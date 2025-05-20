@@ -121,6 +121,7 @@
 
   ];
 
+  security.pam.services.sddm.kwallet.enable = true;
   programs = {
     steam = {
       enable = true;
