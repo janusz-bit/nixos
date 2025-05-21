@@ -118,7 +118,7 @@
     git
     mangohud
     protonup
-
+    vlc
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
@@ -130,6 +130,14 @@
       localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
       gamescopeSession.enable = true;
     };
+    obs-studio = {
+      enable = true;
+      plugins = with pkgs.obs-studio-plugins; [
+        wlrobs
+        obs-backgroundremoval
+        obs-pipewire-audio-capture
+      ];
+    };
     direnv.enable = true;
     firefox.enable = true;
     gamemode.enable = true;
@@ -139,6 +147,42 @@
   environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS = "~/.steam/root/compatibilitytools.d";
   };
+
+  services.asusd.asusdConfig = ''
+    (
+        charge_control_end_threshold: 80,
+        panel_od: false,
+        boot_sound: false,
+        mini_led_mode: false,
+        disable_nvidia_powerd_on_battery: true,
+        ac_command: "",
+        bat_command: "",
+        throttle_policy_linked_epp: true,
+        throttle_policy_on_battery: Quiet,
+        change_throttle_policy_on_battery: true,
+        throttle_policy_on_ac: Performance,
+        change_throttle_policy_on_ac: true,
+        throttle_quiet_epp: Power,
+        throttle_balanced_epp: BalancePower,
+        throttle_performance_epp: Performance,
+        ppt_pl1_spl: 105,
+        ppt_pl2_sppt: 140,
+        ppt_fppt: 140,
+        nv_dynamic_boost: 5,
+        nv_temp_target: 87,
+    )'';
+
+  system.autoUpgrade = {
+    enable = true;
+    dates = "7d";
+
+  };
+
+  # programs.nix-ld.enable = true;
+  # programs.nix-ld.libraries = with pkgs; [
+  #   # Add any missing dynamic libraries for unpackaged
+  #   # programs here, NOT in environment.systemPackages
+  # ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
