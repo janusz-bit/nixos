@@ -191,6 +191,11 @@ in
   #   # programs here, NOT in environment.systemPackages
   # ];
 
+  hardware.bluetooth={
+    enable = true;
+    powerOnBoot = true;
+  };
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
