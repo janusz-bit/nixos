@@ -7,6 +7,9 @@
 
 { config, pkgs, ... }:
 
+let 
+  unstable = import <nixos-unstable> {config = config.nixpkgs.config;};
+in 
 {
   imports = [
     <nixos-hardware/asus/fa507nv>
@@ -120,6 +123,7 @@
     protonup
     vlc
     discord
+    heroic
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
@@ -149,7 +153,7 @@
     STEAM_EXTRA_COMPAT_TOOLS_PATHS = "~/.steam/root/compatibilitytools.d";
   };
 
-  services.asusd.asusdConfig = ''
+  services.asusd.asusdConfig.text = ''
     (
         charge_control_end_threshold: 80,
         panel_od: false,
@@ -171,13 +175,15 @@
         ppt_fppt: 140,
         nv_dynamic_boost: 5,
         nv_temp_target: 87,
-    )'';
+    )
+  '';
 
   system.autoUpgrade = {
     enable = true;
     dates = "7d";
 
   };
+
 
   # programs.nix-ld.enable = true;
   # programs.nix-ld.libraries = with pkgs; [
