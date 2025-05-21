@@ -94,7 +94,7 @@
       "wheel"
     ];
     packages = with pkgs; [
-      vesktop
+      # vesktop # bcs of no sound in some games, I dont use it
       brave
 
       #  thunderbird
@@ -119,6 +119,7 @@
     mangohud
     protonup
     vlc
+    discord
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
