@@ -127,6 +127,7 @@ in
     emacs
     signal-desktop
     handbrake
+    obsidian
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
