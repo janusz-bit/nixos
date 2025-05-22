@@ -10,7 +10,7 @@
 let
   unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
 in
-{
+rec {
   imports = [
     <nixos-hardware/asus/fa507nv>
     # Include the results of the hardware scan.
@@ -185,6 +185,14 @@ in
         nv_temp_target: 87,
     )
   '';
+
+  services.syncthing = rec {
+    enable = true;
+    openDefaultPorts = true;
+    user = "${users.users.dinosaur.description}";
+    dataDir = "/home/${user}";
+    configDir = "/home/${user}/.config/syncthing";
+  };
 
   system.autoUpgrade = {
     enable = true;
