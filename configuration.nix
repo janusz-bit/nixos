@@ -126,6 +126,7 @@ in
     heroic
     emacs
     signal-desktop
+    handbrake
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
