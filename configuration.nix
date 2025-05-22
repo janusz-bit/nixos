@@ -124,7 +124,8 @@ in
     vlc
     discord
     heroic
-    unstable.emacs
+    emacs
+    
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
