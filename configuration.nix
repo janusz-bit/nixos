@@ -125,6 +125,7 @@ in
     discord
     heroic
     emacs
+    signal-desktop
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
