@@ -7,9 +7,9 @@
 
 { config, pkgs, ... }:
 
-let 
-  unstable = import <nixos-unstable> {config = config.nixpkgs.config;};
-in 
+let
+  unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
+in
 {
   imports = [
     <nixos-hardware/asus/fa507nv>
@@ -124,6 +124,7 @@ in
     vlc
     discord
     heroic
+    unstable.emacs
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
@@ -184,14 +185,13 @@ in
 
   };
 
-
   # programs.nix-ld.enable = true;
   # programs.nix-ld.libraries = with pkgs; [
   #   # Add any missing dynamic libraries for unpackaged
   #   # programs here, NOT in environment.systemPackages
   # ];
 
-  hardware.bluetooth={
+  hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
   };
