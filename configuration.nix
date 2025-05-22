@@ -151,8 +151,12 @@ in
   };
 
   environment.sessionVariables = {
-    STEAM_EXTRA_COMPAT_TOOLS_PATHS = "~/.steam/root/compatibilitytools.d";
+    STEAM_EXTRA_COMPAT_TOOLS_PATHS = "~/.local/share/Steam/compatibilitytools.d";
   };
+
+  programs.steam.extraCompatPackages = [
+    pkgs.proton-ge-bin
+  ];
 
   services.asusd.asusdConfig.text = ''
     (
