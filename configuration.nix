@@ -161,30 +161,30 @@ rec {
     pkgs.proton-ge-bin
   ];
 
-  services.asusd.asusdConfig.text = ''
-    (
-        charge_control_end_threshold: 80,
-        panel_od: false,
-        boot_sound: false,
-        mini_led_mode: false,
-        disable_nvidia_powerd_on_battery: true,
-        ac_command: "",
-        bat_command: "",
-        throttle_policy_linked_epp: true,
-        throttle_policy_on_battery: Quiet,
-        change_throttle_policy_on_battery: true,
-        throttle_policy_on_ac: Performance,
-        change_throttle_policy_on_ac: true,
-        throttle_quiet_epp: Power,
-        throttle_balanced_epp: BalancePower,
-        throttle_performance_epp: Performance,
-        ppt_pl1_spl: 105,
-        ppt_pl2_sppt: 140,
-        ppt_fppt: 140,
-        nv_dynamic_boost: 5,
-        nv_temp_target: 87,
-    )
-  '';
+  # services.asusd.asusdConfig.text = ''
+  #   (
+  #       charge_control_end_threshold: 80,
+  #       panel_od: false,
+  #       boot_sound: false,
+  #       mini_led_mode: false,
+  #       disable_nvidia_powerd_on_battery: true,
+  #       ac_command: "",
+  #       bat_command: "",
+  #       throttle_policy_linked_epp: true,
+  #       throttle_policy_on_battery: Quiet,
+  #       change_throttle_policy_on_battery: true,
+  #       throttle_policy_on_ac: Performance,
+  #       change_throttle_policy_on_ac: true,
+  #       throttle_quiet_epp: Power,
+  #       throttle_balanced_epp: BalancePower,
+  #       throttle_performance_epp: Performance,
+  #       ppt_pl1_spl: 105,
+  #       ppt_pl2_sppt: 140,
+  #       ppt_fppt: 140,
+  #       nv_dynamic_boost: 5,
+  #       nv_temp_target: 87,
+  #   )
+  # '';
 
   services.syncthing = rec {
     enable = true;
