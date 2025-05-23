@@ -191,7 +191,7 @@ rec {
   services.syncthing = rec {
     enable = true;
     openDefaultPorts = true;
-    user = "${users.users.dinosaur.description}";
+    user = "${services.displayManager.autoLogin.user}";
     dataDir = "/home/${user}";
     configDir = "/home/${user}/.config/syncthing";
   };
