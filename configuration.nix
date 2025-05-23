@@ -17,6 +17,11 @@ rec {
     ./hardware-configuration.nix
   ];
 
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -130,6 +135,7 @@ rec {
     obsidian
     unstable.pandoc
     unstable.kdePackages.wallpaper-engine-plugin
+    betterdiscord-installer
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
