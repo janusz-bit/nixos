@@ -128,6 +128,8 @@ rec {
     signal-desktop
     handbrake
     obsidian
+    unstable.pandoc
+    unstable.kdePackages.wallpaper-engine-plugin
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
