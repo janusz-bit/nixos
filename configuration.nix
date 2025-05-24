@@ -161,7 +161,7 @@ rec {
     direnv.enable = true;
     firefox.enable = true;
     gamemode.enable = true;
-
+    partition-manager.enable = true;
   };
 
   environment.sessionVariables = {
