@@ -110,8 +110,8 @@ rec {
   };
 
   # Enable automatic login for the user.
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "dinosaur";
+  # services.displayManager.autoLogin.enable = true;
+  # services.displayManager.autoLogin.user = "dinosaur";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -200,7 +200,7 @@ rec {
   services.syncthing = rec {
     enable = true;
     openDefaultPorts = true;
-    user = "${services.displayManager.autoLogin.user}";
+    user = "dinosaur";
     dataDir = "/home/${user}";
     configDir = "/home/${user}/.config/syncthing";
   };
