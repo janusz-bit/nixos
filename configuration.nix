@@ -136,6 +136,9 @@ rec {
     unstable.pandoc
     unstable.kdePackages.wallpaper-engine-plugin
     betterdiscord-installer
+    libreoffice-qt
+    hunspell
+    hunspellDicts.pl_PL
   ];
 
   security.pam.services.sddm.kwallet.enable = true;
