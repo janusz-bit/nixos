@@ -128,7 +128,8 @@ in
     kdePackages.kate
     nixfmt-rfc-style
     nixd
-    vscodium-fhs
+    # vscodium-fhs
+    vscode-fhs
     git
     mangohud
     protonup-qt
