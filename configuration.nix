@@ -191,6 +191,8 @@ in
 
     pinta
     gimp3
+
+    binutils
   ];
 
   services.clamav.daemon.enable = true;
