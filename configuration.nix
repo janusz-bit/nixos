@@ -211,6 +211,7 @@
     xorg.libXcursor
     xorg.libXi
     sdl3
+    waylandpp
   ];
 
   services.clamav.daemon.enable = true;
