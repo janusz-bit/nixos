@@ -199,6 +199,8 @@
     gdb
     lldb
     cmake
+    ninja
+    gnumake
   ];
 
   services.clamav.daemon.enable = true;
