@@ -15,17 +15,17 @@
     "flakes"
   ];
 
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-
-  boot.initrd.luks.devices."luks-ef3bce9a-7ce8-46d3-a929-741a683f123f".device = "/dev/disk/by-uuid/ef3bce9a-7ce8-46d3-a929-741a683f123f";
+  boot.initrd.luks.devices."luks-ef3bce9a-7ce8-46d3-a929-741a683f123f".device =
+    "/dev/disk/by-uuid/ef3bce9a-7ce8-46d3-a929-741a683f123f";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
