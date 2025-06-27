@@ -196,6 +196,8 @@
     gimp3
 
     binutils
+    gdb
+    lldb
   ];
 
   services.clamav.daemon.enable = true;
