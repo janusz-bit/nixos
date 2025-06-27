@@ -205,6 +205,11 @@
     wayland-protocols
     pkg-config
     libxkbcommon
+    xorg.libX11
+    xorg.libXrandr
+    xorg.libXinerama
+    xorg.libXcursor
+    xorg.libXi
   ];
 
   services.clamav.daemon.enable = true;
