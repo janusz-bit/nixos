@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "g14_patches": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1742375758,
+        "narHash": "sha256-k68BTukGUAloNHKR2f/q6pLTT0MM9KyxytBMkU590F4=",
+        "owner": "asus-linux",
+        "repo": "fedora-kernel",
+        "rev": "4846e5cf0d61eda1aa03e767fc8ef4a2b87a6be0",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "asus-linux",
+        "repo": "fedora-kernel",
+        "type": "gitlab"
+      }
+    },
     "nixos-hardware": {
       "locked": {
         "lastModified": 1750837715,
@@ -34,6 +50,7 @@
     },
     "root": {
       "inputs": {
+        "g14_patches": "g14_patches",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs"
       }

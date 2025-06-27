@@ -9,9 +9,6 @@
   inputs,
   ...
 }:
-let
-  g14_patches = builtins.fetchTree "gitlab:asus-linux/fedora-kernel/4846e5cf0d61eda1aa03e767fc8ef4a2b87a6be0";
-in
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -341,7 +338,7 @@ in
   boot.kernelPatches = [
     {
       name = "asus-patch-series.patch";
-      patch = "${g14_patches}/asus-patch-series.patch";
+      patch = "${inputs.g14_patches}/asus-patch-series.patch";
     }
   ];
 
