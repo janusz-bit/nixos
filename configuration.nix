@@ -204,6 +204,7 @@
     wayland
     wayland-protocols
     pkg-config
+    libxkbcommon
   ];
 
   services.clamav.daemon.enable = true;
