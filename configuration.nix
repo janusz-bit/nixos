@@ -201,17 +201,6 @@
     cmake
     ninja
     gnumake
-    wayland
-    wayland-protocols
-    pkg-config
-    libxkbcommon
-    xorg.libX11
-    xorg.libXrandr
-    xorg.libXinerama
-    xorg.libXcursor
-    xorg.libXi
-    sdl3
-    waylandpp
   ];
 
   services.clamav.daemon.enable = true;
