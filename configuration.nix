@@ -210,6 +210,7 @@
     xorg.libXinerama
     xorg.libXcursor
     xorg.libXi
+    sdl3
   ];
 
   services.clamav.daemon.enable = true;
