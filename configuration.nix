@@ -198,6 +198,7 @@
     binutils
     gdb
     lldb
+    cmake
   ];
 
   services.clamav.daemon.enable = true;
