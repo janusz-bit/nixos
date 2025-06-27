@@ -201,6 +201,9 @@
     cmake
     ninja
     gnumake
+    wayland
+    wayland-protocols
+    pkg-config
   ];
 
   services.clamav.daemon.enable = true;
