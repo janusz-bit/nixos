@@ -157,9 +157,6 @@
 
     qbittorrent
 
-    clang
-    gcc
-
     clamav
     clamtk
 
@@ -184,23 +181,30 @@
 
     htop
 
-    nodejs
+    # nodejs
     nil
-    cargo
-    rustc
-    rustfmt
-    rust-analyzer
-    clippy
+    # cargo
+    # rustc
+    # rustfmt
+    # rust-analyzer
+    # clippy
 
     pinta
     gimp3
 
-    binutils
-    gdb
-    lldb
-    cmake
-    ninja
-    gnumake
+    # binutils
+    # gdb
+    # lldb
+    # cmake
+    # ninja
+    # gnumake
+    stremio
+
+    # clang
+    # gcc
+
+    librewolf
+    thunderbird
   ];
 
   services.clamav.daemon.enable = true;
