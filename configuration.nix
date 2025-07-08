@@ -119,6 +119,9 @@ in
       "networkmanager"
       "wheel"
       "adbusers"
+      "qemu-libvirtd"
+      "libvirtd"
+      "disk"
     ];
     packages = with pkgs; [
       # vesktop # bcs of no sound in some games, I dont use it
@@ -386,29 +389,27 @@ in
   ];
 
   virtualisation = {
-     libvirtd = {
-       enable = true;
-       extraConfig = ''
-         user="${user}"
-       '';
+    libvirtd = {
+      enable = true;
+      extraConfig = ''
+        user="${user}"
+      '';
 
-       # Don't start any VMs automatically on boot.
-       onBoot = "ignore";
-       # Stop all running VMs on shutdown.
-       onShutdown = "shutdown";
+      # Don't start any VMs automatically on boot.
+      onBoot = "ignore";
+      # Stop all running VMs on shutdown.
+      onShutdown = "shutdown";
 
-       qemu = {
-         package = pkgs.qemu_kvm;
-         ovmf.enable = true;
-         verbatimConfig = ''
-            namespaces = []
-           user = "+${builtins.toString config.users.users.${user}.uid}"
-         '';
-       };
+      qemu = {
+        package = pkgs.qemu_kvm;
+        ovmf.enable = true;
+        verbatimConfig = ''
+           namespaces = []
+          user = "+${builtins.toString config.users.users.${user}.uid}"
+        '';
+      };
     };
   };
-
-  users.users.${user}.extraGroups = [ "qemu-libvirtd" "libvirtd" "disk" ];
 
   programs.adb.enable = true;
 
