@@ -351,6 +351,8 @@
     }
   ];
 
+  boot.kernelParams = [ "amd_iommu=on" "iommu=pt" ];
+
   programs.adb.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
