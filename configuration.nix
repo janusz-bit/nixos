@@ -9,6 +9,17 @@
   inputs,
   ...
 }:
+let
+  # Change this to your username.
+  user = "dinosaur";
+  # Change this to match your system's CPU.
+  platform = "amd";
+  # Change this to specify the IOMMU ids you wrote down earlier.
+  vfioIds = [
+    "10de:28e0"
+    "10de:22be"
+  ];
+in
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -205,6 +216,9 @@
 
     librewolf
     thunderbird
+
+    virt-manager
+    looking-glass-client
   ];
 
   services.clamav.daemon.enable = true;
@@ -351,7 +365,50 @@
     }
   ];
 
-  boot.kernelParams = [ "amd_iommu=on" "iommu=pt" ];
+  boot = {
+    kernelModules = [
+      "kvm-${platform}"
+      "vfio_virqfd"
+      "vfio_pci"
+      "vfio_iommu_type1"
+      "vfio"
+    ];
+    kernelParams = [
+      "${platform}_iommu=on"
+      "${platform}_iommu=pt"
+      "kvm.ignore_msrs=1"
+    ];
+    extraModprobeConfig = "options vfio-pci ids=${builtins.concatStringsSep "," vfioIds}";
+  };
+
+  systemd.tmpfiles.rules = [
+    "f /dev/shm/looking-glass 0660 ${user} qemu-libvirtd -"
+  ];
+
+  virtualisation = {
+     libvirtd = {
+       enable = true;
+       extraConfig = ''
+         user="${user}"
+       '';
+
+       # Don't start any VMs automatically on boot.
+       onBoot = "ignore";
+       # Stop all running VMs on shutdown.
+       onShutdown = "shutdown";
+
+       qemu = {
+         package = pkgs.qemu_kvm;
+         ovmf.enable = true;
+         verbatimConfig = ''
+            namespaces = []
+           user = "+${builtins.toString config.users.users.${user}.uid}"
+         '';
+       };
+    };
+  };
+
+  users.users.${user}.extraGroups = [ "qemu-libvirtd" "libvirtd" "disk" ];
 
   programs.adb.enable = true;
 
