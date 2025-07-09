@@ -9,17 +9,6 @@
   inputs,
   ...
 }:
-let
-  # Change this to your username.
-  user = "dinosaur";
-  # Change this to match your system's CPU.
-  platform = "amd";
-  # Change this to specify the IOMMU ids you wrote down earlier.
-  vfioIds = [
-    "10de:28e0"
-    "10de:22be"
-  ];
-in
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -30,6 +19,50 @@ in
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
   ];
+
+  specialisation.gaming.configuration = {
+    boot.initrd.kernelModules = [
+      "vfio_pci"
+      "vfio"
+      "vfio_iommu_type1"
+
+      "amdgpu" # replace or remove with your device's driver as needed
+    ];
+
+    boot.kernelParams = [
+      "amd_iommu=on"
+      "iommu=pt"
+      "amd_iommu=on"
+      "vfio-pci.ids=10de:28e0,10de:22be"
+    ];
+
+    programs.virt-manager.enable = true;
+    virtualisation.spiceUSBRedirection.enable = true;
+    virtualisation.libvirtd = {
+      enable = true;
+      qemu = {
+        package = pkgs.qemu_kvm;
+        runAsRoot = true;
+        swtpm.enable = true;
+        ovmf = {
+          enable = true;
+          packages = [
+            (pkgs.OVMF.override {
+              secureBoot = true;
+              tpmSupport = true;
+            }).fd
+          ];
+        };
+      };
+    };
+
+    users.users.dinosaur.extraGroups = [
+      "networkmanager"
+      "wheel"
+      "adbusers"
+      "libvirtd"
+    ];
+  };
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -119,21 +152,13 @@ in
       "networkmanager"
       "wheel"
       "adbusers"
-      "qemu-libvirtd"
-      "libvirtd"
-      "disk"
-    ];
-    packages = with pkgs; [
-      # vesktop # bcs of no sound in some games, I dont use it
-      brave
-
-      #  thunderbird
+      # "libvirtd"
     ];
   };
 
   # Enable automatic login for the user.
-  # services.displayManager.autoLogin.enable = true;
-  # services.displayManager.autoLogin.user = "dinosaur";
+  services.displayManager.autoLogin.enable = true;
+  services.displayManager.autoLogin.user = "dinosaur";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -367,49 +392,6 @@ in
       patch = "${inputs.g14_patches}/asus-patch-series.patch";
     }
   ];
-
-  boot = {
-    kernelModules = [
-      "kvm-${platform}"
-      "vfio_virqfd"
-      "vfio_pci"
-      "vfio_iommu_type1"
-      "vfio"
-    ];
-    kernelParams = [
-      "${platform}_iommu=on"
-      "${platform}_iommu=pt"
-      "kvm.ignore_msrs=1"
-    ];
-    extraModprobeConfig = "options vfio-pci ids=${builtins.concatStringsSep "," vfioIds}";
-  };
-
-  systemd.tmpfiles.rules = [
-    "f /dev/shm/looking-glass 0660 ${user} qemu-libvirtd -"
-  ];
-
-  virtualisation = {
-    libvirtd = {
-      enable = true;
-      extraConfig = ''
-        user="${user}"
-      '';
-
-      # Don't start any VMs automatically on boot.
-      onBoot = "ignore";
-      # Stop all running VMs on shutdown.
-      onShutdown = "shutdown";
-
-      qemu = {
-        package = pkgs.qemu_kvm;
-        ovmf.enable = true;
-        verbatimConfig = ''
-           namespaces = []
-          user = "+${builtins.toString config.users.users.${user}.uid}"
-        '';
-      };
-    };
-  };
 
   programs.adb.enable = true;
 
