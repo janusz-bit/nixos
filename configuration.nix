@@ -61,6 +61,7 @@
       "wheel"
       "adbusers"
       "libvirtd"
+      "tss"
     ];
   };
 
@@ -72,6 +73,11 @@
     "/dev/disk/by-uuid/ef3bce9a-7ce8-46d3-a929-741a683f123f";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+  security.tpm2.enable = true;
+  security.tpm2.pkcs11.enable = true; # expose /run/current-system/sw/lib/libtpm2_pkcs11.so
+  security.tpm2.tctiEnvironment.enable = true; # TPM2TOOLS_TCTI and TPM2_PKCS11_TCTI env variables
+  # users.users.dinosaur.extraGroups = [ "tss" ]; # tss group has access to TPM devices
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -153,6 +159,7 @@
       "wheel"
       "adbusers"
       # "libvirtd"
+      "tss"
     ];
   };
 
@@ -385,8 +392,10 @@
 
   # hardware.graphics.enable32Bit = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_13;
-  boot.kernelPatches = [
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_14;
+  
+  boot.kernelPatches = 
+    [
     {
       name = "asus-patch-series.patch";
       patch = "${inputs.g14_patches}/asus-patch-series.patch";

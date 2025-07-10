@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     g14_patches = {
-      url = "gitlab:asus-linux/fedora-kernel";
+      url = "gitlab:asus-linux/fedora-kernel/rog-6.14";
       flake = false;
     };
   };
