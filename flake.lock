@@ -3,15 +3,16 @@
     "g14_patches": {
       "flake": false,
       "locked": {
-        "lastModified": 1742375758,
-        "narHash": "sha256-k68BTukGUAloNHKR2f/q6pLTT0MM9KyxytBMkU590F4=",
+        "lastModified": 1745749605,
+        "narHash": "sha256-uZsgi4N1cbvk+t2FUAbvuaa1xyPNZfkS+U+Aot3r+GQ=",
         "owner": "asus-linux",
         "repo": "fedora-kernel",
-        "rev": "4846e5cf0d61eda1aa03e767fc8ef4a2b87a6be0",
+        "rev": "d8741a476715f20b54c2cf9f6da7ee4237a1be1f",
         "type": "gitlab"
       },
       "original": {
         "owner": "asus-linux",
+        "ref": "rog-6.14",
         "repo": "fedora-kernel",
         "type": "gitlab"
       }

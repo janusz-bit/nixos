@@ -392,15 +392,15 @@
 
   # hardware.graphics.enable32Bit = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_14;
-  
-  boot.kernelPatches = 
-    [
-    {
-      name = "asus-patch-series.patch";
-      patch = "${inputs.g14_patches}/asus-patch-series.patch";
-    }
-  ];
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_stable;
+
+  # boot.kernelPatches =
+  #   [
+  #   {
+  #     name = "asus-patch-series.patch";
+  #     patch = "${inputs.g14_patches}/asus-patch-series.patch";
+  #   }
+  # ];
 
   programs.adb.enable = true;
 
