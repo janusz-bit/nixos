@@ -261,7 +261,13 @@
 
   fonts.packages = with pkgs; [ nerd-fonts._0xproto ];
 
-  security.pam.services.sddm.kwallet.enable = true;
+  # Enable kwallet PAM integration for secure KDE wallet access via plasma6.
+  security.pam.services.dinosaur.kwallet = {
+    enable = true;
+    package = pkgs.kdePackages.kwallet-pam;
+    # forceRun = true;
+  };
+
   programs = {
     steam = {
       enable = true;
