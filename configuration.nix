@@ -86,6 +86,25 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  # 1. Użyj systemd-resolved jako backendu DNS dla NetworkManagera
+  # Zapewni to lokalny cache DNS i obsługę DNS-over-TLS (DoT).
+  networking.networkmanager.dns = "dnsmasq";
+
+  # 2. Skonfiguruj systemd-resolved
+  services.resolved.extraConfig = ''
+    # Serwery DNS używane do zapytań (Cloudflare, Quad9)
+    DNS=8.8.8.8 8.8.4.4 1.1.1.1 1.0.0.1 9.9.9.9
+
+    # Serwery zapasowe (Google)
+    FallbackDNS=8.8.8.8 8.8.4.4
+
+    # Włącz szyfrowanie DNS-over-TLS w trybie 'oportunistycznym'
+    # (użyje szyfrowania, jeśli serwer je obsługuje)
+    DNSOverTLS=opportunistic
+
+    # Włącz walidację DNSSEC
+    DNSSEC=allow-downgrade
+  '';
 
   # Set your time zone.
   time.timeZone = "Europe/Warsaw";
@@ -263,11 +282,11 @@
     # proton-ge-bin
   ];
 
-  networking.nameservers = [
-    "8.8.8.8" # Google
-    "8.8.4.4" # Google
-    "9.9.9.9" # Quad9
-  ];
+  # networking.nameservers = [
+  #   "8.8.8.8" # Google
+  #   "8.8.4.4" # Google
+  #   "9.9.9.9" # Quad9
+  # ];
 
   services.clamav.daemon.enable = true;
   services.clamav.updater.enable = true;
