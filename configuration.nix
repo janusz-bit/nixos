@@ -60,9 +60,10 @@
       "networkmanager"
       "wheel"
       "adbusers"
-      "libvirtd"
       "tss"
-    ];
+      "kvm"
+    ] ++ [ "libvirtd" ];
+
   };
 
   # Bootloader.
@@ -158,8 +159,8 @@
       "networkmanager"
       "wheel"
       "adbusers"
-      # "libvirtd"
       "tss"
+      "kvm"
     ];
   };
 
@@ -254,6 +255,20 @@
 
     virt-manager
     looking-glass-client
+
+    unrar
+    wine64
+    proton-caller
+    protontricks
+    # proton-ge-bin
+
+    zoom-us
+  ];
+
+  networking.nameservers = [
+    "8.8.8.8" # Google
+    "8.8.4.4" # Google
+    "9.9.9.9" # Quad9
   ];
 
   services.clamav.daemon.enable = true;
@@ -398,7 +413,7 @@
 
   # hardware.graphics.enable32Bit = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_stable;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_xanmod_latest;
 
   # boot.kernelPatches =
   #   [
