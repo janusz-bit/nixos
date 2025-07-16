@@ -261,8 +261,6 @@
     proton-caller
     protontricks
     # proton-ge-bin
-
-    zoom-us
   ];
 
   networking.nameservers = [
