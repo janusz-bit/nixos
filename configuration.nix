@@ -280,6 +280,8 @@
     proton-caller
     protontricks
     # proton-ge-bin
+
+    brave
   ];
 
   # networking.nameservers = [
