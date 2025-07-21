@@ -437,7 +437,7 @@
   boot.kernelPatches =
     [
     {
-      name = "asus-patch-series.patch";
+      name = "0002-asus.patch";
       patch = "${inputs.g14_patches}/6.15/0002-asus.patch";
     }
   ];
