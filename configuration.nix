@@ -282,6 +282,8 @@
     # proton-ge-bin
 
     brave
+
+    krita
   ];
 
   # networking.nameservers = [
