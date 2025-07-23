@@ -276,6 +276,7 @@
     looking-glass-client
 
     unrar
+    wine
     wine64
     proton-caller
     protontricks
