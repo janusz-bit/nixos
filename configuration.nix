@@ -36,34 +36,35 @@
       "vfio-pci.ids=10de:28e0,10de:22be"
     ];
 
-    programs.virt-manager.enable = true;
-    virtualisation.spiceUSBRedirection.enable = true;
-    virtualisation.libvirtd = {
-      enable = true;
-      qemu = {
-        package = pkgs.qemu_kvm;
-        runAsRoot = true;
-        swtpm.enable = true;
-        ovmf = {
-          enable = true;
-          packages = [
-            (pkgs.OVMF.override {
-              secureBoot = true;
-              tpmSupport = true;
-            }).fd
-          ];
-        };
-      };
-    };
-
     users.users.dinosaur.extraGroups = [
       "networkmanager"
       "wheel"
       "adbusers"
       "tss"
       "kvm"
-    ] ++ [ "libvirtd" ];
+    ]
+    ++ [ "libvirtd" ];
 
+  };
+
+  programs.virt-manager.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true;
+      ovmf = {
+        enable = true;
+        packages = [
+          (pkgs.OVMF.override {
+            secureBoot = true;
+            tpmSupport = true;
+          }).fd
+        ];
+      };
+    };
   };
 
   # Bootloader.
@@ -437,8 +438,7 @@
 
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_15;
 
-  boot.kernelPatches =
-    [
+  boot.kernelPatches = [
     {
       name = "0002-asus.patch";
       patch = "${inputs.g14_patches}/6.15/0002-asus.patch";
