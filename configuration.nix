@@ -52,7 +52,7 @@
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
-      package = inputs.nixpkgs2.legacyPackages.${pkgs.system}.qemu_kvm;
+      package = pkgs.qemu_kvm;
       runAsRoot = true;
       swtpm.enable = true;
       ovmf = {
