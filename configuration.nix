@@ -286,6 +286,8 @@
     brave
 
     krita
+
+    kdePackages.libkscreen
   ];
 
   # networking.nameservers = [
