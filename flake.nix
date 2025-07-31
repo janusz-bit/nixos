@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs1.url = "github:nixos/nixpkgs/9807714d6944a957c2e036f84b0ff8caf9930bc0";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     g14_patches = {
       url = "github:CachyOS/kernel-patches";
@@ -14,6 +15,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs1,
       nixos-hardware,
       ...
     }@inputs:

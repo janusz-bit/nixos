@@ -3,11 +3,11 @@
     "g14_patches": {
       "flake": false,
       "locked": {
-        "lastModified": 1753468051,
-        "narHash": "sha256-6uieSI90jWyH/A2a9jCfAAC2EhugZHbZm0t4PZHOG3g=",
+        "lastModified": 1753944221,
+        "narHash": "sha256-1F/HJf5Xmilq4AJ8F2KPhYuZFk8IxI2rd3omaWl58Go=",
         "owner": "CachyOS",
         "repo": "kernel-patches",
-        "rev": "5226fc9a9e65629885db2f1e323dd1d1f589e8e9",
+        "rev": "67ccfdfcc745d0ecb257f60c4c3f6787d91c4119",
         "type": "github"
       },
       "original": {
@@ -34,11 +34,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1753250450,
-        "narHash": "sha256-i+CQV2rPmP8wHxj0aq4siYyohHwVlsh40kV89f3nw1s=",
+        "lastModified": 1753694789,
+        "narHash": "sha256-cKgvtz6fKuK1Xr5LQW/zOUiAC0oSQoA9nOISB0pJZqM=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "fc02ee70efb805d3b2865908a13ddd4474557ecf",
+        "rev": "dc9637876d0dcc8c9e5e22986b857632effeb727",
         "type": "github"
       },
       "original": {
@@ -48,11 +48,28 @@
         "type": "github"
       }
     },
+    "nixpkgs1": {
+      "locked": {
+        "lastModified": 1751984180,
+        "narHash": "sha256-LwWRsENAZJKUdD3SpLluwDmdXY9F45ZEgCb0X+xgOL0=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "g14_patches": "g14_patches",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nixpkgs1": "nixpkgs1"
       }
     }
   },
