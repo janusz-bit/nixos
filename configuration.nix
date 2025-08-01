@@ -290,9 +290,9 @@
     kdePackages.libkscreen
 
     dnsmasq
-
-    flatpak
   ];
+
+  services.flatpak.enable = true;
 
   # networking.nameservers = [
   #   "8.8.8.8" # Google
