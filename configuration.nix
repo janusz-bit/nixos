@@ -290,6 +290,10 @@
     kdePackages.libkscreen
 
     dnsmasq
+
+    inputs.nix-alien.packages.${system}.nix-alien
+
+    virtiofsd
   ];
 
   services.flatpak.enable = true;
@@ -429,7 +433,7 @@
 
   };
 
-  # programs.nix-ld.enable = true;
+  programs.nix-ld.enable = true;
   # programs.nix-ld.libraries = with pkgs; [
   #   # Add any missing dynamic libraries for unpackaged
   #   # programs here, NOT in environment.systemPackages

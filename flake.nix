@@ -9,6 +9,7 @@
       url = "github:CachyOS/kernel-patches";
       flake = false;
     };
+    nix-alien.url = "github:thiagokokada/nix-alien";
   };
 
   outputs =
