@@ -288,6 +288,10 @@
     krita
 
     kdePackages.libkscreen
+
+    dnsmasq
+
+    flatpak
   ];
 
   # networking.nameservers = [
