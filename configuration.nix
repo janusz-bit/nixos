@@ -64,6 +64,7 @@
           }).fd
         ];
       };
+      vhostUserPackages = [ pkgs.virtiofsd ];
     };
   };
 
@@ -181,6 +182,7 @@
       "adbusers"
       "tss"
       "kvm"
+      "libvirtd"
     ];
   };
 
@@ -292,8 +294,6 @@
     dnsmasq
 
     inputs.nix-alien.packages.${system}.nix-alien
-
-    virtiofsd
   ];
 
   services.flatpak.enable = true;
