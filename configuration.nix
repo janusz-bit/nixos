@@ -294,8 +294,6 @@
     dnsmasq
 
     inputs.nix-alien.packages.${system}.nix-alien
-
-    minecraft
   ];
 
   services.flatpak.enable = true;
