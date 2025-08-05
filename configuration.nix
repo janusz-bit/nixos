@@ -294,6 +294,10 @@
     dnsmasq
 
     inputs.nix-alien.packages.${system}.nix-alien
+
+    jdk
+
+    looking-glass-client
   ];
 
   services.flatpak.enable = true;
