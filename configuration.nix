@@ -47,6 +47,10 @@
 
   };
 
+  specialisation.RescueMode.configuration = {
+    environment.systemPackages = [ ];
+  };
+
   programs.virt-manager.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
   virtualisation.libvirtd = {
