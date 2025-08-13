@@ -185,8 +185,6 @@
       "wheel"
       "adbusers"
       "tss"
-      "kvm"
-      "libvirtd"
     ];
   };
 
@@ -454,14 +452,9 @@
 
   # hardware.graphics.enable32Bit = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_15;
-
-  boot.kernelPatches = [
-    {
-      name = "0002-asus.patch";
-      patch = "${inputs.g14_patches}/6.15/0002-asus.patch";
-    }
-  ];
+  # Kernel ChacheOS
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  # services.scx.enable = true;
 
   programs.adb.enable = true;
 
