@@ -45,31 +45,31 @@
     ]
     ++ [ "libvirtd" ];
 
+    programs.virt-manager.enable = true;
+    virtualisation.spiceUSBRedirection.enable = true;
+    virtualisation.libvirtd = {
+      enable = true;
+      qemu = {
+        package = pkgs.qemu_kvm; # inputs.nixpkgs1.legacyPackages.${pkgs.system}.qemu_kvm;
+        runAsRoot = true;
+        swtpm.enable = true;
+        ovmf = {
+          enable = true;
+          packages = [
+            (pkgs.OVMF.override {
+              secureBoot = true;
+              tpmSupport = true;
+            }).fd
+          ];
+        };
+        vhostUserPackages = [ pkgs.virtiofsd ];
+      };
+    };
+
   };
 
   specialisation.RescueMode.configuration = {
     environment.systemPackages = [ ];
-  };
-
-  programs.virt-manager.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
-  virtualisation.libvirtd = {
-    enable = true;
-    qemu = {
-      package = pkgs.qemu_kvm; # inputs.nixpkgs1.legacyPackages.${pkgs.system}.qemu_kvm;
-      runAsRoot = true;
-      swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [
-          (pkgs.OVMF.override {
-            secureBoot = true;
-            tpmSupport = true;
-          }).fd
-        ];
-      };
-      vhostUserPackages = [ pkgs.virtiofsd ];
-    };
   };
 
   # Bootloader.
