@@ -27,7 +27,17 @@
       "vfio_iommu_type1"
 
       "amdgpu" # replace or remove with your device's driver as needed
+
+      "kvmfr"
     ];
+    boot.extraModulePackages = [ config.boot.kernelPackages.kvmfr ];
+    boot.extraModprobeConfig = ''
+      options kvmfr static_size_mb=128
+    '';
+
+    services.udev.extraRules = ''
+      SUBSYSTEM=="kvmfr", OWNER="dinosaur", GROUP="kvm", MODE="0660"
+    '';
 
     boot.kernelParams = [
       "amd_iommu=on"
@@ -63,6 +73,14 @@
           ];
         };
         vhostUserPackages = [ pkgs.virtiofsd ];
+        verbatimConfig = ''
+          cgroup_device_acl = [
+              "/dev/null", "/dev/full", "/dev/zero",
+              "/dev/random", "/dev/urandom",
+              "/dev/ptmx", "/dev/kvm",
+              "/dev/kvmfr0"
+          ]
+        '';
       };
     };
 
