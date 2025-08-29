@@ -318,6 +318,8 @@
     jdk
 
     looking-glass-client
+
+    prismlauncher
   ];
 
   services.flatpak.enable = true;
@@ -467,6 +469,8 @@
     enable = true;
     powerOnBoot = true;
   };
+
+  hardware.wooting.enable = true;
 
   # hardware.graphics.enable32Bit = true;
 
