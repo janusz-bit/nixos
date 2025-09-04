@@ -38,7 +38,7 @@
     ];
     boot.extraModulePackages = [ config.boot.kernelPackages.kvmfr ];
     boot.extraModprobeConfig = ''
-      options kvmfr static_size_mb=128
+      options kvmfr static_size_mb=32
     '';
 
     services.udev.extraRules = ''
@@ -90,10 +90,6 @@
       };
     };
 
-  };
-
-  specialisation.RescueMode.configuration = {
-    environment.systemPackages = [ ];
   };
 
   # Bootloader.
