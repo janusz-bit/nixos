@@ -37,15 +37,23 @@
         customISO = nixos-generators.nixosGenerate {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };
+
           modules = [
+            (
+              { pkgs, modulesPath, ... }:
+              {
+                imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
+                isoImage.squashfsCompression = "gzip -Xcompression-level 1";
+              }
+            )
             # you can include your own nixos configuration here, i.e.
             # ./configuration.nix
+
             ./configuration.nix
             chaotic.nixosModules.default # IMPORTANT
             nixos-hardware.nixosModules.asus-fa507nv
           ];
           format = "install-iso";
-          
 
           # optional arguments:
           # explicit nixpkgs and lib:
