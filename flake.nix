@@ -40,10 +40,11 @@
 
           modules = [
             (
-              { pkgs, modulesPath, ... }:
+              { pkgs, modulesPath, lib, ... }:
               {
-                imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
+                imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix") ];
                 isoImage.squashfsCompression = "gzip -Xcompression-level 1";
+                services.displayManager.autoLogin.user = lib.mkForce "nixos";
               }
             )
             # you can include your own nixos configuration here, i.e.

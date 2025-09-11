@@ -210,7 +210,7 @@
 
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "dinosaur";
+  services.displayManager.autoLogin.user = lib.mkDefault "dinosaur";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
