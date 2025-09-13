@@ -12,9 +12,8 @@
 {
   # Permit insecure packages, IMPORTANT: use with caution !!!!!!!!!!!!!!!!!!!!!!!!
   nixpkgs.config.permittedInsecurePackages = [
-                "qtwebengine-5.15.19"
-              ];
-
+    "qtwebengine-5.15.19"
+  ];
 
   nix.settings.experimental-features = [
     "nix-command"
