@@ -249,6 +249,8 @@
     prismlauncher
 
     megasync
+
+    proton-cachyos_x86_64_v3
   ];
 
   services.flatpak.enable = true;
