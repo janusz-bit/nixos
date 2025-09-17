@@ -10,10 +10,6 @@
   ...
 }:
 {
-  # Permit insecure packages, IMPORTANT: use with caution !!!!!!!!!!!!!!!!!!!!!!!!
-  nixpkgs.config.permittedInsecurePackages = [
-    "qtwebengine-5.15.19"
-  ];
 
   nix.settings.experimental-features = [
     "nix-command"
@@ -182,8 +178,6 @@
     clamav
     clamtk
 
-    python314Full
-
     unzip
 
     emacs
@@ -220,7 +214,7 @@
     # cmake
     # ninja
     # gnumake
-    stremio
+    # stremio # UNSAFE FOR NOW 2025-09-17
 
     # clang
     # gcc
