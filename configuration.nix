@@ -340,7 +340,7 @@
                 group: {},
             ),
             Performance: (
-                enabled: true,
+                enabled: false,
                 group: {
                     PptPl2Sppt: 65,
                     PptPl1Spl: 55,
@@ -353,23 +353,23 @@
                 enabled: false,
                 group: {},
             ),
-            Quiet: (
-                enabled: false,
-                group: {},
-            ),
             Performance: (
                 enabled: true,
                 group: {
                     PptPl3Fppt: 80,
-                    PptPl1Spl: 55,
                     PptPl2Sppt: 75,
+                    PptPl1Spl: 55,
                 },
+            ),
+            Quiet: (
+                enabled: false,
+                group: {},
             ),
         },
         armoury_settings: {
-            NvTempTarget: 87,
-            PanelOverdrive: 1,
             NvDynamicBoost: 25,
+            NvTempTarget: 87,
+            PanelOverdrive: 0,
         },
     )
   '';
