@@ -331,14 +331,6 @@
         profile_custom_epp: Performance,
         profile_performance_epp: Performance,
         ac_profile_tunings: {
-            Balanced: (
-                enabled: false,
-                group: {},
-            ),
-            Quiet: (
-                enabled: false,
-                group: {},
-            ),
             Performance: (
                 enabled: false,
                 group: {
@@ -346,6 +338,14 @@
                     PptPl1Spl: 55,
                     PptPl3Fppt: 65,
                 },
+            ),
+            Balanced: (
+                enabled: false,
+                group: {},
+            ),
+            Quiet: (
+                enabled: false,
+                group: {},
             ),
         },
         dc_profile_tunings: {
