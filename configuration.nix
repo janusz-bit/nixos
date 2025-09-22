@@ -253,6 +253,8 @@
     proton-cachyos_x86_64_v3
 
     tor-browser
+
+    gpa
   ];
 
   services.flatpak.enable = true;
