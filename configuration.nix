@@ -378,7 +378,7 @@
     )
   '';
 
-  # hardware.nvidia.open = lib.mkForce true;
+  hardware.nvidia.open = lib.mkForce true;
 
   services.syncthing = rec {
     enable = true;
