@@ -254,7 +254,7 @@
 
     tor-browser
 
-    gpa
+    kdePackages.kleopatra
   ];
 
   services.flatpak.enable = true;
