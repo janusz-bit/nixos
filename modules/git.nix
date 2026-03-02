@@ -1,4 +1,19 @@
 { self, ... }:
+let
+  config = {
+    user.name = "janusz-bit";
+    user.email = "janusz-bit@proton.me";
+    init.defaultBranch = "main";
+    url = {
+      "https://github.com/" = {
+        insteadOf = [
+          "gh:"
+          "github:"
+        ];
+      };
+    };
+  };
+in
 {
   flake.nixosModules.git-home =
     { ... }:
@@ -8,30 +23,21 @@
           gh.enable = true;
           git = {
             enable = true;
-            settings = {
-              user.name = "janusz-bit";
-              user.email = "janusz-bit@proton.me";
-              init.defaultBranch = "main";
-              url = {
-                "https://github.com/" = {
-                  insteadOf = [
-                    "gh:"
-                    "github:"
-                  ];
-                };
-              };
-            };
+            settings = config;
           };
         };
       };
     };
 
-  # flake.nixosModules.git-configuration =
-  #   { ... }:
-  #   {
-  #     programs.git = {
-  #       enable = true;
-  #       config = (self.nixosModules.git-home { }).nixos.programs.git.settings;
-  #     };
-  #   };
+  flake.nixosModules.git-configuration =
+    { pkgs, ... }:
+    {
+      programs.git = {
+        enable = true;
+        config = config;
+      };
+      environment.systemPackages = with pkgs; [
+        gh
+      ];
+    };
 }
