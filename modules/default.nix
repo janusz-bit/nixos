@@ -1,6 +1,6 @@
-{ ... }:
+{ inputs, ... }:
 {
   systems = [ "x86_64-linux" ];
 
-  imports = [ ];
+  imports = [ inputs.home-manager.flakeModules.home-manager ];
 }
