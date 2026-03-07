@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   flake.nixosModules.configuration =
     { pkgs, ... }:
@@ -14,6 +14,8 @@
         zed-editor-fhs
         nil
         nixd
+        inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
+        fish
       ];
 
       environment.sessionVariables.NIXOS_OZONE_WL = "1";

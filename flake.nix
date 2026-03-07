@@ -8,6 +8,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+  inputs.fresh.url = "github:sinelaw/fresh";
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
