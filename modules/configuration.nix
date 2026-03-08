@@ -14,7 +14,8 @@
         zed-editor-fhs
         nil
         nixd
-        inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
+        # inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
+        fresh-editor
         fish
       ];
 
