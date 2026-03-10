@@ -8,8 +8,6 @@
         self.nixosModules.shell
         self.nixosModules.git-home
         self.nixosModules.shell
-
-        inputs.home-manager.nixosModules.default
         self.nixosModules.home
       ];
     };
