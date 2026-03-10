@@ -15,6 +15,8 @@
       inputs.home-manager.nixosModules.default
       self.nixosModules.wsl-home
 
+      self.nixosModules.shell
+
     ];
   };
 }

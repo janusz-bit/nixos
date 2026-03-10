@@ -16,7 +16,6 @@
         nixd
         # inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
         fresh-editor
-        fish
       ];
 
       environment.sessionVariables.NIXOS_OZONE_WL = "1";
