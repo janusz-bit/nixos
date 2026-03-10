@@ -16,7 +16,7 @@
         nixd
         # inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
         fresh-editor
-        self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
+        # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       ];
 
       environment.sessionVariables.NIXOS_OZONE_WL = "1";
