@@ -1,13 +1,14 @@
-{ ... }:
+{ inputs, self, ... }:
 {
-  flake.nixosModules.wsl-settings =
+  flake.nixosModules.wsl =
     { ... }:
     {
-      wsl.enable = true;
-      wsl.defaultUser = "nixos";
-      wsl.useWindowsDriver = true;
-      wsl.startMenuLaunchers = true;
+      imports = [
+        self.nixosModules.wsl-stateVersion
+        self.nixosModules.wsl-obsidian
 
-      environment.sessionVariables.ZED_ALLOW_EMULATED_GPU = "1";
+        inputs.nixos-wsl.nixosModules.default
+        self.nixosModules.wsl-settings
+      ];
     };
 }

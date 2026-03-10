@@ -1,12 +1,9 @@
 { self, inputs, ... }:
 {
   flake = {
-    nixosModules.wsl-home =
+    nixosModules.home =
       { ... }:
       {
-        imports = [
-          self.nixosModules.git-home
-        ];
         home-manager.backupFileExtension = "backup";
       };
   };
