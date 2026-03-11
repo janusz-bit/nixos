@@ -3,7 +3,7 @@
   flake.nixosModules.configuration =
     { pkgs, ... }:
     let
-      editor = "zeditor --wait";
+      editor = "micro";
     in
     {
       nixpkgs.config.allowUnfree = true;
