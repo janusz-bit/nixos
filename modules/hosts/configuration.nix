@@ -9,9 +9,7 @@
       nixpkgs.config.allowUnfree = true;
 
       environment.systemPackages = with pkgs; [
-        vscode.fhs
         micro
-        zed-editor-fhs
         nil
         nixd
         # inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
