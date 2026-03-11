@@ -6,9 +6,8 @@
       imports = [
         self.nixosModules.configuration
         self.nixosModules.shell
-        self.nixosModules.git-home
+        self.nixosModules.git-configuration
         self.nixosModules.shell
-        self.nixosModules.home
       ];
     };
 
