@@ -10,6 +10,7 @@
   inputs.nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
   # inputs.fresh.url = "github:sinelaw/fresh";
   inputs.nvf.url = "github:notashelf/nvf";
+  inputs.avf.url = "github:nix-community/nixos-avf";
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
