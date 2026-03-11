@@ -11,6 +11,8 @@
   # inputs.fresh.url = "github:sinelaw/fresh";
   inputs.nvf.url = "github:notashelf/nvf";
   inputs.avf.url = "github:nix-community/nixos-avf";
+  inputs.nix-index-database.url = "github:nix-community/nix-index-database";
+  inputs.nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
