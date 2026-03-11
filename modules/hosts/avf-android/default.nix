@@ -5,7 +5,7 @@
     modules = [
       self.nixosModules.base
       inputs.avf.nixosModules.avf
-      self.nixosModules.wsl-stateVersion
+      self.nixosModules.avf-stateVersion
     ];
   };
 }
