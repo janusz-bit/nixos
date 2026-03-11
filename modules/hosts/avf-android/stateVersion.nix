@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.wsl-stateVersion =
+  flake.nixosModules.avf-stateVersion =
     { ... }:
     {
       system.stateVersion = "26.05";
