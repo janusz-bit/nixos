@@ -1,14 +1,7 @@
 { inputs, self, ... }:
 {
   flake.homeConfigurations."dinosaur@cachyos" = inputs.home-manager.lib.homeManagerConfiguration {
-    # Założyłem, że używasz x86_64-linux
-    pkgs = import inputs.nixpkgs {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-    };
-
-    # Przekazujemy inputs i self do wszystkich modułów
-    extraSpecialArgs = { inherit inputs self; };
+    system = "x86_64-linux";
 
     modules = [
       self.homeModules.base-home
