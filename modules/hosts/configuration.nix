@@ -1,10 +1,11 @@
 { inputs, self, ... }:
+let
+  editor = "micro";
+in
 {
   flake.nixosModules.configuration =
     { pkgs, ... }:
-    let
-      editor = "micro";
-    in
+
     {
       nixpkgs.config.allowUnfree = true;
 

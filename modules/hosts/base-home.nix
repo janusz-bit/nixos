@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules.base =
+  flake.homeModules.base-home =
     { ... }:
     {
       imports = [
