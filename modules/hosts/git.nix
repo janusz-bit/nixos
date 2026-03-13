@@ -40,4 +40,14 @@ in
         gh
       ];
     };
+
+  flake.homeModules.git-configuration =
+    { pkgs, ... }:
+    {
+      programs.git = {
+        enable = true;
+        extraConfig = config;
+      };
+      programs.gh.enable = true;
+    };
 }

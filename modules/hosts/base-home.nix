@@ -4,10 +4,10 @@
     { ... }:
     {
       imports = [
-        self.nixosModules.configuration
-        self.nixosModules.shell
-        self.nixosModules.git-configuration
-        inputs.nix-index-database.nixosModules.default
+        self.homeModules.configuration
+        self.homeModules.shell
+        self.homeModules.git-configuration
+        inputs.nix-index-database.hmModules.nix-index
       ];
     };
 
