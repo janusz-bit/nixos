@@ -9,6 +9,7 @@
         qbittorrent-enhanced
         heroic # install heroic launcher
         protonup-qt
+        toybox
       ];
       # Install firefox.
       programs.firefox.enable = true;
