@@ -14,7 +14,7 @@
           boot.loader.limine.extraEntries = ''
             /Windows
               protocol: efi
-              path: boot(484e8969-5970-4ed9-8e29-1d68ffad1112):/EFI/Microsoft/Boot/bootmgfw.efi
+              path: uuid(5257c7fd-64d0-42ca-9ee0-0c77f7c0e2db):/EFI/Microsoft/Boot/bootmgfw.efi
           '';
           boot.loader.efi.canTouchEfiVariables = true;
 
