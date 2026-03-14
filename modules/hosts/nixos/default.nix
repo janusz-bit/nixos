@@ -5,6 +5,7 @@
     modules = [
       self.nixosModules.base
       self.nixosModules.nixos
+      self.nixosModules.nixos-hardware-LOQ-15IRX10
 
     ];
   };
