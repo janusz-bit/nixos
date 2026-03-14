@@ -22,5 +22,9 @@
         dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
       };
       programs.gamemode.enable = true; # for performance mode
+      services.syncthing = {
+        enable = true;
+        openDefaultPorts = true; # Open ports in the firewall for Syncthing. (NOTE: this will not open syncthing gui port)
+      };
     };
 }
