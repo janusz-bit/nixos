@@ -25,7 +25,9 @@
       programs.gamemode.enable = true; # for performance mode
       services.syncthing = {
         enable = true;
-        openDefaultPorts = true; # Open ports in the firewall for Syncthing. (NOTE: this will not open syncthing gui port)
+        user = "dinosaur";
+        dataDir = "/home/dinosaur/Sync";
+        configDir = "/home/dinosaur/.config/syncthing";
       };
     };
 }
