@@ -11,6 +11,7 @@
         protonup-qt
         toybox
         vesktop
+        ytmdesktop
       ];
       # Install firefox.
       programs.firefox.enable = true;
