@@ -13,6 +13,7 @@
   inputs.avf.url = "github:nix-community/nixos-avf";
   inputs.nix-index-database.url = "github:nix-community/nix-index-database";
   inputs.nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }

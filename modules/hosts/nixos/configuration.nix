@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   flake = {
     nixosModules = {
@@ -17,6 +17,11 @@
               path: uuid(5257c7fd-64d0-42ca-9ee0-0c77f7c0e2db):/EFI/Microsoft/Boot/bootmgfw.efi
           '';
           boot.loader.efi.canTouchEfiVariables = true;
+
+          nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
+          boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-x86_64-v3;
+          services.scx.enable = true;
+          services.scx.scheduler = "scx_rustland";
 
           boot.initrd.luks.devices."luks-ebb6d9c8-350c-4291-a8bd-74ec17ab4a67".device =
             "/dev/disk/by-uuid/ebb6d9c8-350c-4291-a8bd-74ec17ab4a67";
