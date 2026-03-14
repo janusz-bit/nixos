@@ -7,12 +7,19 @@
         zed-editor-fhs
         gparted
         qbittorrent-enhanced
+        heroic # install heroic launcher
+        protonup-qt
       ];
       # Install firefox.
       programs.firefox.enable = true;
       hardware.wooting.enable = true;
       services.mullvad-vpn.enable = true;
       services.mullvad-vpn.package = pkgs.mullvad-vpn;
-
+      programs.steam = {
+        enable = true;
+        remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+        dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
+      };
+      programs.gamemode.enable = true; # for performance mode
     };
 }
