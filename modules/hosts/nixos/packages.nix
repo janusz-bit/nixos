@@ -6,9 +6,12 @@
       environment.systemPackages = with pkgs; [
         zed-editor-fhs
         gparted
+        qbittorrent-enhanced
       ];
       # Install firefox.
       programs.firefox.enable = true;
       hardware.wooting.enable = true;
+      services.mullvad-vpn.enable = true;
+
     };
 }
