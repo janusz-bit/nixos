@@ -10,6 +10,7 @@
         heroic # install heroic launcher
         protonup-qt
         toybox
+        vesktop
       ];
       # Install firefox.
       programs.firefox.enable = true;
