@@ -42,6 +42,8 @@ in
 
       # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
       environment.localBinInPath = true;
+      # Fix uv
+      programs.nix-ld.enable = true;
     };
 
   flake.homeModules.configuration =
