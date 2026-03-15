@@ -12,6 +12,7 @@
         toybox
         vesktop
         ytmdesktop
+        vlc
       ];
       # Install firefox.
       programs.firefox.enable = true;
