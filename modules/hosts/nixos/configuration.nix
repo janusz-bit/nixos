@@ -19,6 +19,7 @@
           ];
 
           hardware.bluetooth.enable = true;
+          services.displayManager.sddm.wayland.enable = true;
 
           networking.hostName = "nixos"; # Define your hostname.
           # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -98,6 +99,10 @@
             packages = with pkgs; [
               # kdePackages.kate
               #  thunderbird
+              # kdePackages.bluedevil
+              # kdePackages.bluez-qt
+              # openobex
+              # obexftp
             ];
           };
 
