@@ -12,6 +12,7 @@ let
       # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       nixfmt-tree
       uv
+      toybox
     ];
 
   sharedSessionVariables = {

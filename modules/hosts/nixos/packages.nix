@@ -9,7 +9,6 @@
         qbittorrent-enhanced
         heroic # install heroic launcher
         protonup-qt
-        toybox
         vesktop
         ytmdesktop
         vlc
