@@ -11,6 +11,7 @@ let
       # fresh-editor
       # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       nixfmt-tree
+      uv
     ];
 
   sharedSessionVariables = {
@@ -38,6 +39,9 @@ in
       environment.systemPackages = sharedPackages pkgs;
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
+
+      # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
+      environment.localBinInPath = true;
     };
 
   flake.homeModules.configuration =
