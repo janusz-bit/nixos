@@ -3,9 +3,29 @@
   flake = {
     nixosModules = {
       nixos-configuration =
-        { config, pkgs, ... }:
+        {
+          config,
+          pkgs,
+          lib,
+          ...
+        }:
 
         {
+          specialisation.powersave.configuration = {
+            system.nixos.tags = [ "powersave" ];
+
+            # Zastąpienie flag wydajnościowych schedulera SCX
+            services.scx.extraArgs = lib.mkForce [
+              "-m powersave"
+              "-w"
+            ];
+
+            # Wymuszenie oszczędnego zarządcy częstotliwości procesora
+            powerManagement.cpuFreqGovernor = lib.mkForce "powersave";
+
+            # Włączenie demona profili zasilania (integruje się z widgetem baterii w KDE Plasma)
+            services.power-profiles-daemon.enable = lib.mkForce true;
+          };
           # Bootloader.
           # boot.loader.systemd-boot.enable = true;
 
