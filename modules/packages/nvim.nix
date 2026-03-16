@@ -8,7 +8,7 @@
           inherit pkgs;
           modules = [
             (
-              { ... }:
+              _:
               {
                 config.vim = {
                   theme = {

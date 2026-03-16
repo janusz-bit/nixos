@@ -1,7 +1,7 @@
-{ ... }:
+_:
 {
   flake.nixosModules.nixos-specific =
-    { ... }:
+    _:
     {
       system.stateVersion = "25.11";
       boot.initrd.luks.devices."luks-ebb6d9c8-350c-4291-a8bd-74ec17ab4a67".device =

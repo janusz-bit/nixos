@@ -16,7 +16,7 @@ let
 in
 {
   flake.nixosModules.git-home =
-    { ... }:
+    _:
     {
       home-manager.users.nixos = {
         programs = {
@@ -34,7 +34,7 @@ in
     {
       programs.git = {
         enable = true;
-        config = config;
+        inherit config;
       };
       environment.systemPackages = with pkgs; [
         gh

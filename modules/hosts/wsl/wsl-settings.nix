@@ -1,7 +1,7 @@
-{ ... }:
+_:
 {
   flake.nixosModules.wsl-settings =
-    { ... }:
+    _:
     {
       wsl.enable = true;
       wsl.defaultUser = "nixos";
