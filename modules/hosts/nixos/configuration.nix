@@ -115,6 +115,7 @@
             extraGroups = [
               "networkmanager"
               "wheel"
+              "gamemode"
             ];
             packages = with pkgs; [
               # kdePackages.kate
