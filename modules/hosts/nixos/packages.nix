@@ -12,7 +12,6 @@
         vesktop
         ytmdesktop
         vlc
-        statix
       ];
       # Install firefox.
       programs.firefox.enable = true;

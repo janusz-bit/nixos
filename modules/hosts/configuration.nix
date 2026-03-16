@@ -13,6 +13,7 @@ let
       nixfmt-tree
       uv
       toybox
+      statix
     ];
 
   sharedSessionVariables = {
