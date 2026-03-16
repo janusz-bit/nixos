@@ -44,6 +44,8 @@ in
       environment.localBinInPath = true;
       # Fix uv
       programs.nix-ld.enable = true;
+
+      programs.nix-index-database.comma.enable = true;
     };
 
   flake.homeModules.configuration =
