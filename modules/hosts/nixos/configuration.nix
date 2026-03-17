@@ -9,40 +9,6 @@
     }:
 
     {
-      # system.nixos.label
-      system.nixos.tags = [ "Sync-mode" ];
-      hardware.nvidia = {
-        powerManagement.finegrained = false;
-        prime = {
-          sync.enable = true;
-          offload.enable = false;
-          offload.enableOffloadCmd = false;
-
-        };
-      };
-      specialisation.powersave.configuration = {
-        system.nixos.tags = lib.mkForce [ "Offload-mode" ];
-
-        # Zastąpienie flag wydajnościowych schedulera SCX
-        services.scx.extraArgs = lib.mkForce [
-          "-m powersave"
-          "-w"
-        ];
-
-        # Wymuszenie oszczędnego zarządcy częstotliwości procesora
-        powerManagement.cpuFreqGovernor = lib.mkForce "powersave";
-
-        # Włączenie demona profili zasilania (integruje się z widgetem baterii w KDE Plasma)
-        services.power-profiles-daemon.enable = lib.mkForce true;
-        hardware.nvidia = {
-          prime = {
-            sync.enable = lib.mkForce false;
-            offload.enable = lib.mkForce true;
-            offload.enableOffloadCmd = lib.mkForce true;
-          };
-          powerManagement.finegrained = lib.mkForce true;
-        };
-      };
       # Bootloader.
       # boot.loader.systemd-boot.enable = true;
 
