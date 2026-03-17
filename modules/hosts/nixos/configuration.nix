@@ -14,7 +14,7 @@
       powerManagement.cpuFreqGovernor = "performance";
       nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-x86_64-v3;
-      
+
       services = {
         scx.enable = false;
         scx.scheduler = "scx_rusty";

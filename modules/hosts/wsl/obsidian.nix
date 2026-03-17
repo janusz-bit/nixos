@@ -1,5 +1,4 @@
-_:
-{
+_: {
   flake.nixosModules.wsl-obsidian =
     { pkgs, ... }:
     {

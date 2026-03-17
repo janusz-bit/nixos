@@ -15,19 +15,17 @@ let
   };
 in
 {
-  flake.nixosModules.git-home =
-    _:
-    {
-      home-manager.users.nixos = {
-        programs = {
-          gh.enable = true;
-          git = {
-            enable = true;
-            settings = config;
-          };
+  flake.nixosModules.git-home = _: {
+    home-manager.users.nixos = {
+      programs = {
+        gh.enable = true;
+        git = {
+          enable = true;
+          settings = config;
         };
       };
     };
+  };
 
   flake.nixosModules.git-configuration =
     { pkgs, ... }:
