@@ -11,16 +11,22 @@
     {
       # Bootloader.
       # boot.loader.systemd-boot.enable = true;
-
+      powerManagement.cpuFreqGovernor = "performance";
       nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-x86_64-v3;
+      
       services = {
-        scx.enable = true;
-        scx.scheduler = "scx_bpfland";
+        scx.enable = false;
+        scx.scheduler = "scx_rusty";
         scx.extraArgs = [
           "-m performance"
           "-w"
         ];
+        services.ananicy = {
+          enable = true;
+          package = pkgs.ananicy-cpp;
+          rulesProvider = pkgs.ananicy-rules-cachyos;
+        };
         displayManager = {
           sddm.wayland.enable = true;
           sddm.enable = true;
