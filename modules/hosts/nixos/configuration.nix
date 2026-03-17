@@ -46,7 +46,7 @@
           rulesProvider = pkgs.ananicy-rules-cachyos;
         };
 
-        scx.enable = true;
+        scx.enable = false;
         scx.scheduler = "scx_lavd";
         scx.extraArgs = [
           "--performance"
