@@ -1,20 +1,21 @@
 # flake.nix
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.import-tree.url = "github:vic/import-tree";
-  inputs.flake-parts.url = "github:hercules-ci/flake-parts";
-  inputs.home-manager = {
-    url = "github:nix-community/home-manager";
-    inputs.nixpkgs.follows = "nixpkgs";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    import-tree.url = "github:vic/import-tree";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+    nvf.url = "github:notashelf/nvf";
+    avf.url = "github:nix-community/nixos-avf";
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
-  inputs.nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
-  # inputs.fresh.url = "github:sinelaw/fresh";
-  inputs.nvf.url = "github:notashelf/nvf";
-  inputs.avf.url = "github:nix-community/nixos-avf";
-  inputs.nix-index-database.url = "github:nix-community/nix-index-database";
-  inputs.nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
-  inputs.nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
