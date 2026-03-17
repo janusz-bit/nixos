@@ -7,25 +7,31 @@
     {
       config,
       lib,
-      pkgs,
-      modulesPath,
       ...
     }:
 
     {
       services.xserver.videoDrivers = [ "nvidia" ];
-      hardware.graphics.enable = true;
-      hardware.graphics.enable32Bit = true;
-      hardware.nvidia.modesetting.enable = true;
-      hardware.nvidia.powerManagement.enable = true;
-      hardware.nvidia.powerManagement.finegrained = true;
-      hardware.nvidia.open = true;
-      hardware.nvidia.nvidiaSettings = true;
-      hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.latest;
-      hardware.nvidia.prime.offload.enable = true;
-      hardware.nvidia.prime.offload.enableOffloadCmd = true;
-      hardware.nvidia.prime.intelBusId = "PCI:0:2:0";
-      hardware.nvidia.prime.nvidiaBusId = "PCI:1:0:0";
+      hardware.graphics = {
+        enable = true;
+        enable32Bit = true;
+      };
+      hardware.nvidia = {
+        modesetting.enable = true;
+        powerManagement.enable = true;
+        powerManagement.finegrained = lib.mkDefault true;
+        open = true;
+        nvidiaSettings = true;
+        package = config.boot.kernelPackages.nvidiaPackages.latest;
+        prime = {
+          offload.enable = lib.mkDefault true;
+          offload.enableOffloadCmd = lib.mkDefault true;
+          sync.enable = lib.mkDefault false;
+
+          intelBusId = "PCI:0:2:0";
+          nvidiaBusId = "PCI:1:0:0";
+        };
+      };
 
       imports = with inputs; [
         nixos-hardware.nixosModules.common-cpu-intel
