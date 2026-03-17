@@ -1,5 +1,4 @@
-_:
-{
+_: {
   flake.nixosModules.nixos-packages =
     { pkgs, ... }:
     {
@@ -10,7 +9,6 @@ _:
         heroic # install heroic launcher
         protonup-qt
         vesktop
-        ytmdesktop
         vlc
       ];
       # Install firefox.
