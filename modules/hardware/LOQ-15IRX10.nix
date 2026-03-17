@@ -11,6 +11,7 @@
     }:
 
     {
+      hardware.facter.reportPath = ./facter.json;
       services.xserver.videoDrivers = [ "nvidia" ];
       hardware.graphics = {
         enable = true;
