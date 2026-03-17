@@ -47,7 +47,7 @@
         };
 
         scx.enable = false;
-        scx.scheduler = "scx_lavd";
+        scx.scheduler = "scx_rustland";
         scx.extraArgs = [
           "--performance"
         ];
