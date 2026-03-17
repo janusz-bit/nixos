@@ -11,22 +11,47 @@
     {
       # Bootloader.
       # boot.loader.systemd-boot.enable = true;
+      #
+      specialisation = {
+        reverse-sync.configuration = {
+          hardware.nvidia = {
+            powerManagement.finegrained = false;
+            prime = {
+              offload.enable = false;
+              offload.enableOffloadCmd = false;
+              reverseSync.enable = true;
+            };
+          };
+        };
+        sync-mode.configuration = {
+          hardware.nvidia = {
+            powerManagement.finegrained = false;
+            prime = {
+              offload.enable = false;
+              offload.enableOffloadCmd = false;
+              sync.enable = true;
+
+            };
+          };
+        };
+      };
       powerManagement.cpuFreqGovernor = "performance";
       nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-x86_64-v3;
-
       services = {
-        scx.enable = false;
-        scx.scheduler = "scx_rusty";
-        scx.extraArgs = [
-          "-m performance"
-          "-w"
-        ];
-        services.ananicy = {
+
+        ananicy = {
           enable = true;
           package = pkgs.ananicy-cpp;
           rulesProvider = pkgs.ananicy-rules-cachyos;
         };
+
+        scx.enable = true;
+        scx.scheduler = "scx_lavd";
+        scx.extraArgs = [
+          "--performance"
+        ];
+
         displayManager = {
           sddm.wayland.enable = true;
           sddm.enable = true;
@@ -60,6 +85,7 @@
           # no need to redefine it in your config for now)
           #media-session.enable = true;
         };
+
       };
       hardware = {
 
