@@ -15,6 +15,7 @@
       };
 
       programs.ssh.startAgent = true;
+      programs.ssh.enableAskPassword = true;
       programs.gnupg.agent.enable = true;
     };
 
