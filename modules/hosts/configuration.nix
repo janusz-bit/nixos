@@ -15,12 +15,19 @@ let
       toybox
       statix
       kdePackages.kleopatra
+      cachix
     ];
 
   sharedSessionVariables = {
     NIXOS_OZONE_WL = "1";
     VISUAL = editor;
     EDITOR = editor;
+  };
+
+  environment.shellAliases = {
+    cachix-system = ''
+      nix build github:janusz-bit/nixos#nixosConfigurations.nixos.config.system.build.toplevel --no-link --print-out-paths | cachix push janusz-bit
+    '';
   };
 
   sharedNixSettings = {
@@ -41,6 +48,7 @@ in
       environment.systemPackages = sharedPackages pkgs;
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
+      environment.shellAliases = environment.shellAliases;
 
       # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
       environment.localBinInPath = true;
