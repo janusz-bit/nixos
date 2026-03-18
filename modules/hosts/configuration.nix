@@ -14,6 +14,7 @@ let
       uv
       toybox
       statix
+      kdePackages.kleopatra
     ];
 
   sharedSessionVariables = {
