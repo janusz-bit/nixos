@@ -9,6 +9,7 @@
         self.nixosModules.git-configuration
         self.nixosModules.nix-settings
         self.nixosModules.ssh
+        self.nixosModules.cachix-janusz-bit
         inputs.nix-index-database.nixosModules.default
       ];
     };
