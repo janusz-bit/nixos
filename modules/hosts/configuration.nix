@@ -16,6 +16,7 @@ let
       statix
       kdePackages.kleopatra
       cachix
+      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
   sharedSessionVariables = {
