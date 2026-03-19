@@ -10,6 +10,7 @@
         self.nixosModules.nix-settings
         self.nixosModules.ssh
         self.nixosModules.cachix-janusz-bit
+        self.nixosModules.base-agenix
         inputs.nix-index-database.nixosModules.default
       ];
     };

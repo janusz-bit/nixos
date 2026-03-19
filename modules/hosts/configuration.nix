@@ -17,6 +17,7 @@ let
       kdePackages.kleopatra
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+      tor-browser
     ];
 
   sharedSessionVariables = {
@@ -25,10 +26,12 @@ let
     EDITOR = editor;
   };
 
-  environment.shellAliases = {
+  environmentShellAliases = config: {
     cachix-system = ''
-      nix build github:janusz-bit/nixos#nixosConfigurations.nixos.config.system.build.toplevel --no-link --print-out-paths | cachix push janusz-bit
+      export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})
+      nix build github:janusz-bit/nixos#nixosConfigurations.nixos.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit
     '';
+
   };
 
   sharedNixSettings = {
@@ -41,7 +44,7 @@ let
 in
 {
   flake.nixosModules.configuration =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
 
     {
       nixpkgs.config.allowUnfree = true;
@@ -49,7 +52,7 @@ in
       environment.systemPackages = sharedPackages pkgs;
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
-      environment.shellAliases = environment.shellAliases;
+      environment.shellAliases = environmentShellAliases config;
 
       # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
       environment.localBinInPath = true;
@@ -60,7 +63,7 @@ in
     };
 
   flake.homeModules.configuration =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
 
     {
       nixpkgs.config.allowUnfree = true;
@@ -68,5 +71,6 @@ in
       home.packages = sharedPackages pkgs;
       home.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
+      environment.shellAliases = environmentShellAliases config;
     };
 }
