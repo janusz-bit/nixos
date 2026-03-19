@@ -17,7 +17,6 @@ let
       kdePackages.kleopatra
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
-      tor-browser
     ];
 
   sharedSessionVariables = {

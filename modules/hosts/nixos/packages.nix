@@ -10,6 +10,7 @@ _: {
         protonup-qt
         vesktop
         vlc
+        tor-browser
       ];
       # Install firefox.
       programs.firefox.enable = true;
