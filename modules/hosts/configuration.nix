@@ -32,7 +32,8 @@ let
     '';
     update = ''
       sudo nixos-rebuild switch --sudo --flake github:janusz-bit/nixos#${config.networking.hostName} --refresh
-      ${cachix-system}'';
+      ${cachix-system}
+    '';
   };
 
   sharedNixSettings = {
