@@ -6,6 +6,10 @@
       self.nixosModules.base
       inputs.avf.nixosModules.avf
       self.nixosModules.droid-stateVersion
+      (_: {
+        custom.flakeTarget = "droid";
+        custom.enableFastfetch = false;
+      })
     ];
   };
 }

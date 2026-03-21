@@ -1,4 +1,4 @@
-_:
+{ lib, ... }:
 let
   sharedBashInit = pkgs: ''
     if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
@@ -27,15 +27,13 @@ let
     hw = "hwinfo --short";
   };
 
-  sharedFishInit = ''
+  sharedFishInit = config: ''
     # Ustawienia wtyczki 'done'
     set -U __done_min_cmd_duration 10000
     set -U __done_notification_urgency_level low
 
     # Powitanie fastfetch
-    function fish_greeting
-        fastfetch
-    end
+    ${lib.optionalString config.custom.enableFastfetch "function fish_greeting        fastfetch    end    "}
 
     # Kolorowe man pages przy użyciu bat
     set -x MANROFFOPT "-c"
@@ -57,7 +55,7 @@ let
 in
 {
   flake.nixosModules.shell =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     {
       programs.bash = {
         enable = true;
@@ -66,7 +64,7 @@ in
       };
       programs.fish.enable = true;
       programs.fish.shellAliases = sharedFishAliases;
-      programs.fish.interactiveShellInit = sharedFishInit;
+      programs.fish.interactiveShellInit = sharedFishInit config;
 
       environment.systemPackages = sharedPackages pkgs;
     };
