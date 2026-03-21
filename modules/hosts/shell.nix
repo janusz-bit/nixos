@@ -33,7 +33,11 @@ let
     set -U __done_notification_urgency_level low
 
     # Powitanie fastfetch
-    ${lib.optionalString config.custom.enableFastfetch "function fish_greeting        fastfetch    end    "}
+    ${lib.optionalString config.custom.enableFastfetch ''
+      function fish_greeting
+        fastfetch
+      end
+    ''}
 
     # Kolorowe man pages przy użyciu bat
     set -x MANROFFOPT "-c"
