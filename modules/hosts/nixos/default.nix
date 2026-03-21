@@ -1,5 +1,5 @@
 { inputs, self, ... }:
-{
+rec {
   flake.nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = [
@@ -9,4 +9,6 @@
       (_: { custom.flakeTarget = "nixos"; })
     ];
   };
+
+  flake.nixosConfigurations.default = flake.nixosConfigurations.nixos;
 }
