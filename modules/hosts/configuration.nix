@@ -25,12 +25,14 @@ let
     EDITOR = editor;
   };
 
-  environmentShellAliases = config: {
+  environmentShellAliases = config: rec {
     cachix-system = ''
       export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})
       nix build github:janusz-bit/nixos#nixosConfigurations.${config.networking.hostName}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit
     '';
-    update = "sudo nixos-rebuild switch --sudo --flake github:janusz-bit/nixos#${config.networking.hostName} --refresh";
+    update = ''
+      sudo nixos-rebuild switch --sudo --flake github:janusz-bit/nixos#${config.networking.hostName} --refresh
+      ${cachix-system}'';
   };
 
   sharedNixSettings = {
