@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules.avf-stateVersion = _: {
+  flake.nixosModules.droid-stateVersion = _: {
     system.stateVersion = "26.05";
   };
 }
