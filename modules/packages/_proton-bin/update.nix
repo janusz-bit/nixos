@@ -38,7 +38,7 @@ writeShellScript "update-${repo}" ''
   set -euo pipefail
   PATH=${path}
 
-  srcJson=pkgs/proton-bin/${versionFilename}
+  srcJson=modules/packages/_proton-bin/${versionFilename}
   localBase=$(jq -r .base < $srcJson)
   localRelease=$(jq -r .release < $srcJson)
 
