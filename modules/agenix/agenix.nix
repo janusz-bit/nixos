@@ -15,8 +15,8 @@
       };
       age.identityPaths = [
         "/etc/ssh/ssh_host_ed25519_key"
-        "${config.users.users.dinosaur.home}/.ssh/id_ed25519"
-        "${config.users.users.wsl.home}/.ssh/id_ed25519"
+        "/home/dinosaur/.ssh/id_ed25519"
+        "/home/wsl/.ssh/id_ed25519"
         "/root/.ssh/id_ed25519"
       ];
       imports = [
