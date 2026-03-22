@@ -1,4 +1,5 @@
-_: {
+{ self, ... }:
+{
   flake.nixosModules.nixos-packages =
     { pkgs, ... }:
     {
@@ -11,6 +12,7 @@ _: {
         vesktop
         vlc
         tor-browser
+        self.packages."x86_64-linux".proton-cachyos-v3
       ];
       # Install firefox.
       programs.firefox.enable = true;
