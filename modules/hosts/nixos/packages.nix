@@ -23,6 +23,9 @@
         enable = true;
         remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
         dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
+        extraCompatPackages = [
+          self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        ];
       };
       programs.gamemode.enable = true; # for performance mode
       services.syncthing = {
