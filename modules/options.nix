@@ -11,5 +11,9 @@
         type = lib.types.bool;
         default = true;
       };
+      options.custom.defaultUser = lib.mkOption {
+        type = lib.types.str;
+        default = "nixos";
+      };
     };
 }

@@ -9,6 +9,7 @@
       (_: {
         custom.flakeTarget = "droid";
         custom.enableFastfetch = false;
+        custom.defaultUser = "droid";
       })
     ];
   };
