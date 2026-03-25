@@ -96,7 +96,7 @@
         networkmanager = {
           # Enable networking
           enable = true;
-          wifi.backend = "iwd";
+          # wifi.backend = "iwd";
         };
       };
 
