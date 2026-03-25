@@ -7,7 +7,7 @@ let
       micro
       nil
       nixd
-      inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
+#       inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
       # fresh-editor
       # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       nixfmt-tree
