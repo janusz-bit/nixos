@@ -16,6 +16,8 @@
         noctalia-shell
         niri
         alacritty
+        sqlite
+        brave
       ];
       # Install firefox.
       programs.firefox.enable = true;
