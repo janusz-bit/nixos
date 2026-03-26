@@ -13,6 +13,8 @@
         vlc
         tor-browser
         self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        noctalia-shell
+        niri
       ];
       # Install firefox.
       programs.firefox.enable = true;
