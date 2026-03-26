@@ -4,7 +4,7 @@
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [
-        zed-editor-fhs
+        zed-editor
         gparted
         qbittorrent-enhanced
         heroic # install heroic launcher
