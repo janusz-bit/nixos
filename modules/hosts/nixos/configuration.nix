@@ -40,6 +40,9 @@
       };
       boot.supportedFilesystems = [ "btrfs" ];
       services.btrfs.autoScrub.enable = true;
+      boot.loader.systemd-boot.enable = true;
+      boot.loader.efi.canTouchEfiVariables = true;
+
       services = {
 
         ananicy = {
