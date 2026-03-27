@@ -128,6 +128,7 @@
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
       users.users.dinosaur = {
+        initialPassword = "dinosaur";
         isNormalUser = true;
         description = "dinosaur";
         extraGroups = [
