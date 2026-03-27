@@ -18,6 +18,7 @@
         alacritty
         sqlite
         brave
+        libreoffice-qt
       ];
       # Install firefox.
       programs.firefox.enable = true;
