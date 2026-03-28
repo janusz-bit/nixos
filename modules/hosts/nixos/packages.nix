@@ -20,6 +20,8 @@
         brave
         libreoffice-qt
         kdePackages.qrca
+        signal-desktop
+        element-desktop
       ];
       # Install firefox.
       programs.firefox.enable = true;
