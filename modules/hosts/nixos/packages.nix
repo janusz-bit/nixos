@@ -19,6 +19,7 @@
         sqlite
         brave
         libreoffice-qt
+        kdePackages.qrca
       ];
       # Install firefox.
       programs.firefox.enable = true;
