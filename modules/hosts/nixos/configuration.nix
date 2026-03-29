@@ -41,6 +41,7 @@
       boot.supportedFilesystems = [ "btrfs" ];
       services.btrfs.autoScrub.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
+      services.flatpak.enable = true;
 
       services = {
 
