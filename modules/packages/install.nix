@@ -5,7 +5,7 @@
     let
       text = ''
         sudo nix run github:nix-community/disko  --experimental-features 'nix-command flakes' -- --mode destroy,format,mount --flake github:janusz-bit/nixos#nixos
-        sudo nixos-install --flake github:janusz-bit/nixos#nixos --no-root-passwd
+        sudo nixos-install --flake github:janusz-bit/nixos#nixos --no-root-passwd --option extra-substituters "https://attic.xuyh0120.win/lantian" --option  extra-trusted-public-keys "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
       '';
     in
     {
