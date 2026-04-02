@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, ... }
 {
   flake.nixosModules.disko =
     { ... }:
@@ -13,8 +13,8 @@
               type = "gpt";
               partitions = {
                 ESP = {
-                      start = "1M";
-                      end = "10G";
+                  start = "1M";
+                  end = "10G";
                   type = "EF00";
                   content = {
                     type = "filesystem";
@@ -23,13 +23,24 @@
                     mountOptions = [ "umask=0077" ];
                   };
                 };
+                swap = {
+                  size = "36G";
+                  content = {
+                    type = "luks";
+                    name = "swap";
+                    settings = {
+                      allowDiscards = true;
+                    };
+                    content = {
+                      type = "swap";
+                    };
+                  };
+                };
                 luks = {
                   size = "100%";
                   content = {
                     type = "luks";
                     name = "crypted";
-                    # disable settings.keyFile if you want to use interactive password entry
-                    #passwordFile = "/tmp/secret.key"; # Interactive
                     settings = {
                       allowDiscards = true;
                     };
@@ -57,10 +68,6 @@
                             "compress=zstd"
                             "noatime"
                           ];
-                        };
-                        "/swap" = {
-                          mountpoint = "/.swapvol";
-                          swap.swapfile.size = "36G";
                         };
                       };
                     };
