@@ -138,6 +138,7 @@
           "gamemode"
         ];
       };
+      users.users.root.initialPassword = "root";
       # Allow unfree packages
       nixpkgs.config.allowUnfree = true;
 
