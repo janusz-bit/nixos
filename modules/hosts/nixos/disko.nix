@@ -28,36 +28,50 @@
                 swap = {
                   size = "36G";
                   content = {
-                    type = "swap";
-                    resumeDevice = true;
+                    type = "luks";
+                    name = "crypted-swap";
+                    settings = {
+                      allowDiscards = true;
+                    };
+                    content = {
+                      type = "swap";
+                      resumeDevice = true;
+                    };
                   };
                 };
                 root = {
                   size = "100%";
                   content = {
-                    type = "btrfs";
-                    extraArgs = [ "-f" ];
-                    subvolumes = {
-                      "@root" = {
-                        mountpoint = "/";
-                        mountOptions = [
-                          "compress=zstd"
-                          "noatime"
-                        ];
-                      };
-                      "@home" = {
-                        mountpoint = "/home";
-                        mountOptions = [
-                          "compress=zstd"
-                          "noatime"
-                        ];
-                      };
-                      "@nix" = {
-                        mountpoint = "/nix";
-                        mountOptions = [
-                          "compress=zstd"
-                          "noatime"
-                        ];
+                    type = "luks";
+                    name = "crypted-root";
+                    settings = {
+                      allowDiscards = true;
+                    };
+                    content = {
+                      type = "btrfs";
+                      extraArgs = [ "-f" ];
+                      subvolumes = {
+                        "@root" = {
+                          mountpoint = "/";
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
+                        "@home" = {
+                          mountpoint = "/home";
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
+                        "@nix" = {
+                          mountpoint = "/nix";
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
                       };
                     };
                   };
