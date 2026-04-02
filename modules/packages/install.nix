@@ -12,7 +12,7 @@
       packages.install-system = pkgs.writeShellScriptBin "install-system" ''
         #!/usr/bin/env bash
         set -e
-        echo "${text}"
+        ${text}
       '';
     };
 }
