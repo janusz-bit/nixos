@@ -13,10 +13,8 @@
               type = "gpt";
               partitions = {
                 ESP = {
-                  priority = 1;
-                  name = "ESP";
-                  start = "1M";
-                  end = "10G";
+                      start = "1M";
+                      end = "10G";
                   type = "EF00";
                   content = {
                     type = "filesystem";
@@ -25,25 +23,13 @@
                     mountOptions = [ "umask=0077" ];
                   };
                 };
-                swap = {
-                  size = "36G";
-                  content = {
-                    type = "luks";
-                    name = "crypted-swap";
-                    settings = {
-                      allowDiscards = true;
-                    };
-                    content = {
-                      type = "swap";
-                      resumeDevice = true;
-                    };
-                  };
-                };
-                root = {
+                luks = {
                   size = "100%";
                   content = {
                     type = "luks";
-                    name = "crypted-root";
+                    name = "crypted";
+                    # disable settings.keyFile if you want to use interactive password entry
+                    #passwordFile = "/tmp/secret.key"; # Interactive
                     settings = {
                       allowDiscards = true;
                     };
@@ -51,26 +37,30 @@
                       type = "btrfs";
                       extraArgs = [ "-f" ];
                       subvolumes = {
-                        "@root" = {
+                        "/root" = {
                           mountpoint = "/";
                           mountOptions = [
                             "compress=zstd"
                             "noatime"
                           ];
                         };
-                        "@home" = {
+                        "/home" = {
                           mountpoint = "/home";
                           mountOptions = [
                             "compress=zstd"
                             "noatime"
                           ];
                         };
-                        "@nix" = {
+                        "/nix" = {
                           mountpoint = "/nix";
                           mountOptions = [
                             "compress=zstd"
                             "noatime"
                           ];
+                        };
+                        "/swap" = {
+                          mountpoint = "/.swapvol";
+                          swap.swapfile.size = "36G";
                         };
                       };
                     };
