@@ -14,7 +14,7 @@
               partitions = {
                 ESP = {
                   start = "1M";
-                  end = "10G";
+                  end = "6G";
                   type = "EF00";
                   content = {
                     type = "filesystem";
