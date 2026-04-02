@@ -22,6 +22,7 @@
         kdePackages.qrca
         signal-desktop
         element-desktop
+        prismlauncher
       ];
       # Install firefox.
       programs.firefox.enable = true;
