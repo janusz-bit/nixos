@@ -5,6 +5,9 @@
     modules = [
       self.nixosModules.base
       self.nixosModules.wsl
+      (_: {
+        custom.enableFastfetch = false;
+      })
     ];
   };
 }
