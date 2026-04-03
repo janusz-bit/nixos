@@ -131,10 +131,10 @@
       };
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
-      users.users.dinosaur = {
-        initialPassword = "dinosaur";
+      users.users.${config.custom.defaultUser} = {
+        initialPassword = "${config.custom.defaultUser}";
         isNormalUser = true;
-        description = "dinosaur";
+        description = "${config.custom.defaultUser}";
         extraGroups = [
           "networkmanager"
           "wheel"

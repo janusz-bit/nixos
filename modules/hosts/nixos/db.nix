@@ -18,7 +18,7 @@
         };
       };
 
-      users.users.dinosaur = {
+      users.users.${config.custom.defaultUser} = {
         # replace `<USERNAME>` with the actual username
         extraGroups = [
           "podman"

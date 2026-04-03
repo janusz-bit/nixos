@@ -1,7 +1,7 @@
 { self, ... }:
 {
   flake.nixosModules.nixos-packages =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     {
       environment.systemPackages = with pkgs; [
         zed-editor
@@ -40,9 +40,9 @@
       programs.gamemode.enable = true; # for performance mode
       services.syncthing = {
         enable = true;
-        user = "dinosaur";
-        dataDir = "/home/dinosaur/Sync";
-        configDir = "/home/dinosaur/.config/syncthing";
+        user = "${config.custom.defaultUser}";
+        dataDir = "/home/${config.custom.defaultUser}/Sync";
+        configDir = "/home/${config.custom.defaultUser}/.config/syncthing";
       };
     };
 }
