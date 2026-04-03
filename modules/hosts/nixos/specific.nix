@@ -1,7 +1,6 @@
 _: {
   flake.nixosModules.nixos-specific = _: {
     system.stateVersion = "25.11";
-    
 
     boot.loader.limine.enable = true;
     boot.loader.limine.extraEntries = ''
