@@ -125,7 +125,10 @@
 
       # Configure console keymap
       console.keyMap = "pl2";
-      security.rtkit.enable = true;
+      security = {
+        pam.services.${config.custom.defaultUser}.kwallet.enable = true;
+        rtkit.enable = true;
+      };
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
       users.users.dinosaur = {
