@@ -32,10 +32,18 @@ let
     EDITOR = editor;
   };
 
-  environmentShellAliases = config: rec {
-    push = "export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})\nnix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit";
-    update = "sudo nixos-rebuild switch --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
-  };
+  environmentShellAliases =
+    config:
+    let
+      update_alias =
+        mode:
+        "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
+    in
+    {
+      push = "export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})\nnix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit";
+      update = update_alias "switch";
+      update-boot = update_alias "boot";
+    };
 
   sharedNixSettings = {
     experimental-features = [
