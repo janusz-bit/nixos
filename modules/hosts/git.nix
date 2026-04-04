@@ -1,8 +1,8 @@
-{ self, ... }:
+{ self, custom, ... }:
 let
   config = {
-    user.name = "janusz-bit";
-    user.email = "janusz-bit@proton.me";
+    user.name = "${custom.repository.user}";
+    user.email = "${custom.email.full}";
     init.defaultBranch = "main";
     url = {
       "https://github.com/" = {

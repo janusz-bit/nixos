@@ -16,4 +16,13 @@
         default = "nixos";
       };
     };
+  _module.args.custom = rec {
+    repository = {
+      name = "nixos";
+      site = "github";
+      user = "janusz-bit";
+      linkFlake = "${repository.site}" + ":" + "${repository.user}" + "/" + "${repository.name}";
+    };
+    email.full = "janusz-bit@proton.me";
+  };
 }

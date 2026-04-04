@@ -1,4 +1,9 @@
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  custom,
+  ...
+}:
 let
   editor = "micro";
 
@@ -28,8 +33,8 @@ let
   };
 
   environmentShellAliases = config: rec {
-    push = "export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})\nnix build github:janusz-bit/nixos#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit";
-    update = "sudo nixos-rebuild switch --sudo --flake github:janusz-bit/nixos#${config.custom.flakeTarget} --refresh";
+    push = "export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})\nnix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit";
+    update = "sudo nixos-rebuild switch --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
   };
 
   sharedNixSettings = {
@@ -42,7 +47,11 @@ let
 in
 {
   flake.nixosModules.configuration =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      ...
+    }:
 
     {
       nixpkgs.config.allowUnfree = true;
@@ -61,7 +70,11 @@ in
     };
 
   flake.homeModules.configuration =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      ...
+    }:
 
     {
       nixpkgs.config.allowUnfree = true;
