@@ -1,5 +1,5 @@
 let
-  nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVh4xGoawFG0akl0mh34/kUDvzC8NJ/wxGgAMF7rqzm root@nixos";
+  nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOcA/U1pLJuoQsS//IQ264xwbz5c9E+Yc+lZBZ/NavUm root@nixos";
   droid-android = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIb1ln2lU/lR4NwlfUQ+oPurNDI+O6B0uiFCcWfYuGj3 root@nixos";
 in
 {
