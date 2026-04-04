@@ -2,7 +2,9 @@ name: Build Flake
 
 on:
   push:
-    branches: ["main", "master"]
+    # Trigger on tag pushes matching 'v*' (e.g., 'v1.0', 'v2026.04.05')
+    tags:
+      - "v*"
   pull_request:
     branches: ["main", "master"]
   workflow_dispatch:
