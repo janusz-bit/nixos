@@ -75,6 +75,8 @@ in
       programs.nix-ld.enable = true;
 
       programs.nix-index-database.comma.enable = true;
+
+      programs.direnv.enable = true;
     };
 
   flake.homeModules.configuration =
