@@ -35,6 +35,8 @@
             nix flake update
             echo "Updating proton..."
             ${config.packages.proton-cachyos-v3.updateScript}/bin/update-proton-cachyos
+            git add flake.lock
+            git commit -m "Update flake.lock"
           '')
         ];
       };
