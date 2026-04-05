@@ -24,6 +24,9 @@
               PLATFORM_PROFILE_ON_AC = "low-power";
             };
           };
+          services.scx.extraArgs = [
+            "--powersave"
+          ];
         };
         reverse-sync.configuration = {
           hardware.nvidia = {
@@ -66,8 +69,8 @@
           rulesProvider = pkgs.ananicy-rules-cachyos;
         };
 
-        scx.enable = false;
-        scx.scheduler = "scx_rustland";
+        scx.enable = true;
+        scx.scheduler = "scx_lavd";
         scx.extraArgs = [
           "--performance"
         ];
