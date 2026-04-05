@@ -23,6 +23,7 @@
         signal-desktop
         element-desktop
         prismlauncher
+        lutris
       ];
       # Install firefox.
       programs.firefox.enable = true;
