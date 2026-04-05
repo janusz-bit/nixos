@@ -21,11 +21,11 @@
       formatter = pkgs.nixfmt-tree;
       packages.default = self'.packages.install-system;
 
-      pre-commit.settings.hooks.nixfmt-rfc-style.enable = true;
+      pre-commit.settings.hooks.nixfmt.enable = true;
 
       devShells.default = pkgs.mkShell {
         shellHook = ''
-          ${config.pre-commit.integration.installationScript}
+          ${config.pre-commit.installationScript}
         '';
 
         packages = config.pre-commit.settings.enabledPackages ++ [
