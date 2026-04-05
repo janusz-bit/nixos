@@ -50,7 +50,6 @@
           };
         };
       };
-      powerManagement.cpuFreqGovernor = "ondemand";
       nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.default ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
       environment.sessionVariables = {
