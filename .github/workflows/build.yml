@@ -23,8 +23,8 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://attic.xuyh0120.win/lantian https://janusz-bit.cachix.org
-            extra-trusted-public-keys = lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc= janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters =  https://janusz-bit.cachix.org
+            extra-trusted-public-keys =  janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
 
       - name: Setup Cachix
         uses: cachix/cachix-action@v14
