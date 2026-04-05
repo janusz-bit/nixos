@@ -146,6 +146,17 @@
         pam.services.${config.custom.defaultUser}.kwallet.enable = true;
         rtkit.enable = true;
       };
+      systemd.settings.Manager = {
+        DefaultLimitNOFILE = "524288";
+      };
+      security.pam.loginLimits = [
+        {
+          domain = "${config.custom.defaultUser}";
+          type = "hard";
+          item = "nofile";
+          value = "524288";
+        }
+      ];
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
       users.users.${config.custom.defaultUser} = {
