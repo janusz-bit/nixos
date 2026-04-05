@@ -22,6 +22,7 @@
       site = "github";
       user = "janusz-bit";
       linkFlake = "${repository.site}" + ":" + "${repository.user}" + "/" + "${repository.name}";
+      url = "https://${repository.site}.com/${repository.user}/${repository.name}.git";
     };
     email.full = "janusz-bit@proton.me";
   };
