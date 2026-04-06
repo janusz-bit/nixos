@@ -74,7 +74,7 @@ in
     };
 
   flake.homeModules.shell =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     {
       programs.bash = {
         enable = true;
@@ -82,7 +82,7 @@ in
       };
       programs.fish.enable = true;
       programs.fish.shellAliases = sharedFishAliases;
-      programs.fish.interactiveShellInit = sharedFishInit;
+      programs.fish.interactiveShellInit = sharedFishInit config;
 
       home.packages = sharedPackages pkgs;
     };

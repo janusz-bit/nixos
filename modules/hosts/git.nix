@@ -1,6 +1,6 @@
 { self, custom, ... }:
 let
-  config = {
+  gitConfig = {
     user.name = "${custom.repository.user}";
     user.email = "${custom.email.full}";
     init.defaultBranch = "main";
@@ -15,24 +15,26 @@ let
   };
 in
 {
-  flake.nixosModules.git-home = _: {
-    home-manager.users.nixos = {
-      programs = {
-        gh.enable = true;
-        git = {
-          enable = true;
-          settings = config;
+  flake.nixosModules.git-home =
+    { config, ... }:
+    {
+      home-manager.users.${config.custom.defaultUser} = {
+        programs = {
+          gh.enable = true;
+          git = {
+            enable = true;
+            settings = gitConfig;
+          };
         };
       };
     };
-  };
 
   flake.nixosModules.git-configuration =
     { pkgs, ... }:
     {
       programs.git = {
         enable = true;
-        inherit config;
+        config = gitConfig;
       };
       environment.systemPackages = with pkgs; [
         gh
@@ -44,7 +46,7 @@ in
     {
       programs.git = {
         enable = true;
-        extraConfig = config;
+        extraConfig = gitConfig;
       };
       programs.gh.enable = true;
     };
