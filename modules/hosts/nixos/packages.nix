@@ -13,6 +13,7 @@
         vlc
         tor-browser
         self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        self.packages.${pkgs.stdenv.hostPlatform.system}.tdm-installer
         noctalia-shell
         niri
         alacritty
