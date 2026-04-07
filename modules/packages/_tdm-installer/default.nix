@@ -5,8 +5,8 @@
   autoPatchelfHook,
   buildFHSEnv,
   writeShellScript,
-  libX11,
   makeDesktopItem,
+  libx11,
 }:
 
 let
@@ -24,7 +24,7 @@ let
 
     buildInputs = [
       stdenv.cc.cc.lib
-      libX11
+      libx11
     ];
 
     dontConfigure = true;
@@ -38,21 +38,28 @@ let
     '';
   };
 
-  runScript = writeShellScript "tdm-installer-entry" ''
+  runScript = writeShellScript "tdm-entry" ''
     set -e
     install_dir="''${TDM_HOME:-$HOME/Games/darkmod}"
     mkdir -p "$install_dir"
     cd "$install_dir"
-    # Child processes (e.g. self-update .cmd scripts) must resolve sh/bash from this FHS env.
+
+    # Skrypty aktualizatora gry (.cmd) używają #!/bin/bash
     export PATH="/bin:/usr/bin:$PATH"
-    exec ${unwrapped}/libexec/tdm/tdm_installer.linux64 "$@"
+
+    # Jeśli gra jest zainstalowana, uruchom ją. W przeciwnym razie uruchom instalator.
+    if [ -x "./thedarkmod.x64" ]; then
+      exec ./thedarkmod.x64 "$@"
+    else
+      exec ${unwrapped}/libexec/tdm/tdm_installer.linux64 "$@"
+    fi
   '';
 
   desktopItem = makeDesktopItem {
     name = "tdm-installer";
-    desktopName = "The Dark Mod Installer";
+    desktopName = "The Dark Mod";
     exec = "tdm-installer";
-    comment = "The Dark Mod Installer";
+    comment = "The Dark Mod Game and Installer";
     categories = [ "Game" ];
     terminal = false;
   };
@@ -62,17 +69,34 @@ buildFHSEnv {
   version = "zipsync";
   inherit runScript;
 
+  targetPkgs =
+    pkgs: with pkgs; [
+      libx11
+      libxext
+      libxxf86vm
+      libGL
+      openal
+      libpng
+      libjpeg
+      curl
+      boost
+      ffmpeg
+      xdg-utils
+      zlib
+      stdenv.cc.cc.lib
+    ];
+
   extraInstallCommands = ''
     mkdir -p $out/share/applications
     cp -r ${desktopItem}/share/applications/* $out/share/applications/
   '';
 
-  # Self-update .cmd scripts use #!/bin/bash; FHS env supplies /bin/bash without touching host /bin.
   meta = with lib; {
-    description = "Official The Dark Mod installer (downloads game data on first run)";
+    description = "Official The Dark Mod installer and game runner";
     longDescription = ''
-      Runs in an FHS bubblewrap so self-update shell scripts find /bin/bash on NixOS.
-      Game files go to $HOME/Games/darkmod by default (override with TDM_HOME); set a writable path in the GUI if needed.
+      Runs in an FHS bubblewrap supplying all dependencies required by the Dark Mod engine
+      (OpenAL, MESA, X11, etc.) on NixOS.
+      Game files go to $HOME/Games/darkmod by default (override with TDM_HOME).
     '';
     homepage = "https://www.thedarkmod.com/";
     license = licenses.gpl3Plus;
