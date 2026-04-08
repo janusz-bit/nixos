@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.nixosModules.nixos-configuration =
     {
@@ -52,7 +52,7 @@
       };
       nixpkgs.overlays = [
         inputs.nix-cachyos-kernel.overlays.default
-        inputs.self.overlays.bootdev-cli-overlay
+        self.overlays.bootdev-cli-overlay
       ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
       environment.sessionVariables = {
