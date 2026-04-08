@@ -24,7 +24,26 @@
         element-desktop
         prismlauncher
         lutris
-        bootdev-cli
+        (bootdev-cli.overrideAttrs (oldAttrs: rec {
+          # Nadpisujemy wersję (np. na najnowszą wydaną lub commit)
+          version = "1.28.0"; # Wpisz tutaj żądaną wersję
+
+          # Pobieramy nowy kod źródłowy z GitHuba
+          src = fetchFromGitHub {
+            owner = "bootdotdev";
+            repo = "bootdev";
+            rev = "v${version}"; # lub użyj pełnego hasha commita
+            # Hash dla nowego kodu źródłowego. Przy pierwszej próbie
+            # budowania Nix zgłosi błąd i poda prawidłowy hash - wtedy go tu wklej.
+            hash = "sha256-sBPId1wEsIG1E+sf+pbqfz0xW0+PHVAoRYTkFLXpWOU=";
+          };
+
+          # Aplikacje w Go wymagają weryfikacji modułów (zależności)
+          # Przy zmianie kodu, vendorHash prawie na pewno ulegnie zmianie.
+          # Ustaw na pusty, aby Nix wyrzucił błąd i podał nowy hash.
+          vendorHash = "sha256-ZDioEU5uPCkd+kC83cLlpgzyOsnpj2S7N+lQgsQb8uY=";
+          # vendorHash = "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=";
+        }))
       ];
       # Install firefox.
       programs.firefox.enable = true;
