@@ -25,6 +25,7 @@
         prismlauncher
         lutris
         bootdev-cli
+        kdePackages.kcalc
       ];
       # Install firefox.
       programs.firefox.enable = true;
