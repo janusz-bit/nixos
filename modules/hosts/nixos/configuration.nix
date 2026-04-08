@@ -50,7 +50,10 @@
           };
         };
       };
-      nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.default ];
+      nixpkgs.overlays = [
+        inputs.nix-cachyos-kernel.overlays.default
+        inputs.self.overlays.bootdev-cli-overlay
+      ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
       environment.sessionVariables = {
         GAMEMODERUNEXEC = "env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only PROTON_ENABLE_WAYLAND=1 PROTON_FSR4_UPGRADE=1	PROTON_DLSS_UPGRADE=1 PROTON_XESS_UPGRADE=1 PROTON_USE_NTSYNC=1";
