@@ -26,6 +26,7 @@
         lutris
         bootdev-cli
         kdePackages.kcalc
+        python315
       ];
       # Install firefox.
       programs.firefox.enable = true;
