@@ -24,6 +24,7 @@
         element-desktop
         prismlauncher
         lutris
+        bootdev-cli
       ];
       # Install firefox.
       programs.firefox.enable = true;
