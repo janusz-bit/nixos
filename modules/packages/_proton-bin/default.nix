@@ -36,7 +36,7 @@ let
       };
 in
 stdenvNoCC.mkDerivation {
-  name = repo;
+  pname = repo;
   version = "${version.base}.${version.release}";
 
   src = intake.fetcher {
@@ -56,17 +56,19 @@ stdenvNoCC.mkDerivation {
   passthru =
     if withUpdateScript then
       {
-        updateScript = callPackage ./update.nix {
-          inherit
-            tarballPrefix
-            tarballSuffix
-            releasePrefix
-            releaseSuffix
-            versionFilename
-            owner
-            repo
-            ;
-        };
+        updateScript = lib.getExe (
+          callPackage ./update.nix {
+            inherit
+              tarballPrefix
+              tarballSuffix
+              releasePrefix
+              releaseSuffix
+              versionFilename
+              owner
+              repo
+              ;
+          }
+        );
       }
     else
       { };

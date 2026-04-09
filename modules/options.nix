@@ -23,6 +23,7 @@
       user = "janusz-bit";
       linkFlake = "${repository.site}" + ":" + "${repository.user}" + "/" + "${repository.name}";
       url = "https://${repository.site}.com/${repository.user}/${repository.name}.git";
+      place = "/etc/nixos";
     };
     email.full = "janusz-bit@proton.me";
   };

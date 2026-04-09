@@ -34,9 +34,11 @@
             echo "Updating flake inputs..."
             nix flake update
             git add flake.lock
-            git commit -m "Update flake.lock"
-            echo "Updating proton..."
-            ${config.packages.proton-cachyos-v3.updateScript}/bin/update-proton-cachyos
+            git commit -m "Update flake.lock" || true
+            echo "Updating bootdev-cli..."
+            nix run nixpkgs#nix-update -- --commit -F bootdev-cli
+            echo "Updating proton-cachyos-v3..."
+            nix run nixpkgs#nix-update -- -F proton-cachyos-v3 -u
           '')
         ];
       };

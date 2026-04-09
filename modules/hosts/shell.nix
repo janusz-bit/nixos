@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, custom, ... }:
 let
   sharedBashInit = pkgs: ''
     if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
@@ -25,6 +25,7 @@ let
     grep = "grep --color=auto";
     cat = "bat";
     hw = "hwinfo --short";
+    update-my-pkgs = "nix run ${custom.repository.place}#update-my-pkgs";
   };
 
   sharedFishInit = config: ''
