@@ -24,6 +24,7 @@ let
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
       nix-update
       tlrc
+      fzf
     ];
 
   sharedSessionVariables = {
