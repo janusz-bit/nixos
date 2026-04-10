@@ -9,7 +9,7 @@ let
 
   sharedPackages =
     pkgs: with pkgs; [
-      micro
+      micro-full
       nil
       nixd
       #       inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
