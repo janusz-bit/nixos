@@ -65,6 +65,7 @@
         user = "${config.custom.defaultUser}";
         dataDir = "/home/${config.custom.defaultUser}/Sync";
         configDir = "/home/${config.custom.defaultUser}/.config/syncthing";
+        openDefaultPorts = true;
       };
     };
 }
