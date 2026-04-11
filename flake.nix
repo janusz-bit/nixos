@@ -39,7 +39,6 @@
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
     ];
-    connect-timeout = 5;
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
