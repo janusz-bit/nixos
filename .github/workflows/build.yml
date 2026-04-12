@@ -38,7 +38,7 @@ jobs:
         run: nix flake check --show-trace
 
       - name: Build NixOS Configuration (nixos)
-        run: nix build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
+        run: nix build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace --accept-flake-config
 
       - name: Build NixOS Configuration (raspberry-pi-4)
-        run: nix build .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel --show-trace
+        run: nix build .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel --show-trace --accept-flake-config
