@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   flake.nixosModules.raspberry-pi-4 =
     { pkgs, ... }:
@@ -8,6 +8,12 @@
         self.nixosModules.raspberry-pi-4-specific
         self.nixosModules.raspberry-pi-4-specific-configuration
         self.nixosModules.raspberry-pi-4-configuration
+        inputs.nixos-hardware.nixosModules.raspberry-pi-4
+        self.nixosModules.base
+        (_: {
+          custom.flakeTarget = "raspberry-pi-4";
+          custom.defaultUser = "nixos";
+        })
       ];
     };
 }
