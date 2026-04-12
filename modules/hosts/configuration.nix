@@ -51,7 +51,7 @@ let
       "nix-command"
       "flakes"
     ];
-    trusted-users = [ custom.defaultUser ];
+
   };
 in
 {
