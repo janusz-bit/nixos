@@ -1,4 +1,4 @@
-name: Build RPI ARM
+name: Build raspberry-pi-4
 
 on:
   push:
