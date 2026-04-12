@@ -60,6 +60,11 @@
       };
       boot.supportedFilesystems = [ "btrfs" ];
       boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+      boot.extraModprobeConfig = ''
+        options cfg80211 ieee80211_regdom=PL
+        options rtw89_core disable_aspm_l1=y disable_aspm_l1ss=y
+        options rtw89pci disable_aspm_l1=y disable_aspm_l1ss=y disable_clkreq=y
+      '';
       services.btrfs.autoScrub.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
       services.flatpak.enable = true;
@@ -123,6 +128,7 @@
           # Enable networking
           enable = true;
           # wifi.backend = "iwd";
+          wifi.powersave = false;
         };
       };
 
