@@ -2,8 +2,12 @@
 # sudo mount /dev/disk/by-label/FIRMWARE /mnt
 # sudo micro /mnt/config.txt # &lt;-- make changes here
 # dtparam=audio=on
-
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  lib,
+  ...
+}:
 {
   flake.nixosConfigurations.raspberry-pi-4 = inputs.nixpkgs.lib.nixosSystem {
     system = "aarch64-linux";
