@@ -15,13 +15,4 @@
       self.nixosModules.raspberry-pi-4
     ];
   };
-  flake.nixosConfigurations.raspberry-pi-4-cross = inputs.nixpkgs.lib.nixosSystem {
-    modules = [
-      {
-        nixpkgs.buildPlatform = "x86_64-linux";
-        nixpkgs.hostPlatform = "aarch64-linux";
-      }
-      self.nixosModules.raspberry-pi-4
-    ];
-  };
 }
