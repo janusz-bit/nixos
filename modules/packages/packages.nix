@@ -30,10 +30,14 @@
         }
       );
 
-      packages.update-my-pkgs = pkgs.writeShellScriptBin "update-my-pkgs" ''
-        set -euo pipefail
+      packages.update-flake = pkgs.writeShellScriptBin "update-flake" ''
+        set -e
+        echo "Updating flake inputs..."
+        nix flake update
+        git add flake.lock
+        git commit -m "Update flake.lock" || true
         echo "Updating bootdev-cli..."
-        nix run nixpkgs#nix-update -- -F bootdev-cli
+        nix run nixpkgs#nix-update -- --commit -F bootdev-cli
         echo "Updating proton-cachyos-v3..."
         nix run nixpkgs#nix-update -- -F proton-cachyos-v3 -u
         echo "All packages updated!"
