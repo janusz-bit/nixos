@@ -58,6 +58,6 @@ writeShellScriptBin "update-${repo}" ''
     '.base = $latestBase | .release = $latestRelease | .hash = $latestHash' \
     "$srcJson" | sponge "$srcJson"
 
-  git add $srcJson
-  git commit -m "${repo}: ''${localBase}.''${localRelease} -> ''${latestBase}.''${latestRelease}"
+  git add "$srcJson"
+  git commit -m "${repo}: ''${localBase}.''${localRelease} -> ''${latestBase}.''${latestRelease}" "$srcJson"
 ''

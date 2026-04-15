@@ -36,8 +36,11 @@
         set -e
         echo "Updating flake inputs..."
         nix flake update
-        git add flake.lock
-        git commit -m "Update flake.lock" || true
+        if ! git diff --exit-code flake.lock > /dev/null; then
+          echo "Committing flake.lock..."
+          git add flake.lock
+          git commit -m "Update flake.lock" flake.lock
+        fi
         echo "Updating bootdev-cli..."
         nix run nixpkgs#nix-update -- --commit -F bootdev-cli
         echo "Updating proton-cachyos-v3..."
