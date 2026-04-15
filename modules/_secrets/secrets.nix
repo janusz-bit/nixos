@@ -17,4 +17,11 @@ in
     ];
     armor = true;
   };
+  "nextcloud-adminpass.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+    ];
+    armor = true;
+  };
 }
