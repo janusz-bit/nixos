@@ -17,6 +17,8 @@
         "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
       ];
 
+      nix.settings.trusted-users = [ "@wheel" ];
+
     };
 
 }
