@@ -25,6 +25,7 @@ let
       nix-update
       tlrc
       fzf
+      hw-probe
     ];
 
   sharedSessionVariables = {
@@ -93,6 +94,6 @@ in
       home.packages = sharedPackages pkgs;
       home.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
-      environment.shellAliases = environmentShellAliases config;
+      home.shellAliases = environmentShellAliases config;
     };
 }

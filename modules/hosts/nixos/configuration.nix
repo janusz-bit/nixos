@@ -24,7 +24,7 @@
               PLATFORM_PROFILE_ON_AC = "low-power";
             };
           };
-          services.scx.extraArgs = [
+          services.scx.extraArgs = lib.mkForce [
             "--powersave"
           ];
         };
