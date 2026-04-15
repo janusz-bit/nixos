@@ -13,7 +13,7 @@
       services.nextcloud = {
         enable = true;
         hostName = "raspberry-pi-4.local";
-        package = pkgs.nextcloud29;
+        package = pkgs.nextcloud32;
 
         database.createLocally = true;
 

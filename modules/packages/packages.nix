@@ -17,17 +17,20 @@
       });
 
       packages.proton-cachyos-v3 = (
-        pkgs.callPackage ./_proton-bin {
-          toolTitle = "Proton-CachyOS x86-64-v3";
-          tarballPrefix = "proton-";
-          tarballSuffix = "-x86_64_v3.tar.xz";
-          toolPattern = "proton-cachyos-.*";
-          releasePrefix = "cachyos-";
-          releaseSuffix = "-slr";
-          versionFilename = "cachyos-v3-version.json";
-          owner = "CachyOS";
-          repo = "proton-cachyos";
-        }
+        if pkgs.stdenv.hostPlatform.isx86_64 then
+          pkgs.callPackage ./_proton-bin {
+            toolTitle = "Proton-CachyOS x86-64-v3";
+            tarballPrefix = "proton-";
+            tarballSuffix = "-x86_64_v3.tar.xz";
+            toolPattern = "proton-cachyos-.*";
+            releasePrefix = "cachyos-";
+            releaseSuffix = "-slr";
+            versionFilename = "cachyos-v3-version.json";
+            owner = "CachyOS";
+            repo = "proton-cachyos";
+          }
+        else
+          pkgs.hello
       );
 
       packages.update-flake = pkgs.writeShellScriptBin "update-flake" ''
