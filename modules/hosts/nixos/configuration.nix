@@ -70,7 +70,7 @@
       services.flatpak.enable = true;
 
       services.ollama.enable = true;
-      services.ollama.acceleration = "cuda";
+      services.ollama.package = pkgs.ollama-cuda;
       services = {
 
         ananicy = {
