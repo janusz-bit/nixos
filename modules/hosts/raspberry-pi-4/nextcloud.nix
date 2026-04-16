@@ -4,7 +4,7 @@
     { config, pkgs, ... }:
     {
       age.secrets.nextcloud-adminpass = {
-        file = ../_secrets/nextcloud-adminpass.age;
+        file = ../../_secrets/nextcloud-adminpass.age;
         owner = "nextcloud";
         group = "nextcloud";
         mode = "0400";
