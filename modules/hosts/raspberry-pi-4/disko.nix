@@ -12,7 +12,7 @@
         disk = {
           main = {
             type = "disk";
-            device = "/dev/sda";
+            device = "/dev/sdc";
             content = {
               type = "gpt";
               partitions = {

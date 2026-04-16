@@ -10,7 +10,7 @@
         self.nixosModules.agenix
         self.nixosModules.raspberry-pi-4-specific
         self.nixosModules.raspberry-pi-4-configuration
-        inputs.nixos-hardware.nixosModules.raspberry-pi-4
+        inputs.nixos-raspberrypi.nixosModules.raspberry-pi-4
         # self.nixosModules.base
         self.nixosModules.options
         (_: {
