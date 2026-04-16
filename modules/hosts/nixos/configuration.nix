@@ -65,6 +65,8 @@
         options rtw89_core disable_aspm_l1=y disable_aspm_l1ss=y
         options rtw89pci disable_aspm_l1=y disable_aspm_l1ss=y disable_clkreq=y
       '';
+      services.avahi.enable = true;
+      services.avahi.nssmdns4 = true;
       services.btrfs.autoScrub.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
       services.flatpak.enable = true;
