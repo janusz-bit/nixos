@@ -5,7 +5,7 @@
     {
       environment.systemPackages = with pkgs; [
         zed-editor
-        gparted
+        kdePackages.partitionmanager
         qbittorrent-enhanced
         heroic # install heroic launcher
         protonup-qt
