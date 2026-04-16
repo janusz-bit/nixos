@@ -8,6 +8,11 @@
         owner = "root";
         mode = "0440";
       };
+      age.secrets.github-token = {
+        file = ../_secrets/GITHUB_TOKEN.age;
+        owner = "root";
+        mode = "0440";
+      };
       age.secrets.notes = {
         file = ../_secrets/notes.age;
         owner = "root";
