@@ -24,4 +24,11 @@ in
     ];
     armor = true;
   };
+  "GITHUB_TOKEN.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+    ];
+    armor = true;
+  };
 }
