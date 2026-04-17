@@ -71,9 +71,6 @@
       boot.loader.efi.canTouchEfiVariables = true;
       services.flatpak.enable = true;
 
-      services.ollama.enable = true;
-      services.ollama.host = "0.0.0.0";
-      services.ollama.package = pkgs.ollama-cuda;
       services = {
 
         ananicy = {
