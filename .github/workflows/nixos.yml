@@ -29,4 +29,4 @@ name: nixos
     tags:
       - v*
   workflow_dispatch: {}
-run-name: Build NixOS Configuration (nixos) by @${{ github.actor }}
+run-name: Build nixos by @${{ github.actor }}

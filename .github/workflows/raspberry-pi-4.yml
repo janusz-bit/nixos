@@ -29,3 +29,4 @@ name: raspberry-pi-4
     tags:
       - v*
   workflow_dispatch: {}
+run-name: Build raspberry-pi-4 by @${{ github.actor }}

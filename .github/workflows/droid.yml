@@ -29,3 +29,4 @@ name: droid
     tags:
       - v*
   workflow_dispatch: {}
+run-name: Build droid by @${{ github.actor }}

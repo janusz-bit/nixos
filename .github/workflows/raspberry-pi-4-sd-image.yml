@@ -29,3 +29,4 @@ name: raspberry-pi-4-sd-image
     tags:
       - v*
   workflow_dispatch: {}
+run-name: Build raspberry-pi-4-sd-image by @${{ github.actor }}

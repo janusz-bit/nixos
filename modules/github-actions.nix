@@ -73,7 +73,6 @@
         raspberry-pi-4-sd-image = "aarch64-linux";
         wsl = "x86_64-linux";
         droid = "aarch64-linux";
-        default = "x86_64-linux";
       };
     in
     {

@@ -29,3 +29,4 @@ name: wsl
     tags:
       - v*
   workflow_dispatch: {}
+run-name: Build wsl by @${{ github.actor }}
