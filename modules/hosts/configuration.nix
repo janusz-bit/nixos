@@ -64,6 +64,8 @@ in
     }:
 
     {
+
+      imports = [ inputs.nix-index-database.nixosModules.default ];
       nixpkgs.config.allowUnfree = true;
 
       environment.systemPackages = sharedPackages pkgs;
