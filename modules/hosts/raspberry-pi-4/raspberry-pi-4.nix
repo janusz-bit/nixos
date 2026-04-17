@@ -5,7 +5,6 @@
     {
       imports = [
         self.nixosModules.raspberry-pi-4-hardware-configuration
-        self.nixosModules.raspberry-pi-4-disko
         self.nixosModules.raspberry-pi-4-nextcloud
         self.nixosModules.agenix
         self.nixosModules.raspberry-pi-4-specific
