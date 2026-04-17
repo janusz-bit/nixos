@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.nixos-db =
+  flake.nixosModules.nixos-podman =
     {
       config,
       pkgs,
@@ -24,9 +24,6 @@
           "podman"
         ];
       };
-      environment.systemPackages = [
-        pkgs.oracle-instantclient
-      ];
     };
 
 }

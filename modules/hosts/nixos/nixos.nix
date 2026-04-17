@@ -8,7 +8,8 @@
         self.nixosModules.nixos-configuration
         self.nixosModules.nixos-hardware-configuration
         self.nixosModules.nixos-packages
-        # self.nixosModules.nixos-db
+        self.nixosModules.nixos-openclaw
+        self.nixosModules.nixos-podman
         self.nixosModules.disko
         self.nixosModules.nixos-niri
       ];
