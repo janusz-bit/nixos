@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  flake.nixosModules.raspberry-pi-4-nextcloud =
+  flake.nixosModules."raspberry-pi-4/nextcloud" =
     { config, pkgs, ... }:
     {
       age.secrets.nextcloud-adminpass = {

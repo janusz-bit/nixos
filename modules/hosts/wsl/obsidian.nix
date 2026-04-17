@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules.wsl-obsidian =
+  flake.nixosModules."wsl/obsidian" =
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [

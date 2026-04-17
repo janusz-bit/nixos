@@ -1,4 +1,5 @@
 _: {
-  flake.nixosModules.nixos-hardware-configuration = import ./_hardware-configuration/hardware-configuration.nix;
+  flake.nixosModules."nixos/hardware-configuration" =
+    import ./_hardware-configuration/hardware-configuration.nix;
 
 }

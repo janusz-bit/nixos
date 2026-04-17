@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.nixos-openclaw =
+  flake.nixosModules."nixos/openclaw" =
     {
       config,
       ...

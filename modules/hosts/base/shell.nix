@@ -59,7 +59,7 @@ let
     ];
 in
 {
-  flake.nixosModules.shell =
+  flake.nixosModules."base/shell" =
     { pkgs, config, ... }:
     {
       programs.bash = {
@@ -72,19 +72,5 @@ in
       programs.fish.interactiveShellInit = sharedFishInit config;
 
       environment.systemPackages = sharedPackages pkgs;
-    };
-
-  flake.homeModules.shell =
-    { pkgs, config, ... }:
-    {
-      programs.bash = {
-        enable = true;
-        initExtra = sharedBashInit pkgs;
-      };
-      programs.fish.enable = true;
-      programs.fish.shellAliases = sharedFishAliases;
-      programs.fish.interactiveShellInit = sharedFishInit config;
-
-      home.packages = sharedPackages pkgs;
     };
 }

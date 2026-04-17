@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules.wsl-settings = _: {
+  flake.nixosModules."wsl/settings" = _: {
     wsl.enable = true;
     wsl.defaultUser = "nixos";
     wsl.useWindowsDriver = true;

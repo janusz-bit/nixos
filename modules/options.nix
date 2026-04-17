@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules.options =
+  flake.nixosModules."options" =
     { lib, config, ... }:
     {
       options.custom.flakeTarget = lib.mkOption {

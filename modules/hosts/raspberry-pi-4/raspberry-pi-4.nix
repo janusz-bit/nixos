@@ -1,17 +1,17 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules.raspberry-pi-4 =
+  flake.nixosModules."raspberry-pi-4" =
     { pkgs, ... }:
     {
       imports = [
-        self.nixosModules.raspberry-pi-4-nextcloud
-        self.nixosModules.agenix
-        self.nixosModules.raspberry-pi-4-specific
-        self.nixosModules.raspberry-pi-4-configuration
+        self.nixosModules."raspberry-pi-4/nextcloud"
+        self.nixosModules."agenix"
+        self.nixosModules."raspberry-pi-4/specific"
+        self.nixosModules."raspberry-pi-4/configuration"
         inputs.nixos-hardware.nixosModules.raspberry-pi-4
-        self.nixosModules.git-configuration
-        self.nixosModules.configuration
-        self.nixosModules.options
+        self.nixosModules."base/git"
+        self.nixosModules."base/configuration"
+        self.nixosModules."options"
         (_: {
           custom.flakeTarget = "raspberry-pi-4";
           custom.defaultUser = "nixos";

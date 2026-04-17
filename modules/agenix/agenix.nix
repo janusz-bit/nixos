@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.agenix =
+  flake.nixosModules."agenix" =
     { config, ... }:
     {
       age.secrets.secret1 = {

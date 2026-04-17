@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.raspberry-pi-4-configuration =
+  flake.nixosModules."raspberry-pi-4/configuration" =
     {
       config,
       lib,

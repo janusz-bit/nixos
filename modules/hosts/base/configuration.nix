@@ -56,7 +56,7 @@ let
   };
 in
 {
-  flake.nixosModules.configuration =
+  flake.nixosModules."base/configuration" =
     {
       pkgs,
       config,

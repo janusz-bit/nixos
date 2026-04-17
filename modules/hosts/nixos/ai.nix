@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.nixos-ai =
+  flake.nixosModules."nixos/ai" =
     { pkgs, ... }:
     {
       services.ollama.enable = true;
