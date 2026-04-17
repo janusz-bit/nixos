@@ -18,9 +18,24 @@
         database.createLocally = true;
 
         config = {
-          dbtype = "sqlite";
+          dbtype = "pgsql";
           adminpassFile = config.age.secrets.nextcloud-adminpass.path;
           adminuser = "admin";
+        };
+
+        configureRedis = true;
+
+        # Performance optimizations
+        settings = {
+          # Improve PHP performance
+          opcache_optimization = true;
+          # Enable memory caching
+          memcache.local = "\\OC\\Memcache\\Redis";
+          memcache.locking = "\\OC\\Memcache\\Redis";
+          # Maintenance window to run heavy tasks at night
+          maintenance_window_start = 1;
+          # Default region for better localization performance
+          default_phone_region = "PL";
         };
       };
       # mDNS dla łatwego dostępu lokalnego

@@ -8,55 +8,25 @@
       ...
     }:
     {
-      # Bootloader is handled by nixos-raspberrypi module
-      # boot.loader.grub.enable = false;
-      # boot.loader.generic-extlinux-compatible.enable = true;
-
-      networking.hostName = "raspberry-pi-4"; # Define your hostname.
+      networking.hostName = "raspberry-pi-4";
 
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot.initrd.allowMissingModules = true;
 
-      # Configure network connections interactively with nmcli or nmtui.
-      networking.networkmanager.enable = true;
+      # Storage & RAM optimizations (SD card protection)
+      zramSwap.enable = true;
+      boot.tmp.useTmpfs = true;
+      boot.tmp.tmpfsSize = "50%"; # Allow tmpfs to use up to half of RAM
 
-      # Set your time zone.
+      # CPU Performance optimization
+      powerManagement.cpuFreqGovernor = "ondemand";
+      nix.settings.max-jobs = 2;
+
+      # Network configuration
+      networking.networkmanager.enable = true;
       time.timeZone = "Europe/Warsaw";
 
-      # Configure network proxy if necessary
-      # networking.proxy.default = "http://user:password@proxy:port/";
-      # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-      # Select internationalisation properties.
-      # i18n.defaultLocale = "en_US.UTF-8";
-      # console = {
-      #   font = "Lat2-Terminus16";
-      #   keyMap = "us";
-      #   useXkbConfig = true; # use xkb.options in tty.
-      # };
-
-      # Enable the X11 windowing system.
-      # services.xserver.enable = true;
-
-      # Configure keymap in X11
-      # services.xserver.xkb.layout = "us";
-      # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-      # Enable CUPS to print documents.
-      # services.printing.enable = true;
-
-      # Enable sound.
-      # services.pulseaudio.enable = true;
-      # OR
-      # services.pipewire = {
-      #   enable = true;
-      #   pulse.enable = true;
-      # };
-
-      # Enable touchpad support (enabled default in most desktopManager).
-      # services.libinput.enable = true;
-
-      # Define a user account. Don't forget to set a password with ‘passwd’.
+      # User configuration
       users.users.${config.custom.defaultUser} = {
         initialPassword = "${config.custom.defaultUser}";
         isNormalUser = true;
@@ -67,32 +37,12 @@
         ];
       };
 
-      # programs.firefox.enable = true;
-
-      # List packages installed in system profile.
-      # You can use https://search.nixos.org/ to find more packages (and options).
       environment.systemPackages = with pkgs; [
         micro
         wget
+        htop # Added for monitoring
       ];
 
-      # Some programs need SUID wrappers, can be configured further or are
-      # started in user sessions.
-      # programs.mtr.enable = true;
-      # programs.gnupg.agent = {
-      #   enable = true;
-      #   enableSSHSupport = true;
-      # };
-
-      # List services that you want to enable:
-
-      # Enable the OpenSSH daemon.
       services.openssh.enable = true;
-
-      # Open ports in the firewall.
-      # networking.firewall.allowedTCPPorts = [ ... ];
-      # networking.firewall.allowedUDPPorts = [ ... ];
-      # Or disable the firewall altogether.
-      # networking.firewall.enable = false;
     };
 }
