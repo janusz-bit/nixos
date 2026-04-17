@@ -12,7 +12,7 @@
         containers.openclaw = {
           image = "ghcr.io/openclaw/openclaw:latest";
           autoStart = true;
-          ports = [ "127.0.0.1:8080:8080" ];
+          ports = [ "127.0.0.1:18789:18789" ];
           environment = {
             LLM_PROVIDER = "ollama";
             OLLAMA_URL = "http://10.88.0.1:11434";
