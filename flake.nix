@@ -31,6 +31,7 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    github-actions-nix.url = "github:synapdeck/github-actions-nix";
   };
 
   nixConfig = {
