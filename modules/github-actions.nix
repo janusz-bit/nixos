@@ -101,9 +101,7 @@
             inherit name;
             runsOn = archToRunner."${arch}";
             buildTarget = "nixosConfigurations.${name}.config.system.build.toplevel";
-            # Specjalny opis dla glownej konfiguracji
-            runName =
-              if name == "nixos" then "Build NixOS Configuration (nixos) by @\${{ github.actor }}" else null;
+            runName = "Build ${name} by @\${{ github.actor }}";
           }
         ) configs;
       };
