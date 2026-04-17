@@ -24,6 +24,12 @@
       packages.default = self'.packages.install-system;
 
       pre-commit.settings.hooks.nixfmt.enable = true;
+      pre-commit.settings.hooks.sync-github-actions = {
+        enable = true;
+        name = "sync-github-actions";
+        entry = "${config.packages.sync-github-actions}/bin/sync-github-actions";
+        pass_filenames = false;
+      };
 
       devShells.default = pkgs.mkShell {
         shellHook = ''
