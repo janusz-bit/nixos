@@ -11,7 +11,7 @@
         backend = "podman";
         containers.openclaw = {
           image = "ghcr.io/openclaw/openclaw:latest";
-          autoStart = true;
+          autoStart = false;
           ports = [ "127.0.0.1:18789:18789" ];
           environment = {
             LLM_PROVIDER = "ollama";
