@@ -14,9 +14,8 @@
 
       networking.hostName = "raspberry-pi-4"; # Define your hostname.
 
-      boot.initrd.availableKernelModules = lib.filter (
-        x: x != "dw-hdmi"
-      ) config.boot.initrd.availableKernelModules;
+      # Fix for missing dw-hdmi module on RPi4 generic image
+      boot.initrd.allowMissingModules = true;
 
       # Configure network connections interactively with nmcli or nmtui.
       networking.networkmanager.enable = true;
