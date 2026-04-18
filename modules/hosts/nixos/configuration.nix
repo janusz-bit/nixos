@@ -60,11 +60,6 @@
       };
       boot.supportedFilesystems = [ "btrfs" ];
       boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
-      boot.extraModprobeConfig = ''
-        options cfg80211 ieee80211_regdom=PL
-        options rtw89_core disable_aspm_l1=y disable_aspm_l1ss=y
-        options rtw89pci disable_aspm_l1=y disable_aspm_l1ss=y disable_clkreq=y
-      '';
       services.avahi.enable = true;
       services.avahi.nssmdns4 = true;
       services.btrfs.autoScrub.enable = true;
