@@ -1,7 +1,12 @@
 { self, ... }:
 {
   flake.nixosModules."raspberry-pi-4/nextcloud" =
-    { config, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       age.secrets.nextcloud-adminpass = {
         file = ../../_secrets/nextcloud-adminpass.age;
@@ -46,7 +51,7 @@
           "opcache.max_accelerated_files" = "10000";
           "opcache.memory_consumption" = "128";
           "opcache.revalidate_freq" = "1";
-          "memory_limit" = "512M";
+          "memory_limit" = lib.mkForce "512M";
         };
       };
 
