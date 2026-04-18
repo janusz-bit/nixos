@@ -13,6 +13,7 @@
         self.nixosModules."disko"
         self.nixosModules."nixos/niri"
         self.nixosModules."nixos/ai"
+        self.nixosModules."nixos/appimage-run"
       ];
     };
 }
