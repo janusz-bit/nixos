@@ -1,13 +1,13 @@
 { inputs, custom, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     let
       text = ''
-        sudo nix run github:nix-community/disko  --experimental-features 'nix-command flakes' -- --mode destroy,format,mount --flake ${custom.repository.linkFlake}#nixos
+        sudo ${lib.getExe pkgs.disko} --mode destroy,format,mount --flake ${custom.repository.linkFlake}#nixos
         sudo mkdir -p /mnt/etc/nixos
         sudo ${pkgs.git}/bin/git clone ${custom.repository.url} /mnt/etc/nixos
-        sudo nixos-install --flake /mnt/etc/nixos#nixos --no-root-passwd --option extra-substituters "https://attic.xuyh0120.win/lantian https://janusz-bit.cachix.org" --option  extra-trusted-public-keys "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc= janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
+        sudo ${pkgs.nixos-install-tools}/bin/nixos-install --flake /mnt/etc/nixos#nixos --no-root-passwd --accept-flake-config
       '';
     in
     {
