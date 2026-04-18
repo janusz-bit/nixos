@@ -27,6 +27,7 @@
         bootdev-cli
         kdePackages.kcalc
         python3
+        appimage-run
       ];
       # Install firefox.
       programs.firefox.enable = true;
