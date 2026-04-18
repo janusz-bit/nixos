@@ -60,6 +60,13 @@
       };
       boot.supportedFilesystems = [ "btrfs" ];
       boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+      # Working hibernation
+      boot.resumeDevice = "/dev/mapper/swap";
+      boot.kernelParams = [ "resume=/dev/mapper/swap" ];
+      # Opcjonalnie, ale zalecane przy hibernacji na LUKS:
+      boot.initrd.systemd.enable = true;
+
       services.avahi.enable = true;
       services.avahi.nssmdns4 = true;
       services.btrfs.autoScrub.enable = true;
