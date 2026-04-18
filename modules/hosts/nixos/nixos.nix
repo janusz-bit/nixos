@@ -12,7 +12,7 @@
         self.nixosModules."nixos/podman"
         self.nixosModules."disko"
         self.nixosModules."nixos/niri"
-        # self.nixosModules."nixos/ai"
+        self.nixosModules."nixos/ai"
       ];
     };
 }
