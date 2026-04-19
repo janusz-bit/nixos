@@ -128,11 +128,13 @@
 
       networking = {
         hostName = "nixos";
+        wireless.regulatoryDomain = "PL";
         networkmanager = {
           # Enable networking
           enable = true;
           # wifi.backend = "iwd";
           wifi.powersave = false;
+          wifi.macAddress = "preserve";
         };
       };
 
