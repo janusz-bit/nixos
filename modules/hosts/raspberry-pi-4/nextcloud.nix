@@ -30,29 +30,6 @@
 
         configureRedis = true;
         maxUploadSize = "2G";
-
-        # Performance optimizations
-        settings = {
-          # Enable memory caching
-          memcache.local = "\\OC\\Memcache\\Redis";
-          memcache.locking = "\\OC\\Memcache\\Redis";
-          # Maintenance window to run heavy tasks at night
-          maintenance_window_start = 1;
-          # Default region for better localization performance
-          default_phone_region = "PL";
-          # Limit preview generation to save CPU and SD card wear
-          preview_max_x = 1024;
-          preview_max_y = 1024;
-        };
-
-        # PHP configuration tuning
-        phpOptions = {
-          "opcache.interned_strings_buffer" = "16";
-          "opcache.max_accelerated_files" = "10000";
-          "opcache.memory_consumption" = "128";
-          "opcache.revalidate_freq" = "1";
-          "memory_limit" = lib.mkForce "512M";
-        };
       };
 
       # PostgreSQL performance tuning for RPi4
