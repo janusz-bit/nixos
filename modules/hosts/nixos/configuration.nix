@@ -65,7 +65,7 @@
       boot.resumeDevice = "/dev/mapper/swap";
       boot.kernelParams = [ "resume=/dev/mapper/swap" ];
       # Opcjonalnie, ale zalecane przy hibernacji na LUKS:
-      boot.initrd.systemd.enable = true;
+      # boot.initrd.systemd.enable = true;
 
       services.avahi.enable = true;
       services.avahi.nssmdns4 = true;
