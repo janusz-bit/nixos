@@ -126,9 +126,10 @@
         bluetooth.enable = true;
       };
 
+      hardware.enableAllFirmware = true;
+      hardware.wirelessRegulatoryDatabase = true;
       networking = {
         hostName = "nixos";
-        wireless.regulatoryDomain = "PL";
         networkmanager = {
           # Enable networking
           enable = true;
