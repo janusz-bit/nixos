@@ -66,13 +66,28 @@
         "aarch64-linux" = "ubuntu-24.04-arm";
       };
 
-      # Lista konfiguracji do wygenerowania (nazwa = architektura)
+      # Lista konfiguracji do wygenerowania
       configs = {
-        nixos = "x86_64-linux";
-        raspberry-pi-4 = "aarch64-linux";
-        raspberry-pi-4-sd-image = "aarch64-linux";
-        wsl = "x86_64-linux";
-        droid = "aarch64-linux";
+        nixos = {
+          arch = "x86_64-linux";
+          target = "toplevel";
+        };
+        raspberry-pi-4 = {
+          arch = "aarch64-linux";
+          target = "toplevel";
+        };
+        raspberry-pi-4-sd-image = {
+          arch = "aarch64-linux";
+          target = "sdImage";
+        };
+        wsl = {
+          arch = "x86_64-linux";
+          target = "toplevel";
+        };
+        droid = {
+          arch = "aarch64-linux";
+          target = "toplevel";
+        };
       };
     in
     {
@@ -95,11 +110,11 @@
         enable = true;
         # Automatycznie generujemy workflowy dla wszystkich wpisow w 'configs'
         workflows = builtins.mapAttrs (
-          name: arch:
+          name: cfg:
           mkBuildWorkflow {
             inherit name;
-            runsOn = archToRunner."${arch}";
-            buildTarget = "nixosConfigurations.${name}.config.system.build.toplevel";
+            runsOn = archToRunner."${cfg.arch}";
+            buildTarget = "nixosConfigurations.${name}.config.system.build.${cfg.target}";
             runName = "Build ${name} by @\${{ github.actor }}";
           }
         ) configs;
