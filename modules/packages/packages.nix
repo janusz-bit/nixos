@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.packages.x86_64-linux.proton-cachyos-v3 =
     let
@@ -47,5 +47,8 @@
         ${pkgs.lib.getExe pkgs.nix-update} -F proton-cachyos-v3 -u
         echo "All packages updated!"
       '';
+
+      packages.raspberry-pi-4-sd-image =
+        self.nixosConfigurations.raspberry-pi-4-sd-image.config.system.build.sdImage;
     };
 }
