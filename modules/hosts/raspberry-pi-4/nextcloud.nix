@@ -56,7 +56,12 @@
       services.nextcloud.settings = {
         overwriteprotocol = "https";
         trusted_proxies = [ "127.0.0.1" ];
-        trusted_domains = [ "localhost" ];
+        trusted_domains = [
+          "localhost"
+          "192.168.100.212"
+          "raspberry-pi-4.local"
+          "raspberry-pi-4"
+        ];
       };
     };
 }
