@@ -26,7 +26,7 @@
         lutris
         bootdev-cli
         kdePackages.kcalc
-        python3
+        nextcloud-client
       ];
       # Install firefox.
       programs.firefox.enable = true;
