@@ -11,10 +11,8 @@
       age.secrets.nextcloud-adminpass = {
         file = ../../_secrets/nextcloud-adminpass.age;
         owner = "nextcloud";
-        group = "nextcloud";
-        mode = "0400";
+        mode = "0440";
       };
-
       services.nextcloud = {
         enable = true;
         hostName = "${custom.site.full}";

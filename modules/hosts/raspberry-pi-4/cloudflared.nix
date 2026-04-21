@@ -8,6 +8,11 @@
       ...
     }:
     {
+      age.secrets.cloudflared-tunnel = {
+        file = ../../_secrets/cloudflared-tunnel.age;
+        owner = "cloudflared";
+        mode = "0440";
+      };
       services.cloudflared = {
         enable = true;
         tunnels = {
