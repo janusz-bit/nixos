@@ -70,23 +70,19 @@
       configs = {
         nixos = {
           arch = "x86_64-linux";
-          target = "toplevel";
         };
         raspberry-pi-4 = {
           arch = "aarch64-linux";
-          target = "toplevel";
         };
         raspberry-pi-4-sd-image = {
           arch = "aarch64-linux";
-          target = "sdImage";
+          buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
         };
         wsl = {
           arch = "x86_64-linux";
-          target = "toplevel";
         };
         droid = {
           arch = "aarch64-linux";
-          target = "toplevel";
         };
       };
     in
@@ -114,7 +110,8 @@
           mkBuildWorkflow {
             inherit name;
             runsOn = archToRunner."${cfg.arch}";
-            buildTarget = "nixosConfigurations.${name}.config.system.build.${cfg.target}";
+            buildTarget =
+              cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
             runName = "Build ${name} by @\${{ github.actor }}";
           }
         ) configs;
