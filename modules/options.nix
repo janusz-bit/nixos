@@ -26,5 +26,10 @@
       place = "/etc/nixos";
     };
     email.full = "janusz-bit@proton.me";
+    site = rec {
+      name = "janusz-bit";
+      end = "com";
+      full = name + "." + end;
+    };
   };
 }
