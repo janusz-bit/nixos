@@ -13,14 +13,21 @@
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot.initrd.allowMissingModules = true;
 
-      # Storage & RAM optimizations (SD card protection)
-      zramSwap.enable = true;
-      boot.tmp.useTmpfs = true;
-      boot.tmp.tmpfsSize = "50%"; # Allow tmpfs to use up to half of RAM
-
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
       nix.settings.max-jobs = 2;
+
+      # Memory optimization: SSD swap and zRAM
+      zramSwap.enable = true;
+      zramSwap.algorithm = "zstd";
+      boot.kernel.sysctl."vm.swappiness" = 100;
+      boot.tmp.useTmpfs = true;
+      swapDevices = [
+        {
+          device = "/var/lib/swapfile";
+          size = 4096; # 4GB of swap on SSD
+        }
+      ];
 
       # Network configuration
       networking.networkmanager.enable = true;
@@ -32,17 +39,6 @@
         settings.PasswordAuthentication = false;
         settings.KbdInteractiveAuthentication = false;
       };
-
-      # Logging optimization (SD card protection)
-      services.journald.extraConfig = ''
-        SystemMaxUse=250M
-        MaxFileSec=1month
-      '';
-
-      # Headless optimization
-      # Reduce GPU memory to 16MB for a headless server
-      # hardware.raspberry-pi.config.all.options.gpu_mem = { value = 16; }; # For older nixos-hardware
-      # boot.loader.raspberryPi.firmwareConfig = "gpu_mem=16"; # For generic raspberry pi images
 
       # Fail2ban security
       services.fail2ban = {
@@ -60,7 +56,6 @@
 
       environment.systemPackages = with pkgs; [
         micro
-        wget
         htop
       ];
 
