@@ -35,4 +35,12 @@ in
     ];
     armor = true;
   };
+  "cloudflared-tunnel.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
