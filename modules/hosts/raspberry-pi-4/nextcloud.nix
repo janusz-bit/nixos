@@ -55,6 +55,7 @@
       ];
       services.nextcloud.settings = {
         overwriteprotocol = "https";
+        overwritecondaddr = "^127\\.0\\.0\\.1$";
         trusted_proxies = [ "127.0.0.1" ];
         trusted_domains = [
           "localhost"
