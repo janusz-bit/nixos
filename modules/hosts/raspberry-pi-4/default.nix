@@ -16,11 +16,4 @@
       self.nixosModules."raspberry-pi-4/hardware-configuration"
     ];
   };
-  flake.nixosConfigurations.raspberry-pi-4-sd-image = inputs.nixpkgs.lib.nixosSystem {
-    modules = [
-      { nixpkgs.hostPlatform = "aarch64-linux"; }
-      self.nixosModules."raspberry-pi-4"
-      self.nixosModules."raspberry-pi-4/sdImage"
-    ];
-  };
 }

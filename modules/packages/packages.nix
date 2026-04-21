@@ -49,6 +49,15 @@
       '';
 
       packages.raspberry-pi-4-sd-image =
-        self.nixosConfigurations.raspberry-pi-4-sd-image.config.system.build.sdImage;
+        let
+          image = inputs.nixpkgs.lib.nixosSystem {
+            modules = [
+              { nixpkgs.hostPlatform = "aarch64-linux"; }
+              self.nixosModules."raspberry-pi-4"
+              self.nixosModules."raspberry-pi-4/sdImage"
+            ];
+          };
+        in
+        image.config.system.build.sdImage;
     };
 }
