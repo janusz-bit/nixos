@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, custom, ... }:
 {
   flake.nixosModules."raspberry-pi-4/nextcloud" =
     {
@@ -17,7 +17,7 @@
 
       services.nextcloud = {
         enable = true;
-        hostName = "raspberry-pi-4.local";
+        hostName = "${custom.site.full}";
         package = pkgs.nextcloud33;
 
         database.createLocally = true;

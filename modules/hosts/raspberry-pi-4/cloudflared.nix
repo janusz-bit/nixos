@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, custom, ... }:
 {
   flake.nixosModules."raspberry-pi-4/cloudflared" =
     {
@@ -12,10 +12,10 @@
         enable = true;
         tunnels = {
           "raspberry-pi-4" = {
-            # credentialsFile = config.age.secrets.cloudflared-tunnel.path;
+            credentialsFile = config.age.secrets.cloudflared-tunnel.path;
             default = "http_status:404";
             ingress = {
-              "cloud.example.com" = "http://localhost:80";
+              "${custom.site.full}" = "http://localhost:80";
             };
           };
         };
