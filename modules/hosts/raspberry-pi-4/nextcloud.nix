@@ -42,8 +42,11 @@
       # Odcięto całkowicie dostęp z sieci lokalnej (brak otwartych portów, brak mDNS)
       services.nextcloud.settings = {
         overwriteprotocol = "https";
-        overwritecondaddr = "^127\\.0\\.0\\.1$";
-        trusted_proxies = [ "127.0.0.1" ];
+        "overwrite.cli.url" = "https://${custom.site.full}";
+        trusted_proxies = [
+          "127.0.0.1"
+          "::1"
+        ];
         trusted_domains = [
           "localhost"
         ];
