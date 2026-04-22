@@ -13,40 +13,52 @@
         owner = "nextcloud";
         mode = "0440";
       };
-      services.nextcloud = {
-        enable = true;
-        hostName = "${custom.site.full}";
-        package = pkgs.nextcloud33;
+      services = {
+        nextcloud = {
+          enable = true;
+          hostName = "${custom.site.full}";
+          package = pkgs.nextcloud33;
 
-        database.createLocally = true;
+          database.createLocally = true;
 
-        config = {
-          dbtype = "pgsql";
-          adminpassFile = config.age.secrets.nextcloud-adminpass.path;
-          adminuser = "admin";
+          config = {
+            dbtype = "pgsql";
+            adminpassFile = config.age.secrets.nextcloud-adminpass.path;
+            adminuser = "admin";
+          };
+
+          configureRedis = true;
+          maxUploadSize = "2G";
+
+          phpOptions = {
+            "opcache.interned_strings_buffer" = "16";
+          };
+
+          # Nextcloud dostępny wyłącznie przez Cloudflare Tunnel (via localhost)
+          # Odcięto całkowicie dostęp z sieci lokalnej (brak otwartych portów, brak mDNS)
+          settings = {
+            maintenance_window_start = 1;
+            overwriteprotocol = "https";
+            "overwrite.cli.url" = "https://${custom.site.full}";
+            trusted_proxies = [
+              "127.0.0.1"
+              "::1"
+            ];
+          };
         };
 
-        configureRedis = true;
-        maxUploadSize = "2G";
-      };
+        # HSTS Header
+        nginx.virtualHosts."${custom.site.full}".extraConfig = ''
+          add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
+        '';
 
-      # PostgreSQL performance tuning for RPi4
-      services.postgresql.settings = {
-        shared_buffers = "128MB";
-        work_mem = "4MB";
-        maintenance_work_mem = "32MB";
-        effective_cache_size = "256MB";
-      };
-
-      # Nextcloud dostępny wyłącznie przez Cloudflare Tunnel (via localhost)
-      # Odcięto całkowicie dostęp z sieci lokalnej (brak otwartych portów, brak mDNS)
-      services.nextcloud.settings = {
-        overwriteprotocol = "https";
-        "overwrite.cli.url" = "https://${custom.site.full}";
-        trusted_proxies = [
-          "127.0.0.1"
-          "::1"
-        ];
+        # PostgreSQL performance tuning for RPi4
+        postgresql.settings = {
+          shared_buffers = "128MB";
+          work_mem = "4MB";
+          maintenance_work_mem = "32MB";
+          effective_cache_size = "256MB";
+        };
       };
     };
 }

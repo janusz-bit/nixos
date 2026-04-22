@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   flake.nixosModules."raspberry-pi-4/configuration" =
     {
       config,
@@ -11,17 +10,18 @@
       networking.hostName = "raspberry-pi-4";
 
       # Fix for missing dw-hdmi module on RPi4 generic image
-      boot.initrd.allowMissingModules = true;
+      boot = {
+        initrd.allowMissingModules = true;
+        kernel.sysctl."vm.swappiness" = 100;
+        tmp.useTmpfs = true;
+      };
 
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
-      nix.settings.max-jobs = 2;
 
       # Memory optimization: SSD swap and zRAM
       zramSwap.enable = true;
       zramSwap.algorithm = "zstd";
-      boot.kernel.sysctl."vm.swappiness" = 100;
-      boot.tmp.useTmpfs = true;
       swapDevices = [
         {
           device = "/var/lib/swapfile";
@@ -51,8 +51,13 @@
       };
 
       # More frequent Nix GC for small storage
-      nix.gc.dates = "daily";
-      nix.gc.options = "--delete-older-than 3d";
+      nix = {
+        settings.max-jobs = 2;
+        gc = {
+          dates = "daily";
+          options = "--delete-older-than 3d";
+        };
+      };
 
       environment.systemPackages = with pkgs; [
         micro
