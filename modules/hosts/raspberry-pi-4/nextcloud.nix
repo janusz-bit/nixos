@@ -38,30 +38,14 @@
         effective_cache_size = "256MB";
       };
 
-      # mDNS dla łatwego dostępu lokalnego
-      services.avahi = {
-        enable = true;
-        nssmdns4 = true;
-        publish = {
-          enable = true;
-          addresses = true;
-          domain = true;
-        };
-      };
-
-      networking.firewall.allowedTCPPorts = [
-        80
-        443
-      ];
+      # Nextcloud dostępny wyłącznie przez Cloudflare Tunnel (via localhost)
+      # Odcięto całkowicie dostęp z sieci lokalnej (brak otwartych portów, brak mDNS)
       services.nextcloud.settings = {
         overwriteprotocol = "https";
         overwritecondaddr = "^127\\.0\\.0\\.1$";
         trusted_proxies = [ "127.0.0.1" ];
         trusted_domains = [
           "localhost"
-          "192.168.100.212"
-          "raspberry-pi-4.local"
-          "raspberry-pi-4"
         ];
       };
     };
