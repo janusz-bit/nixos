@@ -25,7 +25,7 @@ _: {
       swapDevices = [
         {
           device = "/var/lib/swapfile";
-          size = 4096; # 4GB of swap on SSD
+          size = 8192; # 4GB of swap on SSD
         }
       ];
 
