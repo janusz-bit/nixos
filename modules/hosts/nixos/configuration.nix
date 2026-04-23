@@ -53,6 +53,7 @@
       nixpkgs.overlays = [
         inputs.nix-cachyos-kernel.overlays.default
         self.overlays.bootdev-cli-overlay
+        self.overlays.brave-debloater
       ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
       environment.sessionVariables = {
