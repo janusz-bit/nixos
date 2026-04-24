@@ -28,7 +28,7 @@
         kdePackages.kcalc
         nextcloud-client
         haruna
-        kdePackages.audiotube
+        kdePackages.plasmatube
         kdePackages.elisa
       ];
       # Install firefox.
