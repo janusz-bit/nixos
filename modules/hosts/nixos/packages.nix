@@ -27,6 +27,9 @@
         bootdev-cli
         kdePackages.kcalc
         nextcloud-client
+        haruna
+        kdePackages.audiotube
+        kdePackages.elisa
       ];
       # Install firefox.
       programs.firefox.enable = true;
