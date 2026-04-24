@@ -19,7 +19,7 @@
         };
         script =
           let
-            pythonEnv = pkgs.python3.withPackages (ps: [ ps.RPi_GPIO ]);
+            pythonEnv = pkgs.python3.withPackages (ps: [ ps.rpi-gpio ]);
           in
           ''
             ${pythonEnv}/bin/python -c '
