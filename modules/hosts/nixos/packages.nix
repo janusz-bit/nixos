@@ -30,6 +30,7 @@
         haruna
         kdePackages.plasmatube
         kdePackages.elisa
+        sbctl
       ];
       # Install firefox.
       programs.firefox.enable = true;
