@@ -32,7 +32,7 @@
         vendorHash = "sha256-ZDioEU5uPCkd+kC83cLlpgzyOsnpj2S7N+lQgsQb8uY=";
       });
 
-      packages.update-flake = pkgs.writeShellScriptBin "update-flake" ''
+      packages.update-flake = pkgs.writeShellScriptBin "flake-update" ''
         set -e
         echo "Updating flake inputs..."
         nix flake update
