@@ -23,7 +23,7 @@
         signal-desktop
         element-desktop
         prismlauncher
-        lutris
+        # lutris
         bootdev-cli
         kdePackages.kcalc
         nextcloud-client
