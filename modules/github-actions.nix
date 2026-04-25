@@ -67,24 +67,7 @@
       };
 
       # Lista konfiguracji do wygenerowania
-      configs = {
-        nixos = {
-          arch = "x86_64-linux";
-        };
-        raspberry-pi-4 = {
-          arch = "aarch64-linux";
-        };
-        raspberry-pi-4-sd-image = {
-          arch = "aarch64-linux";
-          buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
-        };
-        wsl = {
-          arch = "x86_64-linux";
-        };
-        droid = {
-          arch = "aarch64-linux";
-        };
-      };
+      configs = import ./_github-actions-configs.nix;
     in
     {
       packages.github-actions = config.githubActions.workflowsDir;
