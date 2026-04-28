@@ -37,11 +37,9 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
-      "https://nixos-raspberrypi.cachix.org"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
-      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
     ];
   };
 
