@@ -7,13 +7,7 @@
       services.ollama.package = pkgs.ollama-cuda;
       services.open-webui = {
         enable = true;
-        environment = ''
-          {
-            OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-            # Disable authentication
-            WEBUI_AUTH = "False";
-          }
-        '';
+        environment = "{\n  OLLAMA_API_BASE_URL = \"http://127.0.0.1:11434\";\n  # Disable authentication\n  WEBUI_AUTH = \"False\";\n}\n";
       };
 
       environment.systemPackages = with pkgs; [
