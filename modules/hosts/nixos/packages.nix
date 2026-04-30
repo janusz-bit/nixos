@@ -28,7 +28,6 @@
         kdePackages.kcalc
         nextcloud-client
         haruna
-        kdePackages.plasmatube
         kdePackages.elisa
         sbctl
       ];
