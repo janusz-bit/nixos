@@ -26,6 +26,7 @@ let
       tlrc
       fzf
       hw-probe
+      htop
     ];
 
   sharedSessionVariables = {
