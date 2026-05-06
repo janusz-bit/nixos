@@ -17,17 +17,7 @@ _: {
       };
 
       # Fix modDirVersion mismatch for the RPi kernel
-      nixpkgs.overlays = [
-        (final: prev: {
-          linuxPackages_rpi4 = prev.linuxPackages_rpi4.extend (
-            lpf: lpp: {
-              kernel = lpp.kernel.overrideAttrs (oldAttrs: {
-                modDirVersion = "${oldAttrs.modDirVersion}\"\"";
-              });
-            }
-          );
-        })
-      ];
+      boot.kernelPackages = lib.mkForce pkgs.linuxPackages_rpi4;
 
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
