@@ -30,6 +30,7 @@
         haruna
         kdePackages.elisa
         sbctl
+        joplin-desktop
       ];
       # Install firefox.
       programs.firefox.enable = true;
