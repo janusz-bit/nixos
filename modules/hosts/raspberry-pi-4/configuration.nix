@@ -16,6 +16,19 @@ _: {
         tmp.useTmpfs = true;
       };
 
+      # Fix modDirVersion mismatch for the RPi kernel
+      nixpkgs.overlays = [
+        (final: prev: {
+          linuxPackages_rpi4 = prev.linuxPackages_rpi4.extend (
+            lpf: lpp: {
+              kernel = lpp.kernel.overrideAttrs (oldAttrs: {
+                modDirVersion = "${oldAttrs.modDirVersion}\"\"";
+              });
+            }
+          );
+        })
+      ];
+
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
 
