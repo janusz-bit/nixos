@@ -15,4 +15,8 @@
   droid = {
     arch = "aarch64-linux";
   };
+  cachyos-kernel = {
+    arch = "x86_64-linux";
+    buildTarget = "nixosConfigurations.nixos.config.boot.kernelPackages.kernel";
+  };
 }
