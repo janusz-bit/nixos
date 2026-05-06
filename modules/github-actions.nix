@@ -4,47 +4,31 @@
     { config, pkgs, ... }:
     let
       # Wspolne kroki dla wszystkich workflowow budujacych
-      mkBuildSteps =
+      mkBaseSteps = [
         {
-          buildTarget,
-          stepName,
-          kernelTarget ? null,
-        }:
-        [
-          {
-            name = "Checkout repository";
-            uses = "actions/checkout@v5";
-          }
-          {
-            name = "Install Nix";
-            uses = "cachix/install-nix-action@v31";
-            with_ = {
-              nix_path = "nixpkgs=channel:nixos-unstable";
-              extra_nix_config = ''
-                experimental-features = nix-command flakes
-                access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              '';
-            };
-          }
-          {
-            name = "Setup Cachix";
-            uses = "cachix/cachix-action@v14";
-            with_ = {
-              name = "janusz-bit";
-              authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
-            };
-          }
-        ]
-        ++ pkgs.lib.optional (kernelTarget != null) {
-          name = "Build Kernel";
-          run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
+          name = "Checkout repository";
+          uses = "actions/checkout@v5";
         }
-        ++ [
-          {
-            name = stepName;
-            run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
-          }
-        ];
+        {
+          name = "Install Nix";
+          uses = "cachix/install-nix-action@v31";
+          with_ = {
+            nix_path = "nixpkgs=channel:nixos-unstable";
+            extra_nix_config = ''
+              experimental-features = nix-command flakes
+              access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
+            '';
+          };
+        }
+        {
+          name = "Setup Cachix";
+          uses = "cachix/cachix-action@v14";
+          with_ = {
+            name = "janusz-bit";
+            authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
+          };
+        }
+      ];
 
       # Fabryka workflowow
       mkBuildWorkflow =
@@ -62,13 +46,41 @@
             pullRequest.branches = [ "master" ];
             workflowDispatch = { };
           };
-          jobs.build = {
-            inherit runsOn;
-            steps = mkBuildSteps {
-              inherit buildTarget kernelTarget;
-              stepName = name;
-            };
-          };
+          jobs =
+            if kernelTarget != null then
+              {
+                build-kernel = {
+                  inherit runsOn;
+                  steps = mkBaseSteps ++ [
+                    {
+                      name = "Build Kernel";
+                      run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
+                    }
+                  ];
+                };
+                build = {
+                  inherit runsOn;
+                  needs = "build-kernel";
+                  steps = mkBaseSteps ++ [
+                    {
+                      name = name;
+                      run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
+                    }
+                  ];
+                };
+              }
+            else
+              {
+                build = {
+                  inherit runsOn;
+                  steps = mkBaseSteps ++ [
+                    {
+                      name = name;
+                      run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
+                    }
+                  ];
+                };
+              };
         };
 
       # Mapa architektur na GitHub Runners
