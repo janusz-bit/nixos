@@ -5,7 +5,11 @@
     let
       # Wspolne kroki dla wszystkich workflowow budujacych
       mkBuildSteps =
-        { buildTarget, stepName }:
+        {
+          buildTarget,
+          stepName,
+          kernelTarget ? null,
+        }:
         [
           {
             name = "Checkout repository";
@@ -30,6 +34,12 @@
               authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
             };
           }
+        ]
+        ++ pkgs.lib.optional (kernelTarget != null) {
+          name = "Build Kernel";
+          run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
+        }
+        ++ [
           {
             name = stepName;
             run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
@@ -43,6 +53,7 @@
           buildTarget,
           runsOn,
           runName ? null,
+          kernelTarget ? null,
         }:
         {
           inherit name runName;
@@ -54,7 +65,7 @@
           jobs.build = {
             inherit runsOn;
             steps = mkBuildSteps {
-              inherit buildTarget;
+              inherit buildTarget kernelTarget;
               stepName = name;
             };
           };
@@ -96,6 +107,7 @@
             buildTarget =
               cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
             runName = "Build ${name} by @\${{ github.actor }}";
+            kernelTarget = cfg.kernelTarget or null;
           }
         ) configs;
       };
