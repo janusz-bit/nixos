@@ -31,6 +31,7 @@
         kdePackages.elisa
         sbctl
         joplin-desktop
+        gemini-cli
       ];
       # Install firefox.
       programs.firefox.enable = true;
