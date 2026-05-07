@@ -1,20 +1,20 @@
-{ inputs, ... }:
+{ inputs, custom, ... }:
 {
   flake.nixosModules."agenix" =
     { config, ... }:
     {
       age.secrets.secret1 = {
-        file = ../_secrets/secret1.age;
+        file = custom.secretsDir + "/secret1.age";
         owner = "root";
         mode = "0440";
       };
       age.secrets.github-token = {
-        file = ../_secrets/GITHUB_TOKEN.age;
+        file = custom.secretsDir + "/GITHUB_TOKEN.age";
         owner = "root";
         mode = "0440";
       };
       age.secrets.notes = {
-        file = ../_secrets/notes.age;
+        file = custom.secretsDir + "/notes.age";
         owner = "root";
         mode = "0440";
       };

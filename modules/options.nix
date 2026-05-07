@@ -31,5 +31,6 @@
       end = "com";
       full = name + "." + end;
     };
+    secretsDir = self + "/modules/_secrets";
   };
 }
