@@ -16,9 +16,6 @@ _: {
         tmp.useTmpfs = true;
       };
 
-      # Fix modDirVersion mismatch for the RPi kernel
-      boot.kernelPackages = lib.mkForce pkgs.linuxPackages_rpi4;
-
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
 
