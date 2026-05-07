@@ -43,4 +43,12 @@ in
     ];
     armor = true;
   };
+  "attic-server-token.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }

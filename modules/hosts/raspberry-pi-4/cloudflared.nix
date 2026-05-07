@@ -9,7 +9,7 @@
     }:
     {
       age.secrets.cloudflared-tunnel = {
-        file = ../../_secrets/cloudflared-tunnel.age;
+        file = custom.secretsDir + "/cloudflared-tunnel.age";
         owner = "cloudflared";
         mode = "0440";
       };
@@ -21,6 +21,7 @@
             default = "http_status:404";
             ingress = {
               "${custom.site.full}" = "http://localhost:80";
+              "cache.${custom.site.full}" = "http://localhost:8080";
             };
           };
         };

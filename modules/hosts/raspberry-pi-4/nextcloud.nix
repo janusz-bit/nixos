@@ -9,7 +9,7 @@
     }:
     {
       age.secrets.nextcloud-adminpass = {
-        file = ../../_secrets/nextcloud-adminpass.age;
+        file = custom.secretsDir + "/nextcloud-adminpass.age";
         owner = "nextcloud";
         mode = "0440";
       };
