@@ -6,6 +6,7 @@ This repository contains a centralized, declarative NixOS system configuration a
 Integrated technologies handling the system's core capabilities include:
 * **Home Manager**: Manages user-specific environments and dotfiles.
 * **Agenix**: Handles encrypted system secrets.
+* **Attic**: Self-hosted Nix binary cache.
 * **Disko**: Automates disk partitioning and formatting.
 * **NixOS-WSL**: Provides configurations for the Windows Subsystem for Linux.
 * **Pre-commit Hooks**: Enforces CI/CD and repository consistency constraints.
@@ -22,6 +23,9 @@ System deployments are executed via standard NixOS flake reconstruction commands
 To build and switch the configuration for a given host:
 * `sudo nixos-rebuild switch --flake .#nixos`
 * `sudo nixos-rebuild switch --flake .#raspberry-pi-4`
+
+To build and push the configuration to the Attic binary cache:
+* `push` (shell alias)
 
 The repository also exposes an automated installation script via `packages.install-system`, accessible as the flake's default package.
 

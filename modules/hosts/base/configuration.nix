@@ -20,6 +20,7 @@ let
       toybox
       statix
       kdePackages.kleopatra
+      attic-client
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
       nix-update
@@ -43,7 +44,7 @@ let
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
     in
     {
-      push = "export CACHIX_AUTH_TOKEN=$(sudo cat ${config.age.secrets.secret1.path})\nnix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push janusz-bit";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs attic push nixos-builds";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
@@ -54,11 +55,9 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "https://janusz-bit.cachix.org"
-      "https://cache.janusz-bit.com/nixos-builds?priority=41"
+      "https://cache.janusz-bit.com/nixos-builds"
     ];
     extra-trusted-public-keys = [
-      "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
       "nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA="
     ];
   };
