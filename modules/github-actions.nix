@@ -17,15 +17,18 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
+              extra-substituters = https://cache.janusz-bit.com/nixos-builds
+              extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
             '';
           };
         }
         {
-          name = "Setup Cachix";
-          uses = "cachix/cachix-action@v14";
+          name = "Setup Attic cache";
+          uses = "ryanccn/attic-action@v0";
           with_ = {
-            name = "janusz-bit";
-            authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
+            endpoint = "https://cache.janusz-bit.com/";
+            cache = "nixos-builds";
+            token = "\${{ secrets.ATTIC_TOKEN }}";
           };
         }
       ];
@@ -94,7 +97,6 @@
     in
     {
       packages.github-actions = config.githubActions.workflowsDir;
-
       packages.sync-github-actions = pkgs.writeShellApplication {
         name = "sync-github-actions";
         runtimeInputs = [ pkgs.coreutils ];
@@ -118,6 +120,7 @@
             runsOn = archToRunner."${cfg.arch}";
             buildTarget =
               cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
+
             runName = "Build ${name} by @\${{ github.actor }}";
             kernelTarget = cfg.kernelTarget or null;
           }

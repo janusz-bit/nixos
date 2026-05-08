@@ -13,6 +13,8 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            extra-substituters = https://cache.janusz-bit.com/nixos-builds?priority=41
+            extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Setup Cachix
         uses: cachix/cachix-action@v14
@@ -32,6 +34,8 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            extra-substituters = https://cache.janusz-bit.com/nixos-builds?priority=41
+            extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Setup Cachix
         uses: cachix/cachix-action@v14
