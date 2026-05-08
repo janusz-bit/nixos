@@ -44,7 +44,7 @@ let
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
     in
     {
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs attic push nixos-builds --ignore-upstream-cache-filter";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs nix path-info --json -r | ${pkgs.jq}/bin/jq -r 'to_entries[] | select(.value.signatures == null or all(.value.signatures[]; contains(\"cache.nixos.org\") | not)) | .key' | xargs -r attic push nixos-builds --no-closure";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
