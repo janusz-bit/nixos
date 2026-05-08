@@ -53,7 +53,14 @@ let
       "nix-command"
       "flakes"
     ];
-
+    extra-substituters = [
+      "https://janusz-bit.cachix.org"
+      "https://cache.janusz-bit.com/nixos-builds?priority=41"
+    ];
+    extra-trusted-public-keys = [
+      "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
+      "nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA="
+    ];
   };
 in
 {
