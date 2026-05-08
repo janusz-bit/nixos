@@ -58,7 +58,7 @@ let
       "https://cache.janusz-bit.com/nixos-builds"
     ];
     extra-trusted-public-keys = [
-      "nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA="
+      "nixos-builds:cSj6e09m1VrajEy9GmAPrShmp2eFLfiWSgdoSDq77VA="
     ];
   };
 in
