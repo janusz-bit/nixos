@@ -12,14 +12,15 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://cache.janusz-bit.com/nixos-builds?priority=41
+            extra-substituters = https://cache.janusz-bit.com/nixos-builds
             extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
           nix_path: nixpkgs=channel:nixos-unstable
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v14
+      - name: Setup Attic cache
+        uses: ryanccn/attic-action@v0
         with:
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          name: janusz-bit
+          cache: nixos-builds
+          endpoint: https://cache.janusz-bit.com/
+          token: ${{ secrets.ATTIC_TOKEN }}
       - name: droid
         run: nix build .#nixosConfigurations.droid.config.system.build.toplevel --show-trace --accept-flake-config
 name: droid

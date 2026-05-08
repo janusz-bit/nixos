@@ -15,7 +15,9 @@ sudo atticd-atticadm make-token \
   --pull "*" \
   --push "*" \
   --create-cache "*" \
-  --configure-cache "*"
+  --configure-cache "*" \
+  --configure-cache-retention "*" \
+  --destroy-cache "*"
 ```
 
 Wynikiem działania tego polecenia będzie długi ciąg znaków (JWT). Zapisz go bezpiecznie – to klucz dostępu do Twojego serwera Attic.
@@ -41,7 +43,17 @@ Attic obsługuje wielodostępność (multi-tenancy) poprzez podział na oddzieln
 attic cache create rpi-cache:nixos-builds
 ```
 
-## Krok 4: Wypychanie i używanie Cache'a
+## Krok 4: Zmiana widoczności cache'a na publiczny (Opcjonalnie)
+
+Domyślnie nowo utworzony cache jest prywatny i wymaga tokena również do pobierania. Aby każda maszyna mogła pobierać paczki (używając tylko klucza publicznego, bez logowania), uczyń go publicznym:
+
+```bash
+attic cache configure rpi-cache:nixos-builds --public
+```
+
+> **Uwaga:** Do poprawnego wykonania tego polecenia token musi posiadać pełne uprawnienia (m.in. `--configure-cache`, `--configure-cache-retention`, `--destroy-cache`), jak podano w Kroku 1.
+
+## Krok 5: Wypychanie i używanie Cache'a
 
 Aby wysłać własnoręcznie zbudowany wynik (np. konfigurację systemu) do cache'a:
 
@@ -55,7 +67,7 @@ Alternatywnie, możesz nasłuchiwać zmian w Nix store, aby Attic automatycznie 
 attic watch-store rpi-cache:nixos-builds
 ```
 
-## Krok 5: Konfiguracja Nix na kliencie
+## Krok 6: Konfiguracja Nix na kliencie
 
 Aby podczas kompilacji na Twoim komputerze lub innej maszynie Nix pobierał gotowe pakiety z RPi, pobierz klucz publiczny cache'a:
 
