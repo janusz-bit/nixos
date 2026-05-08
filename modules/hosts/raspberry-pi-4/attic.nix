@@ -23,8 +23,8 @@
           # Chunking configuration (recommended for Attic)
           chunking = {
             nar-size-threshold = 65536; # 64 KiB
-            min-size = 65536; # 64 KiB
-            avg-size = 131072; # 128 KiB
+            min-size = 16384; # 16 KiB
+            avg-size = 65536; # 64 KiB
             max-size = 262144; # 256 KiB
           };
 
