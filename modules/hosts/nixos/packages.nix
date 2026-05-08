@@ -32,6 +32,7 @@
         sbctl
         joplin-desktop
         gemini-cli
+        attic-client
       ];
       # Install firefox.
       programs.firefox.enable = true;
