@@ -37,7 +37,7 @@ let
   };
 
   environmentShellAliases =
-    config:
+    config: pkgs:
     let
       update_alias =
         mode:
@@ -78,7 +78,7 @@ in
       environment.systemPackages = sharedPackages pkgs;
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
-      environment.shellAliases = environmentShellAliases config;
+      environment.shellAliases = environmentShellAliases config pkgs;
 
       # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
       environment.localBinInPath = true;
@@ -103,6 +103,6 @@ in
       home.packages = sharedPackages pkgs;
       home.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
-      home.shellAliases = environmentShellAliases config;
+      home.shellAliases = environmentShellAliases config pkgs;
     };
 }
