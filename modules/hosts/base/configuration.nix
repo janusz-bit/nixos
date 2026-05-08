@@ -44,7 +44,7 @@ let
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
     in
     {
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs attic push nixos-builds";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs attic push nixos-builds --ignore-upstream-cache-filter";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
