@@ -3,7 +3,10 @@
   flake.nixosModules."raspberry-pi-4/attic" =
     { config, ... }:
     {
-      age.secrets.attic-server-token.file = custom.secretsDir + "/attic-server-token.age";
+      age.secrets.attic-server-token = {
+        file = custom.secretsDir + "/attic-server-token.age";
+        mode = "0444";
+      };
 
       services.atticd = {
         enable = true;
