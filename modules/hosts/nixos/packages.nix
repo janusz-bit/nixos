@@ -33,7 +33,7 @@
         joplin-desktop
         gemini-cli
         attic-client
-        lutris
+        lutris-free
       ];
       # Install firefox.
       programs.firefox.enable = true;
