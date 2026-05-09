@@ -42,10 +42,13 @@ let
       update_alias =
         mode:
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
+      push_cmd =
+        cache:
+        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs nix path-info --json --json-format 1 -r | ${pkgs.jq}/bin/jq -r 'to_entries[] | select(.value.signatures == null or all(.value.signatures[]; contains(\"cache.nixos.org\") | not)) | .key' | xargs -r attic push ${cache} --no-closure";
     in
     {
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs nix path-info --json --json-format 1 -r | ${pkgs.jq}/bin/jq -r 'to_entries[] | select(.value.signatures == null or all(.value.signatures[]; contains(\"cache.nixos.org\") | not)) | .key' | xargs -r attic push nixos-builds --no-closure";
-      push-local = "attic login local-cache http://192.168.100.212:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml) && nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs nix path-info --json --json-format 1 -r | ${pkgs.jq}/bin/jq -r 'to_entries[] | select(.value.signatures == null or all(.value.signatures[]; contains(\"cache.nixos.org\") | not)) | .key' | xargs -r attic push local-cache:nixos-builds --no-closure";
+      push = push_cmd "nixos-builds";
+      push-local = "attic login local-cache http://192.168.100.212:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml) && ${push_cmd "local-cache:nixos-builds"}";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
