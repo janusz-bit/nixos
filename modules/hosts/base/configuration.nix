@@ -44,7 +44,7 @@ let
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
       push_cmd =
         cache:
-        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | xargs nix path-info --json --json-format 1 -r | ${pkgs.jq}/bin/jq -r 'to_entries[] | select(.value.signatures == null or all(.value.signatures[]; contains(\"cache.nixos.org\") | not)) | .key' | xargs -r attic push ${cache} --no-closure";
+        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | attic push ${cache} --stdin";
     in
     {
       push = push_cmd "nixos-builds";
