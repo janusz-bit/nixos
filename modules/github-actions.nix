@@ -1,4 +1,4 @@
-{ ... }:
+{ custom, ... }:
 {
   perSystem =
     { config, pkgs, ... }:
@@ -17,8 +17,8 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = https://cache.janusz-bit.com/nixos-builds
-              extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
+              extra-substituters = https://cache.${custom.site.full}/nixos-builds
+              extra-trusted-public-keys = ${custom.site.atticPubKey}
             '';
           };
         }
@@ -26,7 +26,7 @@
           name = "Setup Attic cache";
           uses = "ryanccn/attic-action@v0";
           with_ = {
-            endpoint = "https://cache.janusz-bit.com/";
+            endpoint = "https://cache.${custom.site.full}/";
             cache = "nixos-builds";
             token = "\${{ secrets.ATTIC_TOKEN }}";
           };
