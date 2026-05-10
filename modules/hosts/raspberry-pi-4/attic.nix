@@ -28,9 +28,6 @@
             path = "/var/lib/atticd/storage";
           };
 
-          # Do not store packages that are already on the official Nix cache
-          upstream-cache-key-names = [ "cache.nixos.org-1" ];
-
           # Chunking configuration (recommended for Attic)
           chunking = {
             nar-size-threshold = 65536; # 64 KiB
