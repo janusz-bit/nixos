@@ -36,6 +36,7 @@
 
   nixConfig = {
     extra-substituters = [
+      "http://192.168.100.212:8080/nixos-builds"
       "https://cache.janusz-bit.com/nixos-builds"
     ];
     extra-trusted-public-keys = [
