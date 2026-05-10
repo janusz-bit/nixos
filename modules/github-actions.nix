@@ -45,10 +45,7 @@
         {
           inherit name runName;
           on = {
-            push = {
-              branches = [ "master" ];
-              tags = [ "v*" ];
-            };
+            push.tags = [ "v*" ];
             pullRequest.branches = [ "master" ];
             workflowDispatch = { };
           };

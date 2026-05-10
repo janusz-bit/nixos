@@ -45,13 +45,15 @@ jobs:
           endpoint: https://cache.janusz-bit.com/
           token: ${{ secrets.ATTIC_TOKEN }}
       - name: Build Kernel
-        run: nix build .#nixosConfigurations.raspberry-pi-4.config.boot.kernelPackages.kernel --show-trace --accept-flake-config
+        run: nix build .#nixosConfigurations.raspberry-pi-4.config.boot.kernelPackages.kernel^* --show-trace --accept-flake-config
 name: raspberry-pi-4
 "on":
   pull_request:
     branches:
       - master
   push:
+    branches:
+      - master
     tags:
       - v*
   workflow_dispatch: {}
