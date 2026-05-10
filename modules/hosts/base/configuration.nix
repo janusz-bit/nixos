@@ -48,7 +48,7 @@ let
     in
     {
       push = push_cmd "nixos-builds";
-      push-local = "attic login local-cache http://192.168.100.212:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml) && ${push_cmd "local-cache:nixos-builds"}";
+      push-local = "attic login local-cache http://${custom.site.atticIp}:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml) && ${push_cmd "local-cache:nixos-builds"}";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
@@ -59,8 +59,8 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "http://192.168.100.212:8080/nixos-builds"
-      "https://cache.janusz-bit.com/nixos-builds"
+      "http://${custom.site.atticIp}:8080/nixos-builds"
+      "https://cache.${custom.site.full}/nixos-builds"
     ];
     extra-trusted-public-keys = [
       "nixos-builds:FdfmW2lSPWomDoWn5dNZv5ZJa+i5nL8niWqk/RKVWRc="

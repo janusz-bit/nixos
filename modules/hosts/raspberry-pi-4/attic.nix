@@ -16,8 +16,8 @@
           listen = "[::]:8080";
           allowed-hosts = [
             "cache.${custom.site.full}"
-            "192.168.100.212:8080"
-            "192.168.100.212"
+            "${custom.site.atticIp}:8080"
+            "${custom.site.atticIp}"
           ];
 
           # SQLite is lightweight and sufficient for RPi4
