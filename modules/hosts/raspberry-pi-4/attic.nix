@@ -19,7 +19,6 @@
             "192.168.100.212:8080"
             "192.168.100.212"
           ];
-          api-endpoint = "https://cache.${custom.site.full}/";
 
           # SQLite is lightweight and sufficient for RPi4
           database.url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc";
