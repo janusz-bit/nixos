@@ -42,14 +42,24 @@ let
       update_alias =
         mode:
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
+
       push_cmd =
-        cache:
-        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | attic push ${cache} --stdin";
+        serverName:
+        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | attic push ${serverName}:nixos-builds --stdin";
+
+      # Narzędzie wyciągające token, by nie duplikować logiki
+      getToken = "$(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml)";
     in
     {
-      push = push_cmd "nixos-builds";
-      push-local = push_cmd "local-cache:nixos-builds";
-      attic-login-local = "attic login local-cache http://${custom.site.atticIp}:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml)";
+      # Pushing
+      push = push_cmd "global-cache";
+      push-local = push_cmd "local-cache";
+
+      # Logowanie (konfiguracja klienta - wymagane tylko raz)
+      attic-login = "attic login global-cache https://cache.${custom.site.full}/ ${getToken}";
+      attic-login-local = "attic login local-cache http://${custom.site.atticIp}:8080/ ${getToken}";
+
+      # Update systemu
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
