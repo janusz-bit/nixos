@@ -48,7 +48,8 @@ let
     in
     {
       push = push_cmd "nixos-builds";
-      push-local = "attic login local-cache http://${custom.site.atticIp}:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml) && ${push_cmd "local-cache:nixos-builds"}";
+      push-local = push_cmd "local-cache:nixos-builds";
+      attic-login-local = "attic login local-cache http://${custom.site.atticIp}:8080/ $(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml)";
       update = update_alias "switch";
       update-boot = update_alias "boot";
     };
