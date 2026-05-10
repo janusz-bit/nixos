@@ -13,11 +13,11 @@
         environmentFile = config.age.secrets.attic-server-token.path;
 
         settings = {
-          listen = "[::]:8080";
+          listen = "[::]:${custom.cache.port}";
           allowed-hosts = [
             "cache.${custom.site.full}"
-            "${custom.site.atticIp}:8080"
-            "${custom.site.atticIp}"
+            "${custom.cache.ip}:${custom.cache.port}"
+            "${custom.cache.ip}"
           ];
 
           # SQLite is lightweight and sufficient for RPi4

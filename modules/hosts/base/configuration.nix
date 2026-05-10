@@ -56,8 +56,8 @@ let
       push-local = push_cmd "local-cache";
 
       # Logowanie (konfiguracja klienta - wymagane tylko raz)
-      attic-login = "attic login global-cache https://cache.${custom.site.full}/ ${getToken}";
-      attic-login-local = "attic login local-cache http://${custom.site.atticIp}:8080/ ${getToken}";
+      attic-login = "attic login global-cache ${custom.cache.global}/ ${getToken}";
+      attic-login-local = "attic login local-cache ${custom.cache.local}/ ${getToken}";
 
       # Update systemu
       update = update_alias "switch";
@@ -70,11 +70,11 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "http://${custom.site.atticIp}:8080/nixos-builds"
-      "https://cache.${custom.site.full}/nixos-builds"
+      "${custom.cache.local}/nixos-builds"
+      "${custom.cache.global}/nixos-builds"
     ];
     extra-trusted-public-keys = [
-      "nixos-builds:FdfmW2lSPWomDoWn5dNZv5ZJa+i5nL8niWqk/RKVWRc="
+      "${custom.cache.pubKey}"
     ];
   };
 in
