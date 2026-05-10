@@ -45,7 +45,10 @@
         {
           inherit name runName;
           on = {
-            push.tags = [ "v*" ];
+            push = {
+              branches = [ "master" ];
+              tags = [ "v*" ];
+            };
             pullRequest.branches = [ "master" ];
             workflowDispatch = { };
           };
@@ -57,7 +60,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = "Build Kernel";
-                      run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
+                      run = "nix build .#${kernelTarget}^* --show-trace --accept-flake-config";
                     }
                   ];
                 };

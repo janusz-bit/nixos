@@ -13,7 +13,7 @@ jobs:
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             extra-substituters = https://cache.janusz-bit.com/nixos-builds
-            extra-trusted-public-keys = nixos-builds:g7DtqKioAfGeX76wt4lF9gzrpCj1ZCs8HGThHGwL5iA=
+            extra-trusted-public-keys = nixos-builds:FdfmW2lSPWomDoWn5dNZv5ZJa+i5nL8niWqk/RKVWRc=
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Setup Attic cache
         uses: ryanccn/attic-action@v0
