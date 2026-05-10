@@ -14,7 +14,10 @@
 
         settings = {
           listen = "[::]:8080";
-          allowed-hosts = [ "cache.${custom.site.full}" ];
+          allowed-hosts = [
+            "cache.${custom.site.full}"
+            "192.168.100.212"
+          ];
           api-endpoint = "https://cache.${custom.site.full}/";
 
           # SQLite is lightweight and sufficient for RPi4
