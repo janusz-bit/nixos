@@ -11,11 +11,36 @@ Integrated technologies handling the system's core capabilities include:
 * **NixOS-WSL**: Provides configurations for the Windows Subsystem for Linux.
 * **Pre-commit Hooks**: Enforces CI/CD and repository consistency constraints.
 
-## System Architectures & Hosts
-The repository contains isolated host definitions targeting different deployment vectors:
-* **NixOS (Default)**: An `x86_64-linux` system deployment implementing specific hardware configuration for a Lenovo LOQ-15IRX10 laptop.
-* **Raspberry Pi 4**: An `aarch64-linux` platform deployment.
-* **WSL**: Configurations mapped for Windows Subsystem for Linux integration.
+## System Architectures & Host Deployments
+The `modules/hosts/` directory contains isolated definitions targeting different deployment vectors. Each host is built upon a shared foundation but customized for its specific role.
+
+### 1. `base` (The Foundation)
+A shared set of modules included in every system deployment.
+* Sets up the core CLI experience: `bash` wrapping an optimized `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`).
+* Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, and core Nix settings.
+
+### 2. `nixos` (Main Workstation)
+An `x86_64-linux` deployment optimized for a Lenovo LOQ-15IRX10 laptop (Nvidia GPU).
+* **Core**: CachyOS kernel (x86-64-v3 optimized), Disko-managed encrypted Btrfs with subvolumes.
+* **Profiles**: Boot-time `specialisations` allowing the user to select between battery saving (`power-save`) and GPU sync modes (`sync-mode`, `reverse-sync`).
+* **Environment**: KDE Plasma (Wayland via Niri), Pipewire audio, and a robust suite of applications (Steam, Heroic, Vesktop, Tor, Zed).
+* **Tools**: Local LLM environment (Ollama), Podman with Docker compatibility.
+
+### 3. `raspberry-pi-4` (Home Server / Cloud)
+A headless `aarch64-linux` deployment built for network services and caching.
+* **Core**: Highly optimized for limited resources using SSD swap and `zstd` compressed `zramSwap`. Hardened via fail2ban.
+* **Attic Cache**: A self-hosted Nix binary cache utilizing SQLite, upstream filtering (`cache.nixos.org-1`), and Garbage Collection.
+* **Nextcloud**: Performance-tuned PostgreSQL and Redis setup, reverse-proxied securely through a Cloudflare Tunnel.
+* **Hardware Integration**: Custom Python-based systemd service (`pwm-fan`) for temperature-driven GPIO fan control.
+
+### 4. `wsl` (Windows Subsystem for Linux)
+A minimal environment bridging NixOS into a Windows host.
+* Utilizes the external `NixOS-WSL` module.
+* Enables Start Menu launchers, configures the default user, and injects environment variables for GPU acceleration within the Zed editor.
+
+### 5. `droid-android`
+A highly reduced NixOS footprint tailored for Android virtualization (e.g., via `nixos-avf`).
+* Includes the core `base` system but strips away visual elements (like `fastfetch`) to ensure lightweight terminal performance on mobile hardware.
 
 ## Repository Architecture
 The repository uses a highly modular structure powered by `flake-parts` and `import-tree`, which auto-discovers and maps the codebase logically. 
