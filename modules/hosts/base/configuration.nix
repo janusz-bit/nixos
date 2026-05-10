@@ -20,7 +20,6 @@ let
       toybox
       statix
       kdePackages.kleopatra
-      attic-client
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
       nix-update
@@ -42,23 +41,10 @@ let
       update_alias =
         mode:
         "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
-
-      push_cmd =
-        serverName:
-        "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | attic push ${serverName}:nixos-builds --stdin";
-
-      # Narzędzie wyciągające token, by nie duplikować logiki
-      getToken = "$(${pkgs.gawk}/bin/awk -F'\\\"' '/token/ {print $2; exit}' ~/.config/attic/config.toml)";
     in
     {
       # Pushing
-      push = push_cmd "global-cache";
-      push-local = push_cmd "local-cache";
-      push-cachix = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push ${custom.cache.cachix.name}";
-
-      # Logowanie (konfiguracja klienta - wymagane tylko raz)
-      attic-login = "attic login global-cache ${custom.cache.global}/ ${getToken}";
-      attic-login-local = "attic login local-cache ${custom.cache.local}/ ${getToken}";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push ${custom.cache.cachix.name}";
 
       # Update systemu
       update = update_alias "switch";
@@ -71,12 +57,9 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "${custom.cache.local}/nixos-builds"
-      "${custom.cache.global}/nixos-builds"
       "${custom.cache.cachix.url}"
     ];
     extra-trusted-public-keys = [
-      "${custom.cache.pubKey}"
       "${custom.cache.cachix.pubKey}"
     ];
   };

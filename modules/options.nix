@@ -36,11 +36,6 @@
       full = name + "." + end;
     };
     cache = rec {
-      ip = "192.168.100.212";
-      port = "8080";
-      local = "http://${ip}:${port}";
-      global = "https://cache.${site.full}";
-      pubKey = "nixos-builds:FdfmW2lSPWomDoWn5dNZv5ZJa+i5nL8niWqk/RKVWRc=";
       cachix = rec {
         name = "janusz-bit";
         url = "https://${name}.cachix.org";

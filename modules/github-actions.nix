@@ -1,4 +1,4 @@
-{ ... }:
+{ custom, ... }:
 {
   perSystem =
     { config, pkgs, ... }:
@@ -17,6 +17,8 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
+              extra-substituters = ${custom.cache.cachix.url}
+              extra-trusted-public-keys = ${custom.cache.cachix.pubKey}
             '';
           };
         }
@@ -24,7 +26,7 @@
           name = "Setup Cachix";
           uses = "cachix/cachix-action@v14";
           with_ = {
-            name = "janusz-bit";
+            name = "${custom.cache.cachix.name}";
             authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
           };
         }
@@ -54,7 +56,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = "Build Kernel";
-                      run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
+                      run = "nix build .#${kernelTarget}^* --show-trace --accept-flake-config";
                     }
                   ];
                 };

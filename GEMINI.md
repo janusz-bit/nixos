@@ -6,7 +6,7 @@ This repository contains a centralized, declarative NixOS system configuration a
 Integrated technologies handling the system's core capabilities include:
 * **Home Manager**: Manages user-specific environments and dotfiles.
 * **Agenix**: Handles encrypted system secrets.
-* **Attic**: Self-hosted Nix binary cache.
+* **Cachix**: External Nix binary cache.
 * **Disko**: Automates disk partitioning and formatting.
 * **NixOS-WSL**: Provides configurations for the Windows Subsystem for Linux.
 * **Pre-commit Hooks**: Enforces CI/CD and repository consistency constraints.
@@ -29,7 +29,6 @@ An `x86_64-linux` deployment optimized for a Lenovo LOQ-15IRX10 laptop (Nvidia G
 ### 3. `raspberry-pi-4` (Home Server / Cloud)
 A headless `aarch64-linux` deployment built for network services and caching.
 * **Core**: Highly optimized for limited resources using SSD swap and `zstd` compressed `zramSwap`. Hardened via fail2ban.
-* **Attic Cache**: A self-hosted Nix binary cache utilizing SQLite, upstream filtering (`cache.nixos.org-1`), and Garbage Collection.
 * **Nextcloud**: Performance-tuned PostgreSQL and Redis setup, reverse-proxied securely through a Cloudflare Tunnel.
 * **Hardware Integration**: Custom Python-based systemd service (`pwm-fan`) for temperature-driven GPIO fan control.
 
@@ -47,9 +46,9 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 
 * **`flake.nix`**: The heart of the system. Defines all external inputs (nixpkgs, home-manager, agenix) and passes them to `import-tree` to dynamically load the `modules/` folder.
 * **`modules/default.nix`**: The integration module for development environments. It sets up `devShells`, formatters (`nixfmt-tree`), pre-commit hooks, and orchestrates CI pipelines.
-* **`modules/github-actions.nix` & `_github-actions-configs.nix`**: CI/CD automation factory. These dynamically generate GitHub Actions workflows to auto-build target architectures (like x86_64 and aarch64) and push the resulting binaries to the Attic cache.
+* **`modules/github-actions.nix` & `_github-actions-configs.nix`**: CI/CD automation factory. These dynamically generate GitHub Actions workflows to auto-build target architectures (like x86_64 and aarch64) and push the resulting binaries to the Cachix cache.
 * **`modules/hardware/`**: Hardware-specific profiling. Stores hardware patches (e.g., Lenovo LOQ specific configurations, `x86-64-v3` CPU optimizations, and `.icm` color profiles).
-* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic security. Stores highly secure, SSH-key encrypted secrets (GitHub tokens, Attic credentials) safely within the public repository, decryptable only by target machines at runtime.
+* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic security. Stores highly secure, SSH-key encrypted secrets (GitHub tokens, credentials) safely within the public repository, decryptable only by target machines at runtime.
 * **`modules/overlays/`**: Patches and modifications to the default `nixpkgs` tree. Used to fix broken packages or inject custom/modified software (like a tailored Brave browser).
 * **`modules/packages/`**: Custom authored packages and automation scripts (e.g., custom Neovim builder, NixOS installation scripts).
 * **`modules/templates/`**: Project scaffolds. Allows running `nix flake init -t .` in a blank directory to quickly scaffold a new project based on the `_project.nix` structure.
@@ -57,7 +56,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 ## Centralized Configuration (`options.nix`)
 The `modules/options.nix` file acts as the central source of truth for global project variables. It exports custom options (`options.custom`) and module arguments (`_module.args.custom`) that are accessible across the entire flake. This ensures consistency and simplifies maintenance by providing a single place to manage:
 * **Repository Info**: Source URLs, git repository paths, and identifiers.
-* **Domain & Network**: Global domain name mappings and local service IPs (e.g., the local Attic instance IP).
+* **Domain & Network**: Global domain name mappings.
 * **System Defaults**: Universal flags like `enableFastfetch` and the `defaultUser` definition.
 
 ## Building and Running
@@ -70,10 +69,7 @@ To build and switch the configuration for a given host:
 Custom shell aliases are provided to manage deployments and cache pushes (defined in `base/configuration.nix`):
 * `update`: rebuilds and switches the current host configuration.
 * `update-boot`: rebuilds and sets the configuration for the next boot.
-* `push`: builds the top-level configuration and pushes the closure to the primary Attic cache (`global-cache`).
-* `push-local`: builds and pushes to the local network Attic cache (`local-cache`) bypassing external proxy limits.
-* `attic-login`: configures the local Attic client to authenticate with the remote `global-cache`.
-* `attic-login-local`: configures the local Attic client to authenticate with the internal `local-cache`.
+* `push`: builds the top-level configuration and pushes the closure to the Cachix cache.
 
 The repository also exposes an automated installation script via `packages.install-system`, accessible as the flake's default package.
 

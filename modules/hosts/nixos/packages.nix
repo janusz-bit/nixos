@@ -32,7 +32,6 @@
         sbctl
         joplin-desktop
         gemini-cli
-        attic-client
         bitwarden-desktop
       ];
       # Install firefox.

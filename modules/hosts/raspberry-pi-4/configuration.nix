@@ -31,7 +31,6 @@ _: {
 
       # Network configuration
       networking.networkmanager.enable = true;
-      networking.firewall.allowedTCPPorts = [ 8080 ];
       time.timeZone = "Europe/Warsaw";
 
       # Security hardening
