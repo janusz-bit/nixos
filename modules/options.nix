@@ -30,6 +30,7 @@
       name = "janusz-bit";
       end = "com";
       full = name + "." + end;
+      atticIp = "192.168.100.212";
     };
     secretsDir = self + "/modules/_secrets";
   };
