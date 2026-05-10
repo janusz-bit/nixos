@@ -29,8 +29,6 @@ name: wsl
     branches:
       - master
   push:
-    branches:
-      - master
     tags:
       - v*
   workflow_dispatch: {}

@@ -52,8 +52,6 @@ name: nixos
     branches:
       - master
   push:
-    branches:
-      - master
     tags:
       - v*
   workflow_dispatch: {}

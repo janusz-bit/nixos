@@ -29,8 +29,6 @@ name: raspberry-pi-4-sd-image
     branches:
       - master
   push:
-    branches:
-      - master
     tags:
       - v*
   workflow_dispatch: {}

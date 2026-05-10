@@ -52,8 +52,6 @@ name: raspberry-pi-4
     branches:
       - master
   push:
-    branches:
-      - master
     tags:
       - v*
   workflow_dispatch: {}
