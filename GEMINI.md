@@ -17,6 +17,12 @@ The repository contains isolated host definitions targeting different deployment
 * **Raspberry Pi 4**: An `aarch64-linux` platform deployment.
 * **WSL**: Configurations mapped for Windows Subsystem for Linux integration.
 
+## Centralized Configuration (`options.nix`)
+The `modules/options.nix` file acts as the central source of truth for global project variables. It exports custom options (`options.custom`) and module arguments (`_module.args.custom`) that are accessible across the entire flake. This ensures consistency and simplifies maintenance by providing a single place to manage:
+* **Repository Info**: Source URLs, git repository paths, and identifiers.
+* **Domain & Network**: Global domain name mappings and local service IPs (e.g., the local Attic instance IP).
+* **System Defaults**: Universal flags like `enableFastfetch` and the `defaultUser` definition.
+
 ## Building and Running
 System deployments are executed via standard NixOS flake reconstruction commands.
 
