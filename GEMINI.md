@@ -17,6 +17,18 @@ The repository contains isolated host definitions targeting different deployment
 * **Raspberry Pi 4**: An `aarch64-linux` platform deployment.
 * **WSL**: Configurations mapped for Windows Subsystem for Linux integration.
 
+## Repository Architecture
+The repository uses a highly modular structure powered by `flake-parts` and `import-tree`, which auto-discovers and maps the codebase logically. 
+
+* **`flake.nix`**: The heart of the system. Defines all external inputs (nixpkgs, home-manager, agenix) and passes them to `import-tree` to dynamically load the `modules/` folder.
+* **`modules/default.nix`**: The integration module for development environments. It sets up `devShells`, formatters (`nixfmt-tree`), pre-commit hooks, and orchestrates CI pipelines.
+* **`modules/github-actions.nix` & `_github-actions-configs.nix`**: CI/CD automation factory. These dynamically generate GitHub Actions workflows to auto-build target architectures (like x86_64 and aarch64) and push the resulting binaries to the Attic cache.
+* **`modules/hardware/`**: Hardware-specific profiling. Stores hardware patches (e.g., Lenovo LOQ specific configurations, `x86-64-v3` CPU optimizations, and `.icm` color profiles).
+* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic security. Stores highly secure, SSH-key encrypted secrets (GitHub tokens, Attic credentials) safely within the public repository, decryptable only by target machines at runtime.
+* **`modules/overlays/`**: Patches and modifications to the default `nixpkgs` tree. Used to fix broken packages or inject custom/modified software (like a tailored Brave browser).
+* **`modules/packages/`**: Custom authored packages and automation scripts (e.g., custom Neovim builder, NixOS installation scripts).
+* **`modules/templates/`**: Project scaffolds. Allows running `nix flake init -t .` in a blank directory to quickly scaffold a new project based on the `_project.nix` structure.
+
 ## Centralized Configuration (`options.nix`)
 The `modules/options.nix` file acts as the central source of truth for global project variables. It exports custom options (`options.custom`) and module arguments (`_module.args.custom`) that are accessible across the entire flake. This ensures consistency and simplifies maintenance by providing a single place to manage:
 * **Repository Info**: Source URLs, git repository paths, and identifiers.
