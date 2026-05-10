@@ -41,6 +41,11 @@
       local = "http://${ip}:${port}";
       global = "https://cache.${site.full}";
       pubKey = "nixos-builds:FdfmW2lSPWomDoWn5dNZv5ZJa+i5nL8niWqk/RKVWRc=";
+      cachix = rec {
+        name = "janusz-bit";
+        url = "https://${name}.cachix.org";
+        pubKey = "${name}.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=";
+      };
     };
     secretsDir = self + "/modules/_secrets";
   };

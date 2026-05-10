@@ -54,6 +54,7 @@ let
       # Pushing
       push = push_cmd "global-cache";
       push-local = push_cmd "local-cache";
+      push-cachix = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push ${custom.cache.cachix.name}";
 
       # Logowanie (konfiguracja klienta - wymagane tylko raz)
       attic-login = "attic login global-cache ${custom.cache.global}/ ${getToken}";
@@ -72,9 +73,11 @@ let
     extra-substituters = [
       "${custom.cache.local}/nixos-builds"
       "${custom.cache.global}/nixos-builds"
+      "${custom.cache.cachix.url}"
     ];
     extra-trusted-public-keys = [
       "${custom.cache.pubKey}"
+      "${custom.cache.cachix.pubKey}"
     ];
   };
 in
