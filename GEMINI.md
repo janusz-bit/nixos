@@ -24,8 +24,12 @@ To build and switch the configuration for a given host:
 * `sudo nixos-rebuild switch --flake .#nixos`
 * `sudo nixos-rebuild switch --flake .#raspberry-pi-4`
 
-To build and push the configuration to the Attic binary cache:
-* `push` (shell alias)
+Custom shell aliases are provided to manage deployments and cache pushes (defined in `base/configuration.nix`):
+* `update`: rebuilds and switches the current host configuration.
+* `update-boot`: rebuilds and sets the configuration for the next boot.
+* `push`: builds the top-level configuration and pushes the closure to the primary Attic cache (`nixos-builds`).
+* `push-local`: builds and pushes to the local network Attic cache (`local-cache:nixos-builds`) bypassing external proxy limits.
+* `attic-login-local`: configures the local Attic client to access the local-cache.
 
 The repository also exposes an automated installation script via `packages.install-system`, accessible as the flake's default package.
 
