@@ -1,4 +1,4 @@
-{ custom, ... }:
+{ ... }:
 {
   perSystem =
     { config, pkgs, ... }:
@@ -17,18 +17,15 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${custom.cache.global}/nixos-builds
-              extra-trusted-public-keys = ${custom.cache.pubKey}
             '';
           };
         }
         {
-          name = "Setup Attic cache";
-          uses = "ryanccn/attic-action@v0";
+          name = "Setup Cachix";
+          uses = "cachix/cachix-action@v14";
           with_ = {
-            endpoint = "${custom.cache.global}/";
-            cache = "nixos-builds";
-            token = "\${{ secrets.ATTIC_TOKEN }}";
+            name = "janusz-bit";
+            authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
           };
         }
       ];
@@ -57,7 +54,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = "Build Kernel";
-                      run = "nix build .#${kernelTarget}^* --show-trace --accept-flake-config";
+                      run = "nix build .#${kernelTarget} --show-trace --accept-flake-config";
                     }
                   ];
                 };
@@ -97,6 +94,7 @@
     in
     {
       packages.github-actions = config.githubActions.workflowsDir;
+
       packages.sync-github-actions = pkgs.writeShellApplication {
         name = "sync-github-actions";
         runtimeInputs = [ pkgs.coreutils ];
@@ -120,7 +118,6 @@
             runsOn = archToRunner."${cfg.arch}";
             buildTarget =
               cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
-
             runName = "Build ${name} by @\${{ github.actor }}";
             kernelTarget = cfg.kernelTarget or null;
           }
