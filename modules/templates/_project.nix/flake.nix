@@ -1,5 +1,5 @@
 {
-  description = "Graphs for megabonk in python";
+  description = "";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
