@@ -48,6 +48,18 @@
         echo "All packages updated!"
       '';
 
+      packages.flake-release = pkgs.writeShellScriptBin "flake-release" ''
+        set -e
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0")
+        new_tag="v$(( ''${latest_tag#v} + 1 ))"
+        echo "Releasing $new_tag..."
+        git commit -a -m "Release $new_tag" || true
+        git tag $new_tag
+        git push
+        git push --tags
+        echo "Release $new_tag pushed successfully!"
+      '';
+
       packages.raspberry-pi-4-sd-image =
         let
           image = inputs.nixpkgs.lib.nixosSystem {
