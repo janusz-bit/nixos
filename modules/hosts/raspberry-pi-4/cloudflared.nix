@@ -21,6 +21,7 @@
             default = "http_status:404";
             ingress = {
               "${custom.site.full}" = "http://localhost:80";
+              "notes.${custom.site.full}" = "http://localhost:8081";
               "cache.${custom.site.full}" = "http://localhost:8080";
             };
           };
