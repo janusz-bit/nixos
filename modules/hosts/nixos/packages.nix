@@ -33,6 +33,7 @@
         joplin-desktop
         gemini-cli
         bitwarden-desktop
+        trilium-desktop
       ];
       # Install firefox.
       programs.firefox.enable = true;
