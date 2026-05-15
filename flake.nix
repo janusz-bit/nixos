@@ -27,8 +27,8 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
+    trilium = {
+      url = "github:TriliumNext/Trilium";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";

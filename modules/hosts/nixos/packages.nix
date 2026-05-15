@@ -13,7 +13,6 @@
         vlc
         tor-browser
         self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
-        noctalia-shell
         niri
         alacritty
         sqlite

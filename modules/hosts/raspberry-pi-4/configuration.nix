@@ -1,4 +1,5 @@
-_: {
+{ self, ... }:
+{
   flake.nixosModules."raspberry-pi-4/configuration" =
     {
       config,
@@ -8,6 +9,10 @@ _: {
     }:
     {
       networking.hostName = "raspberry-pi-4";
+
+      nixpkgs.overlays = [
+        self.overlays.trilium
+      ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot = {
