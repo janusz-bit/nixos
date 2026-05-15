@@ -16,6 +16,7 @@
       age.secrets.cachix-authtoken = {
         file = custom.secretsDir + "/cachix-authtoken-token.age";
         owner = "root";
+        group = "users";
         mode = "0440";
       };
       age.secrets.notes = {

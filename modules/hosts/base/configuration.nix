@@ -44,7 +44,7 @@ let
     in
     {
       # Pushing
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix push ${custom.cache.cachix.name}";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${custom.cache.cachix.name}";
 
       # Update systemu
       update = update_alias "switch";
