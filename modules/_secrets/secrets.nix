@@ -51,4 +51,12 @@ in
     ];
     armor = true;
   };
+  "cachix-authtoken-token.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }

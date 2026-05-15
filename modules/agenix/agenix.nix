@@ -13,6 +13,11 @@
         owner = "root";
         mode = "0440";
       };
+      age.secrets.cachix-authtoken = {
+        file = custom.secretsDir + "/cachix-authtoken-token.age";
+        owner = "root";
+        mode = "0440";
+      };
       age.secrets.notes = {
         file = custom.secretsDir + "/notes.age";
         owner = "root";
