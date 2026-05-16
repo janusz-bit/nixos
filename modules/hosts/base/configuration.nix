@@ -27,6 +27,7 @@ let
       fzf
       hw-probe
       htop
+      cloudflared
     ];
 
   sharedSessionVariables = {
