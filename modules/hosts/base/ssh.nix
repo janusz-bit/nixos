@@ -16,7 +16,7 @@
 
       programs.ssh.extraConfig = ''
         Host ssh.*
-          User ${config.custom.defaultUser}
+          User root
           ProxyCommand cloudflared access ssh --hostname %h
       '';
     };
