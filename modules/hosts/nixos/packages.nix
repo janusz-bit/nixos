@@ -12,7 +12,8 @@
         vesktop
         vlc
         tor-browser
-        self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        # self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        proton-proton-ge-bin
         niri
         alacritty
         sqlite
@@ -44,7 +45,8 @@
         remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
         dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
         extraCompatPackages = [
-          self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+          # self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+          pkgs.proton-proton-ge-bin
         ];
       };
       programs.gamemode.enable = true; # for performance mode
