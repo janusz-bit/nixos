@@ -13,7 +13,7 @@
         vlc
         tor-browser
         # self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
-        proton-proton-ge-bin
+        proton-ge-bin
         niri
         alacritty
         sqlite
@@ -46,7 +46,7 @@
         dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
         extraCompatPackages = [
           # self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
-          pkgs.proton-proton-ge-bin
+          pkgs.proton-ge-bin
         ];
       };
       programs.gamemode.enable = true; # for performance mode
