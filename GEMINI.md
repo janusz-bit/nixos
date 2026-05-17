@@ -17,7 +17,7 @@ The `modules/hosts/` directory contains isolated definitions targeting different
 ### 1. `base` (The Foundation)
 A shared set of modules included in every system deployment.
 * Sets up the core CLI experience: `bash` wrapping an optimized `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`).
-* Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, and core Nix settings.
+* Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, and vulnerability scanning (`vulnix`).
 
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment optimized for a Lenovo LOQ-15IRX10 laptop (Nvidia GPU).

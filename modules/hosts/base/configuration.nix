@@ -29,6 +29,7 @@ let
       htop
       cloudflared
       gemini-cli
+      vulnix
     ];
 
   sharedSessionVariables = {
