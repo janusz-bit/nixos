@@ -20,13 +20,13 @@
     { pkgs, ... }:
     {
       packages.bootdev-cli = pkgs.bootdev-cli.overrideAttrs (oldAttrs: rec {
-        version = "1.29.3";
+        version = "1.29.4";
 
         src = pkgs.fetchFromGitHub {
           owner = "bootdotdev";
           repo = "bootdev";
           rev = "v${version}";
-          hash = "sha256-6fdzSwCtJG8SFqInVsOc5EO4g9esMU/z9MYtou1ylFI=";
+          hash = "sha256-BU43XyK+5/YTI+61UGZSUPHmeWUIlal7sW6vgR5KCPg=";
         };
 
         vendorHash = "sha256-ZDioEU5uPCkd+kC83cLlpgzyOsnpj2S7N+lQgsQb8uY=";
