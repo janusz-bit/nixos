@@ -31,7 +31,6 @@
         kdePackages.elisa
         sbctl
         joplin-desktop
-        gemini-cli
         bitwarden-desktop
         trilium-desktop
       ];
