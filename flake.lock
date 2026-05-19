@@ -1003,16 +1003,17 @@
         "pnpm2nix": "pnpm2nix"
       },
       "locked": {
-        "lastModified": 1779135540,
-        "narHash": "sha256-gqz4cBgi8STk7TrIw9jIZ3N83jkbV13bRjUTM5DboC8=",
+        "lastModified": 1778702022,
+        "narHash": "sha256-PAGP/qZPud4vHSS7V3iH4wdNLYhIXX7S81/KPRwni10=",
         "owner": "TriliumNext",
         "repo": "Trilium",
-        "rev": "2976bc0b1de78a68dfcccda667556d526d24d180",
+        "rev": "44f5be88b776078fe268dc9877411cb144df3a46",
         "type": "github"
       },
       "original": {
         "owner": "TriliumNext",
         "repo": "Trilium",
+        "rev": "44f5be88b776078fe268dc9877411cb144df3a46",
         "type": "github"
       }
     }
