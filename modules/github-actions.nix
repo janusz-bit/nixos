@@ -56,7 +56,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = "Build Kernel";
-                      run = "nix build .#${kernelTarget}^* --show-trace --accept-flake-config";
+                      run = "nix build \".#${kernelTarget}^*\" --show-trace --accept-flake-config";
                     }
                   ];
                 };
@@ -66,7 +66,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = name;
-                      run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
+                      run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
                     }
                   ];
                 };
@@ -78,7 +78,7 @@
                   steps = mkBaseSteps ++ [
                     {
                       name = name;
-                      run = "nix build .#${buildTarget} --show-trace --accept-flake-config";
+                      run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
                     }
                   ];
                 };
