@@ -60,11 +60,11 @@
     "cachyos-kernel": {
       "flake": false,
       "locked": {
-        "lastModified": 1779034201,
-        "narHash": "sha256-KINz+P9ds2XV+jIhPKbWtpXD27K/vZT0FN87GkMBDKM=",
+        "lastModified": 1779085181,
+        "narHash": "sha256-ZdiBlGOkI9tS3ggyNlJ5gU4qCkvGWLT3sbrnHEemN2o=",
         "owner": "CachyOS",
         "repo": "linux-cachyos",
-        "rev": "791fb8ea6d3cf7c85e596678c25c56fa140591be",
+        "rev": "391e1e35d62d30dccd14ec3af01d58e5310b7d80",
         "type": "github"
       },
       "original": {
@@ -76,11 +76,11 @@
     "cachyos-kernel-patches": {
       "flake": false,
       "locked": {
-        "lastModified": 1778864443,
-        "narHash": "sha256-3OIBgFPMab0avw5A0OcnGrmRTAbw573aAIgYERYRZ8g=",
+        "lastModified": 1779082750,
+        "narHash": "sha256-yyk+TU5OF0JwTlTVqqvQIwsYWFZeSzGD5JqSUg52vHw=",
         "owner": "CachyOS",
         "repo": "kernel-patches",
-        "rev": "a62c86e5d6ce4efcd4f3be9526adfa52aa7286af",
+        "rev": "2c2eb7e421e954960dd336d7d45c24f949475958",
         "type": "github"
       },
       "original": {
@@ -133,11 +133,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779135526,
-        "narHash": "sha256-glCununz6lmaK5fs2X946HA3EkNxB2JagdAAvInuRYU=",
+        "lastModified": 1779226674,
+        "narHash": "sha256-wuOkjI6pRiN4sEn/EPBRnNW5cmcpvd7xtIM8y5LooAs=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "d405a179887d52b24c0ddd31e09a150bd1f66779",
+        "rev": "65fb947964bd44fc0008faf77d1fcb7a9f40bb32",
         "type": "github"
       },
       "original": {
@@ -382,11 +382,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1779093156,
-        "narHash": "sha256-4onAUPHvlsU+1YjTyJ2oqXyH7IxL9RiHHXXse6oTgjU=",
+        "lastModified": 1779222976,
+        "narHash": "sha256-qc2aWjXfl6KCDdgEVHcVt/XFt+QU1oSBCgark8Or0tc=",
         "owner": "sinelaw",
         "repo": "fresh",
-        "rev": "0b5b95ec88fd2bfc86eb36477b67d822847290a3",
+        "rev": "4ea1288c30d20c168c601c2381301ff20b3c8ee3",
         "type": "github"
       },
       "original": {
@@ -485,11 +485,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779125151,
-        "narHash": "sha256-bPHT0oJAHe5a43lkkSGAiCEg/RBqpwv5xsFrcj+Bog8=",
+        "lastModified": 1779213149,
+        "narHash": "sha256-Cf+p/T4Z3n9Sw0TiR3kQaIwQI+/hfvLJcoTzeq6yS3E=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "fab3fd7327a0ac7a1fae5095bf140377704fac7f",
+        "rev": "bd868f769a69d3b6091a1da68a75cb83a181033c",
         "type": "github"
       },
       "original": {
@@ -559,11 +559,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1779043214,
-        "narHash": "sha256-//+01ZthfM8AHz4vGEIvMpEOG6jh5nt3XGR0h3alJwk=",
+        "lastModified": 1779131761,
+        "narHash": "sha256-DIdXwxWzhECkp2n/OF15llkEHoGXLjwjCCg7oU+Qd2o=",
         "owner": "xddxdd",
         "repo": "nix-cachyos-kernel",
-        "rev": "35ce1ffcf034260e4213442ae4e0b5820f529331",
+        "rev": "56707a2b9725fd5b030f508565ae3a1327d6ac44",
         "type": "github"
       },
       "original": {
@@ -784,11 +784,11 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1778930970,
-        "narHash": "sha256-FqqcYr0c5in/HRL5bkRWykAGp/Q10Vj/zUiSr1P8URE=",
+        "lastModified": 1779024751,
+        "narHash": "sha256-fIE/HazjcoU/27WI3//uVg5AIntnVo1Q/GjMuBwPuHw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5a51fe22e18a6ce886b3cffa4c255378c151323c",
+        "rev": "3849902757e881ccbf21df80d592e3b94a35131c",
         "type": "github"
       },
       "original": {
@@ -872,11 +872,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1779018518,
-        "narHash": "sha256-RUmjcuxbaa8UKsd5rUO5bqDe9YxGBDLXd4tFFBi351E=",
+        "lastModified": 1779223791,
+        "narHash": "sha256-xNAn0ugwia62KeaU4cc8BbssFF/revAW4hsU1H6isnc=",
         "owner": "notashelf",
         "repo": "nvf",
-        "rev": "cd45295f9c65ca81f323155660ba83d427bd0154",
+        "rev": "7a6c1147446fceba360a1c5c9d1eca5f9f028e64",
         "type": "github"
       },
       "original": {
