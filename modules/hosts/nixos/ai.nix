@@ -23,6 +23,7 @@
             pip
           ]
         ))
+        opencode
       ];
     };
 }
