@@ -21,7 +21,7 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
       - name: raspberry-pi-4-sd-image
-        run: nix build .#packages.aarch64-linux.raspberry-pi-4-sd-image --show-trace --accept-flake-config
+        run: nix build ".#packages.aarch64-linux.raspberry-pi-4-sd-image" --show-trace --accept-flake-config
 name: raspberry-pi-4-sd-image
 "on":
   pull_request:
