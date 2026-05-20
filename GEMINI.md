@@ -1,79 +1,135 @@
 # NixOS Configuration Flake
 
 ## Project Overview
-This repository contains a centralized, declarative NixOS system configuration architecture using Nix Flakes. The project defines environments and manages states across multiple hardware architectures, specifically supporting `x86_64-linux` and `aarch64-linux` platforms. The codebase structures Nix modules dynamically utilizing `flake-parts` and `vic/import-tree`. 
+This repository contains a centralized, declarative NixOS system configuration architecture using Nix Flakes. The project defines environments and manages state across multiple hardware architectures, specifically supporting `x86_64-linux` and `aarch64-linux` platforms. The codebase structures Nix modules dynamically using `flake-parts` and `vic/import-tree`.
 
 Integrated technologies handling the system's core capabilities include:
 * **Home Manager**: Manages user-specific environments and dotfiles.
-* **Agenix**: Handles encrypted system secrets.
-* **Cachix**: External Nix binary cache.
-* **Disko**: Automates disk partitioning and formatting.
-* **NixOS-WSL**: Provides configurations for the Windows Subsystem for Linux.
-* **Pre-commit Hooks**: Enforces CI/CD and repository consistency constraints.
+* **Agenix**: Handles encrypted system secrets (SSH-key based, age-encrypted).
+* **Cachix**: External Nix binary cache (`janusz-bit.cachix.org`).
+* **Disko**: Automates disk partitioning and formatting (encrypted Btrfs).
+* **NixOS-WSL**: Provides configurations for Windows Subsystem for Linux.
+* **nvf**: Declarative Neovim configuration framework.
+* **nixos-avf**: NixOS support for Android Virtualization Framework.
+* **nixos-raspberrypi**: RPi-specific hardware support.
+* **nix-cachyos-kernel**: CachyOS kernel packages.
+* **github-actions-nix**: Auto-generates GitHub Actions workflows.
+* **Pre-commit Hooks**: Enforces formatting (`nixfmt-tree`) and workflow sync.
 
 ## System Architectures & Host Deployments
 The `modules/hosts/` directory contains isolated definitions targeting different deployment vectors. Each host is built upon a shared foundation but customized for its specific role.
 
 ### 1. `base` (The Foundation)
 A shared set of modules included in every system deployment.
-* Sets up the core CLI experience: `bash` wrapping an optimized `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`).
-* Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, and vulnerability scanning (`vulnix`).
+* Sets up the core CLI experience: `bash` wrapping `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`), the `done` fish plugin for long-command notifications.
+* Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, `vulnix` vulnerability scanning.
+* Shared packages: `micro`, `nil`, `nixd`, `nixfmt-tree`, `uv`, `toybox`, `statix`, `cachix`, `agenix`, `nix-update`, `tlrc`, `fzf`, `hw-probe`, `htop`, `cloudflared`, `gemini-cli`.
+* `nix-ld` enabled to support dynamically linked binaries (e.g., from `uv`).
+* `nix-index-database` with `comma` integration.
+* `direnv` enabled.
+* Default editor: `micro`.
+
+#### Shell Aliases (all hosts)
+| Alias | Command |
+|---|---|
+| `update` | `nixos-rebuild switch` from the flake on GitHub |
+| `update-boot` | `nixos-rebuild boot` from the flake on GitHub |
+| `push` | Build toplevel and push closure to Cachix |
+| `update-my-pkgs` | `nix run <flake>#update-my-pkgs` |
+| `ls`, `la`, `ll`, `lt` | `eza` variants |
+| `cat` | `bat` |
 
 ### 2. `nixos` (Main Workstation)
-An `x86_64-linux` deployment optimized for a Lenovo LOQ-15IRX10 laptop (Nvidia GPU).
-* **Core**: CachyOS kernel (x86-64-v3 optimized), Disko-managed encrypted Btrfs with subvolumes.
-* **Profiles**: Boot-time `specialisations` allowing the user to select between battery saving (`power-save`) and GPU sync modes (`sync-mode`, `reverse-sync`).
-* **Environment**: KDE Plasma (Wayland via Niri), Pipewire audio, and a robust suite of applications (Steam, Heroic, Vesktop, Tor, Zed).
-* **Tools**: Local LLM environment (Ollama), Podman with Docker compatibility.
+An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale).
+* **Kernel**: CachyOS kernel (`linuxPackages-cachyos-latest-lto-x86_64-v3`) via the `nix-cachyos-kernel` input.
+* **Storage**: Disko-managed encrypted Btrfs with LUKS. Working hibernation configured (`/dev/mapper/swap`).
+* **Bootloader**: Limine, with a Windows EFI dual-boot entry.
+* **Desktop**: KDE Plasma 6 (Wayland) with SDDM, plus **Niri** compositor (`programs.niri.enable`).
+* **Audio**: Pipewire (with ALSA 32-bit and PulseAudio compat).
+* **Scheduler**: `scx` with `scx_lavd` (`--performance`); `ananicy-cpp` with CachyOS rules.
+* **Specialisations** (boot-time profiles):
+  * `power-save` – TLP + `powersave` governor + scx `--powersave`.
+  * `reverse-sync` – Nvidia Prime Reverse Sync.
+  * `sync-mode` – Nvidia Prime Sync.
+* **Gaming**: Steam (with Proton-CachyOS-v3 and proton-ge-bin), Heroic, GameMode, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support.
+* **Containers**: Podman with Docker compatibility, DNS enabled.
+* **AI Tools**: Ollama (CUDA backend), `opencode`, `uv`, `repomix`, Node.js, Python 3.
+* **Apps**: Zed, Brave, Firefox, LibreOffice, Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Bitwarden, Trilium, Joplin, Nextcloud client, PrismLauncher, VLC, Haruna, Elisa, Alacritty, sbctl, bootdev-cli.
+* **Sync**: Syncthing (user data in `~/Sync`).
+* **Overlays applied**: `nix-cachyos-kernel`, `bootdev-cli-overlay`, `brave-debloater`, `trilium`.
+* **Locale**: Polish (`pl_PL.UTF-8`), timezone `Europe/Warsaw`, keymap `pl2`.
+* **State version**: `25.11`.
 
 ### 3. `raspberry-pi-4` (Home Server / Cloud)
-A headless `aarch64-linux` deployment built for network services and caching.
-* **Core**: Highly optimized for limited resources using SSD swap and `zstd` compressed `zramSwap`. Hardened via fail2ban.
-* **Nextcloud**: Performance-tuned PostgreSQL and Redis setup, reverse-proxied securely through a Cloudflare Tunnel.
-* **Hardware Integration**: Custom Python-based systemd service (`pwm-fan`) for temperature-driven GPIO fan control.
+A headless `aarch64-linux` deployment for network services.
+* **Memory optimization**: zRAM (`zstd`), 8GB SSD swap, `vm.swappiness=100`, tmpfs for `/tmp`.
+* **CPU**: `ondemand` governor.
+* **Security**: fail2ban (max 5 retries, LAN whitelisted), SSH key-only.
+* **Nix GC**: daily, deletes derivations older than 3 days; max 2 build jobs.
+* **Nextcloud 33**: PostgreSQL backend (locally created), Redis cache, 2GB upload limit, accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled).
+* **Cloudflared**: Tunnel to expose services externally.
+* **Trilium**: Note-taking server (overlay applied).
+* **Fan control**: Custom Python-based systemd service (`pwm-fan`) for GPIO PWM fan control based on CPU temperature.
+* **Overlay applied**: `trilium`.
 
 ### 4. `wsl` (Windows Subsystem for Linux)
-A minimal environment bridging NixOS into a Windows host.
-* Utilizes the external `NixOS-WSL` module.
-* Enables Start Menu launchers, configures the default user, and injects environment variables for GPU acceleration within the Zed editor.
+A minimal `x86_64-linux` environment bridging NixOS into a Windows host.
+* Uses `NixOS-WSL` module.
+* Enables Start Menu integration, sets default user.
+* `fastfetch` disabled.
+* Obsidian launcher support.
 
-### 5. `droid-android`
-A highly reduced NixOS footprint tailored for Android virtualization (e.g., via `nixos-avf`).
-* Includes the core `base` system but strips away visual elements (like `fastfetch`) to ensure lightweight terminal performance on mobile hardware.
+### 5. `droid` (Android Virtualization Framework)
+A reduced `aarch64-linux` footprint for Android (via `nixos-avf`).
+* Includes `base` modules; `fastfetch` and visual elements disabled.
+* Default user: `droid`.
+* Fixes bogus terminal size (`$COLUMNS=131072`) on Android/AVF at bash init.
+* `custom.flakeTarget = "droid"`.
 
 ## Repository Architecture
-The repository uses a highly modular structure powered by `flake-parts` and `import-tree`, which auto-discovers and maps the codebase logically. 
+The repository uses a highly modular structure powered by `flake-parts` and `import-tree`, which auto-discovers and maps the codebase logically.
 
-* **`flake.nix`**: The heart of the system. Defines all external inputs (nixpkgs, home-manager, agenix) and passes them to `import-tree` to dynamically load the `modules/` folder.
-* **`modules/default.nix`**: The integration module for development environments. It sets up `devShells`, formatters (`nixfmt-tree`), pre-commit hooks, and orchestrates CI pipelines.
-* **`modules/github-actions.nix` & `_github-actions-configs.nix`**: CI/CD automation factory. These dynamically generate GitHub Actions workflows to auto-build target architectures (like x86_64 and aarch64) and push the resulting binaries to the Cachix cache.
-* **`modules/hardware/`**: Hardware-specific profiling. Stores hardware patches (e.g., Lenovo LOQ specific configurations, `x86-64-v3` CPU optimizations, and `.icm` color profiles).
-* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic security. Stores highly secure, SSH-key encrypted secrets (GitHub tokens, credentials) safely within the public repository, decryptable only by target machines at runtime.
-* **`modules/overlays/`**: Patches and modifications to the default `nixpkgs` tree. Used to fix broken packages or inject custom/modified software (like a tailored Brave browser).
-* **`modules/packages/`**: Custom authored packages and automation scripts (e.g., custom Neovim builder, NixOS installation scripts).
-* **`modules/templates/`**: Project scaffolds. Allows running `nix flake init -t .` in a blank directory to quickly scaffold a new project based on the `_project.nix` structure.
+* **`flake.nix`**: Entry point. Defines all external inputs and passes them to `import-tree` to dynamically load the `modules/` folder. Declares the `janusz-bit.cachix.org` binary cache.
+* **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `sync-github-actions`), and exposes `update-flake` and `flake-release` packages in the dev shell.
+* **`modules/github-actions.nix` & `_github-actions-configs.nix`**: CI/CD factory that auto-generates GitHub Actions workflows to build target architectures and push binaries to Cachix.
+* **`modules/hardware/`**: Hardware-specific profiling. Stores Lenovo LOQ-15IRX10 patches, `x86-64-v3` CPU optimization, `M27Q.icm` color profile, and a `facter.json` inventory.
+* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. Age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, etc.) stored safely in the repo, decryptable only by target machines.
+* **`modules/overlays/`**: Nixpkgs patches. `brave-debloater` (Brave browser customization), `trilium` (pinned to a specific commit), `bootdev-cli-overlay`.
+* **`modules/packages/`**: Custom packages and scripts. `proton-cachyos-v3` (custom Proton build), `my-neovim` (nvf-based Neovim with gruvbox, LSP, Telescope), `update-flake` (updates flake.lock + packages + commits), `flake-release` (auto-tags and pushes releases), `install-system` (default package).
+* **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
 ## Centralized Configuration (`options.nix`)
-The `modules/options.nix` file acts as the central source of truth for global project variables. It exports custom options (`options.custom`) and module arguments (`_module.args.custom`) that are accessible across the entire flake. This ensures consistency and simplifies maintenance by providing a single place to manage:
-* **Repository Info**: Source URLs, git repository paths, and identifiers.
-* **Domain & Network**: Global domain name mappings.
-* **System Defaults**: Universal flags like `enableFastfetch` and the `defaultUser` definition.
+`modules/options.nix` is the single source of truth for global variables, exported as `options.custom` and `_module.args.custom`:
+* **Repository**: `janusz-bit/nixos` on GitHub, stored at `/etc/nixos`.
+* **Email**: `janusz-bit@proton.me`.
+* **Domain**: `janusz-bit.com`.
+* **Cache**: `janusz-bit.cachix.org`.
+* **Options**: `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
+
+## Dev Shell Tools
+Running `nix develop` provides:
+* `update-flake` – updates `flake.lock`, commits it, then updates `bootdev-cli` and `proton-cachyos-v3` packages.
+* `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
+* Pre-commit hooks auto-installed: `nixfmt` formatter, `sync-github-actions`.
 
 ## Building and Running
-System deployments are executed via standard NixOS flake reconstruction commands.
+```sh
+# Build and activate for a given host
+sudo nixos-rebuild switch --flake .#nixos
+sudo nixos-rebuild switch --flake .#raspberry-pi-4
 
-To build and switch the configuration for a given host:
-* `sudo nixos-rebuild switch --flake .#nixos`
-* `sudo nixos-rebuild switch --flake .#raspberry-pi-4`
+# Or using the shell aliases (pulls from GitHub)
+update        # switch
+update-boot   # boot
 
-Custom shell aliases are provided to manage deployments and cache pushes (defined in `base/configuration.nix`):
-* `update`: rebuilds and switches the current host configuration.
-* `update-boot`: rebuilds and sets the configuration for the next boot.
-* `push`: builds the top-level configuration and pushes the closure to the Cachix cache.
+# Push build closure to Cachix
+push
 
-The repository also exposes an automated installation script via `packages.install-system`, accessible as the flake's default package.
+# Install system (default package)
+nix run github:janusz-bit/nixos
+```
 
 ## Development Conventions
-* **Formatting Enforcement**: Code formatting is strictly unified using `nixfmt-tree`.
-* **Pre-commit Validation**: Development relies heavily on local git hooks. The pre-commit pipeline is configured to run the formatter and synchronize GitHub Actions state (`sync-github-actions`).
-* **Environment Initialization**: Generating a shell context (via `nix develop`) automatically bootstraps the required pre-commit installation scripts into the shell hook alongside necessary formatter packages.
+* **Formatting**: `nixfmt-tree` (enforced via pre-commit and CI).
+* **Pre-commit hooks**: formatter + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions).
+* **Dev shell**: `nix develop` bootstraps pre-commit hooks automatically.
