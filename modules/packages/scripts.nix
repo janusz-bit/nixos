@@ -12,9 +12,9 @@
           git commit -m "Update flake.lock" flake.lock
         fi
         echo "Updating bootdev-cli..."
-        ''${pkgs.lib.getExe pkgs.nix-update} --commit -F bootdev-cli
+        ${pkgs.lib.getExe pkgs.nix-update} --commit -F bootdev-cli
         echo "Updating proton-cachyos-v3..."
-        ''${pkgs.lib.getExe pkgs.nix-update} -F proton-cachyos-v3 -u
+        ${pkgs.lib.getExe pkgs.nix-update} -F proton-cachyos-v3 -u
         echo "All packages updated!"
       '';
 
