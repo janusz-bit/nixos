@@ -65,9 +65,10 @@
       };
 
       environment.systemPackages = with pkgs; [
-        micro
-        htop
-      ];
+         micro
+         htop
+         opencode
+       ];
 
       # User configuration
       users.users.${config.custom.defaultUser} = {
