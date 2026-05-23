@@ -38,7 +38,7 @@
           name,
           buildTarget,
           runsOn,
-          runName ? null,
+          runName ? "Build ${name} by @\${{ github.actor }}",
           kernelTarget ? null,
         }:
         {
@@ -49,6 +49,17 @@
             workflowDispatch = { };
           };
           jobs =
+            let
+              buildJob = {
+                inherit runsOn;
+                steps = mkBaseSteps ++ [
+                  {
+                    name = name;
+                    run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
+                  }
+                ];
+              };
+            in
             if kernelTarget != null then
               {
                 build-kernel = {
@@ -60,29 +71,12 @@
                     }
                   ];
                 };
-                build = {
-                  inherit runsOn;
+                build = buildJob // {
                   needs = "build-kernel";
-                  steps = mkBaseSteps ++ [
-                    {
-                      name = name;
-                      run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
-                    }
-                  ];
                 };
               }
             else
-              {
-                build = {
-                  inherit runsOn;
-                  steps = mkBaseSteps ++ [
-                    {
-                      name = name;
-                      run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
-                    }
-                  ];
-                };
-              };
+              { build = buildJob; };
         };
 
       # Mapa architektur na GitHub Runners
@@ -111,17 +105,42 @@
       githubActions = {
         enable = true;
         # Automatycznie generujemy workflowy dla wszystkich wpisow w 'configs'
-        workflows = builtins.mapAttrs (
-          name: cfg:
-          mkBuildWorkflow {
-            inherit name;
-            runsOn = archToRunner."${cfg.arch}";
-            buildTarget =
-              cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
-            runName = "Build ${name} by @\${{ github.actor }}";
-            kernelTarget = cfg.kernelTarget or null;
-          }
-        ) (import ./_github-actions-configs.nix);
+        workflows =
+          builtins.mapAttrs
+            (
+              name: cfg:
+              mkBuildWorkflow {
+                inherit name;
+                runsOn = archToRunner."${cfg.arch}";
+                buildTarget =
+                  cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
+                kernelTarget =
+                  cfg.kernelTarget or (
+                    if name == "nixos" || name == "raspberry-pi-4" then
+                      "nixosConfigurations.${name}.config.boot.kernelPackages.kernel"
+                    else
+                      null
+                  );
+              }
+            )
+            {
+              nixos = {
+                arch = "x86_64-linux";
+              };
+              raspberry-pi-4 = {
+                arch = "aarch64-linux";
+              };
+              raspberry-pi-4-sd-image = {
+                arch = "aarch64-linux";
+                buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
+              };
+              wsl = {
+                arch = "x86_64-linux";
+              };
+              droid = {
+                arch = "aarch64-linux";
+              };
+            };
       };
     };
 }
