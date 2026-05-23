@@ -19,9 +19,15 @@
         type = lib.types.str;
         default = "nixos";
       };
+      options.custom.enableOpenWebUi = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+      };
     };
   _module.args.custom = rec {
+    enableOpenWebUi = false;
     repository = {
+
       name = "nixos";
       site = "github";
       user = "janusz-bit";
