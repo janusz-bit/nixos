@@ -91,8 +91,6 @@
         "aarch64-linux" = "ubuntu-24.04-arm";
       };
 
-      # Lista konfiguracji do wygenerowania
-      configs = import ./_github-actions-configs.nix;
     in
     {
       packages.github-actions = config.githubActions.workflowsDir;
@@ -123,7 +121,7 @@
             runName = "Build ${name} by @\${{ github.actor }}";
             kernelTarget = cfg.kernelTarget or null;
           }
-        ) configs;
+        ) (import ./_github-actions-configs.nix);
       };
     };
 }
