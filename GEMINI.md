@@ -133,4 +133,4 @@ nix run github:janusz-bit/nixos
 * **Agents**: AI agents are used for repository maintenance; see [AGENTS.md](AGENTS.md) for configuration.
 * **Formatting**: `nixfmt-tree` (enforced via pre-commit and CI).
 * **Pre-commit hooks**: formatter + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions).
-* **Dev shell**: `nix develop` bootstraps pre-commit hooks automatically.
+* **Dev shell**: Always use `nix develop` to ensure pre-commit hooks and required tools are bootstrapped automatically.
