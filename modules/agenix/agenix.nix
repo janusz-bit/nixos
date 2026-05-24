@@ -3,6 +3,11 @@
   flake.nixosModules."agenix" =
     { config, ... }:
     {
+      age.secrets.ollama-api-key = {
+        file = custom.secretsDir + "/ollama-api-key.age";
+        owner = "root";
+        mode = "0440";
+      };
       age.secrets.secret1 = {
         file = custom.secretsDir + "/secret1.age";
         owner = "root";
