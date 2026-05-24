@@ -7,11 +7,16 @@
       inputs.avf.nixosModules.avf
       self.nixosModules."droid/stateVersion"
       (
-        { lib, ... }:
+        { lib, pkgs, ... }:
         {
           custom.flakeTarget = "droid";
           custom.enableFastfetch = false;
           custom.defaultUser = "droid";
+
+          environment.systemPackages = with pkgs; [
+            ollama
+            opencode
+          ];
 
           programs.bash.interactiveShellInit = lib.mkBefore ''
             # Fix for bogus screen size on Android/AVF
