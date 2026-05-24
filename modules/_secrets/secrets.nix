@@ -59,4 +59,12 @@ in
     ];
     armor = true;
   };
+  "ollama-api-key.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
