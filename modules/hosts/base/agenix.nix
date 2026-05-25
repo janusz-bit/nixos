@@ -3,9 +3,11 @@
   flake.nixosModules."base/agenix" =
     { config, pkgs, ... }:
     {
-      environment.sessionVariables.CACHIX_AUTH_TOKEN = "$(${pkgs.coreutils}/bin/cat ${config.age.secrets.cachix-authtoken.path})";
-      environment.sessionVariables.GITHUB_TOKEN = "$(${pkgs.coreutils}/bin/cat ${config.age.secrets.github-token.path})";
-      environment.sessionVariables.OLLAMA_API_KEY = "$(${pkgs.coreutils}/bin/cat ${config.age.secrets.ollama-api-key.path})";
+      environment.shellInit = ''
+        export CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path})
+        export GITHUB_TOKEN=$(cat ${config.age.secrets.github-token.path})
+        export OLLAMA_API_KEY=$(cat ${config.age.secrets.ollama-api-key.path})
+      '';
 
       imports = [ self.nixosModules."agenix" ];
     };
