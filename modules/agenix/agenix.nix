@@ -6,16 +6,19 @@
       age.secrets.ollama-api-key = {
         file = custom.secretsDir + "/ollama-api-key.age";
         owner = "root";
+        group = "users";
         mode = "0440";
       };
       age.secrets.secret1 = {
         file = custom.secretsDir + "/secret1.age";
         owner = "root";
+        group = "users";
         mode = "0440";
       };
       age.secrets.github-token = {
         file = custom.secretsDir + "/GITHUB_TOKEN.age";
         owner = "root";
+        group = "users";
         mode = "0440";
       };
       age.secrets.cachix-authtoken = {
@@ -27,6 +30,7 @@
       age.secrets.notes = {
         file = custom.secretsDir + "/notes.age";
         owner = "root";
+        group = "users";
         mode = "0440";
       };
       age.identityPaths = [
