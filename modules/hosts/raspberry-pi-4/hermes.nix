@@ -46,7 +46,7 @@
           Type = "simple";
           User = "hermes";
           Group = "hermes";
-          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 127.0.0.1 --port 9119 --no-open";
+          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 127.0.0.1 --port 9119 --no-open --insecure";
           Restart = "on-failure";
           RestartSec = 5;
           WorkingDirectory = "/var/lib/hermes";
