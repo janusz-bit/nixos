@@ -39,7 +39,7 @@
           inherit name;
           runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
           on = {
-            schedule = [ { cron = "0 0 * * 0"; } ];
+            schedule = [ { cron = "0 2 * * *"; } ];
             workflowDispatch = { };
           };
           permissions.contents = "write";
