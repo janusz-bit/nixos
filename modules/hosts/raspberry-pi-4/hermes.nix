@@ -24,5 +24,7 @@
         API_SERVER_PORT = "8642";
         API_SERVER_HOST = "127.0.0.1";
       };
+
+      users.users.nixos.extraGroups = [ "hermes" ];
     };
 }
