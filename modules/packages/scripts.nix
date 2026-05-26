@@ -20,8 +20,10 @@
 
       packages.flake-release = pkgs.writeShellScriptBin "flake-release" ''
         set -e
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0")
-        new_tag="v$(( ''${latest_tag#v} + 1 ))"
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        latest_num="''${latest_tag#v}"
+        IFS='.' read -r major minor patch <<< "$latest_num"
+        new_tag="v''${major}.''${minor}.$((patch + 1))"
         echo "Releasing $new_tag..."
         git commit -a -m "Release $new_tag" || true
         git tag $new_tag
