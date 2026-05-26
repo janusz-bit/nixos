@@ -10,7 +10,8 @@
     {
       age.secrets.cloudflared-tunnel = {
         file = custom.secretsDir + "/cloudflared-tunnel.age";
-        owner = "cloudflared";
+        owner = "root";
+        group = "root";
         mode = "0440";
       };
       services.cloudflared = {
