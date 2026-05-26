@@ -23,11 +23,12 @@ The `modules/hosts/` directory contains isolated definitions targeting different
 A shared set of modules included in every system deployment.
 * Sets up the core CLI experience: `bash` wrapping `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`), the `done` fish plugin for long-command notifications.
 * Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, `vulnix` vulnerability scanning.
-* Shared packages: `micro`, `nil`, `nixd`, `nixfmt-tree`, `uv`, `toybox`, `statix`, `cachix`, `agenix`, `nix-update`, `tlrc`, `fzf`, `hw-probe`, `htop`, `cloudflared`, `gemini-cli`.
+* Shared packages: `micro`, `nil`, `nixd`, `nixfmt-tree`, `uv`, `toybox`, `statix`, `cachix`, `agenix`, `nix-update`, `tlrc`, `fzf`, `hw-probe`, `htop`, `cloudflared`, `gemini-cli`, `opencode`.
 * `nix-ld` enabled to support dynamically linked binaries (e.g., from `uv`).
 * `nix-index-database` with `comma` integration.
 * `direnv` enabled.
 * Default editor: `micro`.
+* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Ollama provider with `glm-5.1` model, `superpowers` and `caveman-opencode-plugin` plugins). Installed on all hosts through the `base/opencode` module.
 
 #### Shell Aliases (all hosts)
 | Alias | Command |
@@ -53,7 +54,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
   * `sync-mode` – Nvidia Prime Sync.
 * **Gaming**: Steam (with Proton-CachyOS-v3 and proton-ge-bin), Heroic, GameMode, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
-* **AI Tools**: Ollama (CUDA backend), `opencode`, `uv`, `repomix`, Node.js, Python 3.
+* **AI Tools**: Ollama (CUDA backend), `uv`, `repomix`, Node.js, Python 3.
 * **Apps**: Zed, Brave, Firefox, LibreOffice, Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Bitwarden, Trilium, Joplin, Nextcloud client, PrismLauncher, VLC, Haruna, Elisa, Alacritty, sbctl, bootdev-cli.
 * **Sync**: Syncthing (user data in `~/Sync`).
 * **Overlays applied**: `nix-cachyos-kernel`, `bootdev-cli-overlay`, `brave-debloater`, `trilium`.
