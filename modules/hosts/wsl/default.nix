@@ -7,6 +7,7 @@
       self.nixosModules."wsl"
       (_: {
         custom.enableFastfetch = false;
+        custom.flakeTarget = "wsl";
       })
     ];
   };
