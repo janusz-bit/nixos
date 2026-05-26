@@ -1,9 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "google": {
+      "options": {
+        "websearch_cited": {
+          "model": "gemini-2.5-flash"
+        }
+      }
+    }
+  },
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "caveman-opencode-plugin",
-    "opencode-websearch-cited",
-    "opencode-skillful"
+    "opencode-skillful",
+    "opencode-websearch-cited@1.2.0"
   ]
 }

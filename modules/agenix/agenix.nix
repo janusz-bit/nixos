@@ -33,6 +33,12 @@
         group = "users";
         mode = "0440";
       };
+      age.secrets.google-api-key = {
+        file = custom.secretsDir + "/google-api-key.age";
+        owner = "root";
+        group = "users";
+        mode = "0440";
+      };
       age.identityPaths = [
         "/root/.ssh/id_ed25519"
       ];

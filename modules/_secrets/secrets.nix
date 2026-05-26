@@ -67,4 +67,12 @@ in
     ];
     armor = true;
   };
+  "google-api-key.age" = {
+    publicKeys = [
+      nixos
+      droid-android
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
