@@ -42,16 +42,22 @@ let
     config: pkgs:
     let
       update_alias =
-        mode:
-        "sudo nixos-rebuild ${mode} --sudo --flake ${custom.repository.linkFlake}#${config.custom.flakeTarget} --refresh";
+        mode: remote:
+        let
+          flakeRef = if remote then custom.repository.linkFlake else custom.repository.place;
+        in
+        "sudo nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.custom.flakeTarget}${optionalStr remote " --refresh"}";
+      optionalStr = cond: str: if cond then str else "";
     in
     {
       # Pushing
       push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${custom.cache.cachix.name}";
 
       # Update systemu
-      update = update_alias "switch";
-      update-boot = update_alias "boot";
+      update = update_alias "switch" true;
+      update-boot = update_alias "boot" true;
+      update-local = update_alias "switch" false;
+      update-local-boot = update_alias "boot" false;
     };
 
   sharedNixSettings = {
@@ -79,6 +85,12 @@ in
 
       imports = [ inputs.nix-index-database.nixosModules.default ];
       nixpkgs.config.allowUnfree = true;
+
+      networking.firewall = {
+        enable = true;
+        allowedTCPPorts = [ 22 ];
+        allowedUDPPorts = [ ];
+      };
 
       environment.systemPackages = sharedPackages pkgs;
       environment.sessionVariables = sharedSessionVariables;
