@@ -32,6 +32,42 @@
         }
       ];
 
+      # Workflow aktualizujacy i budujacy CachyOS kernel
+      mkCachyOSKernelUpdateWorkflow =
+        { name, runsOn }:
+        {
+          inherit name;
+          runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
+          on = {
+            schedule = [ { cron = "0 0 * * 0"; } ];
+            workflowDispatch = { };
+          };
+          permissions.contents = "write";
+          jobs.update-and-build = {
+            inherit runsOn;
+            steps = mkBaseSteps ++ [
+              {
+                name = "Update nix-cachyos-kernel flake input";
+                run = "nix flake lock --update-input nix-cachyos-kernel";
+              }
+              {
+                name = "Build Kernel";
+                run = "nix build \".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*\" --show-trace --accept-flake-config";
+              }
+              {
+                name = "Commit updated flake.lock";
+                run = ''
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add flake.lock
+                  git diff --cached --quiet || git commit -m "flake.lock: update nix-cachyos-kernel"
+                  git push
+                '';
+              }
+            ];
+          };
+        };
+
       # Fabryka workflowow
       mkBuildWorkflow =
         {
@@ -140,7 +176,13 @@
               droid = {
                 arch = "aarch64-linux";
               };
+            }
+          // {
+            cachyos-kernel-update = mkCachyOSKernelUpdateWorkflow {
+              name = "cachyos-kernel-update";
+              runsOn = archToRunner."x86_64-linux";
             };
+          };
       };
     };
 }
