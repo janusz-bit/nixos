@@ -9,6 +9,7 @@
 
       services.hermes-agent = {
         enable = true;
+        addToSystemPackages = true;
         settings.model = {
           base_url = "https://api.ollama.cloud/v1";
           default = "gemma4:31b-cloud";
