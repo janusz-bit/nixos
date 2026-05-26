@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   flake.nixosModules."nixos/packages" =
     { pkgs, config, ... }:
@@ -33,6 +33,7 @@
         joplin-desktop
         bitwarden-desktop
         trilium-desktop
+        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
       # Install firefox.
       programs.firefox.enable = true;
