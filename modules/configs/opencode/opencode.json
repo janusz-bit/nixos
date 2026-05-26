@@ -2,6 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    "caveman-opencode-plugin"
+    "caveman-opencode-plugin",
+    "opencode-websearch-cited",
+    "opencode-skillful"
   ]
 }
