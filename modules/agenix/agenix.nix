@@ -39,6 +39,12 @@
         group = "users";
         mode = "0440";
       };
+      age.secrets.hermes-env = {
+        file = custom.secretsDir + "/hermes-env.age";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+      };
       age.identityPaths = [
         "/root/.ssh/id_ed25519"
       ];

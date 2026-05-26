@@ -8,6 +8,7 @@
         self.nixosModules."raspberry-pi-4/trilium"
         self.nixosModules."raspberry-pi-4/cloudflared"
         self.nixosModules."raspberry-pi-4/pwm-fan"
+        self.nixosModules."raspberry-pi-4/hermes"
         self.nixosModules."agenix"
         self.nixosModules."raspberry-pi-4/specific"
         self.nixosModules."raspberry-pi-4/configuration"
