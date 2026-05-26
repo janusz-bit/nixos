@@ -22,6 +22,7 @@
             default = "http_status:404";
             ingress = {
               "${custom.site.full}" = "http://localhost:80";
+              "ai.${custom.site.full}" = "http://localhost:8080";
               "notes.${custom.site.full}" = "http://localhost:8081";
               "ssh.${custom.site.full}" = "ssh://localhost:22";
             };
