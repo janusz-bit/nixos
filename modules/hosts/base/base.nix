@@ -10,6 +10,7 @@
         self.nixosModules."nix/settings"
         self.nixosModules."base/ssh"
         self.nixosModules."base/agenix"
+        self.nixosModules."base/opencode"
         self.nixosModules."options"
       ];
     };

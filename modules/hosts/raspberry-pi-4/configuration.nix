@@ -67,7 +67,6 @@
       environment.systemPackages = with pkgs; [
         micro
         htop
-        opencode
       ];
 
       # User configuration

@@ -15,7 +15,6 @@
 
           environment.systemPackages = with pkgs; [
             ollama
-            opencode
           ];
 
           programs.bash.interactiveShellInit = lib.mkBefore ''
