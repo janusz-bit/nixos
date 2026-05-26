@@ -23,8 +23,6 @@
               "${custom.site.full}" = "http://localhost:80";
               "notes.${custom.site.full}" = "http://localhost:8081";
               "ssh.${custom.site.full}" = "ssh://localhost:22";
-              "hermes.${custom.site.full}" = "http://localhost:80";
-              "hermes-api.${custom.site.full}" = "http://localhost:80";
             };
           };
         };
