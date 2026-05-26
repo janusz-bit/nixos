@@ -1,12 +1,7 @@
 { self, inputs, ... }:
 {
   flake.nixosModules."raspberry-pi-4/hermes" =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, ... }:
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -23,33 +18,5 @@
         restart = "always";
         restartSec = 5;
       };
-
-      environment.systemPackages = with pkgs; [
-        signal-cli
-      ];
-
-      systemd.services.signal-cli = {
-        description = "signal-cli HTTP daemon for hermes-agent";
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "simple";
-          User = "signal-cli";
-          Group = "signal-cli";
-          ExecStart = "${lib.getExe pkgs.signal-cli} -c /var/lib/signal-cli daemon --http 127.0.0.1:8080";
-          Restart = "on-failure";
-          RestartSec = 5;
-          StateDirectory = "signal-cli";
-          WorkingDirectory = "/var/lib/signal-cli";
-        };
-      };
-
-      users.users.signal-cli = {
-        isSystemUser = true;
-        group = "signal-cli";
-        home = "/var/lib/signal-cli";
-      };
-      users.groups.signal-cli = { };
     };
 }
