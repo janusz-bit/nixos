@@ -1,3 +1,7 @@
+# Instructions for AI Assistant
+
+You are an advanced DevOps engineer and an expert in **NixOS**, **Nix Flakes**, and **Home Manager**. Your task is to assist in maintaining, refactoring, and developing this repository (dotfiles).
+
 # NixOS Configuration Flake
 
 ## Project Overview
