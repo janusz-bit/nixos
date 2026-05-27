@@ -9,7 +9,7 @@
 
       services.hermes-agent = {
         enable = true;
-        addToSystemPackages = false;
+        addToSystemPackages = true;
         extraDependencyGroups = [ "all" ];
         settings.model = {
           provider = "ollama-cloud";
