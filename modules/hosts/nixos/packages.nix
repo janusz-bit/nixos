@@ -32,9 +32,8 @@
         sbctl
         joplin-desktop
         bitwarden-desktop
-        trilium-desktop
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
+         trilium-desktop
+       ];
       # Install firefox.
       programs.firefox.enable = true;
       hardware.wooting.enable = true;
