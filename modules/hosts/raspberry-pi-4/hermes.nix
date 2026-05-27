@@ -11,8 +11,8 @@
         enable = true;
         addToSystemPackages = true;
         settings.model = {
-          base_url = "https://api.ollama.cloud/v1";
-          default = "glm-5.1:cloud";
+          base_url = "http://127.0.0.1:11434/v1";
+          default = "kimi-k2.6:cloud";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
         restart = "always";
@@ -24,6 +24,8 @@
         API_SERVER_PORT = "8642";
         API_SERVER_HOST = "127.0.0.1";
       };
+
+      services.ollama.enable = true;
 
       users.users.nixos.extraGroups = [ "hermes" ];
     };
