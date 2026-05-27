@@ -14,5 +14,8 @@
     "caveman-opencode-plugin",
     "opencode-skillful",
     "opencode-websearch-cited@1.2.0"
-  ]
+  ],
+  "permission": {
+    "websearch": "allow"
+  }
 }
