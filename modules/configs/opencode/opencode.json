@@ -1,19 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "provider": {
-    "google": {
-      "options": {
-        "websearch_cited": {
-          "model": "gemini-2.5-flash"
-        }
-      }
-    }
-  },
+  "model": "ollama/gemma4:31b-cloud",
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "caveman-opencode-plugin",
-    "opencode-skillful",
-    "opencode-websearch-cited@1.2.0"
+    "opencode-skillful"
   ],
   "permission": {
     "websearch": "allow"
