@@ -10,6 +10,7 @@
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = false;
+        extraDependencyGroups = [ "all" ];
         settings.model = {
           provider = "ollama-cloud";
           default = "kimi-k2.6:cloud";
