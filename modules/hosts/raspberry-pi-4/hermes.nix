@@ -9,9 +9,9 @@
 
       services.hermes-agent = {
         enable = true;
-        addToSystemPackages = true;
+        addToSystemPackages = false;
         settings.model = {
-          base_url = "https://api.ollama.cloud/v1";
+          provider = "ollama-cloud";
           default = "kimi-k2.6:cloud";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
