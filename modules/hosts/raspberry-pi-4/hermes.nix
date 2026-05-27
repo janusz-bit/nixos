@@ -13,6 +13,7 @@
         extraDependencyGroups = [ "all" ];
         settings.model = {
           provider = "ollama-cloud";
+          base_url = "https://ollama.com/api";
           default = "kimi-k2.6:cloud";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
