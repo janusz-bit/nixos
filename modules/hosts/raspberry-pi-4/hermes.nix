@@ -12,7 +12,7 @@
         addToSystemPackages = true;
         settings.model = {
           base_url = "https://api.ollama.cloud/v1";
-          default = "gemma4:31b-cloud";
+          default = "glm-5.1:cloud";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
         restart = "always";
