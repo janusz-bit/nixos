@@ -66,7 +66,17 @@
             "ollama>=0.6.0"
             "/etc/opencode/web-search-mcp.py"
           ];
-          env = { };
+          # Hermes filters env for stdio MCP – must explicitly pass OLLAMA_API_KEY.
+          # ${OLLAMA_API_KEY} is resolved by Hermes at connect time from the
+          # merged .env file (environmentFiles above) and substituted into the
+          # subprocess environment. Escaping \${} produces a literal ${} in
+          # the generated YAML that Hermes (not Nix) interprets.
+          env = {
+            OLLAMA_API_KEY = "\${OLLAMA_API_KEY}";
+          };
+          # RPi4 needs extra time for uv to resolve/download wheels on first run.
+          connect_timeout = 300;
+          timeout = 300;
         };
       };
 
