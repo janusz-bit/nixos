@@ -32,7 +32,7 @@ A shared set of modules included in every system deployment.
 * `nix-index-database` with `comma` integration.
 * `direnv` enabled.
 * Default editor: `micro`.
-* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Ollama provider with `gemma4:31b-cloud` model, `superpowers`, `caveman-opencode-plugin`, and `opencode-skillful` plugins). Installed on all hosts through the `base/opencode` module.
+* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Ollama provider with `kimi-k2.6:cloud` model, `superpowers`, `caveman-opencode-plugin`, and `opencode-skillful` plugins). Installed on all hosts through the `base/opencode` module.
 
 #### Shell Aliases (all hosts)
 | Alias | Command |

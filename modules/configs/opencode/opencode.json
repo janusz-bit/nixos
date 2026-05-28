@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "ollama/gemma4:31b-cloud",
+  "model": "ollama/kimi-k2.6:cloud",
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "caveman-opencode-plugin",
