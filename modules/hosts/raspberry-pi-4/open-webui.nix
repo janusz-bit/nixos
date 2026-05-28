@@ -14,8 +14,8 @@
           ENABLE_OLLAMA_API = "false";
           WEBUI_AUTH = "False";
         };
-        # API key must match Hermes API_SERVER_KEY
-        environmentFile = config.age.secrets.open-webui-env.path;
+        # API key is not required when Hermes API server has no auth enabled
+        # environmentFile = config.age.secrets.open-webui-env.path;
       };
     };
 }
