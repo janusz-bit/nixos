@@ -7,15 +7,15 @@
         inputs.hermes-agent.nixosModules.default
       ];
 
-      # Testowa zmiana od Hermesa – sprawdzenie dostępu do repozytorium
+      # Używamy Ollama Cloud przez OpenAI-compatible endpoint
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
         extraDependencyGroups = [ "all" ];
         settings.model = {
-          provider = "ollama-cloud";
-          base_url = "https://ollama.com/api";
-          default = "kimi-k2.6:cloud";
+          provider = "openai";
+          base_url = "https://ollama.com/v1";
+          default = "kimi-k2.6";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
         restart = "always";
