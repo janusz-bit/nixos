@@ -7,17 +7,17 @@
         inputs.hermes-agent.nixosModules.default
       ];
 
-      # Integracja Ollama + Hermes przez lokalny OpenAI-compatible endpoint.
-      # Wymaga ollama signin na serwerze, aby cloud modele były dostępne.
-      # Alternatywnie można użyć direct API: base_url = "https://ollama.com/v1" + OLLAMA_API_KEY.
+      # Hermes używa providera 'ollama-cloud' z OpenAI-compatible endpointem.
+      # https://ollama.com/v1/chat/completions wymaga OLLAMA_API_KEY w environmentFiles.
+      # Model 'kimi-k2.6' (bez :cloud) to ID dla direct API.
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
         extraDependencyGroups = [ "all" ];
         settings.model = {
-          provider = "openai";
-          base_url = "http://127.0.0.1:11434/v1";
-          default = "kimi-k2.6:cloud";
+          provider = "ollama-cloud";
+          base_url = "https://ollama.com/v1";
+          default = "kimi-k2.6";
         };
         environmentFiles = [ config.age.secrets.hermes-env.path ];
         restart = "always";
