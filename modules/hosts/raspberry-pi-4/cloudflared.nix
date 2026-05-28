@@ -21,6 +21,8 @@
             credentialsFile = config.age.secrets.cloudflared-tunnel.path;
             default = "http_status:404";
             ingress = {
+              "chat.${custom.site.full}" = "http://localhost:8080";
+              "hermes.${custom.site.full}" = "http://127.0.0.1:8642";
               "${custom.site.full}" = "http://localhost:80";
               "notes.${custom.site.full}" = "http://localhost:8081";
               "ssh.${custom.site.full}" = "ssh://localhost:22";
