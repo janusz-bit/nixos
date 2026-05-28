@@ -39,12 +39,12 @@
         group = "users";
         mode = "0440";
       };
-      # age.secrets.open-webui-env = {
-      #   file = custom.secretsDir + "/open-webui-env.age";
-      #   owner = "open-webui";
-      #   group = "open-webui";
-      #   mode = "0400";
-      # };
+      age.secrets.hermes-api-key = {
+        file = custom.secretsDir + "/hermes-api-key.age";
+        owner = "root";
+        group = "users";
+        mode = "0440";
+      };
       age.identityPaths = [
         "/root/.ssh/id_ed25519"
       ];

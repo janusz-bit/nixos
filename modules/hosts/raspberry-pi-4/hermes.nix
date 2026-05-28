@@ -31,7 +31,10 @@
           base_url = "https://ollama.com/v1";
           default = "kimi-k2.6";
         };
-        environmentFiles = [ config.age.secrets.hermes-env.path ];
+        environmentFiles = [
+          config.age.secrets.hermes-env.path
+          config.age.secrets.hermes-api-key.path
+        ];
         restart = "always";
         restartSec = 5;
       };

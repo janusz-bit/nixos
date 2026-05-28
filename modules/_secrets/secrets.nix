@@ -83,10 +83,11 @@ in
     ];
     armor = true;
   };
-  # "open-webui-env.age" = {
-  #   publicKeys = [
-  #     raspberry-pi-4
-  #   ];
-  #   armor = true;
-  # };
+  "hermes-api-key.age" = {
+    publicKeys = [
+      nixos
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
