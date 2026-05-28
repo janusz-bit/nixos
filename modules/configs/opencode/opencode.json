@@ -8,5 +8,16 @@
   ],
   "permission": {
     "websearch": "allow"
+  },
+  "mcp": {
+    "web_search_and_fetch": {
+      "type": "local",
+      "command": [
+        "uv",
+        "run",
+        "/etc/opencode/web-search-mcp.py"
+      ],
+      "enabled": true
+    }
   }
 }
