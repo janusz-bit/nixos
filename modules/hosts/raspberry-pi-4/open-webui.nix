@@ -1,16 +1,21 @@
 { ... }:
 {
   flake.nixosModules."raspberry-pi-4/open-webui" =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
       services.open-webui = {
         enable = true;
         host = "127.0.0.1";
         port = 8080;
         environment = {
-          OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+          # Point to Hermes Agent API Server (OpenAI-compatible)
+          OPENAI_API_BASE_URL = "http://127.0.0.1:8642/v1";
+          # Disable Ollama so it doesn't shadow the model picker
+          ENABLE_OLLAMA_API = "false";
           WEBUI_AUTH = "False";
         };
+        # API key must match Hermes API_SERVER_KEY
+        environmentFile = config.age.secrets.open-webui-env.path;
       };
     };
 }

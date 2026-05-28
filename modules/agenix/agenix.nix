@@ -45,6 +45,12 @@
         group = "hermes";
         mode = "0400";
       };
+      age.secrets.open-webui-env = {
+        file = custom.secretsDir + "/open-webui-env.age";
+        owner = "open-webui";
+        group = "open-webui";
+        mode = "0400";
+      };
       age.identityPaths = [
         "/root/.ssh/id_ed25519"
       ];

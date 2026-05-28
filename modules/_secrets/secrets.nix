@@ -83,4 +83,10 @@ in
     ];
     armor = true;
   };
+  "open-webui-env.age" = {
+    publicKeys = [
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }

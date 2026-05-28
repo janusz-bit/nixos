@@ -9,7 +9,7 @@
         self.nixosModules."raspberry-pi-4/cloudflared"
         self.nixosModules."raspberry-pi-4/pwm-fan"
         self.nixosModules."raspberry-pi-4/hermes"
-        # self.nixosModules."raspberry-pi-4/open-webui"
+        self.nixosModules."raspberry-pi-4/open-webui"
         self.nixosModules."base/agenix"
         self.nixosModules."raspberry-pi-4/specific"
         self.nixosModules."raspberry-pi-4/configuration"
