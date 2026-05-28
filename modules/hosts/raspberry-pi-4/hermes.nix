@@ -6,7 +6,7 @@
 }:
 {
   flake.nixosModules."raspberry-pi-4/hermes" =
-    { config, ... }:
+    { config, pkgs, ... }:
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -45,6 +45,26 @@
         MATRIX_HOMESERVER_URL = "https://matrix.org";
         MATRIX_USER_ID = "@janusz-bit:matrix.org";
         MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
+      };
+
+      services.hermes-agent.extraPackages = [
+        pkgs.uv
+        pkgs.python312
+      ];
+
+      services.hermes-agent.mcpServers = {
+        web_search_and_fetch = {
+          command = "${pkgs.uv}/bin/uv";
+          args = [
+            "run"
+            "--with"
+            "mcp>=1.0.0"
+            "--with"
+            "ollama>=0.6.0"
+            "/etc/opencode/web-search-mcp.py"
+          ];
+          env = { };
+        };
       };
 
       services.ollama.enable = true;
