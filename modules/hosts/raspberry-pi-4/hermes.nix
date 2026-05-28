@@ -28,6 +28,11 @@
         API_SERVER_ENABLED = "true";
         API_SERVER_PORT = "8642";
         API_SERVER_HOST = "127.0.0.1";
+
+        # Matrix
+        MATRIX_HOMESERVER_URL = "https://matrix.org";
+        MATRIX_USER_ID = "@janusz-bit:matrix.org";
+        MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
       };
 
       services.ollama.enable = true;
