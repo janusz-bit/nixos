@@ -55,6 +55,11 @@
         pkgs.python312
       ];
 
+      # The MCP script lives in the opencode config tree but must also be
+      # present on this host so that Hermes can spawn it as a stdio server.
+      environment.etc."opencode/web-search-mcp.py".source =
+        self + /modules/configs/opencode/web-search-mcp.py;
+
       services.hermes-agent.mcpServers = {
         web_search_and_fetch = {
           command = "${pkgs.uv}/bin/uv";
