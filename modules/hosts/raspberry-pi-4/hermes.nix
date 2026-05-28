@@ -1,4 +1,9 @@
-{ self, inputs, ... }:
+{
+  self,
+  inputs,
+  custom,
+  ...
+}:
 {
   flake.nixosModules."raspberry-pi-4/hermes" =
     { config, ... }:
@@ -6,6 +11,13 @@
       imports = [
         inputs.hermes-agent.nixosModules.default
       ];
+
+      age.secrets.hermes-env = {
+        file = custom.secretsDir + "/hermes-env.age";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+      };
 
       # Hermes używa providera 'ollama-cloud' z OpenAI-compatible endpointem.
       # https://ollama.com/v1/chat/completions wymaga OLLAMA_API_KEY w environmentFiles.

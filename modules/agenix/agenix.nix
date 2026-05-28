@@ -39,12 +39,6 @@
         group = "users";
         mode = "0440";
       };
-      age.secrets.hermes-env = {
-        file = custom.secretsDir + "/hermes-env.age";
-        owner = "hermes";
-        group = "hermes";
-        mode = "0400";
-      };
       # age.secrets.open-webui-env = {
       #   file = custom.secretsDir + "/open-webui-env.age";
       #   owner = "open-webui";
