@@ -32,7 +32,7 @@ A shared set of modules included in every system deployment.
 * `nix-index-database` with `comma` integration.
 * `direnv` enabled.
 * Default editor: `micro`.
-* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Ollama provider with `glm-5.1` model, `superpowers` and `caveman-opencode-plugin` plugins). Installed on all hosts through the `base/opencode` module.
+* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Ollama provider with `gemma4:31b-cloud` model, `superpowers`, `caveman-opencode-plugin`, and `opencode-skillful` plugins). Installed on all hosts through the `base/opencode` module.
 
 #### Shell Aliases (all hosts)
 | Alias | Command |
@@ -72,6 +72,8 @@ A headless `aarch64-linux` deployment for network services.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted), SSH key-only.
 * **Nix GC**: daily, deletes derivations older than 3 days; max 2 build jobs.
 * **Nextcloud 33**: PostgreSQL backend (locally created), Redis cache, 2GB upload limit, accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled).
+* **Hermes Agent**: AI agent service (`services.hermes-agent`) z włączonym API serverem (port 8642), modelem `kimi-k2.6:cloud` via Ollama Cloud, dodatkowymi zależnościami (`extraDependencyGroups = [ "all" ]`).
+* **Ollama**: Lokalny backend LLM (`services.ollama.enable`).
 * **Cloudflared**: Tunnel to expose services externally.
 * **Trilium**: Note-taking server (overlay applied).
 * **Fan control**: Custom Python-based systemd service (`pwm-fan`) for GPIO PWM fan control based on CPU temperature.
@@ -105,11 +107,9 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 
 ## Centralized Configuration (`options.nix`)
 `modules/options.nix` is the single source of truth for global variables, exported as `options.custom` and `_module.args.custom`:
-* **Repository**: `janusz-bit/nixos` on GitHub, stored at `/etc/nixos`.
-* **Email**: `janusz-bit@proton.me`.
-* **Domain**: `janusz-bit.com`.
-* **Cache**: `janusz-bit.cachix.org`.
 * **Options**: `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
+
+Note: Repository metadata (repo URL, email, domain, cache) was previously centralized here but has been removed from `options.nix` in recent refactors.
 
 ## Dev Shell Tools
 Running `nix develop` provides:

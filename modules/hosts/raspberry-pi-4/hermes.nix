@@ -7,6 +7,7 @@
         inputs.hermes-agent.nixosModules.default
       ];
 
+      # Testowa zmiana od Hermesa – sprawdzenie dostępu do repozytorium
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
