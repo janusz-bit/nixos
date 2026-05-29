@@ -55,11 +55,6 @@
         pkgs.python312
       ];
 
-      # The MCP script lives in the opencode config tree but must also be
-      # present on this host so that Hermes can spawn it as a stdio server.
-      environment.etc."opencode/web-search-mcp.py".source =
-        self + /modules/configs/opencode/web-search-mcp.py;
-
       services.hermes-agent.mcpServers = {
         web_search_and_fetch = {
           command = "${pkgs.uv}/bin/uv";
@@ -69,7 +64,8 @@
             "mcp>=1.0.0"
             "--with"
             "ollama>=0.6.0"
-            "/etc/opencode/web-search-mcp.py"
+            # ProtectSystem=strict hides /etc, so use the store path directly.
+            "${self + /modules/configs/opencode/web-search-mcp.py}"
           ];
           # Hermes filters env for stdio MCP – must explicitly pass OLLAMA_API_KEY.
           # ${OLLAMA_API_KEY} is resolved by Hermes at connect time from the
