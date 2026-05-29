@@ -81,7 +81,7 @@
         };
 
         local_mcp = {
-          url = "https://localhost:443/mcp";
+          url = "http://127.0.0.1:8081/mcp";
           enabled = true;
           connect_timeout = 30;
           timeout = 60;
