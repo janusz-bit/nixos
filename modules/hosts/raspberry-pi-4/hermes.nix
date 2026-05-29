@@ -96,5 +96,25 @@
         "users"
         "keys"
       ];
+
+      security.sudo.extraRules = [
+        {
+          users = [ "hermes" ];
+          commands = [
+            {
+              command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
+              options = [ "NOPASSWD" ];
+            }
+            {
+              command = "${pkgs.git}/bin/git";
+              options = [ "NOPASSWD" ];
+            }
+            {
+              command = "ALL";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }
+      ];
     };
 }
