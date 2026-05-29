@@ -85,7 +85,10 @@
           enabled = true;
           connect_timeout = 30;
           timeout = 60;
-          headers = { };
+          headers = {
+            # Hermes interpolates \${VAR} at MCP connect time from .env.
+            Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
+          };
         };
       };
 
