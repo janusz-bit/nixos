@@ -79,6 +79,14 @@
           connect_timeout = 300;
           timeout = 300;
         };
+
+        local_mcp = {
+          url = "https://localhost:443/mcp";
+          enabled = true;
+          connect_timeout = 30;
+          timeout = 60;
+          headers = { };
+        };
       };
 
       services.ollama.enable = true;
