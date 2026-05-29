@@ -84,6 +84,9 @@
       services.ollama.enable = true;
 
       users.users.nixos.extraGroups = [ "hermes" ];
-      users.users.hermes.extraGroups = [ "users" ];
+      users.users.hermes.extraGroups = [
+        "users"
+        "keys"
+      ];
     };
 }
