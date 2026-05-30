@@ -17,7 +17,7 @@
           WEBUI_AUTH = "True";
         };
         # Shared API key with Hermes Agent (API_SERVER_KEY=OPENAI_API_KEY)
-        environmentFile = config.age.secrets.hermes-api-key.path;
+        environmentFile = config.age.secrets.hermes-env.path;
       };
     };
 }
