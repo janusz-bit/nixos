@@ -93,18 +93,8 @@
 
       services.ollama.enable = true;
       # Ollama cloud models (e.g. glm-5.1:cloud) require OLLAMA_API_KEY.
-      # The agenix secret file contains only the raw key value (no KEY= prefix),
-      # so we generate a proper EnvironmentFile in ExecStartPre running as root
-      # (the + prefix) to read the secret and write /run/ollama-env.
-      systemd.services.ollama.serviceConfig.ExecStartPre =
-        let
-          script = pkgs.writeShellScript "ollama-create-env" ''
-            printf 'OLLAMA_API_KEY=%s\n' "$(${pkgs.coreutils}/bin/cat ${config.age.secrets.ollama-api-key.path})" \
-              > /run/ollama-env
-          '';
-        in
-        [ "+${script}" ];
-      systemd.services.ollama.serviceConfig.EnvironmentFile = "-/run/ollama-env";
+      # Reuse hermes-env which already contains OLLAMA_API_KEY=... in KEY=VALUE format.
+      systemd.services.ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
       users.users.nixos.extraGroups = [ "hermes" ];
       users.users.hermes.extraGroups = [
