@@ -33,7 +33,6 @@
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
-          config.age.secrets.hermes-api-key.path
         ];
         restart = "always";
         restartSec = 5;
