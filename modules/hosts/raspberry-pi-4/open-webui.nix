@@ -13,10 +13,6 @@
           # OpenAI-compatible API → Hermes Agent
           ENABLE_OPENAI_API = "true";
           OPENAI_API_BASE_URL = "http://127.0.0.1:8642/v1";
-          # Ollama local backend
-          ENABLE_OLLAMA_API = "true";
-          OLLAMA_BASE_URL = "http://127.0.0.1:11434";
-          OLLAMA_API_BASE_URL = "http://127.0.0.1:11434/api";
           # Require authentication (first registered user becomes admin)
           WEBUI_AUTH = "True";
         };
