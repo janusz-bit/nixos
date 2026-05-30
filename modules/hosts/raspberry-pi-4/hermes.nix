@@ -95,7 +95,7 @@
       # Ollama cloud models (e.g. glm-5.1:cloud) require OLLAMA_API_KEY.
       # EnvironmentFile is read by systemd as root before DynamicUser drops
       # privileges, so root:users 0440 permissions are sufficient.
-      systemd.services.ollama.serviceConfig.EnvironmentFile = config.age.secrets.ollama-api-key.path;
+      systemd.services.ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
       users.users.nixos.extraGroups = [ "hermes" ];
       users.users.hermes.extraGroups = [
