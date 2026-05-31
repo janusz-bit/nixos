@@ -55,8 +55,6 @@
         MATRIX_HOME_ROOM = "!WnDTFSIppijIMxrwux:matrix.org";
       };
 
-      systemd.services.hermes-agent.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
-
       services.hermes-agent.extraPackages = [
         pkgs.uv
         pkgs.python312
