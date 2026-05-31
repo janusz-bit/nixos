@@ -28,6 +28,7 @@
         extraDependencyGroups = [
           "all"
           "messaging"
+          "matrix"
         ];
         settings.model = {
           provider = "ollama-cloud";
