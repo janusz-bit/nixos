@@ -51,6 +51,8 @@
         MATRIX_HOMESERVER = "https://matrix.org";
         MATRIX_USER_ID = "@hermes-janusz-bit:matrix.org";
         MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
+        MATRIX_ENCRYPTION = "true";
+        MATRIX_HOME_ROOM = "!WnDTFSIppijIMxrwux:matrix.org";
       };
 
       systemd.services.hermes-agent.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
