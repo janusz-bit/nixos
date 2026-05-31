@@ -22,6 +22,7 @@
             default = "http_status:404";
             ingress = {
               "chat.${custom.site.full}" = "http://localhost:8080";
+              "agent.${custom.site.full}" = "http://localhost:8787";
               "${custom.site.full}" = "http://localhost:80";
               "notes.${custom.site.full}" = "http://localhost:8081";
               "ssh.${custom.site.full}" = "ssh://localhost:22";
