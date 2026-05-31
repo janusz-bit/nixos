@@ -45,7 +45,7 @@
 
         # Matrix
         MATRIX_HOMESERVER_URL = "https://matrix.org";
-        MATRIX_USER_ID = "@janusz-bit:matrix.org";
+        MATRIX_USER_ID = "@hermes-janusz-bit:matrix.org";
         MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
       };
 
