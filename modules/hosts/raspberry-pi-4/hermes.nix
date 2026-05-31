@@ -53,6 +53,8 @@
         MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
       };
 
+      systemd.services.hermes-agent.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
+
       services.hermes-agent.extraPackages = [
         pkgs.uv
         pkgs.python312
