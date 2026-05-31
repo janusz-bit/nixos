@@ -25,7 +25,10 @@
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
-        extraDependencyGroups = [ "all" ];
+        extraDependencyGroups = [
+          "all"
+          "messaging"
+        ];
         settings.model = {
           provider = "ollama-cloud";
           base_url = "https://ollama.com/v1";
