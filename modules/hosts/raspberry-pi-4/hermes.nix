@@ -46,13 +46,6 @@
         API_SERVER_ENABLED = "true";
         API_SERVER_PORT = "8642";
         API_SERVER_HOST = "127.0.0.1";
-
-        # Matrix
-        MATRIX_HOMESERVER = "https://matrix.org";
-        MATRIX_USER_ID = "@hermes-janusz-bit:matrix.org";
-        MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
-        MATRIX_ENCRYPTION = "true";
-        MATRIX_HOME_ROOM = "!WnDTFSIppijIMxrwux:matrix.org";
       };
 
       services.hermes-agent.extraPackages = [
