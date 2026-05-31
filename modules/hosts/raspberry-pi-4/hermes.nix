@@ -47,7 +47,7 @@
         API_SERVER_HOST = "127.0.0.1";
 
         # Matrix
-        MATRIX_HOMESERVER_URL = "https://matrix.org";
+        MATRIX_HOMESERVER = "https://matrix.org";
         MATRIX_USER_ID = "@hermes-janusz-bit:matrix.org";
         MATRIX_ALLOWED_USERS = "@janusz-bit:matrix.org";
       };
