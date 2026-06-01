@@ -21,7 +21,7 @@
 
       # Hermes używa providera 'ollama-cloud' z OpenAI-compatible endpointem.
       # https://ollama.com/v1/chat/completions wymaga OLLAMA_API_KEY w environmentFiles.
-      # Model 'kimi-k2.6' (bez :cloud) to ID dla direct API.
+      # Model 'minimax-m3:cloud' to ID dla Ollama Cloud API.
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
@@ -33,7 +33,7 @@
         settings.model = {
           provider = "ollama-cloud";
           base_url = "https://ollama.com/v1";
-          default = "kimi-k2.6";
+          default = "minimax-m3:cloud";
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
