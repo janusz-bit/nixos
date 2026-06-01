@@ -33,7 +33,6 @@
         environmentFiles = [ config.age.secrets.hermes-webui-env.path ];
         extraOptions = [
           "--pull=always"
-          "--restart=always"
         ];
       };
 
