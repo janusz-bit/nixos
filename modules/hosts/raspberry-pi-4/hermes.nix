@@ -31,8 +31,7 @@
           "matrix"
         ];
         settings.model = {
-          provider = "ollama-cloud";
-          base_url = "https://ollama.com/v1";
+          provider = "google";
           default = "gemini-3.1-pro-preview";
         };
         environmentFiles = [
