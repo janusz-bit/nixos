@@ -90,4 +90,11 @@ in
     ];
     armor = true;
   };
+  "hermes-webui-env.age" = {
+    publicKeys = [
+      nixos
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
