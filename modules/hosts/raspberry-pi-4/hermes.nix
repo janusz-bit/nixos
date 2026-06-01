@@ -30,9 +30,16 @@
           "messaging"
           "matrix"
         ];
-        settings.model = {
-          provider = "google";
-          default = "gemini-3.1-pro-preview";
+        settings = {
+          model = {
+            provider = "google";
+            default = "gemini-3.1-pro-preview";
+          };
+          # Free web search via DuckDuckGo (no API key required).
+          # Hermes lazy-installs the ddgs package on first use.
+          # If you need web_extract as well, add an extract_backend:
+          #   web = { search_backend = "ddgs"; extract_backend = "firecrawl"; };
+          web.backend = "ddgs";
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
@@ -49,35 +56,15 @@
 
       services.hermes-agent.extraPackages = [
         pkgs.uv
-        pkgs.python312
+        (pkgs.python312.withPackages (
+          python-pkgs: with python-pkgs; [
+            ddgs
+          ]
+        ))
       ];
 
       services.hermes-agent.mcpServers = {
-        web_search_and_fetch = {
-          command = "${pkgs.uv}/bin/uv";
-          args = [
-            "run"
-            "--with"
-            "mcp>=1.0.0"
-            "--with"
-            "ollama>=0.6.0"
-            # ProtectSystem=strict hides /etc, so use the store path directly.
-            "${self + /modules/configs/opencode/web-search-mcp.py}"
-          ];
-          # Hermes filters env for stdio MCP – must explicitly pass OLLAMA_API_KEY.
-          # ${OLLAMA_API_KEY} is resolved by Hermes at connect time from the
-          # merged .env file (environmentFiles above) and substituted into the
-          # subprocess environment. Escaping \${} produces a literal ${} in
-          # the generated YAML that Hermes (not Nix) interprets.
-          env = {
-            OLLAMA_API_KEY = "\${OLLAMA_API_KEY}";
-          };
-          # RPi4 needs extra time for uv to resolve/download wheels on first run.
-          connect_timeout = 300;
-          timeout = 300;
-        };
-
-        local_mcp = {
+        trilium-notes = {
           url = "http://127.0.0.1:8081/mcp";
           enabled = true;
           connect_timeout = 30;
