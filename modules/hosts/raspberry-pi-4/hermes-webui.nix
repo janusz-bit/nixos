@@ -1,11 +1,10 @@
-{ ... }:
+{ self, custom, ... }:
 {
   flake.nixosModules."raspberry-pi-4/hermes-webui" =
     {
       config,
       pkgs,
       lib,
-      custom,
       ...
     }:
     {
