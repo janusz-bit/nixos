@@ -22,7 +22,7 @@
         ports = [ "127.0.0.1:8787:8787" ];
         volumes = [
           "hermes-webui-state:/home/hermeswebui/.hermes/webui"
-          "${inputs.hermes-agent}:/home/hermeswebui/.hermes/hermes-agent:ro"
+          "${inputs.hermes-agent}:/hermes-agent:ro"
         ];
         environment = {
           HERMES_WEBUI_CHAT_BACKEND = "gateway";
@@ -31,6 +31,7 @@
           HERMES_WEBUI_PORT = "8787";
           HERMES_WEBUI_STATE_DIR = "/home/hermeswebui/.hermes/webui";
           HERMES_WEBUI_DEFAULT_MODEL = "kimi-k2.6";
+          HERMES_WEBUI_AGENT_DIR = "/hermes-agent";
           HERMES_HOME = "/home/hermeswebui/.hermes";
         };
         environmentFiles = [ config.age.secrets.hermes-webui-env.path ];
