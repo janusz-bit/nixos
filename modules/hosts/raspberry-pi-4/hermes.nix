@@ -33,7 +33,7 @@
         settings.model = {
           provider = "ollama-cloud";
           base_url = "https://ollama.com/v1";
-          default = "minimax-m3:cloud";
+          default = "gemini-3.1-pro-preview";
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
