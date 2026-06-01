@@ -45,7 +45,7 @@
       services.hermes-agent.environment = {
         API_SERVER_ENABLED = "true";
         API_SERVER_PORT = "8642";
-        API_SERVER_HOST = "127.0.0.1";
+        API_SERVER_HOST = "0.0.0.0";
       };
 
       services.hermes-agent.extraPackages = [

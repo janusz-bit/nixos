@@ -29,6 +29,8 @@
           HERMES_WEBUI_HOST = "0.0.0.0";
           HERMES_WEBUI_PORT = "8787";
           HERMES_WEBUI_STATE_DIR = "/home/hermeswebui/.hermes/webui";
+          HERMES_WEBUI_DEFAULT_MODEL = "kimi-k2.6";
+          HERMES_HOME = "/home/hermeswebui/.hermes";
         };
         environmentFiles = [ config.age.secrets.hermes-webui-env.path ];
         extraOptions = [
