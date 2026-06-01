@@ -31,7 +31,7 @@
           HERMES_WEBUI_PORT = "8787";
           HERMES_WEBUI_STATE_DIR = "/home/hermeswebui/.hermes/webui";
         };
-        environmentFile = config.age.secrets.hermes-webui-env.path;
+        environmentFiles = [ config.age.secrets.hermes-webui-env.path ];
         extraOptions = [
           "--pull=always"
           "--restart=always"
