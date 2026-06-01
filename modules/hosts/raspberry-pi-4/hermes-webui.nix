@@ -10,7 +10,7 @@
     {
       # Agenix secret for env vars (HERMES_WEBUI_PASSWORD, HERMES_WEBUI_GATEWAY_API_KEY)
       age.secrets.hermes-webui-env = {
-        file = custom.secretsDir + "/hermes-webui.env.age";
+        file = custom.secretsDir + "/hermes-webui-env.age";
         owner = "root";
         group = "root";
         mode = "0400";
