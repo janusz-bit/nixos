@@ -1,8 +1,12 @@
-{ ... }:
+{ custom, ... }:
 {
   flake.nixosModules."raspberry-pi-4/open-webui" =
     { config, pkgs, ... }:
     {
+      age.secrets.open-webui-hermes-env = {
+        file = custom.secretsDir + "/hermes-env.age";
+      };
+
       services.open-webui = {
         enable = true;
         host = "127.0.0.1";
@@ -17,7 +21,7 @@
           WEBUI_AUTH = "True";
         };
         # Shared API key with Hermes Agent (API_SERVER_KEY=OPENAI_API_KEY)
-        environmentFile = config.age.secrets.hermes-env.path;
+        environmentFile = config.age.secrets.open-webui-hermes-env.path;
       };
     };
 }
