@@ -31,9 +31,9 @@
         kdePackages.elisa
         sbctl
         joplin-desktop
-        bitwarden-desktop
-         trilium-desktop
-       ];
+        # bitwarden-desktop
+        trilium-desktop
+      ];
       # Install firefox.
       programs.firefox.enable = true;
       hardware.wooting.enable = true;
