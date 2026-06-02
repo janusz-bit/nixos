@@ -82,6 +82,9 @@ in
     }:
 
     {
+      nixpkgs.config.permittedInsecurePackages = [
+        "electron-39.8.10"
+      ];
 
       imports = [ inputs.nix-index-database.nixosModules.default ];
       nixpkgs.config.allowUnfree = true;
