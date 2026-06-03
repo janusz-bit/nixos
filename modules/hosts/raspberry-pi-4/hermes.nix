@@ -38,7 +38,9 @@
           # Free web search via DuckDuckGo (no API key required).
           # Hermes lazy-installs the ddgs package on first use.
           # If you need web_extract as well, add an extract_backend:
-          #   web = { search_backend = "ddgs"; extract_backend = "firecrawl"; };
+          web = {
+            search_backend = "ddgs";
+          };
           web.backend = "ddgs";
         };
         environmentFiles = [
