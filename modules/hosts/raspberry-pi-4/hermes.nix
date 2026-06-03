@@ -7,6 +7,16 @@
 {
   flake.nixosModules."raspberry-pi-4/hermes" =
     { config, pkgs, ... }:
+    let
+      # Definiujemy środowisko Pythona w zmiennej, aby móc wyciągnąć absolutną ścieżkę
+      hermesPythonEnv = pkgs.python3.withPackages (
+        python-pkgs: with python-pkgs; [
+          ddgs
+          pip
+          mcp
+        ]
+      );
+    in
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -19,9 +29,6 @@
         mode = "0400";
       };
 
-      # Hermes używa providera 'ollama-cloud' z OpenAI-compatible endpointem.
-      # https://ollama.com/v1/chat/completions wymaga OLLAMA_API_KEY w environmentFiles.
-      # Model 'minimax-m3:cloud' to ID dla Ollama Cloud API.
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
@@ -35,9 +42,6 @@
             provider = "google";
             default = "gemini-3.5-flash";
           };
-          # Free web search via DuckDuckGo (no API key required).
-          # Hermes lazy-installs the ddgs package on first use.
-          # If you need web_extract as well, add an extract_backend:
           web.backend = "ddgs";
         };
         environmentFiles = [
@@ -55,13 +59,7 @@
 
       services.hermes-agent.extraPackages = [
         pkgs.uv
-        (pkgs.python3.withPackages (
-          python-pkgs: with python-pkgs; [
-            ddgs
-            pip
-            mcp
-          ]
-        ))
+        hermesPythonEnv # Używamy zdefiniowanego wyżej środowiska
       ];
 
       services.hermes-agent.mcpServers = {
@@ -71,12 +69,12 @@
           connect_timeout = 30;
           timeout = 60;
           headers = {
-            # Hermes interpolates \${VAR} at MCP connect time from .env.
             Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
           };
         };
         ddgs-mcp = {
-          command = "ddgs";
+          # GŁÓWNA ZMIANA: absolutna ścieżka do binarki wygenerowanej przez Nix
+          command = "${hermesPythonEnv}/bin/ddgs";
           args = [ "mcp" ];
           enabled = true;
           connect_timeout = 30;
@@ -85,8 +83,6 @@
       };
 
       services.ollama.enable = true;
-      # Ollama cloud models (e.g. glm-5.1:cloud) require OLLAMA_API_KEY.
-      # Reuse hermes-env which already contains OLLAMA_API_KEY=... in KEY=VALUE format.
       systemd.services.ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
       users.users.nixos.extraGroups = [ "hermes" ];
