@@ -85,6 +85,13 @@
           connect_timeout = 30;
           timeout = 60;
         };
+        nixos = {
+          command = "uvx";
+          args = [ "mcp-nixos" ];
+          enabled = true;
+          connect_timeout = 30;
+          timeout = 60;
+        };
       };
 
       services.ollama.enable = true;
