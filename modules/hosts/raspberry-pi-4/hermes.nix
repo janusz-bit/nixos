@@ -74,6 +74,13 @@
             Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
           };
         };
+        ddgs-mcp = {
+          command = "ddgs";
+          args = [ "mcp" ];
+          enabled = true;
+          connect_timeout = 30;
+          timeout = 60;
+        };
       };
 
       services.ollama.enable = true;
