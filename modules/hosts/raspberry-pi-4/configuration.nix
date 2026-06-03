@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   flake.nixosModules."raspberry-pi-4/configuration" =
     {
@@ -12,6 +12,7 @@
 
       nixpkgs.overlays = [
         self.overlays.trilium
+        self.overlays.hermes
       ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
@@ -71,6 +72,7 @@
       environment.systemPackages = with pkgs; [
         micro
         htop
+        hermes-full
       ];
 
       # User configuration
