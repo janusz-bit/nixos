@@ -57,7 +57,7 @@
         pkgs.uv
         (pkgs.python3.withPackages (
           python-pkgs: with python-pkgs; [
-            ddgs
+            # ddgs
             pip
           ]
         ))
