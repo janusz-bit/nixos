@@ -55,9 +55,10 @@
 
       services.hermes-agent.extraPackages = [
         pkgs.uv
-        (pkgs.python312.withPackages (
+        (pkgs.python3.withPackages (
           python-pkgs: with python-pkgs; [
             ddgs
+            pip
           ]
         ))
       ];
