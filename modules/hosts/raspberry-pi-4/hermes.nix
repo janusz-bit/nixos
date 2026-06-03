@@ -77,7 +77,7 @@
         };
         ddgs-mcp = {
           command = "ddgs";
-          mcp = [ "mcp" ];
+          args = [ "mcp" ];
           enabled = true;
           connect_timeout = 30;
           timeout = 60;
