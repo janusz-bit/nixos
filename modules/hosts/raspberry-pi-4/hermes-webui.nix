@@ -6,7 +6,12 @@
 }:
 {
   flake.nixosModules."raspberry-pi-4/hermes-webui" =
-    { config, pkgs, lib, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     {
       # Agenix secret for env vars (HERMES_WEBUI_PASSWORD, HERMES_WEBUI_GATEWAY_API_KEY)
       age.secrets.hermes-webui-env = {
