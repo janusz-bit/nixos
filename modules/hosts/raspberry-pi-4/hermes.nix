@@ -33,7 +33,7 @@
         settings = {
           model = {
             provider = "google";
-            default = "gemini-3.1-pro-preview";
+            default = "gemini-3.5-flash";
           };
           # Free web search via DuckDuckGo (no API key required).
           # Hermes lazy-installs the ddgs package on first use.
