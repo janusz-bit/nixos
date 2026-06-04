@@ -1,6 +1,6 @@
 { custom, ... }:
 {
-  flake.nixosModules."raspberry-pi-4/open-webui" =
+  flake.modules.nixos.open-webui =
     { config, pkgs, ... }:
     {
       age.secrets.open-webui-hermes-env = {

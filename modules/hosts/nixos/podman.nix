@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules."nixos/podman" =
+  flake.modules.nixos.nixos-podman =
     {
       config,
       pkgs,

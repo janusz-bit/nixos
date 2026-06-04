@@ -1,6 +1,6 @@
 { inputs, custom, ... }:
 {
-  flake.nixosModules."agenix" =
+  flake.modules.nixos.agenix =
     { config, ... }:
     {
       age.secrets.ollama-api-key = {

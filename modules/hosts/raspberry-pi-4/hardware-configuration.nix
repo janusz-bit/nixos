@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules."raspberry-pi-4/hardware-configuration" =
+  flake.modules.nixos.rpi-hardware-configuration =
     import ./_hardware-configuration/hardware-configuration.nix;
 
 }

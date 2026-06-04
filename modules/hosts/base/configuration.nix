@@ -74,7 +74,7 @@ let
   };
 in
 {
-  flake.nixosModules."base/configuration" =
+  flake.modules.nixos.base-configuration =
     {
       pkgs,
       config,

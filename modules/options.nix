@@ -4,7 +4,7 @@
 # and default user settings (`options.custom` and `_module.args.custom`).
 { self, inputs, ... }:
 {
-  flake.nixosModules."options" =
+  flake.modules.nixos.options =
     { lib, config, ... }:
     {
       options.custom.flakeTarget = lib.mkOption {

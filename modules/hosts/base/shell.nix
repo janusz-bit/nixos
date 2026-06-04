@@ -59,7 +59,7 @@ let
     ];
 in
 {
-  flake.nixosModules."base/shell" =
+  flake.modules.nixos.base-shell =
     { pkgs, config, ... }:
     {
       programs.bash = {

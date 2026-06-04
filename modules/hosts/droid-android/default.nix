@@ -1,15 +1,15 @@
-{ inputs, self, ... }:
+{ inputs, self, config, ... }:
 {
-  flake.nixosModules."droid/stateVersion" = _: {
+  flake.modules.nixos.droid-stateVersion = _: {
     system.stateVersion = "26.05";
   };
 
   flake.nixosConfigurations.droid = inputs.nixpkgs.lib.nixosSystem {
     system = "aarch64-linux";
     modules = [
-      self.nixosModules."base"
+      self.modules.nixos.base
       inputs.avf.nixosModules.avf
-      self.nixosModules."droid/stateVersion"
+      self.modules.nixos.droid-stateVersion
       (
         { lib, pkgs, ... }:
         {

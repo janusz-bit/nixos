@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules."nix/settings" =
+  flake.modules.nixos.nix-settings =
     { ... }:
     {
       nix.gc.automatic = true;

@@ -6,26 +6,27 @@
   inputs,
   self,
   lib,
+  config,
   ...
 }:
 {
-  flake.nixosModules."raspberry-pi-4" =
+  flake.modules.nixos.raspberry-pi-4 =
     { pkgs, ... }:
     {
       imports = [
-        self.nixosModules."raspberry-pi-4/nextcloud"
-        self.nixosModules."raspberry-pi-4/trilium"
-        self.nixosModules."raspberry-pi-4/cloudflared"
-        self.nixosModules."raspberry-pi-4/pwm-fan"
-        self.nixosModules."raspberry-pi-4/hermes"
-        self.nixosModules."raspberry-pi-4/open-webui"
-        self.nixosModules."base/agenix"
-        self.nixosModules."raspberry-pi-4/specific"
-        self.nixosModules."raspberry-pi-4/configuration"
+        self.modules.nixos.nextcloud
+        self.modules.nixos.trilium
+        self.modules.nixos.cloudflared
+        self.modules.nixos.pwm-fan
+        self.modules.nixos.hermes
+        self.modules.nixos.open-webui
+        self.modules.nixos.base-agenix
+        self.modules.nixos.rpi-specific
+        self.modules.nixos.rpi-configuration
         inputs.nixos-hardware.nixosModules.raspberry-pi-4
-        self.nixosModules."base/git"
-        self.nixosModules."base/configuration"
-        self.nixosModules."options"
+        self.modules.nixos.base-git
+        self.modules.nixos.base-configuration
+        self.modules.nixos.options
         (_: {
           custom.flakeTarget = "raspberry-pi-4";
           custom.defaultUser = "nixos";
@@ -36,8 +37,8 @@
   flake.nixosConfigurations.raspberry-pi-4 = inputs.nixpkgs.lib.nixosSystem {
     modules = [
       { nixpkgs.hostPlatform = "aarch64-linux"; }
-      self.nixosModules."raspberry-pi-4"
-      self.nixosModules."raspberry-pi-4/hardware-configuration"
+      self.modules.nixos.raspberry-pi-4
+      self.modules.nixos.rpi-hardware-configuration
     ];
   };
 }

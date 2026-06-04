@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules."raspberry-pi-4/specific" = _: {
+  flake.modules.nixos.rpi-specific = _: {
     system.stateVersion = "26.05";
   };
 }

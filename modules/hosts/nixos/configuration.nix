@@ -1,6 +1,6 @@
 { inputs, self, ... }:
 {
-  flake.nixosModules."nixos/configuration" =
+  flake.modules.nixos.nixos-configuration =
     {
       config,
       pkgs,

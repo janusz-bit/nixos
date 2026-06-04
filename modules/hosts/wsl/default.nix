@@ -1,14 +1,14 @@
-{ inputs, self, ... }:
+{ inputs, self, config, ... }:
 {
-  flake.nixosModules."wsl" =
+  flake.modules.nixos.wsl =
     { pkgs, ... }:
     {
       imports = [
-        self.nixosModules."wsl/stateVersion"
-        # self.nixosModules."wsl/obsidian"
+        self.modules.nixos.wsl-stateVersion
+        # self.modules.nixos.wsl-obsidian
 
         inputs.nixos-wsl.nixosModules.default
-        self.nixosModules."wsl/settings"
+        self.modules.nixos.wsl-settings
       ];
       environment.systemPackages = with pkgs; [ zed-editor-fhs ];
     };
@@ -16,8 +16,8 @@
   flake.nixosConfigurations.wsl = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = [
-      self.nixosModules."base"
-      self.nixosModules."wsl"
+      self.modules.nixos.base
+      self.modules.nixos.wsl
       (_: {
         custom.enableFastfetch = false;
         custom.flakeTarget = "wsl";

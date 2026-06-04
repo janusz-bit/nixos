@@ -1,28 +1,27 @@
-{ inputs, self, ... }:
-rec {
-  flake.nixosModules.nixos =
+{ inputs, self, config, ... }:
+{
+  flake.modules.nixos.nixos =
     { ... }:
     {
       imports = [
-        self.nixosModules."nixos/specific"
-        self.nixosModules."nixos/configuration"
-        self.nixosModules."nixos/hardware-configuration"
-        self.nixosModules."nixos/packages"
-        # self.nixosModules."nixos/openclaw"
-        self.nixosModules."nixos/podman"
-        self.nixosModules."disko"
-        self.nixosModules."nixos/niri"
-        self.nixosModules."nixos/ai"
-        self.nixosModules."nixos/appimage-run"
+        self.modules.nixos.nixos-specific
+        self.modules.nixos.nixos-configuration
+        self.modules.nixos.nixos-hardware-configuration
+        self.modules.nixos.nixos-packages
+        self.modules.nixos.nixos-podman
+        self.modules.nixos.disko
+        self.modules.nixos.nixos-niri
+        self.modules.nixos.nixos-ai
+        self.modules.nixos.nixos-appimage-run
       ];
     };
 
   flake.nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = [
-      self.nixosModules."base"
-      self.nixosModules.nixos
-      self.nixosModules."hardware/LOQ-15IRX10"
+      self.modules.nixos.base
+      self.modules.nixos.nixos
+      self.modules.nixos.hardware-LOQ-15IRX10
       (_: {
         custom.flakeTarget = "nixos";
         custom.defaultUser = "dinosaur";
@@ -30,5 +29,5 @@ rec {
     ];
   };
 
-  flake.nixosConfigurations.default = flake.nixosConfigurations.nixos;
+  flake.nixosConfigurations.default = self.nixosConfigurations.nixos;
 }
