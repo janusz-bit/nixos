@@ -1,9 +1,9 @@
 # Centralized top-level options for the entire flake. Every module reads global
 # state through `config.customBot.*` rather than via `_module.args`.
-{ ... }:
+{ lib, ... }:
 {
   flake.modules.nixos.options =
-    { lib, ... }:
+    { ... }:
     {
       options.customBot.flakeTarget = lib.mkOption {
         type = lib.types.str;

@@ -139,3 +139,12 @@ nix run github:janusz-bit/nixos
 * **Formatting**: `nixfmt-tree` (enforced via pre-commit and CI).
 * **Pre-commit hooks**: formatter + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions).
 * **Dev shell**: Always use `nix develop` to ensure pre-commit hooks and required tools are bootstrapped automatically.
+
+## Known Dendritic Pattern Gaps
+The repository follows aspect-oriented organization, but is **not yet** at full dendritic pattern compliance. Active deviations and follow-up work:
+
+1. **No top-level orchestrator.** `nixosConfigurations.<host>` is currently defined manually inside `modules/hosts/<name>/default.nix` (4 host files). A canonical dendritic pattern would centralize this in a single orchestrator module that consumes `configurations.nixos.<name>.module` and materializes `nixosConfigurations` automatically. The flake-parts evaluation order makes this non-trivial: a host module that uses `self.modules.nixos.<aspect>` inside its `imports` causes infinite recursion when the orchestrator lives in the same flake-parts evaluation. Use `inputs.nixpkgs.lib.nixosSystem` (as the existing host files do) to keep `self` lazy, or move the orchestrator to a separate flake. See [the skill reference](https://github.com/sebnow/configs/blob/main/dendritic-nix) for the canonical pattern.
+2. **`_module.args.customTop` still in use.** `customTop` is read in 9+ modules (git, shell, agenix, cloudflared, nextcloud, hermes, open-webui, github-actions, base/configuration). Migration to `options.customBot.*` would tighten the pattern, but is a sweeping refactor that requires careful renaming across all consumers.
+3. **Duplicated `base` imports in some hosts.** `modules/hosts/raspberry-pi-4/default.nix` imports `base-git` and `base-configuration` directly; `modules/hosts/nixos/default.nix` correctly imports the merged `base` aspect. Pick one convention per host and document it.
+4. **`homeModules.configuration` is dead code.** `inputs.home-manager.flakeModules.home-manager` is imported in `modules/default.nix` and `flake.homeModules.configuration` is defined in `modules/hosts/base/configuration.nix`, but no host actually activates home-manager. Either wire it up or remove both.
+5. **No `flake.checks` for hosts.** `nix flake check` only validates the pre-commit hook today. Adding `configurations:nixos:<name>` to `checks` would catch eval failures in CI.
