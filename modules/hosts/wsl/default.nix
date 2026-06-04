@@ -19,8 +19,8 @@
       self.nixosModules."base"
       self.nixosModules."wsl"
       (_: {
-        custom.enableFastfetch = false;
-        custom.flakeTarget = "wsl";
+        customBot.enableFastfetch = false;
+        customBot.flakeTarget = "wsl";
       })
     ];
   };

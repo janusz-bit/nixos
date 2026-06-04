@@ -24,8 +24,8 @@ rec {
       self.nixosModules.nixos
       self.nixosModules."hardware/LOQ-15IRX10"
       (_: {
-        custom.flakeTarget = "nixos";
-        custom.defaultUser = "dinosaur";
+        customBot.flakeTarget = "nixos";
+        customBot.defaultUser = "dinosaur";
       })
     ];
   };

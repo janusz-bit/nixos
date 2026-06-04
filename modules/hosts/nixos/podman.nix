@@ -18,7 +18,7 @@
         };
       };
 
-      users.users.${config.custom.defaultUser} = {
+      users.users.${config.customBot.defaultUser} = {
         # replace `<USERNAME>` with the actual username
         extraGroups = [
           "podman"

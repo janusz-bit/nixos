@@ -74,10 +74,10 @@
       ];
 
       # User configuration
-      users.users.${config.custom.defaultUser} = {
-        initialPassword = "${config.custom.defaultUser}";
+      users.users.${config.customBot.defaultUser} = {
+        initialPassword = "${config.customBot.defaultUser}";
         isNormalUser = true;
-        description = "${config.custom.defaultUser}";
+        description = "${config.customBot.defaultUser}";
         extraGroups = [
           "networkmanager"
           "wheel"

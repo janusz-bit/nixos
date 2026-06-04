@@ -27,8 +27,8 @@
         self.nixosModules."base/configuration"
         self.nixosModules."options"
         (_: {
-          custom.flakeTarget = "raspberry-pi-4";
-          custom.defaultUser = "nixos";
+          customBot.flakeTarget = "raspberry-pi-4";
+          customBot.defaultUser = "nixos";
         })
       ];
     };

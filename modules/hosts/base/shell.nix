@@ -34,7 +34,7 @@ let
     set -U __done_notification_urgency_level low
 
     # Powitanie fastfetch
-    ${lib.optionalString config.custom.enableFastfetch ''
+    ${lib.optionalString config.customBot.enableFastfetch ''
       function fish_greeting
         fastfetch
       end

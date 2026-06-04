@@ -69,9 +69,9 @@
       };
       services.syncthing = {
         enable = true;
-        user = "${config.custom.defaultUser}";
-        dataDir = "/home/${config.custom.defaultUser}/Sync";
-        configDir = "/home/${config.custom.defaultUser}/.config/syncthing";
+        user = "${config.customBot.defaultUser}";
+        dataDir = "/home/${config.customBot.defaultUser}/Sync";
+        configDir = "/home/${config.customBot.defaultUser}/.config/syncthing";
         openDefaultPorts = true;
       };
     };

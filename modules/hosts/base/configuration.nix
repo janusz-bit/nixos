@@ -46,12 +46,12 @@ let
         let
           flakeRef = if remote then custom.repository.linkFlake else custom.repository.place;
         in
-        "sudo nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.custom.flakeTarget}${optionalStr remote " --refresh"}";
+        "sudo nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${optionalStr remote " --refresh"}";
       optionalStr = cond: str: if cond then str else "";
     in
     {
       # Pushing
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.custom.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${custom.cache.cachix.name}";
+      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${custom.cache.cachix.name}";
 
       # Update systemu
       update = update_alias "switch" true;

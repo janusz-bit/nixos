@@ -170,7 +170,7 @@
       # Configure console keymap
       console.keyMap = "pl2";
       security = {
-        pam.services.${config.custom.defaultUser}.kwallet.enable = true;
+        pam.services.${config.customBot.defaultUser}.kwallet.enable = true;
         rtkit.enable = true;
       };
       systemd.settings.Manager = {
@@ -178,7 +178,7 @@
       };
       security.pam.loginLimits = [
         {
-          domain = "${config.custom.defaultUser}";
+          domain = "${config.customBot.defaultUser}";
           type = "hard";
           item = "nofile";
           value = "524288";
@@ -186,10 +186,10 @@
       ];
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
-      users.users.${config.custom.defaultUser} = {
-        initialPassword = "${config.custom.defaultUser}";
+      users.users.${config.customBot.defaultUser} = {
+        initialPassword = "${config.customBot.defaultUser}";
         isNormalUser = true;
-        description = "${config.custom.defaultUser}";
+        description = "${config.customBot.defaultUser}";
         extraGroups = [
           "networkmanager"
           "wheel"

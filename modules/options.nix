@@ -7,15 +7,15 @@
   flake.nixosModules."options" =
     { lib, config, ... }:
     {
-      options.custom.flakeTarget = lib.mkOption {
+      options.customBot.flakeTarget = lib.mkOption {
         type = lib.types.str;
         default = "default";
       };
-      options.custom.enableFastfetch = lib.mkOption {
+      options.customBot.enableFastfetch = lib.mkOption {
         type = lib.types.bool;
         default = true;
       };
-      options.custom.defaultUser = lib.mkOption {
+      options.customBot.defaultUser = lib.mkOption {
         type = lib.types.str;
         default = "nixos";
       };

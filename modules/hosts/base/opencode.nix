@@ -11,8 +11,8 @@
         self + /modules/configs/opencode/web-search-mcp.py;
 
       systemd.tmpfiles.rules = [
-        "L+ /home/${config.custom.defaultUser}/.config/opencode/opencode.json - - - - /etc/opencode/opencode.json"
-        "L+ /home/${config.custom.defaultUser}/.config/opencode/web-search-mcp.py - - - - /etc/opencode/web-search-mcp.py"
+        "L+ /home/${config.customBot.defaultUser}/.config/opencode/opencode.json - - - - /etc/opencode/opencode.json"
+        "L+ /home/${config.customBot.defaultUser}/.config/opencode/web-search-mcp.py - - - - /etc/opencode/web-search-mcp.py"
       ];
     };
 }
