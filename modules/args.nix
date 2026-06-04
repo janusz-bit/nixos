@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  _module.args.custom = rec {
+  _module.args.customTop = rec {
     enableOpenWebUi = false;
     repository = {
       name = "nixos";

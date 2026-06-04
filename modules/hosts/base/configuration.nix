@@ -1,7 +1,7 @@
 {
   inputs,
   self,
-  custom,
+  customTop,
   ...
 }:
 let
@@ -44,14 +44,14 @@ let
       update_alias =
         mode: remote:
         let
-          flakeRef = if remote then custom.repository.linkFlake else custom.repository.place;
+          flakeRef = if remote then customTop.repository.linkFlake else customTop.repository.place;
         in
         "sudo nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${optionalStr remote " --refresh"}";
       optionalStr = cond: str: if cond then str else "";
     in
     {
       # Pushing
-      push = "nix build ${custom.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${custom.cache.cachix.name}";
+      push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${customTop.cache.cachix.name}";
 
       # Update systemu
       update = update_alias "switch" true;
@@ -66,10 +66,10 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "${custom.cache.cachix.url}"
+      "${customTop.cache.cachix.url}"
     ];
     extra-trusted-public-keys = [
-      "${custom.cache.cachix.pubKey}"
+      "${customTop.cache.cachix.pubKey}"
     ];
   };
 in

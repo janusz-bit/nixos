@@ -106,7 +106,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
 ## Centralized Configuration (`options.nix`)
-`modules/options.nix` is the single source of truth for global variables, exported as `options.custom` and `_module.args.custom`:
+`modules/options.nix` is the single source of truth for global variables, exported as `options.customBot` and `_module.args.customTop`:
 * **Options**: `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
 
 Note: Repository metadata (repo URL, email, domain, cache) was previously centralized here but has been removed from `options.nix` in recent refactors.

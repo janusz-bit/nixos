@@ -1,4 +1,4 @@
-{ self, custom, ... }:
+{ self, customTop, ... }:
 {
   flake.nixosModules."raspberry-pi-4/nextcloud" =
     {
@@ -9,14 +9,14 @@
     }:
     {
       age.secrets.nextcloud-adminpass = {
-        file = custom.secretsDir + "/nextcloud-adminpass.age";
+        file = customTop.secretsDir + "/nextcloud-adminpass.age";
         owner = "nextcloud";
         mode = "0440";
       };
       services = {
         nextcloud = {
           enable = true;
-          hostName = "${custom.site.full}";
+          hostName = "${customTop.site.full}";
           package = pkgs.nextcloud33;
 
           database.createLocally = true;
@@ -39,7 +39,7 @@
           settings = {
             maintenance_window_start = 1;
             overwriteprotocol = "https";
-            "overwrite.cli.url" = "https://${custom.site.full}";
+            "overwrite.cli.url" = "https://${customTop.site.full}";
             trusted_proxies = [
               "127.0.0.1"
               "::1"
@@ -48,7 +48,7 @@
         };
 
         # HSTS Header
-        nginx.virtualHosts."${custom.site.full}".extraConfig = ''
+        nginx.virtualHosts."${customTop.site.full}".extraConfig = ''
           add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
         '';
 

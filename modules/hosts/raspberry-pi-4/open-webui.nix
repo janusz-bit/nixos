@@ -1,10 +1,10 @@
-{ custom, ... }:
+{ customTop, ... }:
 {
   flake.nixosModules."raspberry-pi-4/open-webui" =
     { config, pkgs, ... }:
     {
       age.secrets.open-webui-hermes-env = {
-        file = custom.secretsDir + "/hermes-env.age";
+        file = customTop.secretsDir + "/hermes-env.age";
       };
 
       services.open-webui = {

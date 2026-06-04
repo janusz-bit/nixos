@@ -1,46 +1,46 @@
-{ inputs, custom, ... }:
+{ inputs, customTop, ... }:
 {
   flake.nixosModules."agenix" =
     { config, ... }:
     {
       age.secrets.ollama-api-key = {
-        file = custom.secretsDir + "/ollama-api-key.age";
+        file = customTop.secretsDir + "/ollama-api-key.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.secret1 = {
-        file = custom.secretsDir + "/secret1.age";
+        file = customTop.secretsDir + "/secret1.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.github-token = {
-        file = custom.secretsDir + "/GITHUB_TOKEN.age";
+        file = customTop.secretsDir + "/GITHUB_TOKEN.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.cachix-authtoken = {
-        file = custom.secretsDir + "/cachix-authtoken-token.age";
+        file = customTop.secretsDir + "/cachix-authtoken-token.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.notes = {
-        file = custom.secretsDir + "/notes.age";
+        file = customTop.secretsDir + "/notes.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.google-api-key = {
-        file = custom.secretsDir + "/google-api-key.age";
+        file = customTop.secretsDir + "/google-api-key.age";
         owner = "root";
         group = "users";
         mode = "0440";
       };
       age.secrets.hermes-api-key = {
-        file = custom.secretsDir + "/hermes-api-key.age";
+        file = customTop.secretsDir + "/hermes-api-key.age";
         owner = "root";
         group = "users";
         mode = "0440";

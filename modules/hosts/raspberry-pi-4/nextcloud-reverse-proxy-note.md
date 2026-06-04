@@ -5,7 +5,7 @@ Poniższy fragment kodu z pliku `nextcloud.nix` odpowiada za poprawne działanie
 ```nix
       services.nextcloud.settings = {
         overwriteprotocol = "https";
-        "overwrite.cli.url" = "https://${custom.site.full}";
+        "overwrite.cli.url" = "https://${customTop.site.full}";
         trusted_proxies = [
           "127.0.0.1"
           "::1"
@@ -19,7 +19,7 @@ Poniższy fragment kodu z pliku `nextcloud.nix` odpowiada za poprawne działanie
    Z technicznego punktu widzenia aplikacja Nextcloud działa u Ciebie lokalnie na niezabezpieczonym porcie 80 (HTTP). Cloudflare Tunnel "zdejmuje" z zewnątrz szyfrowanie HTTPS i przesyła ruch po HTTP wewnątrz maszyny do usługi Nextcloud. Z tego powodu Nextcloud myśli, że domyślnym protokołem komunikacji jest HTTP i w takim też schemacie próbuje generować np. linki do logowania z aplikacji mobilnej (co powodowało błędy).
    Ta opcja wymusza (nadpisuje) informację protokołu, instruując Nextcloud: *"Bez względu na to, jakim protokołem otrzymałeś ruch wewnętrznie, wiedz, że po stronie klienta było to `https` i zawsze generuj wszystkie linki powrotne i zasoby w HTTPS"*.
 
-2. **`"overwrite.cli.url" = "https://${custom.site.full}";`**
+2. **`"overwrite.cli.url" = "https://${customTop.site.full}";`**
    Adres używany w narzędziu wiersza poleceń Nextcloud (tzw. `occ` - OwnCloud Console). 
    Gdy system wyzwala pewne zdarzenia działając całkowicie w tle (np. skrypty systemowe, zadania Cron, wysyłka e-maila o udostępnieniu pliku), brakuje mu żądania od przeglądarki z publicznym adresem URL.
    Ta flaga działa jak bezpiecznik i informuje środowisko tła Nextcloud, pod jakim publicznym adresem bazowym istnieje ta konkretna instancja. Bez tego linki rozsyłane np. w mailach wyglądałyby jak `http://localhost/index.php/...`.
