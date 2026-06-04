@@ -1,4 +1,9 @@
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  config,
+  ...
+}:
 {
   flake.packages.x86_64-linux.proton-cachyos-v3 =
     inputs.nixpkgs.legacyPackages.x86_64-linux.callPackage ./_proton-bin
@@ -35,8 +40,8 @@
           image = inputs.nixpkgs.lib.nixosSystem {
             modules = [
               { nixpkgs.hostPlatform = "aarch64-linux"; }
-              self.nixosModules."raspberry-pi-4"
-              self.nixosModules."raspberry-pi-4/sdImage"
+              self.modules.nixos.raspberry-pi-4
+              self.modules.nixos.rpi-sdImage
             ];
           };
         in

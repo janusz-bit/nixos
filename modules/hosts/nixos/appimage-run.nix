@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules."nixos/appimage-run" = {
+  flake.modules.nixos.nixos-appimage-run = {
     programs.appimage = {
       enable = true;
       binfmt = true;

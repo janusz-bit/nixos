@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules."nixos/packages" =
+  flake.modules.nixos.nixos-packages =
     { pkgs, config, ... }:
     {
       environment.systemPackages = with pkgs; [

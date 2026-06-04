@@ -5,7 +5,7 @@
   ...
 }:
 {
-  flake.nixosModules."raspberry-pi-4/hermes" =
+  flake.modules.nixos.hermes =
     { config, pkgs, ... }:
     let
       # Definiujemy środowisko Pythona w zmiennej, aby móc wyciągnąć absolutną ścieżkę

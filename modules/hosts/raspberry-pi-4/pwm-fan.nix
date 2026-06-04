@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  flake.nixosModules."raspberry-pi-4/pwm-fan" =
+  flake.modules.nixos.pwm-fan =
     {
       config,
       lib,

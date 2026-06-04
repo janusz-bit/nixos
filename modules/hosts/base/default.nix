@@ -1,18 +1,22 @@
-{ self, inputs, ... }:
 {
-  flake.nixosModules."base" =
+  self,
+  inputs,
+  config,
+  ...
+}:
+{
+  flake.modules.nixos.base =
     { ... }:
     {
       imports = [
-        self.nixosModules."base/configuration"
-        self.nixosModules."base/shell"
-        self.nixosModules."base/git"
-        self.nixosModules."nix/settings"
-        self.nixosModules."base/ssh"
-        self.nixosModules."base/agenix"
-        self.nixosModules."base/opencode"
-        self.nixosModules."options"
+        self.modules.nixos.base-configuration
+        self.modules.nixos.base-shell
+        self.modules.nixos.base-git
+        self.modules.nixos.nix-settings
+        self.modules.nixos.base-ssh
+        self.modules.nixos.base-agenix
+        self.modules.nixos.base-opencode
+        self.modules.nixos.options
       ];
     };
-
 }

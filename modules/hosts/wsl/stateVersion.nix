@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules."wsl/stateVersion" = _: {
+  flake.modules.nixos.wsl-stateVersion = _: {
     system.stateVersion = "25.05";
   };
 }

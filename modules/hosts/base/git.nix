@@ -15,7 +15,7 @@ let
   };
 in
 {
-  flake.nixosModules."base/git" =
+  flake.modules.nixos.base-git =
     { pkgs, ... }:
     {
       programs.git = {

@@ -1,6 +1,6 @@
 { self, customTop, ... }:
 {
-  flake.nixosModules."raspberry-pi-4/cloudflared" =
+  flake.modules.nixos.cloudflared =
     {
       config,
       lib,

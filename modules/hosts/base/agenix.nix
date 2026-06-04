@@ -1,6 +1,6 @@
-{ self, ... }:
+{ self, config, ... }:
 {
-  flake.nixosModules."base/agenix" =
+  flake.modules.nixos.base-agenix =
     { config, pkgs, ... }:
     {
       environment.shellInit = ''
@@ -10,6 +10,6 @@
         export GOOGLE_API_KEY=$(cat ${config.age.secrets.google-api-key.path})
       '';
 
-      imports = [ self.nixosModules."agenix" ];
+      imports = [ self.modules.nixos.agenix ];
     };
 }

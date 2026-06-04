@@ -4,7 +4,7 @@
 # and default user settings (`options.customBot` and `_module.args.customTop`).
 { self, inputs, ... }:
 {
-  flake.nixosModules."options" =
+  flake.modules.nixos.options =
     { lib, config, ... }:
     {
       options.customBot.flakeTarget = lib.mkOption {

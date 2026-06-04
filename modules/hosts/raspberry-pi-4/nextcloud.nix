@@ -1,6 +1,6 @@
 { self, customTop, ... }:
 {
-  flake.nixosModules."raspberry-pi-4/nextcloud" =
+  flake.modules.nixos.nextcloud =
     {
       config,
       lib,

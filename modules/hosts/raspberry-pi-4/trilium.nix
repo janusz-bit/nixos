@@ -1,6 +1,6 @@
 { self, customTop, ... }:
 {
-  flake.nixosModules."raspberry-pi-4/trilium" =
+  flake.modules.nixos.trilium =
     {
       config,
       pkgs,
