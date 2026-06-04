@@ -1,4 +1,9 @@
-{ inputs, self, config, ... }:
+{
+  inputs,
+  self,
+  config,
+  ...
+}:
 {
   flake.modules.nixos.droid-stateVersion = _: {
     system.stateVersion = "26.05";

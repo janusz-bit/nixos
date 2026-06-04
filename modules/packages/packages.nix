@@ -1,4 +1,9 @@
-{ inputs, self, config, ... }:
+{
+  inputs,
+  self,
+  config,
+  ...
+}:
 {
   flake.packages.x86_64-linux.proton-cachyos-v3 =
     inputs.nixpkgs.legacyPackages.x86_64-linux.callPackage ./_proton-bin
