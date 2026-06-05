@@ -39,8 +39,8 @@
         ];
         settings = {
           model = {
-            provider = "google";
-            default = "gemini-3.5-flash";
+            provider = "ollama-cloud";
+            default = "kimi-k2.6";
           };
           web.backend = "ddgs";
         };
