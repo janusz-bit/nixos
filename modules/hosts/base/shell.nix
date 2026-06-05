@@ -1,4 +1,4 @@
-{ lib, customTop, ... }:
+{ lib, ... }:
 let
   sharedBashInit = pkgs: ''
     if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
@@ -8,7 +8,7 @@ let
     fi
   '';
 
-  sharedFishAliases = {
+  sharedFishAliases = config: {
     # Eza zamiast ls
     ls = "eza -al --color=always --group-directories-first --icons=always";
     la = "eza -a --color=always --group-directories-first --icons=always";
@@ -25,7 +25,7 @@ let
     grep = "grep --color=auto";
     cat = "bat";
     hw = "hwinfo --short";
-    update-my-pkgs = "nix run ${customTop.repository.place}#update-my-pkgs";
+    update-my-pkgs = "nix run ${config.customTop.repository.place}#update-my-pkgs";
   };
 
   sharedFishInit = config: ''
@@ -68,7 +68,7 @@ in
         interactiveShellInit = sharedBashInit pkgs;
       };
       programs.fish.enable = true;
-      programs.fish.shellAliases = sharedFishAliases;
+      programs.fish.shellAliases = sharedFishAliases config;
       programs.fish.interactiveShellInit = sharedFishInit config;
 
       environment.systemPackages = sharedPackages pkgs;

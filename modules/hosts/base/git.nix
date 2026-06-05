@@ -1,8 +1,8 @@
-{ self, customTop, ... }:
+{ self, ... }:
 let
-  gitConfig = {
-    user.name = "${customTop.repository.user}";
-    user.email = "${customTop.email.full}";
+  gitConfig = config: {
+    user.name = config.customTop.repository.user;
+    user.email = config.customTop.email.full;
     init.defaultBranch = "main";
     url = {
       "https://github.com/" = {
@@ -16,11 +16,11 @@ let
 in
 {
   flake.modules.nixos.base-git =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
       programs.git = {
         enable = true;
-        config = gitConfig;
+        config = gitConfig config;
       };
       environment.systemPackages = with pkgs; [
         gh

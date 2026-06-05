@@ -14,6 +14,7 @@
     { pkgs, ... }:
     {
       imports = [
+        self.modules.nixos.customTop-options
         self.modules.nixos.nextcloud
         self.modules.nixos.trilium
         self.modules.nixos.cloudflared

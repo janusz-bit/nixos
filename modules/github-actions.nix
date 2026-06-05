@@ -1,4 +1,4 @@
-{ customTop, ... }:
+{ ... }:
 {
   perSystem =
     { config, pkgs, ... }:
@@ -17,8 +17,8 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cache.cachix.url}
-              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
+              extra-substituters = ${config.customTop.cache.cachix.url}
+              extra-trusted-public-keys = ${config.customTop.cache.cachix.pubKey}
             '';
           };
         }
@@ -26,7 +26,7 @@
           name = "Setup Cachix";
           uses = "cachix/cachix-action@v14";
           with_ = {
-            name = "${customTop.cache.cachix.name}";
+            name = config.customTop.cache.cachix.name;
             authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
           };
         }

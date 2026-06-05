@@ -17,6 +17,7 @@
         self.modules.nixos.base-agenix
         self.modules.nixos.base-opencode
         self.modules.nixos.options
+        self.modules.nixos.customTop-options
       ];
     };
 }

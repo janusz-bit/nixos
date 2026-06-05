@@ -1,12 +1,17 @@
-{ inputs, customTop, ... }:
+{ inputs, ... }:
 {
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     let
       text = ''
-        sudo ${lib.getExe pkgs.disko} --mode destroy,format,mount --flake ${customTop.repository.linkFlake}#nixos
+        sudo ${lib.getExe pkgs.disko} --mode destroy,format,mount --flake ${config.customTop.repository.linkFlake}#nixos
         sudo mkdir -p /mnt/etc/nixos
-        sudo ${pkgs.git}/bin/git clone ${customTop.repository.url} /mnt/etc/nixos
+        sudo ${pkgs.git}/bin/git clone ${config.customTop.repository.url} /mnt/etc/nixos
         sudo ${pkgs.nixos-install-tools}/bin/nixos-install --flake /mnt/etc/nixos#nixos --no-root-passwd
       '';
     in

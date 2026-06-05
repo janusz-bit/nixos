@@ -1,7 +1,6 @@
 {
   self,
   inputs,
-  customTop,
   ...
 }:
 {
@@ -23,7 +22,7 @@
       ];
 
       age.secrets.hermes-env = {
-        file = customTop.secretsDir + "/hermes-env.age";
+        file = config.customTop.secretsDir + "/hermes-env.age";
         owner = "hermes";
         group = "hermes";
         mode = "0400";

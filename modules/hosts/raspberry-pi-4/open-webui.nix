@@ -1,10 +1,10 @@
-{ customTop, ... }:
+{ ... }:
 {
   flake.modules.nixos.open-webui =
     { config, pkgs, ... }:
     {
       age.secrets.open-webui-hermes-env = {
-        file = customTop.secretsDir + "/hermes-env.age";
+        file = config.customTop.secretsDir + "/hermes-env.age";
       };
 
       services.open-webui = {

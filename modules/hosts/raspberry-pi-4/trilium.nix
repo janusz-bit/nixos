@@ -1,4 +1,4 @@
-{ self, customTop, ... }:
+{ self, ... }:
 {
   flake.modules.nixos.trilium =
     {
