@@ -40,7 +40,7 @@
         settings = {
           model = {
             provider = "openrouter";
-            default = "deepseek/deepseek-v4-pro";
+            default = "deepseek/deepseek-v4-flash";
           };
           web.backend = "ddgs";
         };
