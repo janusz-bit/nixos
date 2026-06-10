@@ -25,7 +25,7 @@ The `modules/hosts/` directory contains isolated definitions targeting different
 
 ### 1. `base` (The Foundation)
 A shared set of modules included in every system deployment.
-* Sets up the core CLI experience: `bash` wrapping `fish` shell with custom aliases (`eza`, `bat`, `fastfetch`), the `done` fish plugin for long-command notifications.
+* Sets up the core CLI experience: `bash` is set as the login shell (to avoid compatibility issues like broken recovery environments), but automatically `exec`s `fish` for interactive sessions. Includes custom aliases (`eza`, `bat`, `fastfetch`), the `done` fish plugin for long-command notifications.
 * Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, `vulnix` vulnerability scanning.
 * Shared packages: `micro`, `nil`, `nixd`, `nixfmt-tree`, `uv`, `toybox`, `statix`, `cachix`, `agenix`, `nix-update`, `tlrc`, `fzf`, `hw-probe`, `htop`, `cloudflared`, `gemini-cli`, `opencode`.
 * `nix-ld` enabled to support dynamically linked binaries (e.g., from `uv`).
@@ -37,12 +37,16 @@ A shared set of modules included in every system deployment.
 #### Shell Aliases (all hosts)
 | Alias | Command |
 |---|---|
-| `update` | `nixos-rebuild switch` from the flake on GitHub |
-| `update-boot` | `nixos-rebuild boot` from the flake on GitHub |
-| `push` | Build toplevel and push closure to Cachix |
+| `update` | `sudo nixos-rebuild switch --sudo --flake <remote-flake>#<target> --refresh` |
+| `update-boot` | `sudo nixos-rebuild boot --sudo --flake <remote-flake>#<target> --refresh` |
+| `update-local` | `sudo nixos-rebuild switch --sudo --flake <local-flake>#<target>` |
+| `update-local-boot` | `sudo nixos-rebuild boot --sudo --flake <local-flake>#<target>` |
+| `push` | Build toplevel and push closure to Cachix via `nix build ... \| cachix push ...` |
 | `update-my-pkgs` | `nix run <flake>#update-my-pkgs` |
-| `ls`, `la`, `ll`, `lt` | `eza` variants |
+| `ls`, `la`, `ll`, `lt`, `l.` | `eza` variants |
+| `..`, `...`, `....` | Directory navigation |
 | `cat` | `bat` |
+| `hw` | `hwinfo --short` |
 
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale).
@@ -72,7 +76,7 @@ A headless `aarch64-linux` deployment for network services.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted), SSH key-only.
 * **Nix GC**: daily, deletes derivations older than 3 days; max 2 build jobs.
 * **Nextcloud 33**: PostgreSQL backend (locally created), Redis cache, 2GB upload limit, accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled).
-* **Hermes Agent**: AI agent service (`services.hermes-agent`) z włączonym API serverem (port 8642), modelem `kimi-k2.6:cloud` via Ollama Cloud, dodatkowymi zależnościami (`extraDependencyGroups = [ "all" ]`).
+* **Hermes Agent**: AI agent service (`services.hermes-agent`) with API server on port 8642. Uses `deepseek/deepseek-v4-flash` model via `openrouter`, and `ddgs` as the web backend. Configured MCP servers: `trilium-notes`, `ddgs-mcp`, and `nixos`.
 * **Ollama**: Lokalny backend LLM (`services.ollama.enable`).
 * **Cloudflared**: Tunnel to expose services externally.
 * **Trilium**: Note-taking server (overlay applied).
@@ -106,10 +110,10 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
 ## Centralized Configuration (`options.nix`)
-`modules/options.nix` is the single source of truth for global variables, exported as `options.customBot` and `_module.args.customTop`:
+`modules/options.nix` is the single source of truth for global custom arguments (passed via `config.customBot` and `_module.args.customTop`). 
 * **Options**: `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
 
-Note: Repository metadata (repo URL, email, domain, cache) was previously centralized here but has been removed from `options.nix` in recent refactors.
+Note: Repository metadata (repo URL, email, domain, cache) was previously centralized here but has been removed from `options.nix` in recent refactors (now managed via `customTop` arguments).
 
 ## Dev Shell Tools
 Running `nix develop` provides:
@@ -124,8 +128,9 @@ sudo nixos-rebuild switch --flake .#nixos
 sudo nixos-rebuild switch --flake .#raspberry-pi-4
 
 # Or using the shell aliases (pulls from GitHub)
-update        # switch
-update-boot   # boot
+update        # switch (remote)
+update-boot   # boot (remote)
+update-local  # switch (local)
 
 # Push build closure to Cachix
 push

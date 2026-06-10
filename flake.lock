@@ -501,6 +501,22 @@
         "type": "github"
       }
     },
+    "hermes-webui": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781049755,
+        "narHash": "sha256-Kac8xt/r+MvTigtDGfRWb5NEvYs309CajoeZacKa6Oc=",
+        "owner": "nesquena",
+        "repo": "hermes-webui",
+        "rev": "e8d71a2fb826da584d5b398f36e2fade18e25f03",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nesquena",
+        "repo": "hermes-webui",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1106,6 +1122,7 @@
         "git-hooks-nix": "git-hooks-nix",
         "github-actions-nix": "github-actions-nix",
         "hermes-agent": "hermes-agent",
+        "hermes-webui": "hermes-webui",
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
         "nix-cachyos-kernel": "nix-cachyos-kernel",

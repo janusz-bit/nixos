@@ -112,7 +112,7 @@
               options = [ "NOPASSWD" ];
             }
             {
-              command = "ALL";
+              command = "${config.system.build.nixos-rebuild}/bin/nixos-rebuild";
               options = [ "NOPASSWD" ];
             }
           ];
