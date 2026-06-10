@@ -18,6 +18,14 @@
 
     in
     {
+      # Wczytujemy hermes-env.age jako sekret współdzielony z hermes-agent
+      age.secrets.hermes-webui-env = {
+        file = customTop.secretsDir + "/hermes-env.age";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+      };
+
       # Systemd service to run the Hermes WebUI server
       systemd.services.hermes-webui = {
         description = "Hermes WebUI Server";
@@ -33,7 +41,11 @@
           ExecStart = "${pythonEnv}/bin/python server.py";
           Restart = "always";
           RestartSec = "10";
-          # Environment variables can be configured here
+
+          # Load the password and any other env vars from agenix
+          EnvironmentFile = config.age.secrets.hermes-webui-env.path;
+
+          # Hardcoded Environment variables
           # Since it's a native Nix setup, we bind to 127.0.0.1 for the tunnel
           Environment = [
             "HOST=127.0.0.1"
