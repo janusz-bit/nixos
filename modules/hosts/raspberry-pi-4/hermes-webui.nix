@@ -1,4 +1,9 @@
-{ customTop, inputs, ... }:
+{
+  customTop,
+  inputs,
+  lib,
+  ...
+}:
 {
   flake.modules.nixos.hermes-webui =
     { config, pkgs, ... }:
@@ -42,12 +47,15 @@
         unitConfig.StartLimitIntervalSec = 120;
         serviceConfig = {
           StartLimitBurst = 5;
-          # Alias variables from the EnvironmentFile so the app sees the names it expects
-          ExecStart = pkgs.writeShellScript "hermes-workspace-wrapper" ''
-            export HERMES_API_TOKEN="$API_SERVER_KEY"
-            export HERMES_DASHBOARD_TOKEN="$API_SERVER_KEY"
-            exec ${config.services.hermes-workspace.package}/bin/hermes-workspace
-          '';
+          # Use mkForce to override the ExecStart defined by the module options
+          ExecStart = lib.mkForce (
+            pkgs.writeShellScript "hermes-workspace-wrapper" ''
+              # Bridge API_SERVER_KEY from EnvironmentFile to the names expected by the app
+              export HERMES_API_TOKEN="$API_SERVER_KEY"
+              export HERMES_DASHBOARD_TOKEN="$API_SERVER_KEY"
+              exec ${config.services.hermes-workspace.package}/bin/hermes-workspace
+            ''
+          );
         };
       };
     };
