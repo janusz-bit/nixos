@@ -34,8 +34,8 @@
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
     hermes-agent.url = "github:NousResearch/hermes-agent";
     hermes-webui = {
-      url = "github:nesquena/hermes-webui";
-      flake = false;
+      url = "github:outsourc-e/hermes-workspace";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
