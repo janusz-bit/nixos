@@ -17,7 +17,15 @@
 
       services.hermes-workspace = {
         enable = true;
-        package = inputs.hermes-webui.packages.${pkgs.system}.default;
+        package = inputs.hermes-webui.packages.${pkgs.system}.default.overrideAttrs (old: {
+          pnpmDeps = pkgs.fetchPnpmDeps {
+            inherit (old) pname version src;
+            # fetchPnpmDeps requires passing pnpm explicitly if the package did so
+            pnpm = pkgs.pnpm;
+            fetcherVersion = 3;
+            hash = "sha256-1JycO+WwnM6iFol/Zu93uTbkB1Dq8cnntfdbtGTIm/k=";
+          };
+        });
         host = "127.0.0.1";
         port = 8787;
         hermesApiUrl = "http://127.0.0.1:8642";
