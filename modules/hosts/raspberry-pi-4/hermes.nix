@@ -105,6 +105,8 @@
             "HERMES_HOME=/var/lib/hermes/.hermes"
             "HERMES_API_URL=http://127.0.0.1:8642"
             "GATEWAY_HEALTH_URL=http://127.0.0.1:8642"
+            # OIDC Configuration (will be read from hermes-env.age)
+            "HERMES_DASHBOARD_OIDC_REDIRECT_URI=https://dashboard.janusz-bit.com/auth/callback"
           ];
           EnvironmentFile = config.age.secrets.hermes-env.path;
         };
