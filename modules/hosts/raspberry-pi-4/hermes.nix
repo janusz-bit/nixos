@@ -74,7 +74,7 @@
         };
         ddgs-mcp = {
           # GŁÓWNA ZMIANA: absolutna ścieżka do binarki wygenerowanej przez Nix
-          command = "uvx";
+          command = "${hermesPythonEnv}/bin/ddgs";
           args = [
             "--from"
             "ddgs[mcp]"
