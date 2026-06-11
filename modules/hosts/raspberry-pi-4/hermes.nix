@@ -105,9 +105,6 @@
             "HERMES_HOME=/var/lib/hermes/.hermes"
             "HERMES_API_URL=http://127.0.0.1:8642"
             "GATEWAY_HEALTH_URL=http://127.0.0.1:8642"
-            "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin"
-            "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=\${HERMES_PASSWORD}"
-            "HERMES_DASHBOARD_BASIC_AUTH_SECRET=janusz-bit-dashboard-secret-2137"
           ];
           EnvironmentFile = config.age.secrets.hermes-env.path;
         };
