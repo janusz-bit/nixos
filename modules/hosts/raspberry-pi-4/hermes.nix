@@ -72,19 +72,6 @@
             Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
           };
         };
-        ddgs-mcp = {
-          # GŁÓWNA ZMIANA: absolutna ścieżka do binarki wygenerowanej przez Nix
-          command = "${hermesPythonEnv}/bin/ddgs";
-          args = [
-            "--from"
-            "ddgs[mcp]"
-            "ddgs"
-            "mcp"
-          ];
-          enabled = true;
-          connect_timeout = 30;
-          timeout = 60;
-        };
         nixos = {
           command = "uvx";
           args = [ "mcp-nixos" ];
