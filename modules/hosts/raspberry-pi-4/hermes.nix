@@ -40,7 +40,7 @@
         settings = {
           model = {
             provider = "ollama-cloud";
-            default = "kimi-k2.6";
+            default = "kimi-k2.6:cloud";
           };
           web.backend = "ddgs";
         };
@@ -87,7 +87,10 @@
       # Hermes Dashboard — required for MCP, skills, config APIs in Hermes Workspace
       systemd.services.hermes-dashboard = {
         description = "Hermes Agent Web Dashboard";
-        after = [ "network-online.target" "hermes-gateway.service" ];
+        after = [
+          "network-online.target"
+          "hermes-agent.service"
+        ];
         wants = [ "network-online.target" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
