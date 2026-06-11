@@ -104,6 +104,7 @@
           Environment = [
             "HERMES_HOME=/var/lib/hermes/.hermes"
             "HERMES_API_URL=http://127.0.0.1:8642"
+            "GATEWAY_HEALTH_URL=http://127.0.0.1:8642"
           ];
           EnvironmentFile = config.age.secrets.hermes-env.path;
         };

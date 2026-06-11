@@ -39,10 +39,16 @@
 
       systemd.services.hermes-workspace = {
         path = [ pkgs.sqlite ];
-        serviceConfig.Environment = [
-          "HERMES_API_TOKEN=\${API_SERVER_KEY}"
-          "HERMES_DASHBOARD_TOKEN=\${API_SERVER_KEY}"
-        ];
+        unitConfig.StartLimitIntervalSec = 120;
+        serviceConfig = {
+          StartLimitBurst = 5;
+          # Alias variables from the EnvironmentFile so the app sees the names it expects
+          ExecStart = pkgs.writeShellScript "hermes-workspace-wrapper" ''
+            export HERMES_API_TOKEN="$API_SERVER_KEY"
+            export HERMES_DASHBOARD_TOKEN="$API_SERVER_KEY"
+            exec ${config.services.hermes-workspace.package}/bin/hermes-workspace
+          '';
+        };
       };
     };
 }
