@@ -39,8 +39,8 @@
         ];
         settings = {
           model = {
-            provider = "openrouter";
-            default = "deepseek/deepseek-v4-flash";
+            provider = "ollama-cloud";
+            default = "kimi-k2.6";
           };
           web.backend = "ddgs";
         };
