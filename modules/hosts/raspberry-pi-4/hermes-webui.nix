@@ -44,9 +44,7 @@
 
       systemd.services.hermes-workspace = {
         path = [ pkgs.sqlite ];
-        unitConfig.StartLimitIntervalSec = 120;
         serviceConfig = {
-          StartLimitBurst = 5;
           # Use mkForce to override the ExecStart defined by the module options
           ExecStart = lib.mkForce (
             pkgs.writeShellScript "hermes-workspace-wrapper" ''
