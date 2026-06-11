@@ -51,6 +51,7 @@
             "HOST=127.0.0.1"
             "PORT=8787"
             "HERMES_AGENT_API_URL=http://127.0.0.1:8642"
+            "HERMES_WEBUI_AGENT_DIR=${inputs.hermes-agent}"
           ];
         };
       };
