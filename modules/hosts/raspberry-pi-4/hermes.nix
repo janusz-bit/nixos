@@ -95,7 +95,7 @@
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "simple";
-          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --no-open --skip-build";
+          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --no-open --skip-build --insecure";
           Restart = "always";
           RestartSec = 5;
           User = "hermes";
