@@ -71,6 +71,7 @@
       environment.systemPackages = with pkgs; [
         micro
         htop
+        sqlite
       ];
 
       # User configuration

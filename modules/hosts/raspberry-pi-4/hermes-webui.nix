@@ -32,6 +32,7 @@
         hermesDashboardUrl = "http://127.0.0.1:9119";
         user = "hermes";
         group = "hermes";
+        path = [ pkgs.sqlite ];
         # Keep using the same home directory for state
         dataDir = "/var/lib/hermes";
         environmentFile = config.age.secrets.hermes-webui-env.path;
