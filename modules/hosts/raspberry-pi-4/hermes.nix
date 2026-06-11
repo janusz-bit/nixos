@@ -84,6 +84,25 @@
       services.ollama.enable = true;
       systemd.services.ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
+      # Hermes Dashboard — required for MCP, skills, config APIs in Hermes Workspace
+      systemd.services.hermes-dashboard = {
+        description = "Hermes Agent Web Dashboard";
+        after = [ "network-online.target" "hermes-gateway.service" ];
+        wants = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --no-open --skip-build";
+          Restart = "always";
+          RestartSec = 5;
+          User = "hermes";
+          Group = "hermes";
+          WorkingDirectory = "/var/lib/hermes";
+          Environment = "HERMES_HOME=/var/lib/hermes/.hermes";
+          EnvironmentFile = config.age.secrets.hermes-env.path;
+        };
+      };
+
       users.users.nixos.extraGroups = [ "hermes" ];
       users.users.hermes.extraGroups = [
         "users"
