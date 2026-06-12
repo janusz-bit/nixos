@@ -7,16 +7,6 @@
 {
   flake.modules.nixos.hermes =
     { config, pkgs, ... }:
-    let
-      # Definiujemy środowisko Pythona w zmiennej, aby móc wyciągnąć absolutną ścieżkę
-      hermesPythonEnv = pkgs.python3.withPackages (
-        python-pkgs: with python-pkgs; [
-          ddgs
-          pip
-          mcp
-        ]
-      );
-    in
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -53,7 +43,6 @@
 
       services.hermes-agent.extraPackages = [
         pkgs.uv
-        hermesPythonEnv # Używamy zdefiniowanego wyżej środowiska
       ];
 
       services.hermes-agent.mcpServers = {
