@@ -18,8 +18,8 @@
         self.modules.nixos.trilium
         self.modules.nixos.cloudflared
         self.modules.nixos.pwm-fan
-        self.modules.nixos.hermes
-        self.modules.nixos.librechat
+        # self.modules.nixos.hermes
+        # self.modules.nixos.librechat
         self.modules.nixos.base-agenix
         self.modules.nixos.rpi-specific
         self.modules.nixos.rpi-configuration
