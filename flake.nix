@@ -32,6 +32,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
   nixConfig = {

@@ -76,10 +76,11 @@ A headless `aarch64-linux` deployment for network services.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted), SSH key-only.
 * **Nix GC**: daily, deletes derivations older than 3 days; max 2 build jobs.
 * **Nextcloud 33**: PostgreSQL backend (locally created), Redis cache, 2GB upload limit, accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled).
-* **Hermes Agent & WebUI**: AI agent service (`services.hermes-agent`) on port 8642 + Python-based WebUI (`hermes-webui`) on port 8787. WebUI accessible via `chat.${customTop.site.full}`. Uses `deepseek/deepseek-v4-flash` model via `openrouter`, and `ddgs` as the web backend. Configured MCP servers: `trilium-notes`, `ddgs-mcp`, and `nixos`.
+* **Hermes Agent**: AI agent service (`services.hermes-agent`) on port 8642. Uses `kimi-k2.6:cloud` model via Ollama Cloud, and `ddgs` as the web backend. Configured MCP servers: `trilium-notes` and `nixos`.
+* **LibreChat**: Open-source AI chat interface (`services.librechat`) on port 2309. Accessible via `chat.${customTop.site.full}`.
 * **Ollama**: Lokalny backend LLM (`services.ollama.enable`).
 * **Cloudflared**: Tunnel to expose services externally:
-  * `chat.${customTop.site.full}` -> Hermes WebUI
+  * `chat.${customTop.site.full}` -> LibreChat
   * `${customTop.site.full}` -> Nextcloud
   * `notes.${customTop.site.full}` -> Trilium
   * `ssh.${customTop.site.full}` -> SSH

@@ -97,4 +97,11 @@ in
     ];
     armor = true;
   };
+  "librechat-env.age" = {
+    publicKeys = [
+      nixos
+      raspberry-pi-4
+    ];
+    armor = true;
+  };
 }
