@@ -44,13 +44,24 @@
 
       systemd.services.hermes-workspace = {
         path = [ pkgs.sqlite ];
+        unitConfig.StartLimitIntervalSec = 120;
         serviceConfig = {
-          # Use mkForce to override the ExecStart defined by the module options
+          StartLimitBurst = 5;
+          # Robust wrapper that sources the env file and maps tokens
           ExecStart = lib.mkForce (
             pkgs.writeShellScript "hermes-workspace-wrapper" ''
-              # Bridge API_SERVER_KEY from EnvironmentFile to the names expected by the app
+              # Source the agenix secret file to get API_SERVER_KEY
+              if [ -f "${config.age.secrets.hermes-webui-env.path}" ]; then
+                set -a
+                source "${config.age.secrets.hermes-webui-env.path}"
+                set +a
+              fi
+
+              # Map the key to the names expected by the workspace
               export HERMES_API_TOKEN="$API_SERVER_KEY"
               export HERMES_DASHBOARD_TOKEN="$API_SERVER_KEY"
+
+              echo "Starting Hermes Workspace with token mapping..."
               exec ${config.services.hermes-workspace.package}/bin/hermes-workspace
             ''
           );
