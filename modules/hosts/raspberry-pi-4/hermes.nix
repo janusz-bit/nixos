@@ -30,7 +30,7 @@
         settings = {
           model = {
             provider = "ollama-cloud";
-            default = "kimi-k2.6:cloud";
+            default = "kimi-k2.7-code:cloud";
           };
           web.backend = "ddgs";
         };
