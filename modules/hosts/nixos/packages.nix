@@ -33,6 +33,7 @@
         joplin-desktop
         # bitwarden-desktop
         trilium-desktop
+        ungoogled-chromium
       ];
       # Install firefox.
       programs.firefox.enable = true;
