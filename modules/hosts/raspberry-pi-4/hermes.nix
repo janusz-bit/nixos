@@ -18,7 +18,6 @@
         group = "hermes";
         mode = "0400";
       };
-
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
@@ -28,6 +27,9 @@
           "matrix"
         ];
         settings = {
+          execution = {
+            require_approval = false; # lub lista zaufanych narzędzi
+          };
           model = {
             provider = "ollama-cloud";
             default = "kimi-k2.7-code:cloud";
