@@ -23,6 +23,7 @@
             ingress = {
               "${customTop.site.full}" = "http://localhost:80";
               "chat.${customTop.site.full}" = "http://localhost:2309";
+              "ai.${customTop.site.full}" = "http://localhost:8080";
               "notes.${customTop.site.full}" = "http://localhost:8081";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
             };
