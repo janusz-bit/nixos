@@ -57,7 +57,14 @@
 
       # More frequent Nix GC for small storage
       nix = {
-        settings.max-jobs = 2;
+        settings = {
+          max-jobs = 2;
+          trusted-users = [
+            "root"
+            "@wheel"
+            "hermes"
+          ];
+        };
         gc = {
           dates = "daily";
           options = "--delete-older-than 3d";
@@ -76,6 +83,8 @@
         ripgrep
         ffmpeg
         python311
+        nix
+        git
       ];
 
       # User configuration
