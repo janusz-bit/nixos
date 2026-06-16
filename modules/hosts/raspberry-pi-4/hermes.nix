@@ -43,8 +43,12 @@
         restartSec = 5;
       };
 
-      services.hermes-agent.extraPackages = [
-        pkgs.uv
+      services.hermes-agent.extraPackages = with pkgs; [
+        uv
+        nodejs_22
+        ripgrep
+        ffmpeg
+        python311
       ];
 
       services.hermes-agent.mcpServers = {

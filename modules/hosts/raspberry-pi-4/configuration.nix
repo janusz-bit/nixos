@@ -71,6 +71,11 @@
       environment.systemPackages = with pkgs; [
         micro
         htop
+        uv
+        nodejs_22
+        ripgrep
+        ffmpeg
+        python311
       ];
 
       # User configuration
