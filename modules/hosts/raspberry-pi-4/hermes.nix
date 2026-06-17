@@ -32,7 +32,7 @@
           };
           model = {
             provider = "ollama-cloud";
-            default = "kimi-k2.7-code:cloud";
+            default = "glm-5.2:cloud";
           };
           web.backend = "ddgs";
         };
