@@ -12,6 +12,7 @@
 
       nixpkgs.overlays = [
         self.overlays.trilium
+        self.overlays.hermes-agent
       ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
