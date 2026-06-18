@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   flake.modules.nixos.rpi-configuration =
     {
@@ -20,6 +20,15 @@
         kernel.sysctl."vm.swappiness" = 100;
         tmp.useTmpfs = true;
       };
+
+      # Use the mainline kernel instead of the Raspberry Pi vendor kernel from
+      # nixos-hardware. The vendor kernel (linux-rpi 6.18.33) fails to build on
+      # nixos-unstable because nixpkgs common-config.nix sets PREEMPT_LAZY=yes
+      # (for kernel >= 6.18) which conflicts with nixos-hardware's PREEMPT=yes
+      # (vendor defconfig uses full preempt).
+      # See: https://github.com/NixOS/nixpkgs/commit/d79e72ee0533cd5ce021dcd8863599e9dd290a33
+      # The mainline kernel builds cleanly from the nixos.org binary cache.
+      boot.kernelPackages = pkgs.linuxPackages;
 
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
