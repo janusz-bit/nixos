@@ -18,6 +18,7 @@
         self.modules.nixos.trilium
         self.modules.nixos.cloudflared
         self.modules.nixos.pwm-fan
+        self.modules.nixos.leds-off
         self.modules.nixos.hermes
         self.modules.nixos.open-webui
         self.modules.nixos.base-agenix
