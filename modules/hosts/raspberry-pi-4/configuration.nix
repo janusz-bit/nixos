@@ -22,6 +22,17 @@
         tmp.useTmpfs = true;
       };
 
+      # Use the mainline kernel instead of the Raspberry Pi vendor kernel from
+      # nixos-hardware. The vendor kernel (linux-rpi 6.18.33) fails to build on
+      # nixos-unstable because nixpkgs common-config.nix sets PREEMPT_LAZY=yes
+      # (for kernel >= 6.18) which conflicts with nixos-hardware's PREEMPT=yes
+      # (vendor defconfig uses full preempt). The nixos-hardware module hardcodes
+      # structuredExtraConfig inside buildLinux, so boot.kernelPatches cannot
+      # override it. The mainline kernel builds cleanly from the nixos.org cache.
+      # See: https://github.com/NixOS/nixpkgs/commit/d79e72ee0533cd5ce021dcd8863599e9dd290a33
+      # See: https://github.com/NixOS/nixos-hardware/issues/1887
+      boot.kernelPackages = pkgs.linuxPackages;
+
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
 
