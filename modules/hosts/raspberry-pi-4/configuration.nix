@@ -22,16 +22,27 @@
         tmp.useTmpfs = true;
       };
 
-      # Use the mainline kernel instead of the Raspberry Pi vendor kernel from
-      # nixos-hardware. The vendor kernel (linux-rpi 6.18.33) fails to build on
-      # nixos-unstable because nixpkgs common-config.nix sets PREEMPT_LAZY=yes
-      # (for kernel >= 6.18) which conflicts with nixos-hardware's PREEMPT=yes
-      # (vendor defconfig uses full preempt). The nixos-hardware module hardcodes
-      # structuredExtraConfig inside buildLinux, so boot.kernelPatches cannot
-      # override it. The mainline kernel builds cleanly from the nixos.org cache.
-      # See: https://github.com/NixOS/nixpkgs/commit/d79e72ee0533cd5ce021dcd8863599e9dd290a33
-      # See: https://github.com/NixOS/nixos-hardware/issues/1887
-      boot.kernelPackages = pkgs.linuxPackages;
+      # The RPi vendor kernel from nixos-hardware uses PREEMPT=yes but does not
+      # set PREEMPT_LAZY=no. nixpkgs common-config.nix sets PREEMPT_LAZY=yes for
+      # kernel >= 6.18, which conflicts with PREEMPT=yes (same kconfig choice).
+      # boot.kernelPatches is not applied because nixos-hardware hardcodes
+      # kernelPatches inside buildLinux (via callPackage), bypassing the NixOS
+      # kernel module's apply hook. Use argsOverride on the nixos-hardware
+      # kernel.nix to inject PREEMPT_LAZY=n via extraConfig (legacy string format
+      # appended to the intermediate kernel config, overriding structured config).
+      # Ref: https://github.com/NixOS/nixpkgs/commit/d79e72ee0533cd5ce021dcd8863599e9dd290a33
+      boot.kernelPackages =
+        let
+          rpiKernel = pkgs.callPackage "${inputs.nixos-hardware}/raspberry-pi/common/kernel.nix" {
+            rpiVersion = 4;
+            argsOverride = {
+              extraConfig = ''
+                PREEMPT_LAZY n
+              '';
+            };
+          };
+        in
+        pkgs.linuxPackagesFor rpiKernel;
 
       # CPU Performance optimization
       powerManagement.cpuFreqGovernor = "ondemand";
