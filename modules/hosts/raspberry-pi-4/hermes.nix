@@ -100,5 +100,45 @@
           ];
         }
       ];
+
+      # Make hermes-agent create group-writable files so that both the
+      # `hermes` service user and the `nixos` login user (member of the
+      # `hermes` group) can read/write the same files in ~/.hermes/.
+      systemd.services.hermes-agent.serviceConfig.UMask = "0002";
+
+      # Periodically fix permissions on the hermes data directory so that
+      # files created by the `nixos` user (e.g. via `hermes` CLI with the
+      # default umask 022) become group-writable.  The setgid bit on
+      # directories ensures correct group ownership; this service only
+      # adjusts the permission bits.
+      systemd.services.hermes-fix-perms = {
+        description = "Fix group-write permissions on hermes data directory";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          ExecStart = [
+            # chmod g+w on all files and dirs under ~/.hermes
+            "${pkgs.coreutils}/bin/find /var/lib/hermes/.hermes -type d -exec chmod g+ws {} +"
+            "${pkgs.coreutils}/bin/find /var/lib/hermes/.hermes -type f -exec chmod g+w {} +"
+          ];
+        };
+      };
+
+      systemd.timers.hermes-fix-perms = {
+        description = "Periodically fix hermes data directory permissions";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "1min";
+          OnUnitActiveSec = "5min";
+        };
+      };
+
+      # Ensure the `nixos` login user also creates group-writable files
+      # inside the hermes data directory (umask 002 in interactive shells).
+      environment.interactiveShellInit = ''
+        if [[ -d /var/lib/hermes/.hermes ]] && [[ "$(id -gn)" == "hermes" || " $(id -Gn) " == *" hermes "* ]]; then
+          umask 0002
+        fi
+      '';
     };
 }
