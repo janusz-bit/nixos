@@ -19,6 +19,7 @@
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
               extra-substituters = ${customTop.cache.cachix.url}
               extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
+              build-fallback = true
             '';
           };
         }
