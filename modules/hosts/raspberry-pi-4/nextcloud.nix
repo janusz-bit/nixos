@@ -13,6 +13,10 @@
         owner = "nextcloud";
         mode = "0440";
       };
+
+      # Dostęp Nextcloud do plików Hermes workspace (External Storage)
+      users.users.nextcloud.extraGroups = [ "hermes" ];
+
       services = {
         nextcloud = {
           enable = true;
