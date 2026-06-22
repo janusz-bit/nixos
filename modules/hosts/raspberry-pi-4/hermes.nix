@@ -6,7 +6,7 @@
 }:
 {
   flake.modules.nixos.hermes =
-    { config, pkgs, ... }:
+    { config, pkgs, lib, ... }:
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -101,6 +101,6 @@
       # We need sudo so the agent can fix file ownership/permissions
       # on files created by the interactive nixos user (e.g. skills,
       # cron scripts) and vice versa.
-      systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = false;
+      systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = lib.mkForce false;
     };
 }
