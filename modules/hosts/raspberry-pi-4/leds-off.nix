@@ -1,30 +1,29 @@
 { ... }:
 {
   flake.modules.nixos.leds-off = _: {
-    # Disable all LEDs on Raspberry Pi 4:
-    #   ACT (green, heartbeat), PWR (red, default-on),
-    #   mmc0/mmc1 (SD activity), Ethernet amber/green.
-    # systemd-tmpfiles runs during sysinit.target, after the LED
-    # subsystem has created the /sys/class/leds/ entries.
+    # Disable all LEDs on Raspberry Pi 4.
+    # ACT, PWR, and Ethernet LEDs are controlled via device tree overlays
+    # using the nixos-hardware raspberry-pi/4/leds.nix module.
+    # Ethernet PHY LEDs (amber/green on RJ45 port) are NOT in /sys/class/leds/
+    # — they require a DT overlay setting led-modes = <0x04 0x04> (Off).
+    hardware.raspberry-pi."4".leds = {
+      eth.disable = true; # Ethernet amber + green LEDs via DT overlay
+      act.disable = true; # Green ACT LED via DT overlay
+      pwr.disable = true; # Red PWR LED via DT overlay
+    };
+
+    # Remaining LEDs (mmc0 SD activity, default-on) are not covered by
+    # nixos-hardware — disable them via systemd-tmpfiles.
     systemd.tmpfiles.rules = [
-      # ACT - green activity LED on the board
-      "w /sys/class/leds/ACT/trigger - - - - none"
-      "w /sys/class/leds/ACT/brightness - - - - 0"
-      # PWR - red power LED on the board
-      "w /sys/class/leds/PWR/trigger - - - - none"
-      "w /sys/class/leds/PWR/brightness - - - - 0"
-      # mmc0 - SD/eMMC controller LED
+      # mmc0 - SD controller activity LED
+      ''w "/sys/class/leds/mmc0/trigger" - - - - none''
+      ''w "/sys/class/leds/mmc0/brightness" - - - - 0''
+      # mmc0:: - SD/eMMC controller LED (alternative name)
       ''w "/sys/class/leds/mmc0::/trigger" - - - - none''
       ''w "/sys/class/leds/mmc0::/brightness" - - - - 0''
-      # mmc1 - second MMC controller LED
-      ''w "/sys/class/leds/mmc1::/trigger" - - - - none''
-      ''w "/sys/class/leds/mmc1::/brightness" - - - - 0''
-      # Ethernet amber LED
-      ''w "/sys/class/leds/unimac-mdio--19:01:amber:lan/trigger" - - - - none''
-      ''w "/sys/class/leds/unimac-mdio--19:01:amber:lan/brightness" - - - - 0''
-      # Ethernet green LED
-      ''w "/sys/class/leds/unimac-mdio--19:01:green:lan/trigger" - - - - none''
-      ''w "/sys/class/leds/unimac-mdio--19:01:green:lan/brightness" - - - - 0''
+      # default-on - residual default-on LED
+      ''w "/sys/class/leds/default-on/trigger" - - - - none''
+      ''w "/sys/class/leds/default-on/brightness" - - - - 0''
     ];
   };
 }
