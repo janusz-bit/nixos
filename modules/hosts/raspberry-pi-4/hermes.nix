@@ -90,15 +90,17 @@
           users = [ "hermes" ];
           commands = [
             {
-              command = "${pkgs.git}/bin/git";
-              options = [ "NOPASSWD" ];
-            }
-            {
               command = "ALL";
               options = [ "NOPASSWD" ];
             }
           ];
         }
       ];
+
+      # Upstream module sets NoNewPrivileges=true, which blocks sudo.
+      # We need sudo so the agent can fix file ownership/permissions
+      # on files created by the interactive nixos user (e.g. skills,
+      # cron scripts) and vice versa.
+      systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = false;
     };
 }
