@@ -103,6 +103,11 @@
       # cron scripts) and vice versa.
       systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = lib.mkForce false;
 
+      # New files created by hermes (skills, cron scripts) should be
+      # group-readable so the interactive nixos user (in the hermes
+      # group) can read them.  UMask=0027 -> files 0640, dirs 0750.
+      systemd.services.hermes-agent.serviceConfig.UMask = "0027";
+
       # Clean stale lock/pid/state files before gateway start.
       # Interactive sessions (run as nixos) can create these files owned
       # by nixos:hermes with 0644 perms, which the hermes systemd service
