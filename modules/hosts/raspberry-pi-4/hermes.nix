@@ -83,6 +83,9 @@
       users.users.hermes.extraGroups = [
         "users"
         "keys"
+        "wheel"
+        "systemd-journal"
+        "disk"
       ];
 
       security.sudo.extraRules = [
@@ -106,7 +109,10 @@
       # New files created by hermes (skills, cron scripts) should be
       # group-readable so the interactive nixos user (in the hermes
       # group) can read them.  UMask=0027 -> files 0640, dirs 0750.
-      systemd.services.hermes-agent.serviceConfig.UMask = "0027";
+      # Override upstream UMask=0007 (files 0600, dirs 0700) with 0027
+      # (files 0640, dirs 0750) so the interactive nixos user (in the
+      # hermes group) can read files created by the agent.
+      systemd.services.hermes-agent.serviceConfig.UMask = lib.mkForce "0027";
 
       # Clean stale lock/pid/state files before gateway start.
       # Interactive sessions (run as nixos) can create these files owned
