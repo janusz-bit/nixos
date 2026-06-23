@@ -102,5 +102,14 @@
       # on files created by the interactive nixos user (e.g. skills,
       # cron scripts) and vice versa.
       systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = lib.mkForce false;
+
+      # Clean stale lock/pid/state files before gateway start.
+      # Interactive sessions (run as nixos) can create these files owned
+      # by nixos:hermes with 0644 perms, which the hermes systemd service
+      # cannot open in append mode (PermissionError). Removing them before
+      # start lets the service recreate them with correct ownership.
+      systemd.services.hermes-agent.serviceConfig.ExecStartPre = lib.mkBefore [
+        "${pkgs.coreutils}/bin/rm -f /var/lib/hermes/.hermes/gateway.lock /var/lib/hermes/.hermes/gateway.pid /var/lib/hermes/.hermes/gateway_state.json"
+      ];
     };
 }
