@@ -13,9 +13,6 @@
         owner = "nextcloud";
         mode = "0440";
       };
-      # Pozwól Nextcloud czytać pliki Hermesa (external storage: local)
-      users.users.nextcloud.extraGroups = [ "hermes" ];
-
       services = {
         nextcloud = {
           enable = true;
@@ -49,14 +46,6 @@
             ];
           };
         };
-
-        # Włącz aplikację External Storage (files_external) po setupie.
-        # files_external to aplikacja wbudowana w Nextcloud (nie jest w
-        # nextcloud33Packages.apps), więc extraApps nie zadziała — trzeba
-        # ją włączyć przez occ po instalacji.
-        systemd.services.nextcloud-setup.serviceConfig.ExecStartPost = lib.mkAfter [
-          "${config.services.nextcloud.occ}/bin/nextcloud-occ app:enable files_external"
-        ];
 
         # HSTS Header
         nginx.virtualHosts."${customTop.site.full}".extraConfig = ''
