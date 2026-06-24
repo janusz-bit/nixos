@@ -107,20 +107,41 @@
       systemd.services.hermes-agent.serviceConfig.NoNewPrivileges = lib.mkForce false;
 
       # New files created by hermes (skills, cron scripts) should be
-      # group-readable so the interactive nixos user (in the hermes
-      # group) can read them.  UMask=0027 -> files 0640, dirs 0750.
-      # Override upstream UMask=0007 (files 0600, dirs 0700) with 0027
-      # (files 0640, dirs 0750) so the interactive nixos user (in the
-      # hermes group) can read files created by the agent.
+      # group-readable so the interactive nixos user AND nextcloud (both
+      # in the hermes group) can read them.  UMask=0027 -> files 0640,
+      # dirs 0750.
       systemd.services.hermes-agent.serviceConfig.UMask = lib.mkForce "0027";
 
       # Clean stale lock/pid/state files before gateway start.
-      # Interactive sessions (run as nixos) can create these files owned
-      # by nixos:hermes with 0644 perms, which the hermes systemd service
-      # cannot open in append mode (PermissionError). Removing them before
-      # start lets the service recreate them with correct ownership.
       systemd.services.hermes-agent.serviceConfig.ExecStartPre = lib.mkBefore [
         "${pkgs.coreutils}/bin/rm -f /var/lib/hermes/.hermes/gateway.lock /var/lib/hermes/.hermes/gateway.pid /var/lib/hermes/.hermes/gateway_state.json"
       ];
+
+      # Periodically fix permissions on hermes data directories so that
+      # files created with restrictive umasks become group-readable.
+      # This is essential for Nextcloud external storage access (nextcloud
+      # user is in the hermes group and needs g+r/g+x to read files).
+      systemd.services.hermes-fix-perms = {
+        description = "Fix group-read permissions on hermes data directories";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          ExecStart = [
+            # Ensure directories are group-readable+executable with setgid
+            "${pkgs.coreutils}/bin/find /var/lib/hermes/.hermes /var/lib/hermes/workspace -type d -exec chmod g+rxs {} +"
+            # Ensure files are group-readable
+            "${pkgs.coreutils}/bin/find /var/lib/hermes/.hermes /var/lib/hermes/workspace -type f -exec chmod g+r {} +"
+          ];
+        };
+      };
+
+      systemd.timers.hermes-fix-perms = {
+        description = "Periodically fix hermes data directory permissions";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "1min";
+          OnUnitActiveSec = "5min";
+        };
+      };
     };
 }
