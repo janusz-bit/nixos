@@ -38,7 +38,7 @@
           };
           model = {
             provider = "ollama-cloud";
-            default = "glm-5.2:cloud";
+            default = "minimax-m3:cloud";
           };
           web.backend = "ddgs";
         };
