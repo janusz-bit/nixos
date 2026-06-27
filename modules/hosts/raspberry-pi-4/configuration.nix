@@ -1,4 +1,9 @@
-{ self, inputs, ... }:
+{
+  self,
+  inputs,
+  customTop,
+  ...
+}:
 {
   flake.modules.nixos.rpi-configuration =
     {
@@ -119,10 +124,11 @@
           "networkmanager"
           "wheel"
         ];
-        openssh.authorizedKeys.keys = [
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkQRhJASMQB1ClDBwqnYGZXSSGAr1S2y5KaQ5Z0Fc5+ root@nixos"
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIb1ln2lU/lR4NwlfUQ+oPurNDI+O6B0uiFCcWfYuGj3 root@nixos"
-        ];
+        openssh.authorizedKeys.keys =
+          let
+            secrets = import "${customTop.secretsDir}/secrets.nix";
+          in
+          secrets."secret1.age".publicKeys;
       };
     };
 }
