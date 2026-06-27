@@ -6,7 +6,12 @@
 }:
 {
   flake.modules.nixos.hermes =
-    { config, pkgs, lib, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -40,6 +45,7 @@
             provider = "ollama-cloud";
             default = "glm-5.2:cloud";
           };
+          agent.reasoning_effort = "xhigh"; # minimal|low|medium|high|xhigh|none (xhigh→max dla ollama-cloud)
           web.backend = "ddgs";
         };
         environmentFiles = [
