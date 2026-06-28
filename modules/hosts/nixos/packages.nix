@@ -34,7 +34,7 @@
             zulu
           ];
         })
-        # lutris
+        lutris
         bootdev-cli
         kdePackages.kcalc
         nextcloud-client
