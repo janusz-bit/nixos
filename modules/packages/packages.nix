@@ -22,18 +22,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.bootdev-cli = pkgs.bootdev-cli.overrideAttrs (oldAttrs: rec {
-        version = "1.29.6";
-
-        src = pkgs.fetchFromGitHub {
-          owner = "bootdotdev";
-          repo = "bootdev";
-          rev = "v${version}";
-          hash = "sha256-uoFnhcJvvY+lb8VLv0kPI8hp4H8XfQOY5R83Rj17gfw=";
-        };
-
-        vendorHash = "sha256-ZDioEU5uPCkd+kC83cLlpgzyOsnpj2S7N+lQgsQb8uY=";
-      });
+      packages.bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
 
       packages.raspberry-pi-4-sd-image =
         let
