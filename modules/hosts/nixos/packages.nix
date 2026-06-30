@@ -46,17 +46,9 @@
         trilium-desktop
         ungoogled-chromium
         # Compilers & build tools
-        gcc
-        clang
-        rustc
-        cargo
-        go
-        gnumake
+        clangStdenv
         cmake
-        meson
         ninja
-        pkg-config
-        binutils
       ];
       # Install firefox.
       programs.firefox.enable = true;
