@@ -46,9 +46,14 @@
         trilium-desktop
         ungoogled-chromium
         # Compilers & build tools
-        clangStdenv
         cmake
         ninja
+        clang
+        pkgs.pkgsCross.mingwW64.buildPackages.gcc
+        wine64
+        clang-tools
+        lldb
+        boost
       ];
       # Install firefox.
       programs.firefox.enable = true;
