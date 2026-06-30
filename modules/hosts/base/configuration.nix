@@ -30,6 +30,19 @@ let
       cloudflared
       gemini-cli
       vulnix
+
+      # Kompilatory i narzędzia budowania
+      gcc
+      gnumake
+      cmake
+      pkg-config
+      binutils
+      clang
+      rustc
+      cargo
+      go
+      ninja
+      meson
     ];
 
   sharedSessionVariables = {
