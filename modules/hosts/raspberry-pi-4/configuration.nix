@@ -113,6 +113,7 @@
         python311
         nix
         git
+        tea # Gitea official CLI client
       ];
 
       # User configuration
