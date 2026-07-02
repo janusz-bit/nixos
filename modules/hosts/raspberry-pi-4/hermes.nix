@@ -47,6 +47,10 @@
           };
           agent.reasoning_effort = "xhigh"; # minimal|low|medium|high|xhigh|none (xhigh→max dla ollama-cloud)
           web.backend = "ddgs";
+          auxiliary.vision = {
+            provider = "ollama-cloud";
+            model = "gemma4:31b";
+          };
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
