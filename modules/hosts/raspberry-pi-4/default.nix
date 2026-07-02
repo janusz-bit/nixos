@@ -16,6 +16,7 @@
       imports = [
         self.modules.nixos.nextcloud
         self.modules.nixos.trilium
+        self.modules.nixos.gitea
         self.modules.nixos.cloudflared
         self.modules.nixos.pwm-fan
         self.modules.nixos.leds-off

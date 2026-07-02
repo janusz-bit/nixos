@@ -25,6 +25,7 @@
               "chat.${customTop.site.full}" = "http://localhost:8080";
               "notes.${customTop.site.full}" = "http://localhost:8081";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
+              "git.${customTop.site.full}" = "http://localhost:3000";
             };
           };
         };
