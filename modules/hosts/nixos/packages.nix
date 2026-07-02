@@ -54,6 +54,7 @@
         clang-tools
         lldb
         boost
+        tea
       ];
       # Install firefox.
       programs.firefox.enable = true;
