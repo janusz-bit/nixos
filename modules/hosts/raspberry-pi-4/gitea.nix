@@ -18,7 +18,10 @@
             ROOT_URL = "https://git.${customTop.site.full}/";
             HTTP_ADDR = "127.0.0.1";
             HTTP_PORT = 3000;
-            DISABLE_SSH = true;
+            DISABLE_SSH = false;
+            START_SSH_SERVER = false;
+            SSH_DOMAIN = "git.${customTop.site.full}";
+            SSH_PORT = 22;
           };
           service.DISABLE_REGISTRATION = true;
           session.COOKIE_SECURE = true;
