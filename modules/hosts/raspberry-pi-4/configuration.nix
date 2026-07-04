@@ -16,8 +16,7 @@
       networking.hostName = "raspberry-pi-4";
 
       nixpkgs.overlays = [
-        self.overlays.trilium
-        self.overlays.hermes-agent
+
       ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image

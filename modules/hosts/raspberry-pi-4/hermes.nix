@@ -26,12 +26,6 @@
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
-        # The upstream NixOS module defaults its package to
-        # inputs.hermes-agent.packages.${system}.default, whose nix/lib.nix
-        # carries a stale npmDepsHash on current nixos-unstable. The
-        # self.overlays.hermes-agent overlay exposes a patched pkgs.hermes-agent
-        # (substituted npmDepsHash) that we pin here so the service builds.
-        package = pkgs.hermes-agent;
         extraDependencyGroups = [
           "all"
           "messaging"
