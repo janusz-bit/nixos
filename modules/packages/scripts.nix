@@ -1,15 +1,17 @@
 {
   perSystem =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
       packages.update-flake = pkgs.writeShellScriptBin "flake-update" ''
         set -e
         echo "Updating flake inputs..."
         nix flake update
-        if ! git diff --exit-code flake.lock > /dev/null; then
-          echo "Committing flake.lock..."
-          git add flake.lock
-          git commit -m "Update flake.lock" flake.lock
+        echo "Syncing GitHub Actions workflows..."
+        ${config.packages.sync-github-actions}/bin/sync-github-actions
+        if ! git diff --exit-code flake.lock .github/workflows > /dev/null; then
+          echo "Committing flake.lock and synced workflows..."
+          git add flake.lock .github/workflows
+          git commit -m "flake.lock: update all inputs" flake.lock .github/workflows
         fi
         echo "Updating bootdev-cli..."
         ${pkgs.lib.getExe pkgs.nix-update} --commit -F bootdev-cli
