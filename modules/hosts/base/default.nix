@@ -15,7 +15,6 @@
         self.modules.nixos.nix-settings
         self.modules.nixos.base-ssh
         self.modules.nixos.base-agenix
-        self.modules.nixos.base-opencode
         self.modules.nixos.options
       ];
     };
