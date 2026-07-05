@@ -86,13 +86,15 @@ in
       imports = [ inputs.nix-index-database.nixosModules.default ];
       nixpkgs.config.allowUnfree = true;
 
+      nixpkgs.overlays = [ self.overlays.opencode-config ];
+
       networking.firewall = {
         enable = true;
         allowedTCPPorts = [ 22 ];
         allowedUDPPorts = [ ];
       };
 
-      environment.systemPackages = sharedPackages pkgs;
+      environment.systemPackages = (sharedPackages pkgs) ++ [ pkgs.opencode ];
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
       environment.shellAliases = environmentShellAliases config pkgs;

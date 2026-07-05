@@ -10,7 +10,10 @@
         } $out/share/opencode/web-search-mcp.py
         substituteInPlace $out/share/opencode/opencode.json \
           --replace-fail "/etc/opencode/web-search-mcp.py" "$out/share/opencode/web-search-mcp.py"
-        wrapProgram $out/bin/opencode --set OPENCODE_CONFIG $out/share/opencode/opencode.json
+        wrapProgram $out/bin/opencode \
+          --prefix PATH : ${prev.ripgrep}/bin \
+          --set OPENCODE_DISABLE_AUTOUPDATE true \
+          --set OPENCODE_CONFIG $out/share/opencode/opencode.json
       '';
     });
   };
