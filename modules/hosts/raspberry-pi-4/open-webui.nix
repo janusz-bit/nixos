@@ -21,6 +21,8 @@
           ENABLE_OLLAMA_API = "false";
           # Require authentication (first registered user becomes admin)
           WEBUI_AUTH = "True";
+          # Stateful Responses API (forwarding previous_response_id)
+          ENABLE_RESPONSES_API_STATEFUL = "1";
         };
         # Shared API key with Hermes Agent (API_SERVER_KEY=OPENAI_API_KEY)
         environmentFile = config.age.secrets.open-webui-hermes-env.path;
