@@ -88,6 +88,13 @@ in
 
       nixpkgs.overlays = [ self.overlays.opencode-config ];
 
+      networking.nameservers = [
+        "9.9.9.9"
+        "149.112.112.112"
+        "2620:fe::fe"
+        "2620:fe::9"
+      ];
+
       networking.firewall = {
         enable = true;
         allowedTCPPorts = [ 22 ];
