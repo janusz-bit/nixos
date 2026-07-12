@@ -122,8 +122,17 @@
           # no need to redefine it in your config for now)
           #media-session.enable = true;
         };
-
       };
+
+      environment.etc."kcminputrc".text = ''
+        [Keyboard]
+        NumLock=0
+      '';
+      systemd.tmpfiles.rules = [
+        "d /home/${config.customBot.defaultUser}/.config 0755 ${config.customBot.defaultUser} ${config.customBot.defaultUser} -"
+        "L+ /home/${config.customBot.defaultUser}/.config/kcminputrc - - - - /etc/kcminputrc"
+      ];
+
       hardware = {
         bluetooth.enable = true;
       };
