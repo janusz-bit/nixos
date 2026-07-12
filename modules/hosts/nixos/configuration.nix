@@ -91,6 +91,7 @@
         displayManager = {
           sddm.wayland.enable = true;
           sddm.enable = true;
+          sddm.autoNumlock = true;
         };
         desktopManager.plasma6.enable = true;
 
