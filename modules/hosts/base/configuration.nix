@@ -114,6 +114,11 @@ in
       programs.nix-index-database.comma.enable = true;
 
       programs.direnv.enable = true;
+
+      # The ZFS module is pulled in by default by nixpkgs even when ZFS
+      # is not in use. Explicitly disable forceImportRoot to silence the
+      # 26.11 evaluation warning and reduce the risk of data loss.
+      boot.zfs.forceImportRoot = false;
     };
 
   flake.homeModules.configuration =
