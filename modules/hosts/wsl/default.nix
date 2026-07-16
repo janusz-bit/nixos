@@ -26,6 +26,7 @@
       (_: {
         customBot.enableFastfetch = false;
         customBot.flakeTarget = "wsl";
+        customBot.defaultUser = "nixos";
       })
     ];
   };
