@@ -17,6 +17,11 @@
           RestartSec = "10";
           User = "root";
         };
+        environment = {
+          # rpi-lgpio can't detect RPi revision via /proc/device-tree on this kernel
+          # (system/ node missing from DT). Provide it explicitly.
+          RPI_LGPIO_REVISION = "0xc03114"; # RPi4B Rev 1.4
+        };
         script =
           let
             pythonEnv = pkgs.python3.withPackages (ps: [ ps.rpi-lgpio ]);
