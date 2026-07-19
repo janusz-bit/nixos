@@ -98,7 +98,7 @@
         };
       };
 
-      # Workaround for python3.12-doc build failure with sphinx/docutils 0.22
+      # Workaround for python3.11-doc build failure with sphinx/docutils 0.22
       # https://github.com/NixOS/nixpkgs/issues/499166
       documentation.doc.enable = false;
 

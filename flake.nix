@@ -32,7 +32,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
-    hermes-agent.url = "github:NousResearch/hermes-agent";
+    # Pinned to last commit before topup.ts introduced broken
+    # @hermes/shared/charge-settlement import in nix/tui.nix (missing
+    # apps/shared in dirs). Upstream bug — unpin once fixed.
+    hermes-agent.url = "github:NousResearch/hermes-agent/3f2a389c7e1f1729cad91ae63c26fb08c7753c74";
   };
 
   nixConfig = {
