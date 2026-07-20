@@ -7,11 +7,6 @@
           {
             "$schema": "https://opencode.ai/config.json",
             "model": "google/gemini-3.1-pro-preview",
-            "plugin": [
-              "superpowers@git+https://github.com/obra/superpowers.git",
-              "caveman-opencode-plugin",
-              "opencode-skillful"
-            ],
             "permission": {
               "websearch": "allow"
             },
@@ -21,7 +16,7 @@
                 "command": [
                   "uv",
                   "run",
-                  "/etc/opencode/web-search-mcp.py"
+                  "${webSearchMcp}"
                 ],
                 "enabled": true
               }
@@ -151,9 +146,6 @@
         postInstall = (oldAttrs.postInstall or "") + ''
           mkdir -p $out/share/opencode
           install -Dm644 ${opencodeJson} $out/share/opencode/opencode.json
-          install -Dm755 ${webSearchMcp} $out/share/opencode/web-search-mcp.py
-          substituteInPlace $out/share/opencode/opencode.json \
-            --replace-fail "/etc/opencode/web-search-mcp.py" "$out/share/opencode/web-search-mcp.py"
           wrapProgram $out/bin/opencode \
             --prefix PATH : ${prev.ripgrep}/bin \
             --set OPENCODE_DISABLE_AUTOUPDATE true \
