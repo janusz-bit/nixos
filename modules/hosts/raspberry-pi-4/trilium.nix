@@ -1,10 +1,7 @@
-{ self, customTop, ... }:
+{ ... }:
 {
   flake.modules.nixos.trilium =
     {
-      config,
-      pkgs,
-      lib,
       ...
     }:
     {

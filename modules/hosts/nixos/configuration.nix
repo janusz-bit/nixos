@@ -71,7 +71,6 @@
       services.avahi.enable = true;
       services.avahi.nssmdns4 = true;
       services.btrfs.autoScrub.enable = true;
-      boot.loader.efi.canTouchEfiVariables = true;
       services.flatpak.enable = true;
 
       services = {
@@ -206,9 +205,6 @@
         ];
       };
       users.users.root.initialPassword = "root";
-      # Allow unfree packages
-      nixpkgs.config.allowUnfree = true;
-
     };
 
 }

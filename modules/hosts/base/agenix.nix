@@ -1,4 +1,4 @@
-{ self, config, ... }:
+{ self, ... }:
 {
   flake.modules.nixos.base-agenix =
     { config, pkgs, ... }:

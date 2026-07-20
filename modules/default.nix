@@ -10,7 +10,6 @@
     inputs.home-manager.flakeModules.home-manager
     inputs.git-hooks-nix.flakeModule
     inputs.github-actions-nix.flakeModules.default
-    inputs.flake-parts.flakeModules.modules
   ];
 
   perSystem =

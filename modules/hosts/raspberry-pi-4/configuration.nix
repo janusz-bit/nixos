@@ -15,10 +15,6 @@
     {
       networking.hostName = "raspberry-pi-4";
 
-      nixpkgs.overlays = [
-
-      ];
-
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot = {
         initrd.allowMissingModules = true;
