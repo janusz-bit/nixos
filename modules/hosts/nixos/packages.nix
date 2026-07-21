@@ -44,6 +44,7 @@
         joplin-desktop
         # bitwarden-desktop
         trilium-desktop
+        foliate
         ungoogled-chromium
         # Compilers & build tools
         cmake
