@@ -38,7 +38,7 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 * `direnv` enabled.
 * `environment.localBinInPath = true` (recommended for `uv`-installed binaries in `~/.local/bin`).
 * Default editor: `micro`.
-* **OpenCode**: Declarative configuration via `environment.etc` + `systemd.tmpfiles.rules` symlink. Config at `modules/configs/opencode/opencode.json` (Google `gemini-3.1-pro-preview` model, `superpowers`, `caveman-opencode-plugin`, and `opencode-skillful` plugins, local `web_search_and_fetch` MCP server via `uv run`). Installed on all hosts through the `base/opencode` module.
+* **OpenCode**: Declarative configuration inline in `modules/overlays/opencode.nix` (Nix overlay generating `opencode.json` + `web-search-mcp.py` at build time). Default model: `google/gemini-3.1-pro-preview`. Provider `ollama` (OpenAI-compatible, `http://localhost:11434/v1`) with model `orinth:35b`. Local `web_search_and_fetch` MCP server via `uv run` (Ollama web_search/web_fetch API). Installed on all hosts through the `base/opencode` module.
 * **Nix settings** (`modules/nix-settings.nix`): Weekly GC (delete older than 7d), auto-optimise-store, trusted-users = `@wheel`.
 * **Git** (`modules/hosts/base/git.nix`): user.name = `janusz-bit`, user.email = `janusz-bit@proton.me`, init.defaultBranch = `main`, `gh:` and `github:` rewritten to `https://github.com/`. `gh` CLI installed.
 * **SSH** (`modules/hosts/base/ssh.nix`): Key-only authentication, `ssh.startAgent = false`, `gnupg.agent.enable = true`. Cloudflared SSH proxy configured (`ssh.*` host pattern uses `cloudflared access ssh --hostname %h`).
@@ -153,7 +153,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6)
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
-* **`modules/configs/opencode/`**: OpenCode configuration (`opencode.json`) and `web-search-mcp.py` MCP server script.
+* **`modules/configs/opencode/`**: OpenCode legacy config directory (now generated inline by `modules/overlays/opencode.nix` overlay).
 
 ## Centralized Configuration
 
