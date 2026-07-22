@@ -6,7 +6,7 @@
         opencodeJson = prev.writeText "opencode.json" ''
           {
             "$schema": "https://opencode.ai/config.json",
-            "model": "google/gemini-3.1-pro-preview",
+            "model": "ollama-cloud/glm-5.2:cloud",
             "provider": {
               "ollama": {
                 "npm": "@ai-sdk/openai-compatible",
@@ -17,6 +17,19 @@
                 "models": {
                   "orinth:35b": {
                     "name": "orinth:35b"
+                  }
+                }
+              },
+              "ollama-cloud": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "Ollama Cloud",
+                "options": {
+                  "baseURL": "https://ollama.com/v1",
+                  "apiKey": "{env:OLLAMA_API_KEY}"
+                },
+                "models": {
+                  "glm-5.2:cloud": {
+                    "name": "glm-5.2:cloud"
                   }
                 }
               }
