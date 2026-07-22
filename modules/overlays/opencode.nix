@@ -15,8 +15,8 @@
                   "baseURL": "http://localhost:11434/v1"
                 },
                 "models": {
-                  "orinth:35b": {
-                    "name": "orinth:35b"
+                  "ornith:35b": {
+                    "name": "ornith:35b"
                   }
                 }
               },
