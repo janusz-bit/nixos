@@ -30,6 +30,21 @@
           configureRedis = true;
           maxUploadSize = "2G";
 
+          # PHP-FPM pool tuning for RPi4 (4 GB RAM).
+          # Default max_children=120 is absurd for 4GB — each child is ~55 MB,
+          # so 120 children = 6.6 GB potential allocation. Under memory
+          # pressure (RPi4 typically runs with <200 MB free), PHP-FPM cannot
+          # spawn new children for upload processing, causing uploads to fail
+          # silently. 24 children × 55 MB = ~1.3 GB — fits comfortably.
+          poolSettings = {
+            pm = "dynamic";
+            "pm.max_children" = 24;
+            "pm.max_requests" = 500;
+            "pm.max_spare_servers" = 6;
+            "pm.min_spare_servers" = 2;
+            "pm.start_servers" = 4;
+          };
+
           phpOptions = {
             "opcache.interned_strings_buffer" = "16";
           };
