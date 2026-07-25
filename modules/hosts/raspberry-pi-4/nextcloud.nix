@@ -17,7 +17,7 @@
         nextcloud = {
           enable = true;
           hostName = "${customTop.site.full}";
-          package = pkgs.nextcloud33;
+          package = pkgs.nextcloud34;
 
           database.createLocally = true;
 
