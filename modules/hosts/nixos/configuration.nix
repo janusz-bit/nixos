@@ -48,6 +48,10 @@
               # WiFi
               WIFI_PWR_ON_AC = "on";
               WIFI_PWR_ON_BAT = "on";
+              # Bateria: conservation mode (Lenovo ideapad_laptop)
+              # 1 = ON (~60-80% cap, hardware-level), 0 = OFF (charges to 100%)
+              START_CHARGE_THRESH_BAT0 = 0;  # dummy — required by TLP, ignored by ideapad driver
+              STOP_CHARGE_THRESH_BAT0 = 1;   # 1 = conservation mode ON
             };
           };
 
@@ -94,14 +98,6 @@
           services.scx.extraArgs = lib.mkForce [
             "--powersave"
           ];
-
-          # Lenovo LOQ charge threshold (~80%)
-          # UWAGA: sprawdź czy sysfs istnieje:
-          #   cat /sys/class/power_supply/BAT0/charge_control_end_threshold
-          # LOQ (ideapad_laptop) może wymagać conservation_mode zamiast progu
-          services.udev.extraRules = ''
-            ACTION=="add|change", SUBSYSTEM=="power_supply", KERNEL=="BAT0", RUN+="${pkgs.bash}/bin/sh -c 'echo 80 > /sys/class/power_supply/BAT0/charge_control_end_threshold'"
-          '';
         };
         reverse-sync.configuration = {
           hardware.nvidia = {
