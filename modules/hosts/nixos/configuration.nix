@@ -13,20 +13,95 @@
         power-save.configuration = {
           powerManagement.cpuFreqGovernor = lib.mkForce "powersave";
           services.power-profiles-daemon.enable = lib.mkForce false;
+
+          # TLP: pełne ustawienia oszczędzania energii
           services.tlp = {
             enable = lib.mkForce true;
             settings = {
+              # CPU
               CPU_SCALING_GOVERNOR_ON_AC = "powersave";
               CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-              CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
               CPU_ENERGY_PERF_POLICY_ON_AC = "power";
-              PLATFORM_PROFILE_ON_BAT = "low-power";
+              CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+              CPU_BOOST_ON_AC = 0;
+              CPU_BOOST_ON_BAT = 0;
+              SCHED_POWERSAVE_ON_AC = 1;
+              SCHED_POWERSAVE_ON_BAT = 1;
+              NMI_WATCHDOG = 0;
+              # Platform
               PLATFORM_PROFILE_ON_AC = "low-power";
+              PLATFORM_PROFILE_ON_BAT = "low-power";
+              # PCIe / Runtime PM
+              PCIE_ASPM_ON_AC = "powersave";
+              PCIE_ASPM_ON_BAT = "powersave";
+              RUNTIME_PM_ON_AC = "auto";
+              RUNTIME_PM_ON_BAT = "auto";
+              # USB
+              USB_AUTOSUSPEND = 1;
+              USB_BLACKLIST_WWAN = 1;
+              # Audio
+              SOUND_POWER_SAVE_ON_AC = 1;
+              SOUND_POWER_SAVE_ON_BAT = 1;
+              SOUND_POWER_SAVE_CONTROLLER = "Y";
+              # Disk
+              DISK_IDLE_SECS_ON_BAT = 2;
+              # WiFi
+              WIFI_PWR_ON_AC = "on";
+              WIFI_PWR_ON_BAT = "on";
             };
           };
+
+          # WiFi powersave (wymagane dla WIFI_PWR_* w TLP)
+          networking.networkmanager.wifi.powersave = lib.mkForce true;
+
+          # thermald: inteligentne zarządzanie temperaturą Intela (DPTF)
+          services.thermald.enable = lib.mkForce true;
+
+          # UPower: polityka procentowa + hibernacja przy krytycznym
+          services.upower = {
+            enable = true;
+            usePercentageForPolicy = true;
+            percentageLow = 20;
+            percentageCritical = 10;
+            percentageAction = 5;
+            criticalPowerAction = "Hibernate";
+          };
+
+          # Kernel params: oszczędzanie energii (łączy się z resume= z base)
+          boot.kernelParams = [
+            "pcie_aspm=powersave"
+            "i915.enable_dc=2"
+            "i915.enable_fbc=1"
+            "i915.enable_psr=1"
+            "nvme_core.default_ps_max_latency_us=0"
+            "usbcore.autosuspend=30"
+            "nmi_watchdog=0"
+          ];
+
+          # Mniejszy swappiness (hibernacja na LUKS swap)
+          boot.kernel.sysctl."vm.swappiness" = 10;
+
+          # Logind: lid switch + idle suspend
+          services.logind.settings.Login = {
+            HandleLidSwitch = "suspend";
+            HandleLidSwitchExternalPower = "suspend";
+            HandleLidSwitchDocked = "ignore";
+            IdleAction = "suspend";
+            IdleActionSec = "1200";
+          };
+
+          # SCX scheduler: powersave mode
           services.scx.extraArgs = lib.mkForce [
             "--powersave"
           ];
+
+          # Lenovo LOQ charge threshold (~80%)
+          # UWAGA: sprawdź czy sysfs istnieje:
+          #   cat /sys/class/power_supply/BAT0/charge_control_end_threshold
+          # LOQ (ideapad_laptop) może wymagać conservation_mode zamiast progu
+          services.udev.extraRules = ''
+            ACTION=="add|change", SUBSYSTEM=="power_supply", KERNEL=="BAT0", RUN+="${pkgs.bash}/bin/sh -c 'echo 80 > /sys/class/power_supply/BAT0/charge_control_end_threshold'"
+          '';
         };
         reverse-sync.configuration = {
           hardware.nvidia = {
