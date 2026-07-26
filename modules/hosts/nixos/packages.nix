@@ -56,6 +56,7 @@
         lldb
         boost
         tea
+        kdePackages.kdenlive
       ];
       # Install firefox.
       programs.firefox.enable = true;
