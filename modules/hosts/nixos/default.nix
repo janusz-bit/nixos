@@ -15,7 +15,7 @@
         self.modules.nixos.nixos-packages
         self.modules.nixos.nixos-podman
         self.modules.nixos.disko
-        self.modules.nixos.nixos-niri
+        # self.modules.nixos.nixos-niri
         self.modules.nixos.nixos-ai
         self.modules.nixos.nixos-appimage-run
       ];

@@ -14,7 +14,7 @@
         tor-browser
         self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
         # proton-ge-bin
-        niri
+        # niri
         alacritty
         sqlite
         brave
