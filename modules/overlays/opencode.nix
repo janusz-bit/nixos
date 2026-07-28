@@ -7,6 +7,9 @@
           {
             "$schema": "https://opencode.ai/config.json",
             "model": "ollama-cloud/glm-5.2:cloud",
+            "plugin": [
+              "caveman-opencode-plugin"
+            ],
             "provider": {
               "ollama": {
                 "npm": "@ai-sdk/openai-compatible",
