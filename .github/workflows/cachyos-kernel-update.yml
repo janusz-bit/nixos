@@ -34,8 +34,6 @@ jobs:
           git push
 name: cachyos-kernel-update
 "on":
-  schedule:
-    - cron: 0 2 * * *
   workflow_dispatch: {}
 permissions:
   contents: write

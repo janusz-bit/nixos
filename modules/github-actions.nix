@@ -40,7 +40,8 @@
           inherit name;
           runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
           on = {
-            schedule = [ { cron = "0 2 * * *"; } ];
+            # Na razie wylaczone — daily cron zakomentowany
+            # schedule = [ { cron = "0 2 * * *"; } ];
             workflowDispatch = { };
           };
           permissions.contents = "write";
@@ -151,13 +152,8 @@
                 runsOn = archToRunner."${cfg.arch}";
                 buildTarget =
                   cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
-                kernelTarget =
-                  cfg.kernelTarget or (
-                    if name == "nixos" || name == "raspberry-pi-4" then
-                      "nixosConfigurations.${name}.config.boot.kernelPackages.kernel"
-                    else
-                      null
-                  );
+                # Na razie wylaczone — kernel budowany recznie, nie w CI
+                kernelTarget = cfg.kernelTarget or null;
               }
             )
             {
