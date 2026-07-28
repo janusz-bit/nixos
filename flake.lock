@@ -445,17 +445,16 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1784155967,
-        "narHash": "sha256-/oyMru7PxmRu2bSeNgNuUmJF8DbVV+V2T3ayMV9NPrY=",
+        "lastModified": 1785230690,
+        "narHash": "sha256-0+X3MY3AZHLZmj3gcTMJOViVeHIz+OVypZynvLrLKJw=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "3f2a389c7e1f1729cad91ae63c26fb08c7753c74",
+        "rev": "1dfe781edd5e96d09511cf27d800a03e63b09789",
         "type": "github"
       },
       "original": {
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "3f2a389c7e1f1729cad91ae63c26fb08c7753c74",
         "type": "github"
       }
     },
@@ -924,15 +923,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1778690633,
-        "narHash": "sha256-aCw5ZrbO02VTuF+Pf6APotGvDR0dH+0N1HqocK1UhU8=",
-        "owner": "TriliumNext",
+        "lastModified": 1784968304,
+        "narHash": "sha256-NPXKyp40QNCk9r6kavSwqi/zv7OcLgrSRtPmHW+e74w=",
+        "owner": "FliegendeWurst",
         "repo": "pnpm2nix-nzbr",
-        "rev": "31d00012c26b14303702a35885ccc97943888366",
+        "rev": "9b15300b711a50bb96e553b66aad5cad94df9c7e",
         "type": "github"
       },
       "original": {
-        "owner": "TriliumNext",
+        "owner": "FliegendeWurst",
         "ref": "main",
         "repo": "pnpm2nix-nzbr",
         "type": "github"
@@ -1066,17 +1065,17 @@
         "pnpm2nix": "pnpm2nix"
       },
       "locked": {
-        "lastModified": 1778702022,
-        "narHash": "sha256-PAGP/qZPud4vHSS7V3iH4wdNLYhIXX7S81/KPRwni10=",
+        "lastModified": 1784985943,
+        "narHash": "sha256-EL/Gi0R4ExTMyE1ZP1cRIh5w3dunq1mXZ9bbb+utWgg=",
         "owner": "TriliumNext",
         "repo": "Trilium",
-        "rev": "44f5be88b776078fe268dc9877411cb144df3a46",
+        "rev": "744646d07bff459d1db305b1c0a8ea0c99b9c27c",
         "type": "github"
       },
       "original": {
         "owner": "TriliumNext",
         "repo": "Trilium",
-        "rev": "44f5be88b776078fe268dc9877411cb144df3a46",
+        "rev": "744646d07bff459d1db305b1c0a8ea0c99b9c27c",
         "type": "github"
       }
     },
