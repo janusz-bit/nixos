@@ -28,14 +28,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     trilium = {
-      url = "github:TriliumNext/Trilium/44f5be88b776078fe268dc9877411cb144df3a46";
+      url = "github:TriliumNext/Trilium/744646d07bff459d1db305b1c0a8ea0c99b9c27c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
     # Pinned to last commit before topup.ts introduced broken
     # @hermes/shared/charge-settlement import in nix/tui.nix (missing
     # apps/shared in dirs). Upstream bug — unpin once fixed.
-    hermes-agent.url = "github:NousResearch/hermes-agent/3f2a389c7e1f1729cad91ae63c26fb08c7753c74";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
   nixConfig = {
