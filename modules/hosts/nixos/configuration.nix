@@ -176,7 +176,10 @@
         };
 
         # Enable CUPS to print documents.
-        printing.enable = true;
+        printing = {
+          enable = true;
+          drivers = [ pkgs.splix ];
+        };
 
         # Enable sound with pipewire.
         pulseaudio.enable = false;
@@ -192,6 +195,19 @@
           # no need to redefine it in your config for now)
           #media-session.enable = true;
         };
+      };
+
+      # Samsung ML-2160 printer (SPL driver via splix)
+      hardware.printers = {
+        ensurePrinters = [
+          {
+            name = "Samsung-ML-2160";
+            location = "Home";
+            deviceUri = "usb://Samsung/ML-2160";
+            model = "samsung/ml2160.ppd";
+          }
+        ];
+        ensureDefaultPrinter = "Samsung-ML-2160";
       };
 
       environment.etc."kcminputrc".text = ''
