@@ -1,10 +1,16 @@
 { inputs, ... }:
+let
+  pkgs-stable = import inputs.nixpkgs-stable {
+    system = "x86_64-linux";
+    config.allowUnfree = true;
+  };
+in
 {
   flake.modules.nixos.nixos-ai =
     { pkgs, config, ... }:
     {
       services.ollama.enable = true;
-      services.ollama.package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.ollama-cuda.override {
+      services.ollama.package = pkgs-stable.ollama-cuda.override {
         cudaArches = [ "sm_120" ];
       };
       services.open-webui = {
