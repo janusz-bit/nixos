@@ -124,7 +124,6 @@
       nixpkgs.overlays = [
         inputs.nix-cachyos-kernel.overlays.default
         self.overlays.brave-debloater
-        self.overlays.ollama-cuda
       ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
       environment.sessionVariables = {

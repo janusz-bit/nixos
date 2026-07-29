@@ -1,10 +1,12 @@
-{ ... }:
+{ inputs, ... }:
 {
   flake.modules.nixos.nixos-ai =
     { pkgs, config, ... }:
     {
       services.ollama.enable = true;
-      services.ollama.package = pkgs.ollama-cuda;
+      services.ollama.package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.ollama-cuda.override {
+        cudaArches = [ "sm_120" ];
+      };
       services.open-webui = {
         enable = false;
         environment = {
