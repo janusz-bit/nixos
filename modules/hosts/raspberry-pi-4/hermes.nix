@@ -36,10 +36,10 @@
             require_approval = false; # lub lista zaufanych narzędzi
           };
           model = {
-            provider = "ollama-cloud";
-            default = "glm-5.2:cloud";
+            provider = "opencode-go";
+            default = "kimi-k3";
           };
-          agent.reasoning_effort = "xhigh"; # minimal|low|medium|high|xhigh|none (xhigh→max dla ollama-cloud)
+          agent.reasoning_effort = "xhigh";
           web.backend = "ddgs";
           auxiliary.vision = {
             provider = "ollama-cloud";
