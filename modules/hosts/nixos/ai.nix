@@ -10,7 +10,7 @@ in
     { pkgs, config, ... }:
     {
       services.ollama.enable = true;
-      services.ollama.package = pkgs-stable.ollama-cuda;
+      services.ollama.package = pkgs-stable.ollama; # temporary
       services.open-webui = {
         enable = false;
         environment = {
