@@ -15,7 +15,10 @@
         inputs.nixos-wsl.nixosModules.default
         self.modules.nixos.wsl-settings
       ];
-      environment.systemPackages = with pkgs; [ zed-editor-fhs ];
+      environment.systemPackages = with pkgs; [
+        zed-editor-fhs
+        opencode
+      ];
     };
 
   flake.nixosConfigurations.wsl = inputs.nixpkgs.lib.nixosSystem {

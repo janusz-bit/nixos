@@ -101,7 +101,7 @@ in
         allowedUDPPorts = [ ];
       };
 
-      environment.systemPackages = (sharedPackages pkgs) ++ [ pkgs.opencode ];
+      environment.systemPackages = (sharedPackages pkgs);
       environment.sessionVariables = sharedSessionVariables;
       nix.settings = sharedNixSettings;
       environment.shellAliases = environmentShellAliases config pkgs;
