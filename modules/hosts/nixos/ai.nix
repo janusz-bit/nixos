@@ -10,9 +10,7 @@ in
     { pkgs, config, ... }:
     {
       services.ollama.enable = true;
-      services.ollama.package = pkgs-stable.ollama-cuda.override {
-        cudaArches = [ "sm_120" ];
-      };
+      services.ollama.package = pkgs-stable.ollama-cuda;
       services.open-webui = {
         enable = false;
         environment = {
