@@ -52,7 +52,7 @@
             provider = "opencode-go";
             default = "kimi-k3";
           };
-          agent.reasoning_effort = "xhigh";
+          agent.reasoning_effort = "max";
           web.backend = "ddgs";
           auxiliary.vision = {
             provider = "ollama-cloud";
