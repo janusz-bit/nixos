@@ -34,4 +34,5 @@ in
   "hermes-api-key.age" = mkSecret serverHosts;
   "hermes-webui-env.age" = mkSecret serverHosts;
   "librechat-env.age" = mkSecret serverHosts;
+  "opencode.age" = mkSecret serverHosts;
 }

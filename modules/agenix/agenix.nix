@@ -45,6 +45,12 @@
         group = "users";
         mode = "0440";
       };
+      age.secrets.opencode = {
+        file = customTop.secretsDir + "/opencode.age";
+        owner = "root";
+        group = "users";
+        mode = "0440";
+      };
       age.identityPaths = [
         "/root/.ssh/id_ed25519"
       ];
