@@ -35,6 +35,22 @@
                     "name": "glm-5.2:cloud"
                   }
                 }
+              },
+              "opencode": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "OpenCode Cloud",
+                "options": {
+                  "baseURL": "https://api.opencode.ai/v1",
+                  "apiKey": "{env:OPENCODE_GO_API_KEY}"
+                },
+                "models": {
+                  "glm-5.2": {
+                    "name": "glm-5.2"
+                  },
+                  "kimi-k3": {
+                    "name": "kimi-k3"
+                  }
+                }
               }
             },
             "permission": {
