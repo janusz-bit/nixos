@@ -32,6 +32,7 @@ in
   "google-api-key.age" = mkSecret allHosts;
   "hermes-env.age" = mkSecret serverHosts;
   "hermes-api-key.age" = mkSecret serverHosts;
+  "hermes-dashboard-auth.age" = mkSecret serverHosts;
   "hermes-webui-env.age" = mkSecret serverHosts;
   "librechat-env.age" = mkSecret serverHosts;
   "opencode.age" = mkSecret serverHosts;
