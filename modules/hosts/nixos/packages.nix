@@ -58,6 +58,7 @@
         tea
         kdePackages.kdenlive
         opencode
+        losange
       ];
       # Install firefox.
       programs.firefox.enable = true;
