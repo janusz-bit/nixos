@@ -75,7 +75,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
   * `power-save` – TLP + `powersave` governor + scx `--powersave`.
   * `reverse-sync` – Nvidia Prime Reverse Sync.
   * `sync-mode` – Nvidia Prime Sync.
-* **Gaming**: Steam (with Proton-CachyOS-v3 and proton-ge-bin), Heroic, Lutris, GameMode, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management.
+* **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS-v3 and proton-ge-bin, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (CUDA backend via `ollama-cuda`), Open WebUI (no auth, connects to local Ollama at `127.0.0.1:11434`), `uv`, `repomix`, Node.js, Python 3 with pip.
@@ -229,8 +229,8 @@ nix build .#raspberry-pi-4-sd-image
 * **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 6 workflows generated from `modules/github-actions.nix`.
 
 ## Repository Statistics
-* 88 tracked files (excluding `.git/`)
-* 60 `.nix` files, ~2782 LOC total
+* 89 tracked files (excluding `.git/`)
+* 61 `.nix` files, ~2824 LOC total
 * 13 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (6 auto-generated + 1 stale `cachyos-kernel.yml`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
