@@ -65,6 +65,13 @@
                   "${webSearchMcp}"
                 ],
                 "enabled": true
+              },
+              "nixos": {
+                "type": "local",
+                "command": [
+                  "${prev.lib.getExe prev.mcp-nixos}"
+                ],
+                "enabled": true
               }
             }
           }
