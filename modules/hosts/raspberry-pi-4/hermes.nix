@@ -38,7 +38,7 @@
           model = {
             provider = "custom";
             base_url = "https://api.llmgateway.io/v1";
-            default = "claude-sonnet-4-6";
+            default = "kimi-k3";
           };
           providers.llm-gateway = {
             base_url = "https://api.llmgateway.io/v1";
@@ -47,8 +47,9 @@
           agent.reasoning_effort = "max";
           web.backend = "ddgs";
           auxiliary.vision = {
-            provider = "ollama-cloud";
-            model = "gemma4:31b";
+            provider = "custom";
+            base_url = "https://api.llmgateway.io/v1";
+            model = "gemini-3.1-pro";
           };
         };
         environmentFiles = [
