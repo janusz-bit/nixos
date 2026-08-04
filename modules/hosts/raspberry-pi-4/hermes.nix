@@ -36,8 +36,13 @@
             require_approval = false; # lub lista zaufanych narzędzi
           };
           model = {
-            provider = "opencode-go";
-            default = "kimi-k3";
+            provider = "custom";
+            base_url = "https://api.llmgateway.io/v1";
+            default = "claude-sonnet-4-6";
+          };
+          providers.llm-gateway = {
+            base_url = "https://api.llmgateway.io/v1";
+            key_env = "LLMGATEWAY_API_KEY";
           };
           agent.reasoning_effort = "max";
           web.backend = "ddgs";
@@ -48,6 +53,7 @@
         };
         environmentFiles = [
           config.age.secrets.hermes-env.path
+          config.age.secrets.llmgateway-api-key.path
         ];
         restart = "always";
         restartSec = 5;
