@@ -63,8 +63,10 @@
       # Install firefox.
       programs.firefox.enable = true;
       hardware.wooting.enable = true;
+      # Mullvad split upstream: pkgs.mullvad = daemon (module default),
+      # pkgs.mullvad-vpn = GUI only, enabled via gui.enable.
       services.mullvad-vpn.enable = true;
-      services.mullvad-vpn.package = pkgs.mullvad-vpn;
+      services.mullvad-vpn.gui.enable = true;
       programs.steam = {
         enable = true;
         remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
