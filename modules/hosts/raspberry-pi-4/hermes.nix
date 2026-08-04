@@ -38,7 +38,7 @@
           model = {
             provider = "custom";
             base_url = "https://api.llmgateway.io/v1";
-            default = "kimi-k3";
+            default = "qwen3.8-max";
           };
           providers.llm-gateway = {
             base_url = "https://api.llmgateway.io/v1";
