@@ -49,7 +49,7 @@
           auxiliary.vision = {
             provider = "custom";
             base_url = "https://api.llmgateway.io/v1";
-            model = "gemini-3.1-pro";
+            model = "qwen3.8-max";
           };
         };
         environmentFiles = [
