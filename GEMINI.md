@@ -19,9 +19,9 @@ Integrated technologies handling the system's core capabilities include:
 * **nixos-hardware**: Common hardware modules (`github:NixOS/nixos-hardware/master`).
 * **nix-cachyos-kernel**: CachyOS kernel packages (`github:xddxdd/nix-cachyos-kernel/release`).
 * **github-actions-nix**: Auto-generates GitHub Actions workflows (`github:synapdeck/github-actions-nix`).
-* **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Pinned to commit `3f2a389c7e1f1729cad91ae63c26fb08c7753c74` (last commit before `topup.ts` introduced broken `@hermes/shared/charge-settlement` import in `nix/tui.nix` — upstream bug, unpin once fixed).
+* **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
-* **TriliumNext**: Note-taking server and desktop client (pinned to specific commit `44f5be88b776078fe268dc9877411cb144df3a46`).
+* **TriliumNext**: Note-taking server and desktop client (pinned to specific commit `744646d07bff459d1db305b1c0a8ea0c99b9c27c`).
 * **Pre-commit Hooks**: Enforces formatting (`nixfmt-tree`) and workflow sync.
 
 ## System Architectures & Host Deployments
@@ -38,11 +38,11 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 * `direnv` enabled.
 * `environment.localBinInPath = true` (recommended for `uv`-installed binaries in `~/.local/bin`).
 * Default editor: `micro`.
-* **OpenCode**: Declarative configuration inline in `modules/overlays/opencode.nix` (Nix overlay generating `opencode.json` + `web-search-mcp.py` at build time). Default model: `llmgateway/claude-sonnet-4-6`. Provider `llmgateway` (OpenAI-compatible, `https://api.llmgateway.io/v1`, apiKey from `{env:LLMGATEWAY_API_KEY}`) with models `claude-sonnet-4-6`, `gpt-5.5`, `gemini-3.1-pro`. Provider `ollama` (OpenAI-compatible, `http://localhost:11434/v1`) with model `orinth:35b`. Provider `ollama-cloud` (OpenAI-compatible, `https://ollama.com/v1`, apiKey from `{env:OLLAMA_API_KEY}`) with model `glm-5.2:cloud`. Local MCP servers: `web_search_and_fetch` via `uv run` (Ollama web_search/web_fetch API) and `nixos` via `pkgs.mcp-nixos` (`lib.getExe`; NixOS/Home Manager/nixpkgs/flakes/wiki search tools). Installed on all hosts through the `base/opencode` module.
+* **OpenCode**: Declarative configuration inline in `modules/overlays/opencode.nix` (Nix overlay generating `opencode.json` + `web-search-mcp.py` at build time). Default model: `llmgateway/claude-sonnet-4-6`. Plugin: `caveman-opencode-plugin`; `websearch` permission set to `allow`. Provider `llmgateway` (OpenAI-compatible, `https://api.llmgateway.io/v1`, apiKey from `{env:LLMGATEWAY_API_KEY}`) with models `claude-sonnet-4-6`, `gpt-5.5`, `gemini-3.1-pro`, `qwen3.8-max`, `kimi-k3`, `glm-5.2`. Provider `ollama` (OpenAI-compatible, `http://localhost:11434/v1`) with model `ornith:35b`. Provider `ollama-cloud` (OpenAI-compatible, `https://ollama.com/v1`, apiKey from `{env:OLLAMA_API_KEY}`) with model `glm-5.2:cloud`. Provider `opencode` (OpenCode Cloud, `https://api.opencode.ai/v1`, apiKey from `{env:OPENCODE_GO_API_KEY}`) with models `glm-5.2`, `kimi-k3`. Local MCP servers: `web_search_and_fetch` via `uv run` (Ollama web_search/web_fetch API) and `nixos` via `pkgs.mcp-nixos` (`lib.getExe`; NixOS/Home Manager/nixpkgs/flakes/wiki search tools). The `opencode-config` overlay is applied in `base/configuration.nix`, so the wrapped `opencode` is available on all hosts.
 * **Nix settings** (`modules/nix-settings.nix`): Weekly GC (delete older than 7d), auto-optimise-store, trusted-users = `@wheel`.
 * **Git** (`modules/hosts/base/git.nix`): user.name = `janusz-bit`, user.email = `janusz-bit@proton.me`, init.defaultBranch = `main`, `gh:` and `github:` rewritten to `https://github.com/`. `gh` CLI installed.
 * **SSH** (`modules/hosts/base/ssh.nix`): Key-only authentication, `ssh.startAgent = false`, `gnupg.agent.enable = true`. Cloudflared SSH proxy configured (`ssh.*` host pattern uses `cloudflared access ssh --hostname %h`).
-* **Agenix** (`modules/hosts/base/agenix.nix`): Exports `CACHIX_AUTH_TOKEN`, `GITHUB_TOKEN`, `OLLAMA_API_KEY`, `GOOGLE_API_KEY`, `LLMGATEWAY_API_KEY`, and `NIX_CONFIG` (access-tokens for `github.com`) via `environment.shellInit` from age-encrypted secrets.
+* **Agenix** (`modules/hosts/base/agenix.nix`): Exports `CACHIX_AUTH_TOKEN`, `GITHUB_TOKEN`, `OLLAMA_API_KEY`, `GOOGLE_API_KEY`, `OPENCODE_GO_API_KEY` (from `opencode.age`), and `NIX_CONFIG` (access-tokens for `github.com`) via `environment.shellInit` from age-encrypted secrets; additionally sources the `llmgateway-api-key.age` env-file (exports `LLMGATEWAY_API_KEY`).
 * **DNS**: Quad9 nameservers (`9.9.9.9`, `149.112.112.112`, `2620:fe::fe`, `2620:fe::9`) configured in base.
 * **ZFS**: `boot.zfs.forceImportRoot = false` explicitly set in base to silence the 26.11 evaluation warning (ZFS module pulled in by default even when not in use).
 * **Firewall**: Enabled, allows TCP port 22.
@@ -68,23 +68,23 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Bootloader**: Limine, with a Windows EFI dual-boot entry. `efi.canTouchEfiVariables = true`.
 * **binfmt emulation**: `aarch64-linux` emulated systems enabled (`boot.binfmt.emulatedSystems`).
 * **Supported filesystems**: `btrfs` explicitly listed.
-* **Desktop**: KDE Plasma 6 (Wayland) with SDDM, plus **Niri** compositor (`programs.niri.enable`).
+* **Desktop**: KDE Plasma 6 (Wayland) with SDDM (Wayland, autoNumlock). A **Niri** module exists (`nixos/niri.nix`) but is currently commented out/disabled.
 * **Audio**: Pipewire (with ALSA 32-bit and PulseAudio compat).
 * **Scheduler**: `scx` with `scx_lavd` (`--performance`); `ananicy-cpp` with CachyOS rules.
 * **Specialisations** (boot-time profiles):
-  * `power-save` – TLP + `powersave` governor + scx `--powersave`.
+  * `power-save` – full TLP settings (incl. battery conservation mode), thermald, UPower (percentage policy, hibernate on critical), `powersave` governor, WiFi powersave, power-saving kernel params, logind lid/idle suspend, scx `--powersave`.
   * `reverse-sync` – Nvidia Prime Reverse Sync.
   * `sync-mode` – Nvidia Prime Sync.
 * **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS-v3 and proton-ge-bin, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
-* **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (CUDA backend via `ollama-cuda`), Open WebUI (no auth, connects to local Ollama at `127.0.0.1:11434`), `uv`, `repomix`, Node.js, Python 3 with pip.
-* **Apps**: Zed, Brave, Firefox, LibreOffice, Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
+* **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (temporarily uses the `ollama` package from the `nixpkgs-stable` input), Open WebUI currently **disabled** (`enable = false`), `uv`, `repomix`, Node.js, Python 3 with pip.
+* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
 * **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies).
-* **Other services**: Avahi (mDNS), Flatpak, Btrfs autoScrub, CUPS printing, Bluetooth.
+* **Other services**: Avahi (mDNS), Flatpak, Btrfs autoScrub, CUPS printing (splix driver, Samsung ML-2160 preconfigured), Bluetooth, rtkit.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted).
 * **Locale**: Polish (`pl_PL.UTF-8`), timezone `Europe/Warsaw`, keymap `pl2`.
 * **State version**: `25.11`.
@@ -99,19 +99,19 @@ A headless `aarch64-linux` deployment for network services. Default user: `nixos
 * **Nix GC**: daily, deletes derivations older than 3 days; max 2 build jobs. `documentation.doc.enable = false` (workaround for sphinx/docutils build failure). Trusted users include `hermes`.
 * **Networking**: NetworkManager enabled. Timezone `Europe/Warsaw`.
 * **User SSH keys**: Authorized keys imported DRY from `secrets.nix` (same public keys used for age encryption).
-* **Nextcloud 33**: PostgreSQL backend (locally created, tuned: 128MB shared_buffers, 4MB work_mem, 32MB maintenance_work_mem, 256MB effective_cache_size), Redis cache, 2GB upload limit, accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled). Trusted proxies: `127.0.0.1`, `::1`.
-* **Hermes Agent** (`modules/hosts/raspberry-pi-4/hermes.nix`): AI agent service (`services.hermes-agent`) on port 8642. Uses `glm-5.2:cloud` model via Ollama Cloud, `ddgs` as the web backend. `require_approval = false`. `agent.reasoning_effort = "xhigh"` (maps to `max` for ollama-cloud). `auxiliary.vision` configured with `gemma4:31b` model via Ollama Cloud. `restart = "always"`, `restartSec = 5`. Extra packages: `uv`, `nodejs_22`, `ripgrep`, `ffmpeg`, `python311`. Extra dependency groups: `all`, `messaging`, `matrix`. Configured MCP servers: `trilium-notes` (HTTP at `127.0.0.1:8081/mcp` with Bearer token) and `nixos` (`uvx mcp-nixos`). Environment loaded from `hermes-env.age` (sops-nix). Sudo NOPASSWD for user `hermes` (ALL). Service hardening overrides: `NoNewPrivileges = false` (enables sudo), `UMask = 0027` (group-readable files for `nixos` user in `hermes` group), `ExecStartPre` cleans stale lock/pid/state files. User `hermes` in groups: `users`, `keys`, `wheel`, `systemd-journal`, `disk`. User `nixos` added to `hermes` group.
-* **Open WebUI** (`modules/hosts/raspberry-pi-4/open-webui.nix`): Open-source AI chat interface on port 8080 (localhost only). Connects to Hermes Agent via OpenAI-compatible API at `127.0.0.1:8642/v1` (`ENABLE_OPENAI_API = "true"`). Ollama API disabled (`ENABLE_OLLAMA_API = "false"`). Auth required (`WEBUI_AUTH = "True"`). `ENABLE_PERSISTENT_CONFIG = "False"` (env vars override DB-stored values). Shared API key with Hermes Agent via `hermes-env.age`.
+* **Nextcloud 34**: PostgreSQL backend (locally created, tuned: 128MB shared_buffers, 4MB work_mem, 32MB maintenance_work_mem, 256MB effective_cache_size), Redis cache, 2GB upload limit, PHP-FPM pool tuned for 4GB RAM (`pm = dynamic`, max_children 24, opcache interned strings 16MB), accessible **only via Cloudflare Tunnel** (no open ports, HSTS enabled). Trusted proxies: `127.0.0.1`, `::1`.
+* **Hermes Agent** (`modules/hosts/raspberry-pi-4/hermes.nix`): AI agent service (`services.hermes-agent`) on port 8642. Uses `qwen3.8-max` model via LLM Gateway (`https://api.llmgateway.io/v1`, key from `LLMGATEWAY_API_KEY`), `ddgs` as the web backend. `require_approval = false`. `agent.reasoning_effort = "max"`. `auxiliary.vision` configured with `qwen3.8-max` via LLM Gateway. `addToSystemPackages = true`. `restart = "always"`, `restartSec = 5`. Extra packages: `uv`, `nodejs_22`, `ripgrep`, `ffmpeg`, `python311`. Extra dependency groups: `all`, `messaging`, `matrix`. Configured MCP servers: `trilium-notes` (HTTP at `127.0.0.1:8081/mcp` with Bearer token) and `nixos` (`uvx mcp-nixos`). Environment loaded from `hermes-env.age` and `llmgateway-api-key.age` (agenix). Sudo NOPASSWD for user `hermes` (ALL). Service hardening overrides: `NoNewPrivileges = false` (enables sudo), `UMask = 0027` (group-readable files for `nixos` user in `hermes` group), `ExecStartPre` cleans stale lock/pid/state files. User `hermes` in groups: `users`, `keys`, `wheel`, `systemd-journal`, `disk`. User `nixos` added to `hermes` group.
+* **Open WebUI** (`modules/hosts/raspberry-pi-4/open-webui.nix`): Open-source AI chat interface on port 3001 (localhost only), fronted by an **nginx reverse proxy on port 8080** (cloudflared ingress target) with static-asset caching (`proxy_cache`, immutable `Cache-Control` headers, gzip, response buffering). Connects to Hermes Agent via OpenAI-compatible API at `127.0.0.1:8642/v1` (`ENABLE_OPENAI_API = "true"`). Ollama API disabled (`ENABLE_OLLAMA_API = "false"`). Auth required (`WEBUI_AUTH = "True"`). `ENABLE_PERSISTENT_CONFIG = "False"` (env vars override DB-stored values). Stateful Responses API enabled. Session/auth cookies set to `Secure` + `SameSite=none` (required behind Cloudflare Tunnel TLS termination). Shared API key with Hermes Agent via `hermes-env.age`.
 * **Ollama**: Local LLM backend (`services.ollama.enable`), EnvironmentFile from `hermes-env.age`.
 * **Gitea** (`modules/hosts/raspberry-pi-4/gitea.nix`): Self-hosted Git service on port 3000 (localhost only). SQLite database. Domain `git.janusz-bit.com`. Registration disabled. Cookie secure enabled. SSH access via system SSH (port 22, `START_SSH_SERVER = false`). `tea` (Gitea CLI) installed in system packages.
-* **Cloudflared**: Tunnel to expose services externally:
+* **Cloudflared**: Tunnel to expose services externally (root and `chat.` hosts get `originRequest` tuning: `connectTimeout = 300s`, keepalive settings, to survive long photo uploads / slow LLM streams):
   * `${customTop.site.full}` -> Nextcloud (localhost:80)
-  * `chat.${customTop.site.full}` -> Open WebUI (localhost:8080)
+  * `chat.${customTop.site.full}` -> Open WebUI via nginx (localhost:8080)
   * `notes.${customTop.site.full}` -> Trilium (localhost:8081)
   * `ssh.${customTop.site.full}` -> SSH (localhost:22)
   * `git.${customTop.site.full}` -> Gitea (localhost:3000)
 * **Trilium**: Note-taking server on port 8081 (flake input `trilium` pinned to specific commit, used as `trilium-server` NixOS module — not an overlay).
-* **Fan control**: Custom Python-based systemd service (`pwm-fan`) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
+* **Fan control**: Custom Python-based systemd service (`pwm-fan`, `rpi-lgpio` package with `RPI_LGPIO_REVISION` override) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
 * **LED control** (`modules/hosts/raspberry-pi-4/leds-off.nix`): All LEDs disabled via DT overlays (`hardware.raspberry-pi."4".leds` — eth, act, pwr) and systemd-tmpfiles rules (mmc0, default-on).
 * **Overlays applied**: None host-specific (only `opencode-config` from base).
 * **State version**: `26.05`.
@@ -121,7 +121,7 @@ A minimal `x86_64-linux` environment bridging NixOS into a Windows host.
 * Uses `NixOS-WSL` module (`wsl.enable`, `useWindowsDriver`, `startMenuLaunchers`).
 * Default user: `nixos`.
 * `fastfetch` disabled.
-* `zed-editor-fhs` installed.
+* `zed-editor-fhs` and `opencode` installed.
 * `ZED_ALLOW_EMULATED_GPU = "1"` session variable for Zed GPU emulation.
 * Obsidian module available but currently commented out.
 * **State version**: `25.05`.
@@ -142,9 +142,9 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/args.nix`**: Defines `customTop` arguments passed to all modules. Contains: repository info (`github:janusz-bit/nixos`, `/etc/nixos`), email (`janusz-bit@proton.me`), site domain (`janusz-bit.com`), Cachix cache info, `secretsDir`.
 * **`modules/options.nix`**: Custom NixOS options (`customBot`): `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
 * **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `sync-github-actions`), and exposes `update-flake` and `flake-release` packages in the dev shell.
-* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 6 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `cachyos-kernel-update` (daily cron at 2am). `nixos` and `raspberry-pi-4` additionally build the kernel separately (`build-kernel` job, dependency chain). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. Note: a stale `cachyos-kernel.yml` exists in `.github/workflows/` from a previous config — superseded by `cachyos-kernel-update.yml`.
+* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 6 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out). The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. Note: a stale `cachyos-kernel.yml` exists in `.github/workflows/` from a previous config — superseded by `cachyos-kernel-update.yml`.
 * **`modules/hardware/`**: Hardware-specific profiling. Stores Lenovo LOQ-15IRX10 patches, `x86-64-v3` CPU optimization, `M27Q.icm` color profile, and a `facter.json` inventory.
-* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 13 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Hermes env/API key, Ollama API key, Google API key, LibreChat env, Open WebUI env, notes, attic token, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `hermes-webui-env`, and `librechat-env` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `secret1` is used on `raspberry-pi-4` for user SSH authorized keys.
+* **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 15 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Hermes env/API key, Ollama API key, Google API key, LLM Gateway API key, OpenCode API key, LibreChat env, Open WebUI env, notes, attic token, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `hermes-webui-env`, `librechat-env`, and `opencode` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `llmgateway-api-key` targets all hosts; `secret1` is used on `raspberry-pi-4` for user SSH authorized keys.
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`). Applied via `self.overlays` in host configs and base.
 * **`modules/packages/`**: Custom packages and scripts.
   * `proton-cachyos-v3` (custom Proton build from CachyOS, x86_64-linux only)
@@ -155,7 +155,6 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
-* **`modules/configs/opencode/`**: OpenCode legacy config directory (now generated inline by `modules/overlays/opencode.nix` overlay).
 
 ## Centralized Configuration
 
@@ -175,6 +174,7 @@ Custom NixOS options:
 
 ## Flake Inputs
 * `nixpkgs` — `github:NixOS/nixpkgs/nixos-unstable` (base package set)
+* `nixpkgs-stable` — `github:NixOS/nixpkgs/nixos-26.05` (currently used for the `ollama` package on the workstation)
 * `import-tree` — `github:vic/import-tree` (auto-discovery of `modules/` directory)
 * `flake-parts` — `github:hercules-ci/flake-parts` (flake module system)
 * `home-manager` — `github:nix-community/home-manager` (follows nixpkgs)
@@ -189,9 +189,9 @@ Custom NixOS options:
 * `fresh` — `github:sinelaw/fresh` (commented out in base config — not currently used)
 * `disko` — `github:nix-community/disko` (follows nixpkgs; disk partitioning)
 * `git-hooks-nix` — `github:cachix/git-hooks.nix` (follows nixpkgs; pre-commit hooks)
-* `trilium` — `github:TriliumNext/Trilium/44f5be88b776078fe268dc9877411cb144df3a46` (follows nixpkgs; pinned commit)
+* `trilium` — `github:TriliumNext/Trilium/744646d07bff459d1db305b1c0a8ea0c99b9c27c` (follows nixpkgs; pinned commit)
 * `github-actions-nix` — `github:synapdeck/github-actions-nix` (CI workflow generation)
-* `hermes-agent` — `github:NousResearch/hermes-agent/3f2a389c7e1f1729cad91ae63c26fb08c7753c74` (pinned commit — see hermes-agent note above)
+* `hermes-agent` — `github:NousResearch/hermes-agent` (unpinned — see hermes-agent note above)
 
 ## Dev Shell Tools
 Running `nix develop` provides:
@@ -229,9 +229,9 @@ nix build .#raspberry-pi-4-sd-image
 * **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 6 workflows generated from `modules/github-actions.nix`.
 
 ## Repository Statistics
-* 89 tracked files (excluding `.git/`)
-* 61 `.nix` files, ~2824 LOC total
-* 13 age-encrypted secrets
+* 92 tracked files (excluding `.git/`)
+* 60 `.nix` files, ~3158 LOC total
+* 15 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (6 auto-generated + 1 stale `cachyos-kernel.yml`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
 * 2 Nixpkgs overlays: `brave-debloater`, `opencode-config`
