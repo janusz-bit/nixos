@@ -6,11 +6,30 @@
         opencodeJson = prev.writeText "opencode.json" ''
           {
             "$schema": "https://opencode.ai/config.json",
-            "model": "ollama-cloud/glm-5.2:cloud",
+            "model": "llmgateway/claude-sonnet-4-6",
             "plugin": [
               "caveman-opencode-plugin"
             ],
             "provider": {
+              "llmgateway": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LLM Gateway",
+                "options": {
+                  "baseURL": "https://api.llmgateway.io/v1",
+                  "apiKey": "{env:LLMGATEWAY_API_KEY}"
+                },
+                "models": {
+                  "claude-sonnet-4-6": {
+                    "name": "Claude Sonnet 4.6"
+                  },
+                  "gpt-5.5": {
+                    "name": "GPT-5.5"
+                  },
+                  "gemini-3.1-pro": {
+                    "name": "Gemini 3.1 Pro"
+                  }
+                }
+              },
               "ollama": {
                 "npm": "@ai-sdk/openai-compatible",
                 "name": "Ollama",

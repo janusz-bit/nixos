@@ -8,6 +8,7 @@
         export GITHUB_TOKEN=$(cat ${config.age.secrets.github-token.path})
         export OLLAMA_API_KEY=$(cat ${config.age.secrets.ollama-api-key.path})
         export GOOGLE_API_KEY=$(cat ${config.age.secrets.google-api-key.path})
+        source ${config.age.secrets.llmgateway-api-key-shared.path}
         export NIX_CONFIG="access-tokens = github.com=$(cat ${config.age.secrets.github-token.path})"
         export OPENCODE_GO_API_KEY=$(cat ${config.age.secrets.opencode.path})
       '';
