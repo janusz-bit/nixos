@@ -51,12 +51,6 @@
         group = "users";
         mode = "0440";
       };
-      age.secrets.llmgateway-api-key = {
-        file = customTop.secretsDir + "/llmgateway-api-key.age";
-        owner = "hermes";
-        group = "hermes";
-        mode = "0400";
-      };
       age.secrets.llmgateway-api-key-shared = {
         file = customTop.secretsDir + "/llmgateway-api-key.age";
         owner = "root";

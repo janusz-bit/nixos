@@ -23,6 +23,12 @@
         group = "hermes";
         mode = "0400";
       };
+      age.secrets.llmgateway-api-key = {
+        file = customTop.secretsDir + "/llmgateway-api-key.age";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+      };
       services.hermes-agent = {
         enable = true;
         addToSystemPackages = true;
