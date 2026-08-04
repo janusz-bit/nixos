@@ -27,6 +27,15 @@
                   },
                   "gemini-3.1-pro": {
                     "name": "Gemini 3.1 Pro"
+                  },
+                  "qwen3.8-max": {
+                    "name": "Qwen3.8 Max"
+                  },
+                  "kimi-k3": {
+                    "name": "Kimi K3"
+                  },
+                  "glm-5.2": {
+                    "name": "GLM 5.2"
                   }
                 }
               },
