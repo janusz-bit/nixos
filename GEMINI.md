@@ -22,7 +22,7 @@ Integrated technologies handling the system's core capabilities include:
 * **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
 * **TriliumNext**: Note-taking server and desktop client (pinned to specific commit `744646d07bff459d1db305b1c0a8ea0c99b9c27c`).
-* **Pre-commit Hooks**: Enforces formatting (`nixfmt-tree`) and workflow sync.
+* **Pre-commit Hooks**: Enforces formatting (`nixfmt`), linting (`statix`, `deadnix`) and workflow sync. The same checks run in CI via `checks.<system>.pre-commit` (built by the `lint` workflow).
 
 ## System Architectures & Host Deployments
 The `modules/hosts/` directory contains isolated definitions targeting different deployment vectors. Each host is built upon a shared foundation but customized for its specific role.
@@ -141,8 +141,8 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`flake.nix`**: Entry point. Defines all external inputs and passes them to `import-tree` to dynamically load the `modules/` folder. Declares the `janusz-bit.cachix.org` binary cache.
 * **`modules/args.nix`**: Defines `customTop` arguments passed to all modules. Contains: repository info (`github:janusz-bit/nixos`, `/etc/nixos`), email (`janusz-bit@proton.me`), site domain (`janusz-bit.com`), Cachix cache info, `secretsDir`.
 * **`modules/options.nix`**: Custom NixOS options (`customBot`): `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
-* **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `sync-github-actions`), and exposes `update-flake` and `flake-release` packages in the dev shell.
-* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 6 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out). The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. Note: a stale `cachyos-kernel.yml` exists in `.github/workflows/` from a previous config — superseded by `cachyos-kernel-update.yml`.
+* **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `statix`, `deadnix`, `sync-github-actions`), and exposes `update-flake` and `flake-release` packages in the dev shell.
+* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 7 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `lint` (builds `checks.x86_64-linux.pre-commit` — nixfmt/statix/deadnix + workflow sync), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out). The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. The sync script deletes orphaned workflow files before copying, so a refactor cannot leave stale YAML behind.
 * **`modules/hardware/`**: Hardware-specific profiling. Stores Lenovo LOQ-15IRX10 patches, `x86-64-v3` CPU optimization, `M27Q.icm` color profile, and a `facter.json` inventory.
 * **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 15 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Hermes env/API key, Ollama API key, Google API key, LLM Gateway API key, OpenCode API key, LibreChat env, Open WebUI env, notes, attic token, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `hermes-webui-env`, `librechat-env`, and `opencode` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `llmgateway-api-key` targets all hosts; `secret1` is used on `raspberry-pi-4` for user SSH authorized keys.
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`). Applied via `self.overlays` in host configs and base.
@@ -186,7 +186,6 @@ Custom NixOS options:
 * `nixos-hardware` — `github:NixOS/nixos-hardware/master` (hardware modules)
 * `nixos-raspberrypi` — `github:nvmd/nixos-raspberrypi` (RPi-specific support)
 * `agenix` — `github:ryantm/agenix` (follows nixpkgs; secrets management)
-* `fresh` — `github:sinelaw/fresh` (commented out in base config — not currently used)
 * `disko` — `github:nix-community/disko` (follows nixpkgs; disk partitioning)
 * `git-hooks-nix` — `github:cachix/git-hooks.nix` (follows nixpkgs; pre-commit hooks)
 * `trilium` — `github:TriliumNext/Trilium/744646d07bff459d1db305b1c0a8ea0c99b9c27c` (follows nixpkgs; pinned commit)
@@ -197,7 +196,7 @@ Custom NixOS options:
 Running `nix develop` provides:
 * `update-flake` – updates `flake.lock`, commits it, then updates `bootdev-cli` and `proton-cachyos-v3` packages via `nix-update`.
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
-* Pre-commit hooks auto-installed: `nixfmt` formatter, `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`).
+* Pre-commit hooks auto-installed: `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.
 
 ## Building and Running
 ```sh
@@ -222,17 +221,17 @@ nix build .#raspberry-pi-4-sd-image
 
 ## Development Conventions
 * **Agents**: AI agents are used for repository maintenance; see [AGENTS.md](AGENTS.md) for configuration.
-* **Formatting**: `nixfmt-tree` (enforced via pre-commit and CI).
-* **Pre-commit hooks**: formatter + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions).
+* **Formatting & linting**: `nixfmt` + `statix` + `deadnix` (enforced via pre-commit and the CI `lint` workflow building `checks.<system>.pre-commit`).
+* **Pre-commit hooks**: formatter, linters + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions; deletes orphaned files first).
 * **Dev shell**: Always use `nix develop` to ensure pre-commit hooks and required tools are bootstrapped automatically.
 * **Secrets**: Never write API keys, passwords, or tokens directly in `.nix` files (they end up in the world-readable `/nix/store`). Always use Agenix with `environmentFiles` from age-encrypted secrets.
-* **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 6 workflows generated from `modules/github-actions.nix`.
+* **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 7 workflows generated from `modules/github-actions.nix` (6 builds + `lint`).
 
 ## Repository Statistics
 * 92 tracked files (excluding `.git/`)
 * 60 `.nix` files, ~3158 LOC total
 * 15 age-encrypted secrets
-* 7 workflow `.yml` files in `.github/workflows/` (6 auto-generated + 1 stale `cachyos-kernel.yml`)
+* 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
 * 2 Nixpkgs overlays: `brave-debloater`, `opencode-config`
 * Channel: `nixos-unstable`
