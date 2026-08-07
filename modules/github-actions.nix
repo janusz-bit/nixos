@@ -92,7 +92,7 @@
                 inherit runsOn;
                 steps = mkBaseSteps ++ [
                   {
-                    name = name;
+                    inherit name;
                     run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
                   }
                 ];
@@ -134,6 +134,9 @@
           WORKFLOWS_DIR="${config.githubActions.workflowsDir}"
           echo "Syncing workflows from $WORKFLOWS_DIR to .github/workflows/..."
           mkdir -p .github/workflows
+          # Usun stare workflowy, ktore nie sa juz generowane (np. po refactorze),
+          # zeby nie zostaly osierocone pliki w .github/workflows/.
+          find .github/workflows -name '*.yml' -delete
           cp -f "$WORKFLOWS_DIR"/*.yml .github/workflows/
           chmod +w .github/workflows/*.yml
           echo "Done! Workflows are now in sync."
@@ -172,6 +175,10 @@
               };
               droid = {
                 arch = "aarch64-linux";
+              };
+              lint = {
+                arch = "x86_64-linux";
+                buildTarget = "checks.x86_64-linux.pre-commit";
               };
             }
           // {
