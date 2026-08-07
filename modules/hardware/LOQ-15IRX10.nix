@@ -11,26 +11,29 @@
     }:
 
     {
-      hardware.facter.reportPath = ./facter.json;
       services.xserver.videoDrivers = [ "nvidia" ];
-      hardware.graphics = {
-        enable = true;
-        enable32Bit = true;
-      };
-      hardware.nvidia = {
-        modesetting.enable = true;
-        powerManagement.enable = true;
-        powerManagement.finegrained = lib.mkDefault true;
-        open = true;
-        nvidiaSettings = true;
-        package = config.boot.kernelPackages.nvidiaPackages.latest;
-        prime = {
-          offload.enable = lib.mkDefault true;
-          offload.enableOffloadCmd = lib.mkDefault true;
-          sync.enable = lib.mkDefault false;
 
-          intelBusId = "PCI:0:2:0";
-          nvidiaBusId = "PCI:1:0:0";
+      hardware = {
+        facter.reportPath = ./facter.json;
+        graphics = {
+          enable = true;
+          enable32Bit = true;
+        };
+        nvidia = {
+          modesetting.enable = true;
+          powerManagement.enable = true;
+          powerManagement.finegrained = lib.mkDefault true;
+          open = true;
+          nvidiaSettings = true;
+          package = config.boot.kernelPackages.nvidiaPackages.latest;
+          prime = {
+            offload.enable = lib.mkDefault true;
+            offload.enableOffloadCmd = lib.mkDefault true;
+            sync.enable = lib.mkDefault false;
+
+            intelBusId = "PCI:0:2:0";
+            nvidiaBusId = "PCI:1:0:0";
+          };
         };
       };
 

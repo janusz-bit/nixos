@@ -1,9 +1,11 @@
 _: {
   flake.modules.nixos.wsl-settings = _: {
-    wsl.enable = true;
-    wsl.defaultUser = "nixos";
-    wsl.useWindowsDriver = true;
-    wsl.startMenuLaunchers = true;
+    wsl = {
+      enable = true;
+      defaultUser = "nixos";
+      useWindowsDriver = true;
+      startMenuLaunchers = true;
+    };
 
     environment.sessionVariables.ZED_ALLOW_EMULATED_GPU = "1";
   };

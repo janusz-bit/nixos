@@ -1,6 +1,5 @@
-{ ... }:
-{
-  flake.overlays.brave-debloater = final: prev: {
+_: {
+  flake.overlays.brave-debloater = _final: prev: {
     brave =
       let
         policies = {

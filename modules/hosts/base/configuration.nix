@@ -12,8 +12,6 @@ let
       micro-full
       nil
       nixd
-      #       inputs.fresh.packages.${pkgs.stdenv.hostPlatform.system}.default
-      # fresh-editor
       # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       nixfmt-tree
       uv
@@ -39,7 +37,7 @@ let
   };
 
   environmentShellAliases =
-    config: pkgs:
+    config:
     let
       update_alias =
         mode: remote:
@@ -84,36 +82,46 @@ in
     {
 
       imports = [ inputs.nix-index-database.nixosModules.default ];
-      nixpkgs.config.allowUnfree = true;
 
-      nixpkgs.overlays = [ self.overlays.opencode-config ];
-
-      networking.nameservers = [
-        "9.9.9.9"
-        "149.112.112.112"
-        "2620:fe::fe"
-        "2620:fe::9"
-      ];
-
-      networking.firewall = {
-        enable = true;
-        allowedTCPPorts = [ 22 ];
-        allowedUDPPorts = [ ];
+      nixpkgs = {
+        config.allowUnfree = true;
+        overlays = [ self.overlays.opencode-config ];
       };
 
-      environment.systemPackages = (sharedPackages pkgs);
-      environment.sessionVariables = sharedSessionVariables;
+      networking = {
+        nameservers = [
+          "9.9.9.9"
+          "149.112.112.112"
+          "2620:fe::fe"
+          "2620:fe::9"
+        ];
+
+        firewall = {
+          enable = true;
+          allowedTCPPorts = [ 22 ];
+          allowedUDPPorts = [ ];
+        };
+      };
+
+      environment = {
+        systemPackages = sharedPackages pkgs;
+        sessionVariables = sharedSessionVariables;
+        shellAliases = environmentShellAliases config;
+
+        # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
+        localBinInPath = true;
+      };
+
       nix.settings = sharedNixSettings;
-      environment.shellAliases = environmentShellAliases config pkgs;
 
-      # Setting environment.localBinInPath = true; is highly recommended, because uv will install binaries in ~/.local/bin.
-      environment.localBinInPath = true;
-      # Fix uv
-      programs.nix-ld.enable = true;
+      programs = {
+        # Fix uv
+        nix-ld.enable = true;
 
-      programs.nix-index-database.comma.enable = true;
+        nix-index-database.comma.enable = true;
 
-      programs.direnv.enable = true;
+        direnv.enable = true;
+      };
 
       # The ZFS module is pulled in by default by nixpkgs even when ZFS
       # is not in use. Explicitly disable forceImportRoot to silence the
@@ -131,9 +139,11 @@ in
     {
       nixpkgs.config.allowUnfree = true;
 
-      home.packages = sharedPackages pkgs;
-      home.sessionVariables = sharedSessionVariables;
+      home = {
+        packages = sharedPackages pkgs;
+        sessionVariables = sharedSessionVariables;
+        shellAliases = environmentShellAliases config;
+      };
       nix.settings = sharedNixSettings;
-      home.shellAliases = environmentShellAliases config pkgs;
     };
 }

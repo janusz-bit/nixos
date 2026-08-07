@@ -10,15 +10,18 @@
         settings.KbdInteractiveAuthentication = false;
       };
 
-      programs.ssh.startAgent = false;
-      programs.ssh.enableAskPassword = true;
-      programs.gnupg.agent.enable = true;
-
-      programs.ssh.extraConfig = ''
-        Host ssh.*
-          User root
-          ProxyCommand cloudflared access ssh --hostname %h
-      '';
+      programs = {
+        ssh = {
+          startAgent = false;
+          enableAskPassword = true;
+          extraConfig = ''
+            Host ssh.*
+              User root
+              ProxyCommand cloudflared access ssh --hostname %h
+          '';
+        };
+        gnupg.agent.enable = true;
+      };
     };
 
 }

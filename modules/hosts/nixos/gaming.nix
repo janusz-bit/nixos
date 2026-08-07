@@ -2,30 +2,32 @@ _: {
   flake.modules.nixos.nixos-gaming =
     { pkgs, ... }:
     {
-      # Gamescope: mikro-kompozytor Valve — lepszy frame pacing, skalowanie FSR,
-      # izolacja gry od compositora. capSysNice = wyższy priorytet procesu gamescope.
-      programs.gamescope = {
-        enable = true;
-        capSysNice = true;
-      };
+      programs = {
+        # Gamescope: mikro-kompozytor Valve — lepszy frame pacing, skalowanie FSR,
+        # izolacja gry od compositora. capSysNice = wyższy priorytet procesu gamescope.
+        gamescope = {
+          enable = true;
+          capSysNice = true;
+        };
 
-      programs.steam = {
-        # Osobna sesja "Steam (Gamescope)" w SDDM
-        gamescopeSession.enable = true;
-        # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
-        protontricks.enable = true;
-      };
+        steam = {
+          # Osobna sesja "Steam (Gamescope)" w SDDM
+          gamescopeSession.enable = true;
+          # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
+          protontricks.enable = true;
+        };
 
-      # GameMode: tymczasowe przełączenie systemu w tryb wydajnościowy na czas gry
-      # (uruchamiane przez `gamemoderun %command%` lub automatycznie przez Proton).
-      programs.gamemode = {
-        enableRenice = true; # nadaje gamemoded CAP_SYS_NICE (wymagane dla ujemnego nice)
-        settings = {
-          general = {
-            renice = 10; # gra dostaje nice -10 (użytkownik jest już w grupie gamemode)
-            softrealtime = "auto";
-            inhibit_screensaver = 1;
-            desiredgov = "performance"; # governor performance na czas gry
+        # GameMode: tymczasowe przełączenie systemu w tryb wydajnościowy na czas gry
+        # (uruchamiane przez `gamemoderun %command%` lub automatycznie przez Proton).
+        gamemode = {
+          enableRenice = true; # nadaje gamemoded CAP_SYS_NICE (wymagane dla ujemnego nice)
+          settings = {
+            general = {
+              renice = 10; # gra dostaje nice -10 (użytkownik jest już w grupie gamemode)
+              softrealtime = "auto";
+              inhibit_screensaver = 1;
+              desiredgov = "performance"; # governor performance na czas gry
+            };
           };
         };
       };

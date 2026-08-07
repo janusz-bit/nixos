@@ -1,13 +1,8 @@
-{ ... }:
-{
-  flake.modules.nixos.trilium =
-    {
-      ...
-    }:
-    {
-      services.trilium-server = {
-        enable = true;
-        port = 8081;
-      };
+_: {
+  flake.modules.nixos.trilium = _: {
+    services.trilium-server = {
+      enable = true;
+      port = 8081;
     };
+  };
 }

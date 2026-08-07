@@ -11,7 +11,6 @@
       imports = [
         self.modules.nixos.wsl-stateVersion
         # self.modules.nixos.wsl-obsidian
-
         inputs.nixos-wsl.nixosModules.default
         self.modules.nixos.wsl-settings
       ];
@@ -27,9 +26,11 @@
       self.modules.nixos.base
       self.modules.nixos.wsl
       (_: {
-        customBot.enableFastfetch = false;
-        customBot.flakeTarget = "wsl";
-        customBot.defaultUser = "nixos";
+        customBot = {
+          enableFastfetch = false;
+          flakeTarget = "wsl";
+          defaultUser = "nixos";
+        };
       })
     ];
   };

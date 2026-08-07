@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   flake.modules.nixos.nixos-appimage-run = { pkgs, ... }: {
     programs.appimage = {
       enable = true;

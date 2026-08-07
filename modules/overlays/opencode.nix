@@ -1,6 +1,5 @@
-{ ... }:
-{
-  flake.overlays.opencode-config = final: prev: {
+_: {
+  flake.overlays.opencode-config = _final: prev: {
     opencode =
       let
         opencodeJson = prev.writeText "opencode.json" ''

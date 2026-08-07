@@ -77,7 +77,10 @@
         virtualHosts."chat.${customTop.site.full}" = {
           # Listen on 8080 — cloudflared ingress target (unchanged)
           listen = [
-            { addr = "127.0.0.1"; port = 8080; }
+            {
+              addr = "127.0.0.1";
+              port = 8080;
+            }
           ];
 
           locations = {

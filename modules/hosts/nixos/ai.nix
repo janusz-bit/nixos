@@ -7,16 +7,20 @@ let
 in
 {
   flake.modules.nixos.nixos-ai =
-    { pkgs, config, ... }:
+    { pkgs, ... }:
     {
-      services.ollama.enable = true;
-      services.ollama.package = pkgs-stable.ollama; # temporary
-      services.open-webui = {
-        enable = false;
-        environment = {
-          OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-          # Disable authentication
-          WEBUI_AUTH = "False";
+      services = {
+        ollama = {
+          enable = true;
+          package = pkgs-stable.ollama; # temporary
+        };
+        open-webui = {
+          enable = false;
+          environment = {
+            OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+            # Disable authentication
+            WEBUI_AUTH = "False";
+          };
         };
       };
 

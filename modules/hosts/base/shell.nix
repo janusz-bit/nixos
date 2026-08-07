@@ -62,14 +62,18 @@ in
   flake.modules.nixos.base-shell =
     { pkgs, config, ... }:
     {
-      programs.bash = {
-        enable = true;
-        # Using fish as the the login shell can cause compatibility issues. For example, certain recovery environments such as systemd's emergency mode to be completely broken when fish was set as the login shell. This limitation is noted on the Gentoo wiki. There they present an alternative, keeping bash as the system shell but having it exec fish when run interactively.
-        interactiveShellInit = sharedBashInit pkgs;
+      programs = {
+        bash = {
+          enable = true;
+          # Using fish as the the login shell can cause compatibility issues. For example, certain recovery environments such as systemd's emergency mode to be completely broken when fish was set as the login shell. This limitation is noted on the Gentoo wiki. There they present an alternative, keeping bash as the system shell but having it exec fish when run interactively.
+          interactiveShellInit = sharedBashInit pkgs;
+        };
+        fish = {
+          enable = true;
+          shellAliases = sharedFishAliases;
+          interactiveShellInit = sharedFishInit config;
+        };
       };
-      programs.fish.enable = true;
-      programs.fish.shellAliases = sharedFishAliases;
-      programs.fish.interactiveShellInit = sharedFishInit config;
 
       environment.systemPackages = sharedPackages pkgs;
     };

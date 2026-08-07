@@ -18,9 +18,11 @@
       (
         { lib, pkgs, ... }:
         {
-          customBot.flakeTarget = "droid";
-          customBot.enableFastfetch = false;
-          customBot.defaultUser = "droid";
+          customBot = {
+            flakeTarget = "droid";
+            enableFastfetch = false;
+            defaultUser = "droid";
+          };
 
           environment.systemPackages = with pkgs; [
             ollama

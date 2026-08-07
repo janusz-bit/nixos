@@ -60,47 +60,58 @@
         opencode
         losange
       ];
-      # Install firefox.
-      programs.firefox.enable = true;
+
       hardware.wooting.enable = true;
+
+      programs = {
+        # Install firefox.
+        firefox.enable = true;
+
+        steam = {
+          enable = true;
+          remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+          dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting
+          extraCompatPackages = [
+            self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+            pkgs.proton-ge-bin
+          ];
+        };
+
+        gamemode.enable = true; # for performance mode
+
+        obs-studio = {
+          enable = true;
+
+          # optional Nvidia hardware acceleration
+          package = pkgs.obs-studio.override {
+            cudaSupport = true;
+          };
+
+          plugins = with pkgs.obs-studio-plugins; [
+            wlrobs
+            obs-backgroundremoval
+            obs-pipewire-audio-capture
+            obs-gstreamer
+            obs-vkcapture
+          ];
+        };
+      };
+
       # Mullvad split upstream: pkgs.mullvad = daemon (module default),
       # pkgs.mullvad-vpn = GUI only, enabled via gui.enable.
-      services.mullvad-vpn.enable = true;
-      services.mullvad-vpn.gui.enable = true;
-      programs.steam = {
-        enable = true;
-        remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting};
-        extraCompatPackages = [
-          self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
-          pkgs.proton-ge-bin
-        ];
-      };
-      programs.gamemode.enable = true; # for performance mode
-      programs.obs-studio = {
-        enable = true;
+      services = {
+        mullvad-vpn = {
+          enable = true;
+          gui.enable = true;
+        };
 
-        # optional Nvidia hardware acceleration
-        package = (
-          pkgs.obs-studio.override {
-            cudaSupport = true;
-          }
-        );
-
-        plugins = with pkgs.obs-studio-plugins; [
-          wlrobs
-          obs-backgroundremoval
-          obs-pipewire-audio-capture
-          obs-gstreamer
-          obs-vkcapture
-        ];
-      };
-      services.syncthing = {
-        enable = true;
-        user = "${config.customBot.defaultUser}";
-        dataDir = "/home/${config.customBot.defaultUser}/Sync";
-        configDir = "/home/${config.customBot.defaultUser}/.config/syncthing";
-        openDefaultPorts = true;
+        syncthing = {
+          enable = true;
+          user = "${config.customBot.defaultUser}";
+          dataDir = "/home/${config.customBot.defaultUser}/Sync";
+          configDir = "/home/${config.customBot.defaultUser}/.config/syncthing";
+          openDefaultPorts = true;
+        };
       };
     };
 }
