@@ -21,7 +21,6 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fresh.url = "github:sinelaw/fresh";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     git-hooks-nix = {
@@ -33,9 +32,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
-    # Pinned to last commit before topup.ts introduced broken
-    # @hermes/shared/charge-settlement import in nix/tui.nix (missing
-    # apps/shared in dirs). Upstream bug — unpin once fixed.
+    # Tracks upstream (unpinned). The previous pin to 3f2a389c... existed
+    # because topup.ts introduced a broken @hermes/shared/charge-settlement
+    # import in nix/tui.nix; upstream moved on and the pin was lifted.
     hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
