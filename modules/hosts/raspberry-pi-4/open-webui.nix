@@ -11,6 +11,11 @@
       age.secrets.open-webui-hermes-env = {
         file = customTop.secretsDir + "/hermes-env.age";
       };
+      # OPENAI_API_KEYS (Hermes + LLM Gateway keys) — must stay out of
+      # environment {} so it never lands in the world-readable nix store
+      age.secrets.open-webui-keys = {
+        file = customTop.secretsDir + "/open-webui-keys.age";
+      };
 
       services.open-webui = {
         enable = true;
@@ -20,12 +25,15 @@
         environment = {
           # Ensure env vars always override DB-stored PersistentConfig values
           ENABLE_PERSISTENT_CONFIG = "False";
-          # OpenAI-compatible API → Hermes Agent
+          # OpenAI-compatible API → multiple backends. Semicolon-separated
+          # lists, paired by index with OPENAI_API_KEYS (from
+          # open-webui-keys.age): index 0 = Hermes Agent,
+          # index 1 = LLM Gateway (devpass)
           ENABLE_OPENAI_API = "true";
-          OPENAI_API_BASE_URL = "http://127.0.0.1:8642/v1";
-          # Local Ollama instance on the RPi4 (services.ollama, port 11434)
-          ENABLE_OLLAMA_API = "true";
-          OLLAMA_BASE_URL = "http://127.0.0.1:11434";
+          OPENAI_API_BASE_URLS = "http://127.0.0.1:8642/v1;https://api.llmgateway.io/v1";
+          # Ollama API disabled — models come from Hermes Agent and
+          # LLM Gateway (devpass) instead
+          ENABLE_OLLAMA_API = "false";
           # Require authentication (first registered user becomes admin)
           WEBUI_AUTH = "True";
           # Stateful Responses API (forwarding previous_response_id)
@@ -151,7 +159,14 @@
       # If open-webui ever crashes it must come back on its own — the NixOS
       # module ships Restart=no, so a single crash meant chat.janusz-bit.com
       # stayed dead until the next reboot/rebuild.
-      systemd.services.open-webui.serviceConfig.Restart = lib.mkForce "on-failure";
+      systemd.services.open-webui.serviceConfig = {
+        Restart = lib.mkForce "on-failure";
+        # Second env file appended after the module's environmentFile:
+        # OPENAI_API_KEYS="<hermes key>;<llmgateway key>". Loaded by systemd
+        # (root) before the DynamicUser sandbox starts, so root:root 0400
+        # is fine.
+        EnvironmentFile = config.age.secrets.open-webui-keys.path;
+      };
 
       # Ensure nginx cache directory exists with correct ownership
       systemd.tmpfiles.rules = [
