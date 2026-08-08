@@ -18,6 +18,14 @@
         enable = true;
         tunnels = {
           "raspberry-pi-4" = {
+            # Force HTTP/2 over TCP instead of the default QUIC (UDP).
+            # QUIC connections died in clusters ("Failed to dial a quic
+            # connection … timeout: no recent network activity"), sometimes
+            # taking all 4 tunnel connections down at once → every site
+            # behind the tunnel intermittently unreachable. Classic QUIC/UDP
+            # path issue (e.g. MTU blackhole on the uplink). HTTP/2 is
+            # TCP-based and unaffected; perf difference is negligible here.
+            protocol = "http2";
             credentialsFile = config.age.secrets.cloudflared-tunnel.path;
             default = "http_status:404";
             ingress = {

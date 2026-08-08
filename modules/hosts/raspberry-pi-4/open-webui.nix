@@ -1,7 +1,12 @@
 { customTop, ... }:
 {
   flake.modules.nixos.open-webui =
-    { config, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       age.secrets.open-webui-hermes-env = {
         file = customTop.secretsDir + "/hermes-env.age";
@@ -141,6 +146,11 @@
           };
         };
       };
+
+      # If open-webui ever crashes it must come back on its own — the NixOS
+      # module ships Restart=no, so a single crash meant chat.janusz-bit.com
+      # stayed dead until the next reboot/rebuild.
+      systemd.services.open-webui.serviceConfig.Restart = lib.mkForce "on-failure";
 
       # Ensure nginx cache directory exists with correct ownership
       systemd.tmpfiles.rules = [
