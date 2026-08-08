@@ -7,6 +7,7 @@ _: {
             "$schema": "https://opencode.ai/config.json",
             "model": "llmgateway/claude-sonnet-4-6",
             "plugin": [
+              "superpowers@git+https://github.com/obra/superpowers.git",
               "caveman-opencode-plugin"
             ],
             "provider": {
