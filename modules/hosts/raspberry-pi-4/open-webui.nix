@@ -20,11 +20,12 @@
         environment = {
           # Ensure env vars always override DB-stored PersistentConfig values
           ENABLE_PERSISTENT_CONFIG = "False";
-          # OpenAI-compatible API → Hermes Agent (sole model source)
+          # OpenAI-compatible API → Hermes Agent
           ENABLE_OPENAI_API = "true";
           OPENAI_API_BASE_URL = "http://127.0.0.1:8642/v1";
-          # Disable Ollama API so Open WebUI only uses Hermes
-          ENABLE_OLLAMA_API = "false";
+          # Local Ollama instance on the RPi4 (services.ollama, port 11434)
+          ENABLE_OLLAMA_API = "true";
+          OLLAMA_BASE_URL = "http://127.0.0.1:11434";
           # Require authentication (first registered user becomes admin)
           WEBUI_AUTH = "True";
           # Stateful Responses API (forwarding previous_response_id)
