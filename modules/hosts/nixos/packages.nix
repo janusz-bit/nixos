@@ -59,6 +59,7 @@
         kdePackages.kdenlive
         opencode
         losange
+        freecad-qt6
       ];
 
       hardware.wooting.enable = true;
