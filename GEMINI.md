@@ -18,6 +18,7 @@ Integrated technologies handling the system's core capabilities include:
 * **nixos-raspberrypi**: RPi-specific hardware support (`github:nvmd/nixos-raspberrypi`).
 * **nixos-hardware**: Common hardware modules (`github:NixOS/nixos-hardware/master`).
 * **nix-cachyos-kernel**: CachyOS kernel packages (`github:xddxdd/nix-cachyos-kernel/release`).
+* **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git`, `linux_cachyos` etc.; its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
 * **github-actions-nix**: Auto-generates GitHub Actions workflows (`github:synapdeck/github-actions-nix`).
 * **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
@@ -75,7 +76,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
   * `power-save` – full TLP settings (incl. battery conservation mode), thermald, UPower (percentage policy, hibernate on critical), `powersave` governor, WiFi powersave, power-saving kernel params, logind lid/idle suspend, scx `--powersave`.
   * `reverse-sync` – Nvidia Prime Reverse Sync.
   * `sync-mode` – Nvidia Prime Sync.
-* **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS-v3 and proton-ge-bin, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
+* **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS x86-64-v3 and proton-ge-bin as extraCompatPackages — Proton now comes from the chaotic-nyx overlay/binary cache, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (temporarily uses the `ollama` package from the `nixpkgs-stable` input), Open WebUI currently **disabled** (`enable = false`), `uv`, `repomix`, Node.js, Python 3 with pip.
@@ -83,7 +84,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
-* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies).
+* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64_v3 etc., via `chaotic.nixosModules.default`).
 * **Other services**: Avahi (mDNS), Flatpak, Btrfs autoScrub, CUPS printing (splix driver, Samsung ML-2160 preconfigured), Bluetooth, rtkit.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted).
 * **Locale**: Polish (`pl_PL.UTF-8`), timezone `Europe/Warsaw`, keymap `pl2`.
@@ -147,13 +148,13 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 15 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Hermes env/API key, Ollama API key, Google API key, LLM Gateway API key, OpenCode API key, LibreChat env, Open WebUI env, notes, attic token, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `hermes-webui-env`, `librechat-env`, and `opencode` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `llmgateway-api-key` targets all hosts; `secret1` is used on `raspberry-pi-4` for user SSH authorized keys.
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`). Applied via `self.overlays` in host configs and base.
 * **`modules/packages/`**: Custom packages and scripts.
-  * `proton-cachyos-v3` (custom Proton build from CachyOS, x86_64-linux only)
   * `my-neovim` (nvf-based Neovim with gruvbox, LSP, Telescope, which-key, lualine, treesitter, nix/python/clang)
-  * `update-flake` (updates flake.lock, syncs workflows, updates `bootdev-cli` and `proton-cachyos-v3` via `nix-update`)
+  * `update-flake` (updates flake.lock, syncs workflows, updates `bootdev-cli` via `nix-update`)
   * `flake-release` (commits, auto-increments git tag, pushes)
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
+  * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
 ## Centralized Configuration
@@ -183,6 +184,7 @@ Custom NixOS options:
 * `avf` — `github:nix-community/nixos-avf` (Android Virtualization Framework)
 * `nix-index-database` — `github:nix-community/nix-index-database` (follows nixpkgs; for `comma`)
 * `nix-cachyos-kernel` — `github:xddxdd/nix-cachyos-kernel/release` (CachyOS kernels + overlay)
+* `chaotic` — `github:chaotic-cx/nyx/nyxpkgs-unstable` (Chaotic-Nyx: bleeding-edge packages + nyx binary cache; nixos host only)
 * `nixos-hardware` — `github:NixOS/nixos-hardware/master` (hardware modules)
 * `nixos-raspberrypi` — `github:nvmd/nixos-raspberrypi` (RPi-specific support)
 * `agenix` — `github:ryantm/agenix` (follows nixpkgs; secrets management)
@@ -194,7 +196,7 @@ Custom NixOS options:
 
 ## Dev Shell Tools
 Running `nix develop` provides:
-* `update-flake` – updates `flake.lock`, commits it, then updates `bootdev-cli` and `proton-cachyos-v3` packages via `nix-update`.
+* `update-flake` – updates `flake.lock`, commits it, then updates the `bootdev-cli` package via `nix-update`.
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
 * Pre-commit hooks auto-installed: `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.
 

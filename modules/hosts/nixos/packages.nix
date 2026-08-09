@@ -1,5 +1,4 @@
-{ self, inputs, ... }:
-{
+_: {
   flake.modules.nixos.nixos-packages =
     { pkgs, config, ... }:
     {
@@ -12,7 +11,7 @@
         vesktop
         vlc
         tor-browser
-        self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+        pkgs.proton-cachyos_x86_64_v3 # z chaotic-nyx (binary cache, bez własnego builda)
         # proton-ge-bin
         # niri
         alacritty
@@ -73,7 +72,7 @@
           remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
           dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting
           extraCompatPackages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.proton-cachyos-v3
+            pkgs.proton-cachyos_x86_64_v3 # z chaotic-nyx
             pkgs.proton-ge-bin
           ];
         };

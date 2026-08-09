@@ -29,6 +29,9 @@
         self.modules.nixos.base
         self.modules.nixos.nixos
         self.modules.nixos.hardware-LOQ-15IRX10
+        # Chaotic-Nyx: overlay z bleeding-edge pakietami (proton-cachyos_x86_64_v3,
+        # proton-ge-custom, mangohud_git, linux_cachyos...) + własny binary cache.
+        inputs.chaotic.nixosModules.default
         (_: {
           customBot.flakeTarget = "nixos";
           customBot.defaultUser = "dinosaur";
