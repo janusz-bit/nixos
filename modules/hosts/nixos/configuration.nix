@@ -122,6 +122,72 @@
             };
           };
         };
+
+        # PCI passthrough (VFIO): RTX 5060 Laptop GPU -> VM
+        # wg https://wiki.nixos.org/wiki/PCI_passthrough
+        # GPU: 01:00.0 VGA [10de:2d59] + 01:00.1 audio [10de:22eb] (facter.json).
+        # Host zostaje na iGPU Intel (wyświetlacz), dGPU przechodzi do VM.
+        # UWAGA: kernelParams/initrd wymagają REBOOT (sam switch nie przeładuje jądra).
+        gpu-passthrough.configuration = {
+          # facter automatycznie dodałby "nvidia" do boot.initrd.kernelModules,
+          # a nixpkgs sortuje tę listę alfabetycznie (typ attrNamesToTrue),
+          # więc nvidia wiązałby GPU PRZED vfio_pci. Wyłączamy auto-detekcję
+          # grafiki; i915 dla iGPU hosta dodajemy jawnie poniżej.
+          hardware.facter.detected.graphics.enable = false;
+
+          boot = {
+            # Moduły VFIO w initrd (muszą zająć GPU przed jakimkolwiek
+            # sterownikiem GPU) + i915 dla iGPU hosta.
+            initrd.kernelModules = [
+              "vfio_pci"
+              "vfio"
+              "vfio_iommu_type1"
+              "i915"
+            ];
+            # IOMMU + device IDs przejmowane przez vfio-pci (VGA + HDMI audio GPU)
+            kernelParams = [
+              "intel_iommu=on"
+              "vfio-pci.ids=10de:2d59,10de:22eb"
+            ];
+            # Zabezpieczenie: nvidia nie może związać GPU w runtime
+            # (np. po resume z hibernacji / PCI rescan)
+            blacklistedKernelModules = [
+              "nvidia"
+              "nvidia_modeset"
+              "nvidia_uvm"
+              "nvidia_drm"
+            ];
+          };
+
+          # GPU nie jest własnością hosta: X startuje na iGPU (modesetting),
+          # prime offload i power management NVIDII wyłączone.
+          services.xserver.videoDrivers = lib.mkForce [ "modesetting" ];
+          hardware.nvidia = {
+            powerManagement.enable = lib.mkForce false;
+            powerManagement.finegrained = lib.mkForce false;
+            prime = {
+              offload.enable = lib.mkForce false;
+              offload.enableOffloadCmd = lib.mkForce false;
+            };
+          };
+
+          # libvirtd + QEMU/OVMF (UEFI) + TPM (swtpm) wg wiki
+          virtualisation = {
+            spiceUSBRedirection.enable = true;
+            libvirtd = {
+              enable = true;
+              qemu = {
+                package = pkgs.qemu_kvm;
+                runAsRoot = true;
+                swtpm.enable = true;
+              };
+            };
+          };
+          programs.virt-manager.enable = true;
+
+          # Użytkownik może zarządzać VM bez roota
+          users.users.${config.customBot.defaultUser}.extraGroups = [ "libvirtd" ];
+        };
       };
       nixpkgs.overlays = [
         inputs.nix-cachyos-kernel.overlays.default
