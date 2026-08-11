@@ -76,10 +76,6 @@ buildNpmPackage (finalAttrs: {
   versionCheckProgram = "${placeholder "out"}/bin/prime-agent";
   versionCheckProgramArg = "--version";
 
-  passthru = {
-    inherit modelsJson settingsJson;
-  };
-
   meta = {
     description = "Self-improving, open-source AI coding agent (RLM-based)";
     homepage = "https://github.com/PrimeIntellect-ai/prime-agent";
