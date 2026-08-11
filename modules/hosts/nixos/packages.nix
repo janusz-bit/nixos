@@ -57,6 +57,7 @@ _: {
         tea
         kdePackages.kdenlive
         opencode
+        prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
         losange
         freecad-qt6
       ];

@@ -9,6 +9,7 @@
     { pkgs, ... }:
     {
       packages.bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
+      packages.prime-agent = pkgs.callPackage ./_prime-agent { };
 
       packages.raspberry-pi-4-sd-image =
         let

@@ -1,0 +1,66 @@
+{
+  "providers": {
+    "ollama-cloud": {
+      "baseUrl": "https://ollama.com/v1",
+      "api": "openai-completions",
+      "apiKey": "***",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "kimi-k2.7-code",
+          "name": "Kimi K2.7 Code (Ollama Cloud)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 262144,
+          "maxTokens": 32768
+        },
+        {
+          "id": "qwen3.5:397b",
+          "name": "Qwen 3.5 397B (Ollama Cloud)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 262144,
+          "maxTokens": 32768
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "name": "DeepSeek V4 Pro (Ollama Cloud)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 163840,
+          "maxTokens": 16384
+        },
+        {
+          "id": "glm-5.2",
+          "name": "GLM 5.2 (Ollama Cloud)",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 202752,
+          "maxTokens": 16384
+        }
+      ]
+    },
+    "ollama": {
+      "baseUrl": "http://localhost:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "***",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "ornith:35b",
+          "name": "Ornith 35B (local)",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 32768,
+          "maxTokens": 8192
+        }
+      ]
+    }
+  }
+}

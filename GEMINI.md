@@ -91,11 +91,11 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (temporarily uses the `ollama` package from the `nixpkgs-stable` input), Open WebUI currently **disabled** (`enable = false`), `uv`, `repomix`, Node.js, Python 3 with pip.
-* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
+* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
-* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64_v3 etc., via `chaotic.nixosModules.default`).
+* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
 * **Other services**: Avahi (mDNS), Flatpak, Btrfs autoScrub, CUPS printing (splix driver, Samsung ML-2160 preconfigured), Bluetooth, rtkit.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted).
 * **Locale**: Polish (`pl_PL.UTF-8`), timezone `Europe/Warsaw`, keymap `pl2`.
@@ -165,6 +165,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
+  * `prime-agent` (v0.7.2, `_prime-agent/`: `buildNpmPackage` z tarballa release; brak skryptu build — dist/ to gotowy bundle; `nodejs_22` wymagany pod prebuildy zeromq/koffi; vendored `package-lock.json` generowany ręcznie (`npm install --package-lock-only`), tarball release go nie zawiera; wrapper seeduje domyślne `~/.prime/agent/models.json` + `settings.json` (Ollama Cloud: kimi-k2.7-code jako default, qwen3.5:397b, deepseek-v4-pro, glm-5.2; lokalne Ollama: ornith:35b) — apiKey to nazwa zmiennej `OLLAMA_API_KEY`, sekret nie trafia do store)
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
@@ -246,5 +247,5 @@ nix build .#raspberry-pi-4-sd-image
 * 15 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
-* 2 Nixpkgs overlays: `brave-debloater`, `opencode-config`
+* 3 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `prime-agent`
 * Channel: `nixos-unstable`
