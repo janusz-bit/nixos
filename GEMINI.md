@@ -62,6 +62,15 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 | `cat` | `bat` |
 | `hw` | `hwinfo --short` |
 
+#### GPU Aliases (`nixos` host only, via `modules/hosts/nixos/gpu.nix`)
+| Alias | Command |
+|---|---|
+| `update-passthrough` | `sudo nixos-rebuild switch --sudo --specialisation gpu-passthrough --flake <remote-flake>#nixos --refresh` (reboot required to take effect) |
+| `update-passthrough-local` | Same as above with local `/etc/nixos` flake |
+| `gpu-status` | `gpu status` (drivers of both PCI functions + boot mode) |
+| `gpu-vfio` | `gpu vfio` (runtime: rebind GPU to vfio-pci) |
+| `gpu-host` | `gpu host` (runtime: rebind GPU back to nvidia) |
+
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale). Default user: `dinosaur`.
 * **Kernel**: CachyOS kernel (`linuxPackages-cachyos-latest-lto-x86_64-v3`) via the `nix-cachyos-kernel` input.
@@ -76,6 +85,8 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
   * `power-save` – full TLP settings (incl. battery conservation mode), thermald, UPower (percentage policy, hibernate on critical), `powersave` governor, WiFi powersave, power-saving kernel params, logind lid/idle suspend, scx `--powersave`.
   * `reverse-sync` – Nvidia Prime Reverse Sync.
   * `sync-mode` – Nvidia Prime Sync.
+  * `gpu-passthrough` – PCI passthrough (VFIO) for the dGPU: `intel_iommu=on` + `vfio-pci.ids=10de:2d59,10de:22eb` kernel params, `vfio_pci`/`vfio`/`vfio_iommu_type1`/`i915` initrd modules, `nvidia*` modules blacklisted, `hardware.facter.detected.graphics.enable = false` (prevents facter from injecting `nvidia` into initrd before vfio), X server on iGPU (`modesetting`), libvirtd (qemu_kvm, runAsRoot, swtpm), spiceUSBRedirection, virt-manager, user in `libvirtd` group. See https://wiki.nixos.org/wiki/PCI_passthrough.
+* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (writeShellScriptBin) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `update-passthrough` (`nixos-rebuild switch --specialisation gpu-passthrough`, remote), `update-passthrough-local` (local `/etc/nixos`), `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs.
 * **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS x86-64-v3 and proton-ge-bin as extraCompatPackages — Proton now comes from the chaotic-nyx overlay/binary cache, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
