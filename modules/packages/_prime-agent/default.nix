@@ -9,8 +9,8 @@
 }:
 
 let
-  # Domyślna konfiguracja providerów (Ollama Cloud + lokalne Ollama).
-  # apiKey to NAZWA zmiennej środowiskowej (OLLAMA_API_KEY jest już
+  # Domyślna konfiguracja providerów (LLM Gateway / devpass).
+  # apiKey to NAZWA zmiennej środowiskowej (LLMGATEWAY_API_KEY jest
   # eksportowana globalnie przez base-agenix), więc żaden sekret nie
   # trafia do store.
   modelsJson = ./models.json;
