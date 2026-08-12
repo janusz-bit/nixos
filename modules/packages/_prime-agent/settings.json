@@ -1,4 +1,4 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "claude-sonnet-4-6"
+  "defaultModel": "qwen3.8-max"
 }

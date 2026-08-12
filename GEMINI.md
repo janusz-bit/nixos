@@ -165,7 +165,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
-  * `prime-agent` (v0.7.2, `_prime-agent/`: `buildNpmPackage` z tarballa release; brak skryptu build — dist/ to gotowy bundle; `nodejs_22` wymagany pod prebuildy zeromq/koffi; vendored `package-lock.json` generowany ręcznie (`npm install --package-lock-only`), tarball release go nie zawiera; wrapper seeduje domyślne `~/.prime/agent/models.json` + `settings.json` (LLM Gateway/devpass `https://api.llmgateway.io/v1`: claude-sonnet-4-6 jako default, claude-opus-4-8, gpt-5.3-codex, kimi-k2.7-code, qwen3.8-max, deepseek-v4-pro) — apiKey to nazwa zmiennej `LLMGATEWAY_API_KEY`, sekret nie trafia do store)
+  * `prime-agent` (v0.7.2, `_prime-agent/`: `buildNpmPackage` z tarballa release; brak skryptu build — dist/ to gotowy bundle; `nodejs_22` wymagany pod prebuildy zeromq/koffi; vendored `package-lock.json` generowany ręcznie (`npm install --package-lock-only`), tarball release go nie zawiera; wrapper seeduje domyślne `~/.prime/agent/models.json` + `settings.json` (LLM Gateway/devpass `https://api.llmgateway.io/v1`: qwen3.8-max jako default, claude-sonnet-4-6, claude-opus-4-8, gpt-5.3-codex, kimi-k2.7-code, qwen3.8-max, deepseek-v4-pro) — apiKey to nazwa zmiennej `LLMGATEWAY_API_KEY`, sekret nie trafia do store)
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
