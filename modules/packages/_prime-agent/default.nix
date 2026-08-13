@@ -4,6 +4,7 @@
   buildNpmPackage,
   fetchurl,
   nodejs_22,
+  mcp-nixos,
   writableTmpDirAsHomeHook,
   versionCheckHook,
 }:
@@ -16,17 +17,32 @@ let
   modelsJson = ./models.json;
   settingsJson = ./settings.json;
 
+  # Skille Pythonowe seedowane do ~/.prime/agent/skills/:
+  # - nixos-mcp: integracja MCP z lokalnym serwerem mcp-nixos (stdio;
+  #   McpIntegration z nadpisanym _open_session, host wspiera tylko HTTP).
+  # - websearch: wyszukiwanie przez DuckDuckGo (ddgs), bez klucza API;
+  #   nadpisuje wbudowany skill Serper (user skills mają priorytet).
+  # Kernel instaluje je jako --editable do kernel-venv (uv) przy starcie.
+  skillsDir = ./skills;
+
   # Seed na pierwszy start: kopiuj domyślne pliki konfiguracyjne do
   # ~/.prime/agent/ tylko jeśli jeszcze nie istnieją (nie nadpisuj
-  # zmian użytkownika). Skrypt idzie do wrapProgram --run, więc musi
-  # zawsze kończyć się sukcesem (inaczej wrapper przerywa start) i nie
-  # może zakładać PATH/HOME (np. installCheck w sandboxie bez HOME).
+  # zmian użytkownika). Skille są zarządzane pakietowo i nadpisywane
+  # przy każdym starcie (aktualizacje z GitOps muszą się propagować;
+  # własne skille użytkownika: ~/.agents/skills/). Skrypt idzie do
+  # wrapProgram --run, więc musi zawsze kończyć się sukcesem (inaczej
+  # wrapper przerywa start) i nie może zakładać PATH/HOME (np.
+  # installCheck w sandboxie bez HOME).
   seedConfig = pkgs.writeShellScript "prime-agent-seed-config" ''
     if [ -n "''${PRIME_AGENT_CODING_AGENT_DIR:-}" ] || [ -n "''${HOME:-}" ]; then
       agent_dir="''${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}"
-      ${pkgs.coreutils}/bin/mkdir -p "$agent_dir" 2>/dev/null || :
+      ${pkgs.coreutils}/bin/mkdir -p "$agent_dir" "$agent_dir/skills" 2>/dev/null || :
       [ -f "$agent_dir/models.json" ] || ${pkgs.coreutils}/bin/install -m 0644 "${modelsJson}" "$agent_dir/models.json" 2>/dev/null || :
       [ -f "$agent_dir/settings.json" ] || ${pkgs.coreutils}/bin/install -m 0644 "${settingsJson}" "$agent_dir/settings.json" 2>/dev/null || :
+      for skill in nixos-mcp websearch; do
+        ${pkgs.coreutils}/bin/rm -rf "$agent_dir/skills/$skill" 2>/dev/null || :
+        ${pkgs.coreutils}/bin/cp -r "${skillsDir}/$skill" "$agent_dir/skills/$skill" 2>/dev/null || :
+      done
     fi
     true
   '';
@@ -65,7 +81,13 @@ buildNpmPackage (finalAttrs: {
   disallowedReferences = [ finalAttrs.npmDeps ];
 
   postInstall = ''
-    wrapProgram "$out/bin/prime-agent" --run "${seedConfig}"
+    # MCP_NIXOS_EXE: skill nixos-mcp łączy się z lokalnym serwerem
+    # mcp-nixos przez stdio — ścieżka do binarki wstrzyknięta envem,
+    # bez zależności od PATH.
+    wrapProgram "$out/bin/prime-agent" \
+      --run "${seedConfig}" \
+      --set MCP_NIXOS_EXE "${mcp-nixos}/bin/mcp-nixos" \
+      --prefix PATH : "${mcp-nixos}/bin"
   '';
 
   doInstallCheck = true;
