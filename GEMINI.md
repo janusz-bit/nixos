@@ -56,7 +56,7 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 | `update-local` | `sudo nixos-rebuild switch --sudo --flake <local-flake>#<target>` |
 | `update-local-boot` | `sudo nixos-rebuild boot --sudo --flake <local-flake>#<target>` |
 | `push` | Build toplevel and push closure to Cachix via `nix build ... \| cachix push ...` |
-| `update-my-pkgs` | `nix run <flake>#update-my-pkgs` |
+| `update-my-pkgs` | `nix run <flake>#update-flake` |
 | `ls`, `la`, `ll`, `lt`, `l.` | `eza` variants |
 | `..`, `...`, `....` | Directory navigation |
 | `cat` | `bat` |
@@ -86,7 +86,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
   * `reverse-sync` – Nvidia Prime Reverse Sync.
   * `sync-mode` – Nvidia Prime Sync.
   * `gpu-passthrough` – PCI passthrough (VFIO) for the dGPU: `intel_iommu=on` + `vfio-pci.ids=10de:2d59,10de:22eb` kernel params, `vfio_pci`/`vfio`/`vfio_iommu_type1`/`i915` initrd modules, `nvidia*` modules blacklisted, `hardware.facter.detected.graphics.enable = false` (prevents facter from injecting `nvidia` into initrd before vfio), X server on iGPU (`modesetting`), libvirtd (qemu_kvm, runAsRoot, swtpm), spiceUSBRedirection, virt-manager, user in `libvirtd` group. See https://wiki.nixos.org/wiki/PCI_passthrough.
-* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (writeShellScriptBin) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `update-passthrough` (`nixos-rebuild switch --specialisation gpu-passthrough`, remote), `update-passthrough-local` (local `/etc/nixos`), `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs.
+* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (wrapped shell script, runtime deps `pciutils`/`libvirt`/`kmod`/`coreutils`/`gnugrep` pinned in PATH; `sudo` intentionally left to the setuid wrapper) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `update-passthrough` (`nixos-rebuild switch --specialisation gpu-passthrough`, remote), `update-passthrough-local` (local `/etc/nixos`), `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs.
 * **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS x86-64-v3 and proton-ge-bin as extraCompatPackages — Proton now comes from the chaotic-nyx overlay/binary cache, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
@@ -242,9 +242,9 @@ nix build .#raspberry-pi-4-sd-image
 * **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 7 workflows generated from `modules/github-actions.nix` (6 builds + `lint`).
 
 ## Repository Statistics
-* 92 tracked files (excluding `.git/`)
-* 60 `.nix` files, ~3158 LOC total
-* 15 age-encrypted secrets
+* 97 tracked files (excluding `.git/`)
+* 61 `.nix` files, ~3350 LOC total
+* 16 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
 * 3 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `prime-agent`
