@@ -39,6 +39,15 @@
           "compat": { "supportsDeveloperRole": false }
         },
         {
+          "id": "kimi-k3",
+          "name": "Kimi K3 (devpass)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "compat": { "supportsDeveloperRole": false }
+        },
+        {
           "id": "qwen3.8-max",
           "name": "Qwen3.8 Max (devpass)",
           "reasoning": true,

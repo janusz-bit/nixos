@@ -1,4 +1,4 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "qwen3.8-max"
+  "defaultModel": "kimi-k3"
 }
