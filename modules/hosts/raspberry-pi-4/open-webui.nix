@@ -28,10 +28,9 @@
           # OpenAI-compatible API → multiple backends. Semicolon-separated
           # lists, paired by index with OPENAI_API_KEYS (from
           # open-webui-keys.age): index 0 = Hermes Agent,
-          # index 1 = LLM Gateway (devpass), index 2 = Prime Agent bridge
-          # (localhost, bez klucza — trzeci wpis w OPENAI_API_KEYS pusty)
+          # index 1 = LLM Gateway (devpass)
           ENABLE_OPENAI_API = "true";
-          OPENAI_API_BASE_URLS = "http://127.0.0.1:8642/v1;https://api.llmgateway.io/v1;http://127.0.0.1:8643/v1";
+          OPENAI_API_BASE_URLS = "http://127.0.0.1:8642/v1;https://api.llmgateway.io/v1";
           # Ollama API disabled — models come from Hermes Agent and
           # LLM Gateway (devpass) instead
           ENABLE_OLLAMA_API = "false";

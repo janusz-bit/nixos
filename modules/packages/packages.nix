@@ -10,7 +10,6 @@
       packages = {
         bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
         prime-agent = pkgs.callPackage ./_prime-agent { };
-        prime-agent-bridge = pkgs.callPackage ./_prime-agent-bridge { };
 
         raspberry-pi-4-sd-image =
           let
