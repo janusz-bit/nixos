@@ -22,6 +22,12 @@ lib.meta.addMetaAttrs
       # uv musi być na PATH: prime-agent przy pierwszym użyciu bootstrapuje
       # kernel-venv IPythona przez uv (jednorazowo, potem cache w $HOME).
       export PATH="${lib.getBin uv}/bin:$PATH"
+      # Seed ~/.prime/agent (models.json, settings.json, skille) przy
+      # starcie: robi to hook --run wrappera prime-agent, a lista
+      # /v1/models jest czytana z models.json — bez tego open-webui
+      # widziałby tylko model domyślny aż do pierwszego czatu.
+      # --version nie wykonuje żadnego wywołania API (~kilka s startu Node).
+      "''${PRIME_AGENT_BIN:-prime-agent}" --version >/dev/null 2>&1 || :
       exec "${lib.getExe python3}" "${./bridge.py}" "$@"
     ''
   )
