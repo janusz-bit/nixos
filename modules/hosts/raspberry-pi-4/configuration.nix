@@ -15,6 +15,11 @@
     {
       networking.hostName = "raspberry-pi-4";
 
+      # Pakiet prime-agent (modules/packages/_prime-agent) — ten sam co na
+      # hoście nixos. LLMGATEWAY_API_KEY eksportuje base-agenix na każdym
+      # hoście, więc seed models.json działa bez zmian.
+      nixpkgs.overlays = [ self.overlays.prime-agent ];
+
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot = {
         initrd.allowMissingModules = true;
@@ -109,6 +114,7 @@
         nix
         git
         tea # Gitea official CLI client
+        prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
       ];
 
       # User configuration
