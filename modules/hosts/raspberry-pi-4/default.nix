@@ -23,6 +23,7 @@
         self.modules.nixos.hermes
         self.modules.nixos.open-webui
         self.modules.nixos.prime-agent-bridge
+        self.modules.nixos.ttyd-web-terminal
         self.modules.nixos.base-agenix
         self.modules.nixos.rpi-specific
         self.modules.nixos.rpi-configuration
