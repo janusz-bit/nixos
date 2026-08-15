@@ -80,7 +80,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Supported filesystems**: `btrfs` explicitly listed.
 * **Desktop**: KDE Plasma 6 (Wayland) with SDDM (Wayland, autoNumlock). A **Niri** module exists (`nixos/niri.nix`) but is currently commented out/disabled.
 * **Audio**: Pipewire (with ALSA 32-bit and PulseAudio compat).
-* **Scheduler**: `scx` with `scx_lavd` (`--performance`); `ananicy-cpp` with CachyOS rules.
+* **Scheduler**: `scx` with `scx_lavd` (`--performance`).
 * **Specialisations** (boot-time profiles):
   * `power-save` – full TLP settings (incl. battery conservation mode), thermald, UPower (percentage policy, hibernate on critical), `powersave` governor, WiFi powersave, power-saving kernel params, logind lid/idle suspend, scx `--powersave`.
   * `reverse-sync` – Nvidia Prime Reverse Sync.

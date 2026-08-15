@@ -193,7 +193,6 @@
         inputs.nix-cachyos-kernel.overlays.default
         self.overlays.brave-debloater
         self.overlays.prime-agent
-        self.overlays.ananicy-cstring
       ];
 
       boot = {
@@ -222,12 +221,6 @@
             "127.0.0.1/8"
             "192.168.1.0/24"
           ];
-        };
-
-        ananicy = {
-          enable = true;
-          package = pkgs.ananicy-cpp;
-          rulesProvider = pkgs.ananicy-rules-cachyos;
         };
 
         scx = {
