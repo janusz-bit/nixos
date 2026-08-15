@@ -26,7 +26,6 @@ let
       hw-probe
       htop
       cloudflared
-      gemini-cli
       vulnix
     ];
 
