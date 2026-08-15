@@ -1,7 +1,7 @@
-{ customTop, lib, ... }:
+{ lib, ... }:
 {
   flake.modules.nixos.nixos-gpu =
-    { pkgs, config, ... }:
+    { pkgs, ... }:
     let
       # gpu.sh używa lspci/virsh/modprobe — zamiast polegać na PATH
       # użytkownika, dowiązujemy je do PATH wrappera. UWAGA: celowo bez
@@ -22,10 +22,6 @@
           }
         '';
       };
-      flakeTarget = config.customBot.flakeTarget;
-      rebuildSpecialisation =
-        flakeRef:
-        "sudo nixos-rebuild switch --sudo --specialisation gpu-passthrough --flake ${flakeRef}#${flakeTarget} --refresh";
     in
     {
       environment = {
@@ -34,10 +30,6 @@
         # Aliasy propagują się automatycznie do fisha
         # (programs.fish.shellAliases = mkDefault environment.shellAliases).
         shellAliases = {
-          # Boot-time: przełącz na specjalizację gpu-passthrough (GPU -> VM)
-          update-passthrough = rebuildSpecialisation customTop.repository.linkFlake;
-          update-passthrough-local = rebuildSpecialisation customTop.repository.place;
-
           # Skróty do subkomend skryptu `gpu`
           gpu-status = "gpu status";
           gpu-vfio = "gpu vfio";

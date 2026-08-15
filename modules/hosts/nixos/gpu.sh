@@ -29,7 +29,7 @@ status() {
   echo "Sterownik VGA:   $(current_driver $VGA)"
   echo "Sterownik audio: $(current_driver $AUDIO)"
   if grep -q "vfio-pci.ids=" /proc/cmdline; then
-    echo "Tryb boot: specjalizacja gpu-passthrough (vfio-pci.ids w cmdline)"
+    echo "Tryb boot: vfio-pci.ids w cmdline (GPU przypisana do vfio-pci)"
   else
     echo "Tryb boot: domyślny (GPU dostępna dla sterownika nvidia)"
   fi
@@ -121,10 +121,6 @@ Użycie: gpu <komenda> [nazwa-vm]
   attach <vm>     hotplug: podłącz GPU + audio do działającej VM
   detach <vm>     hotplug: odłącz GPU + audio od działającej VM
   help            ten tekst
-
-Tryb boot (zmiany wymagają reboot):
-  update-passthrough   specjalizacja gpu-passthrough (GPU dla VM)
-  update               domyślny wpis (GPU dla hosta)
 EOF
 }
 
