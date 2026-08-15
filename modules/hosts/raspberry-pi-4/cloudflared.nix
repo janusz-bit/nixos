@@ -51,6 +51,7 @@
                 };
               };
               "notes.${customTop.site.full}" = "http://localhost:8081";
+              "ttyd.${customTop.site.full}" = "http://localhost:8082";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
               "git.${customTop.site.full}" = "http://localhost:3000";
             };
