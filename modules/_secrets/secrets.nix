@@ -36,6 +36,5 @@ in
   "librechat-env.age" = mkSecret serverHosts;
   "opencode.age" = mkSecret serverHosts;
   "open-webui-keys.age" = mkSecret serverHosts;
-  "ttyd-pass.age" = mkSecret serverHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
 }

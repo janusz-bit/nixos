@@ -51,8 +51,6 @@
                 };
               };
               "notes.${customTop.site.full}" = "http://localhost:8081";
-              # Web terminal (ttyd) — basic auth po stronie ttyd (hasło w agenix).
-              "terminal.${customTop.site.full}" = "http://localhost:7681";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
               "git.${customTop.site.full}" = "http://localhost:3000";
             };
