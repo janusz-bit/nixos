@@ -78,9 +78,6 @@
               IdleAction = "suspend";
               IdleActionSec = "1200";
             };
-
-            # SCX scheduler: powersave mode
-            scx.extraArgs = lib.mkForce [ "--powersave" ];
           };
 
           # WiFi powersave (wymagane dla WIFI_PWR_* w TLP)
@@ -227,12 +224,6 @@
           enable = false;
           package = pkgs.ananicy-cpp;
           rulesProvider = pkgs.ananicy-rules-cachyos;
-        };
-
-        scx = {
-          enable = true;
-          scheduler = "scx_lavd";
-          extraArgs = [ "--performance" ];
         };
 
         displayManager = {
