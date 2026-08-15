@@ -25,7 +25,7 @@
           powerManagement.finegrained = lib.mkDefault true;
           open = true;
           nvidiaSettings = true;
-          package = config.boot.kernelPackages.nvidiaPackages.latest;
+          # package = config.boot.kernelPackages.nvidiaPackages.latest;
           prime = {
             offload.enable = lib.mkDefault true;
             offload.enableOffloadCmd = lib.mkDefault true;

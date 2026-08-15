@@ -196,7 +196,7 @@
       ];
 
       boot = {
-        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
+        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3;
         supportedFilesystems = [ "btrfs" ];
         binfmt.emulatedSystems = [ "aarch64-linux" ];
 
