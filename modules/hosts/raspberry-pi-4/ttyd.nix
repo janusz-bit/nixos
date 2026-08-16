@@ -28,16 +28,13 @@ _: {
         # useful home or groups), so every client lands in a stripped
         # session. A named user gets the full profile.
         user = config.customBot.defaultUser;
-        # Direct interactive shell instead of the default `login` prompt —
-        # HTTP Basic auth already gates access, a second login: prompt would
-        # only add friction. fish matches the shell used on all hosts.
-        # Wrapped in bash -l so /etc/profile sets up the full NixOS
-        # environment (PATH, profiles), then fish replaces it.
+        # Normal interactive shell — drop the bash wrapper. The NixOS ttyd
+        # module runs the service with systemd, which already sources
+        # /etc/profile for the session. Spawning fish directly gives the
+        # user the same full shell experience (aliases, eza, bat, fastfetch)
+        # they get over SSH, instead of a stripped-down wrapper.
         entrypoint = [
-          (lib.getExe pkgs.bashInteractive)
-          "-l"
-          "-c"
-          "exec ${lib.getExe pkgs.fish}"
+          (lib.getExe pkgs.fish)
         ];
       };
     };
