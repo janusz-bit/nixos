@@ -26,7 +26,14 @@ _: {
         # Direct interactive shell instead of the default `login` prompt —
         # HTTP Basic auth already gates access, a second login: prompt would
         # only add friction. fish matches the shell used on all hosts.
-        entrypoint = [ (lib.getExe pkgs.fish) ];
+        # Wrapped in bash -l so /etc/profile sets up the full NixOS
+        # environment (PATH, profiles), then fish replaces it.
+        entrypoint = [
+          (lib.getExe pkgs.bashInteractive)
+          "-l"
+          "-c"
+          "exec ${lib.getExe pkgs.fish}"
+        ];
       };
     };
 }
