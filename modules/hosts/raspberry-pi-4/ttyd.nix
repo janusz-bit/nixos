@@ -16,6 +16,15 @@ _: {
       # the NixOS ttyd module picks it up via systemd LoadCredential
       # (root reads it before dropping privileges), so no new secret is
       # needed and nothing sensitive ever lands in the nix store.
+      #
+      # Entrypoint pattern taken from the OCF Berkeley production config
+      # (ocf/nix, modules/ttyd.nix): spawn the system `login` program
+      # instead of a bare shell. `login` is the SAME binary SSH uses —
+      # it sets up the full PAM session, sources /etc/profile and the
+      # NixOS environment, then starts the user's login shell (fish via
+      # the base bash->fish exec chain). That is what gives the ttyd
+      # session aliases, eza/bat/fastfetch and the complete user PATH —
+      # a direct fish entrypoint skips all of that.
       services.ttyd = {
         enable = true;
         port = 8082;
@@ -23,18 +32,12 @@ _: {
         writeable = true;
         username = "admin";
         passwordFile = config.age.secrets.nextcloud-adminpass.path;
-        # Run as the regular user, not root — the nixos ttyd module
-        # defaults to DynamicUser=true (an unprivileged user with no
-        # useful home or groups), so every client lands in a stripped
-        # session. A named user gets the full profile.
-        user = config.customBot.defaultUser;
-        # Normal interactive shell — drop the bash wrapper. The NixOS ttyd
-        # module runs the service with systemd, which already sources
-        # /etc/profile for the session. Spawning fish directly gives the
-        # user the same full shell experience (aliases, eza, bat, fastfetch)
-        # they get over SSH, instead of a stripped-down wrapper.
+        # `login` must run as root to be able to set up user sessions.
+        # The service reads passwordFile as root via LoadCredential
+        # before executing the entrypoint, so root here is expected.
+        user = "root";
         entrypoint = [
-          (lib.getExe pkgs.fish)
+          (lib.getExe' pkgs.shadow "login")
         ];
       };
     };
