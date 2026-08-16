@@ -118,7 +118,8 @@ A headless `aarch64-linux` deployment for network services. Default user: `nixos
 * **Trilium**: Note-taking server on port 8081 (flake input `trilium` pinned to specific commit, used as `trilium-server` NixOS module — not an overlay).
 * **Fan control**: Custom Python-based systemd service (`pwm-fan`, `rpi-lgpio` package with `RPI_LGPIO_REVISION` override) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
 * **LED control** (`modules/hosts/raspberry-pi-4/leds-off.nix`): All LEDs disabled via DT overlays (`hardware.raspberry-pi."4".leds` — eth, act, pwr) and systemd-tmpfiles rules (mmc0, default-on).
-* **Overlays applied**: None host-specific (only `opencode-config` from base).
+* **Prime Agent CLI** (`modules/packages/_prime-agent`, via `flake.overlays.prime-agent`): The same self-improving coding agent (RLM) package as on the `nixos` host — `buildNpmPackage` from the GitHub release tarball, `nodejs_22` (native prebuilds ABI), wrapper seeds `~/.prime/agent/models.json` + `settings.json` (LLM Gateway/devpass, default model `qwen3.8-max`; `apiKey` is the ENV VAR NAME `LLMGATEWAY_API_KEY`, exported by base agenix on all hosts, so no secret wiring needed) and re-seeds the managed Python skills (`nixos-mcp`, `websearch`) on every launch. Available system-wide as `prime-agent` after rebuild. No HTTP bridge / open-webui backend — CLI only.
+* **Overlays applied**: `prime-agent` (custom Prime Agent package from `modules/packages/_prime-agent`), plus `opencode-config` from base.
 * **State version**: `26.05`.
 
 ### 4. `wsl` (Windows Subsystem for Linux)
