@@ -23,6 +23,11 @@ _: {
         writeable = true;
         username = "admin";
         passwordFile = config.age.secrets.nextcloud-adminpass.path;
+        # Run as the regular user, not root — the nixos ttyd module
+        # defaults to DynamicUser=true (an unprivileged user with no
+        # useful home or groups), so every client lands in a stripped
+        # session. A named user gets the full profile.
+        user = config.customBot.defaultUser;
         # Direct interactive shell instead of the default `login` prompt —
         # HTTP Basic auth already gates access, a second login: prompt would
         # only add friction. fish matches the shell used on all hosts.
