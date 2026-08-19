@@ -44,7 +44,7 @@
         '';
 
         packages = config.pre-commit.settings.enabledPackages ++ [
-          config.packages.update-flake
+          config.packages.flake-update
           config.packages.flake-release
           config.packages.repo-sync
         ];

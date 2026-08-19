@@ -25,7 +25,7 @@ let
     grep = "grep --color=auto";
     cat = "bat";
     hw = "hwinfo --short";
-    update-my-pkgs = "nix run ${customTop.repository.place}#update-flake";
+    update-my-pkgs = "nix run ${customTop.repository.place}#flake-update";
   };
 
   sharedFishInit = config: ''

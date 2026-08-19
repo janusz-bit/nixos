@@ -3,7 +3,7 @@
     { config, pkgs, ... }:
     {
       packages = {
-        update-flake = pkgs.writeShellScriptBin "flake-update" ''
+        flake-update = pkgs.writeShellScriptBin "flake-update" ''
           set -e
           echo "Updating flake inputs..."
           nix flake update

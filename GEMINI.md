@@ -56,7 +56,7 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 | `update-local` | `sudo nixos-rebuild switch --sudo --flake <local-flake>#<target>` |
 | `update-local-boot` | `sudo nixos-rebuild boot --sudo --flake <local-flake>#<target>` |
 | `push` | Build toplevel and push closure to Cachix via `nix build ... \| cachix push ...` |
-| `update-my-pkgs` | `nix run <flake>#update-flake` |
+| `update-my-pkgs` | `nix run <flake>#flake-update` |
 | `ls`, `la`, `ll`, `lt`, `l.` | `eza` variants |
 | `..`, `...`, `....` | Directory navigation |
 | `cat` | `bat` |
@@ -147,14 +147,14 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`flake.nix`**: Entry point. Defines all external inputs and passes them to `import-tree` to dynamically load the `modules/` folder. Declares the `janusz-bit.cachix.org` binary cache.
 * **`modules/args.nix`**: Defines `customTop` arguments passed to all modules. Contains: repository info (`github:janusz-bit/nixos`, `/etc/nixos`), email (`janusz-bit@proton.me`), site domain (`janusz-bit.com`), Cachix cache info, `secretsDir`.
 * **`modules/options.nix`**: Custom NixOS options (`customBot`): `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
-* **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `statix`, `deadnix`, `sync-github-actions`), and exposes `update-flake` and `flake-release` packages in the dev shell.
+* **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`nixfmt`, `statix`, `deadnix`, `sync-github-actions`), and exposes `flake-update` and `flake-release` packages in the dev shell.
 * **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 7 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `lint` (builds `checks.x86_64-linux.pre-commit` — nixfmt/statix/deadnix + workflow sync), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out). The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. The sync script deletes orphaned workflow files before copying, so a refactor cannot leave stale YAML behind.
 * **`modules/hardware/`**: Hardware-specific profiling. Stores Lenovo LOQ-15IRX10 patches, `x86-64-v3` CPU optimization, `M27Q.icm` color profile, and a `facter.json` inventory.
 * **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 15 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Hermes env/API key, Ollama API key, Google API key, LLM Gateway API key, OpenCode API key, LibreChat env, Open WebUI env, notes, attic token, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `hermes-webui-env`, `librechat-env`, and `opencode` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `llmgateway-api-key` targets all hosts; `secret1` is used on `raspberry-pi-4` for user SSH authorized keys.
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`). Applied via `self.overlays` in host configs and base.
 * **`modules/packages/`**: Custom packages and scripts.
   * `my-neovim` (nvf-based Neovim with gruvbox, LSP, Telescope, which-key, lualine, treesitter, nix/python/clang)
-  * `update-flake` (updates flake.lock, syncs workflows, updates `bootdev-cli` via `nix-update`)
+  * `flake-update` (updates flake.lock, syncs workflows, updates `bootdev-cli` via `nix-update`)
   * `flake-release` (commits, auto-increments git tag, pushes)
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
@@ -202,7 +202,7 @@ Custom NixOS options:
 
 ## Dev Shell Tools
 Running `nix develop` provides:
-* `update-flake` – updates `flake.lock`, commits it, then updates the `bootdev-cli` package via `nix-update`.
+* `flake-update` – updates `flake.lock`, commits it, then updates the `bootdev-cli` package via `nix-update`.
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
 * Pre-commit hooks auto-installed: `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.
 
