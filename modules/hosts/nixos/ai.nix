@@ -28,9 +28,11 @@ in
         uv
         repomix
         nodejs
-        (pkgs.python3.withPackages (
+        # python313 pinned: python3 (3.14) is too new for torchao, an unsloth dependency
+        (pkgs.python313.withPackages (
           python-pkgs: with python-pkgs; [
             pip
+            unsloth
           ]
         ))
       ];
