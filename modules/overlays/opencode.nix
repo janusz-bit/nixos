@@ -79,6 +79,22 @@ _: {
                     "name": "kimi-k3"
                   }
                 }
+              },
+              "llamacpp": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "llama.cpp (local)",
+                "options": {
+                  "baseURL": "http://localhost:8080/v1"
+                },
+                "models": {
+                  "qwen3.8-27b": {
+                    "name": "Qwen3.8 27B UD-Q8_K_XL (local)",
+                    "limit": {
+                      "context": 32768,
+                      "output": 4096
+                    }
+                  }
+                }
               }
             },
             "permission": {
