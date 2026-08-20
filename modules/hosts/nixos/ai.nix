@@ -6,7 +6,7 @@
       services = {
         ollama = {
           enable = true;
-          # package = pkgs.ollama; # domyślnie z nixpkgs, aktualizowany przez overlay ollama-latest
+          # package = pkgs.ollama; # domyślnie z nixpkgs
         };
         open-webui = {
           enable = false;
