@@ -1,10 +1,4 @@
 { inputs, ... }:
-let
-  pkgs-stable = import inputs.nixpkgs-stable {
-    system = "x86_64-linux";
-    config.allowUnfree = true;
-  };
-in
 {
   flake.modules.nixos.nixos-ai =
     { pkgs, ... }:
@@ -12,7 +6,7 @@ in
       services = {
         ollama = {
           enable = true;
-          package = pkgs-stable.ollama; # temporary
+          # package = pkgs.ollama; # domyślnie z nixpkgs, aktualizowany przez overlay ollama-latest
         };
         open-webui = {
           enable = false;
