@@ -13,6 +13,7 @@
         inputs.nix-cachyos-kernel.overlays.default
         self.overlays.brave-debloater
         self.overlays.prime-agent
+        self.overlays.ollama-latest
       ];
 
       boot = {
