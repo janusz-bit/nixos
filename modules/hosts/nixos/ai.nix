@@ -28,11 +28,9 @@ in
         uv
         repomix
         nodejs
-        # python313 pinned: python3 (3.14) is too new for torchao, an unsloth dependency
-        (pkgs.python313.withPackages (
+        (pkgs.python3.withPackages (
           python-pkgs: with python-pkgs; [
             pip
-            unsloth
           ]
         ))
         # CUDA fine-tuning env: PyPI torch+CUDA wheel via uv (needs nix-ld, already in base).
