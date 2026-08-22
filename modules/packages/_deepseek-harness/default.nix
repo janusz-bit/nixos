@@ -46,6 +46,20 @@ stdenv.mkDerivation (finalAttrs: {
 
   installPhase = ''
     runHook preInstall
+
+    # Symlink all workspace packages into root node_modules/@deepseek-ai/
+    # so that dynamic plugin imports via Cordis loader resolve correctly.
+    mkdir -p node_modules/@deepseek-ai
+    for pkg in packages/*/* vendor/* native/landlock-run/packages/*; do
+      if [ -f "$pkg/package.json" ]; then
+        pkg_name=$(${nodejs}/bin/node -p "require('./$pkg/package.json').name")
+        if [[ "$pkg_name" == @deepseek-ai/* ]]; then
+          short_name="''${pkg_name#@deepseek-ai/}"
+          ln -sfn "../../$pkg" "node_modules/@deepseek-ai/$short_name"
+        fi
+      fi
+    done
+
     mkdir -p $out/lib/deepseek-harness $out/bin
     cp -r . $out/lib/deepseek-harness/
 
