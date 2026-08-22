@@ -18,7 +18,10 @@
       # Pakiet prime-agent (modules/packages/_prime-agent) — ten sam co na
       # hoście nixos. LLMGATEWAY_API_KEY eksportuje base-agenix na każdym
       # hoście, więc seed models.json działa bez zmian.
-      nixpkgs.overlays = [ self.overlays.prime-agent ];
+      nixpkgs.overlays = [
+        self.overlays.prime-agent
+        self.overlays.deepseek-harness
+      ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot = {
@@ -115,6 +118,7 @@
         git
         tea # Gitea official CLI client
         prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
+        deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
       ];
 
       # User configuration

@@ -58,6 +58,7 @@ _: {
         kdePackages.kdenlive
         opencode
         prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
+        deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
         losange
         freecad-qt6
         antigravity-ide-fhs

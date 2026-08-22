@@ -84,11 +84,11 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (temporarily uses the `ollama` package from the `nixpkgs-stable` input), Open WebUI currently **disabled** (`enable = false`), `uv`, `repomix`, Node.js, Python 3 with pip.
-* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
+* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), DeepSeek Harness (`dsh`), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
-* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
+* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `deepseek-harness` (exposes `modules/packages/_deepseek-harness`), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
 * **Memory optimization**: zRAM (`zstd`, 50% RAM, priority 100 > disk swap -2). NVMe LUKS swap (`/dev/mapper/swap`) preserved for hibernation.
 * **Snapshots (`modules/hosts/nixos/snapper.nix`)**: Snapper automated Btrfs snapshots for `/` and `/home` (hourly/daily/weekly retention, user access for `dinosaur`, `snapper-gui`).
 * **Lenovo Hardware & Battery (`modules/hardware/lenovo.nix`)**: `ideapad_laptop` kernel module, `services.thermald` for Intel Raptor Lake thermal management, `power-profiles-daemon` with KDE Plasma 6 ACPI `platform_profile` integration, `upower`, Battery Conservation Mode (enforced 80% charge limit on boot via tmpfiles).
@@ -122,7 +122,7 @@ A headless `aarch64-linux` deployment for network services. Default user: `nixos
 * **Fan control**: Custom Python-based systemd service (`pwm-fan`, `rpi-lgpio` package with `RPI_LGPIO_REVISION` override) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
 * **LED control** (`modules/hosts/raspberry-pi-4/leds-off.nix`): All LEDs disabled via DT overlays (`hardware.raspberry-pi."4".leds` — eth, act, pwr) and systemd-tmpfiles rules (mmc0, default-on).
 * **Prime Agent CLI** (`modules/packages/_prime-agent`, via `flake.overlays.prime-agent`): The same self-improving coding agent (RLM) package as on the `nixos` host — `buildNpmPackage` from the GitHub release tarball, `nodejs_22` (native prebuilds ABI), wrapper seeds `~/.prime/agent/models.json` + `settings.json` (LLM Gateway/devpass, default model `qwen3.8-max`; `apiKey` is the ENV VAR NAME `LLMGATEWAY_API_KEY`, exported by base agenix on all hosts, so no secret wiring needed) and re-seeds the managed Python skills (`nixos-mcp`, `websearch`) on every launch. Available system-wide as `prime-agent` after rebuild. No HTTP bridge / open-webui backend — CLI only.
-* **Overlays applied**: `prime-agent` (custom Prime Agent package from `modules/packages/_prime-agent`), plus `opencode-config` from base.
+* **Overlays applied**: `prime-agent` (custom Prime Agent package from `modules/packages/_prime-agent`), `deepseek-harness` (custom DeepSeek Harness package from `modules/packages/_deepseek-harness`), plus `opencode-config` from base.
 * **State version**: `26.05`.
 
 ### 4. `wsl` (Windows Subsystem for Linux)
@@ -163,6 +163,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
   * `prime-agent` (v0.7.2, `_prime-agent/`: `buildNpmPackage` z tarballa release; brak skryptu build — dist/ to gotowy bundle; `nodejs_22` wymagany pod prebuildy zeromq/koffi; vendored `package-lock.json` generowany ręcznie (`npm install --package-lock-only`), tarball release go nie zawiera; wrapper seeduje domyślne `~/.prime/agent/models.json` + `settings.json` (LLM Gateway/devpass `https://api.llmgateway.io/v1`: qwen3.8-max jako default, claude-sonnet-4-6, claude-opus-4-8, gpt-5.3-codex, kimi-k2.7-code, qwen3.8-max, deepseek-v4-pro) — apiKey to nazwa zmiennej `LLMGATEWAY_API_KEY`, sekret nie trafia do store; compat `supportsDeveloperPlatforms: false` tylko per-model dla kimi-k2.7-code i qwen3.8-max (pozostałe modele gateway przepuszcza natywnie — zweryfikowane testem na żywym API); seeduje też 2 skille Pythonowe do `~/.prime/agent/skills/` (nadpisywane przy każdym starcie): `nixos-mcp` (integracja MCP z lokalnym serwerem mcp-nixos przez stdio — `McpIntegration` z nadpisanym `_open_session`, bo host wspiera w `mcpServers` tylko HTTP; binarka wstrzyknięta envem `MCP_NIXOS_EXE` przez wrapper) i `websearch` (wyszukiwanie DuckDuckGo przez ddgs, bez klucza API; nadpisuje wbudowany skill Serper — user skills mają priorytet); kernel instaluje skille jako `--editable` do kernel-venv przez uv przy starcie; zależność `prime-agent-runtime` spełniana lokalnym pakietem z dist/ tarballa)
+  * `deepseek-harness` (v0.1.1-rc.2, `_deepseek-harness/`: budowany ze źródeł Git z `pnpm_11` + `fetchPnpmDeps` (fetcherVersion = 4), `DSH_CLIENT_COMMIT_HASH` przekazywane do kompilacji TS/client artifacts, dostarcza `dsh` i `deepseek-harness` wrappowane z Node.js i pnpm na PATH)
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 
@@ -244,5 +245,5 @@ nix build .#raspberry-pi-4-sd-image
 * 16 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
-* 3 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `prime-agent`
+* 4 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `prime-agent`, `deepseek-harness`
 * Channel: `nixos-unstable`

@@ -10,6 +10,7 @@
       packages = {
         bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
         prime-agent = pkgs.callPackage ./_prime-agent { };
+        deepseek-harness = pkgs.callPackage ./_deepseek-harness { };
 
         raspberry-pi-4-sd-image =
           let
