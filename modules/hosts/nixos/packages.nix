@@ -60,6 +60,8 @@ _: {
         prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
         losange
         freecad-qt6
+        antigravity-fhs
+        antigravity-ide-fhs
       ];
 
       hardware.wooting.enable = true;
