@@ -64,7 +64,7 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r . $out/lib/deepseek-harness/
 
     makeWrapper ${nodejs}/bin/node $out/bin/dsh \
-      --add-flags "$out/lib/deepseek-harness/apps/cli/lib/bin.js" \
+      --add-flags "--expose-internals $out/lib/deepseek-harness/apps/cli/lib/bin.js" \
       --prefix PATH : "${
         lib.makeBinPath [
           nodejs
@@ -74,7 +74,7 @@ stdenv.mkDerivation (finalAttrs: {
       --set-default NODE_ENV production
 
     makeWrapper ${nodejs}/bin/node $out/bin/deepseek-harness \
-      --add-flags "$out/lib/deepseek-harness/apps/cli/lib/bin.js" \
+      --add-flags "--expose-internals $out/lib/deepseek-harness/apps/cli/lib/bin.js" \
       --prefix PATH : "${
         lib.makeBinPath [
           nodejs
