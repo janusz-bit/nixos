@@ -27,6 +27,15 @@
         # boot.initrd.systemd.enable = true;
       };
 
+      # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).
+      # Dysk NVMe LUKS swap (/dev/mapper/swap) pozostaje dedykowany pod hibernację.
+      zramSwap = {
+        enable = true;
+        algorithm = "zstd";
+        priority = 100;
+        memoryPercent = 50;
+      };
+
       services = {
         avahi = {
           enable = true;

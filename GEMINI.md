@@ -89,11 +89,14 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
 * **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
+* **Memory optimization**: zRAM (`zstd`, 50% RAM, priority 100 > disk swap -2). NVMe LUKS swap (`/dev/mapper/swap`) preserved for hibernation.
+* **Snapshots (`modules/hosts/nixos/snapper.nix`)**: Snapper automated Btrfs snapshots for `/` and `/home` (hourly/daily/weekly retention, user access for `dinosaur`, `snapper-gui`).
+* **Lenovo Hardware & Battery (`modules/hardware/lenovo.nix`)**: `ideapad_laptop` kernel module, `services.thermald` for Intel Raptor Lake thermal management, `power-profiles-daemon` with KDE Plasma 6 ACPI `platform_profile` integration, `upower`, Battery Conservation Mode (enforced 80% charge limit on boot via tmpfiles).
 * **Other services**: Avahi (mDNS), Flatpak, Btrfs autoScrub, CUPS printing (splix driver, Samsung ML-2160 preconfigured), Bluetooth, rtkit.
 * **Security**: fail2ban (max 5 retries, LAN whitelisted).
 * **Locale**: Polish (`pl_PL.UTF-8`), timezone `Europe/Warsaw`, keymap `pl2`.
 * **State version**: `25.11`.
-* **Hardware** (`modules/hardware/LOQ-15IRX10.nix`): Nvidia Prime offload (intelBusId `PCI:0:2:0`, nvidiaBusId `PCI:1:0:0`), `nixos-hardware` modules for Intel CPU/GPU, Nvidia GPU, laptop, SSD. `facter.json` report. `x86-64-v3` architecture optimization (`modules/hardware/architectures/x86-64-v3.nix`).
+* **Hardware** (`modules/hardware/LOQ-15IRX10.nix`): Lenovo hardware optimizations (`modules/hardware/lenovo.nix`), Nvidia Prime offload (intelBusId `PCI:0:2:0`, nvidiaBusId `PCI:1:0:0`), `nixos-hardware` modules for Intel CPU/GPU, Nvidia GPU, laptop, SSD. `facter.json` report. `x86-64-v3` architecture optimization (`modules/hardware/architectures/x86-64-v3.nix`).
 
 ### 3. `raspberry-pi-4` (Home Server / Cloud)
 A headless `aarch64-linux` deployment for network services. Default user: `nixos`.
