@@ -29,7 +29,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     trilium = {
-      url = "github:TriliumNext/Trilium/744646d07bff459d1db305b1c0a8ea0c99b9c27c";
+      url = "github:TriliumNext/Trilium/a0908a6e1e1741a3c3824d803da07300183dcb0c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
