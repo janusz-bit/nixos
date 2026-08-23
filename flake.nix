@@ -28,10 +28,6 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    trilium = {
-      url = "github:TriliumNext/Trilium/a0908a6e1e1741a3c3824d803da07300183dcb0c";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
     # Tracks upstream (unpinned). The previous pin to 3f2a389c... existed
     # because topup.ts introduced a broken @hermes/shared/charge-settlement
