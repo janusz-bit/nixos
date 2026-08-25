@@ -17,8 +17,7 @@ Integrated technologies handling the system's core capabilities include:
 * **nixos-avf**: NixOS support for Android Virtualization Framework.
 * **nixos-raspberrypi**: RPi-specific hardware support (`github:nvmd/nixos-raspberrypi`).
 * **nixos-hardware**: Common hardware modules (`github:NixOS/nixos-hardware/master`).
-* **nix-cachyos-kernel**: CachyOS kernel packages (`github:xddxdd/nix-cachyos-kernel/release`).
-* **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git`, `linux_cachyos` etc.; its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
+* **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides CachyOS kernel (`linux_cachyos`, `linuxPackages_cachyos-lto`), CachyOS NVIDIA drivers (`nvidia_cachyos`), `pkgsx86_64_v3`, `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git` etc.; its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
 * **github-actions-nix**: Auto-generates GitHub Actions workflows (`github:synapdeck/github-actions-nix`).
 * **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
@@ -71,7 +70,7 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale). Default user: `dinosaur`.
-* **Kernel**: CachyOS kernel (`linuxPackages-cachyos-latest-lto-x86_64-v3`) via the `nix-cachyos-kernel` input.
+* **Kernel**: CachyOS kernel with LTO (`pkgs.pkgsx86_64_v3.linuxPackages_cachyos-lto`) via the `chaotic` (Chaotic-Nyx) input.
 * **Storage**: Disko-managed encrypted Btrfs with LUKS on `/dev/nvme1n1`. Partitions: 6G ESP (vfat `/boot`), 36G LUKS swap, rest LUKS+Btrfs (`/root`, `/home`, `/nix` subvolumes, `compress=zstd`, `noatime`). Working hibernation configured (`/dev/mapper/swap`).
 * **Bootloader**: Limine, with a Windows EFI dual-boot entry. `efi.canTouchEfiVariables = true`.
 * **binfmt emulation**: `aarch64-linux` emulated systems enabled (`boot.binfmt.emulatedSystems`).
@@ -79,7 +78,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Desktop**: KDE Plasma 6 (Wayland) with SDDM (Wayland, autoNumlock). A **Niri** module exists (`nixos/niri.nix`) but is currently commented out/disabled.
 * **Audio**: Pipewire (with ALSA 32-bit and PulseAudio compat).
 * **Scheduler**: `scx` with `scx_lavd` (`--performance`); `ananicy-cpp` with CachyOS rules.
-* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (wrapped shell script, runtime deps `pciutils`/`libvirt`/`kmod`/`coreutils`/`gnugrep` pinned in PATH; `sudo` intentionally left to the setuid wrapper) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs.
+* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (wrapped shell script, runtime deps `pciutils`/`libvirt`/`kmod`/`coreutils`/`gnugrep` pinned in PATH; `sudo` intentionally left to the setuid wrapper) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs. Driver package: `config.boot.kernelPackages.nvidiaPackages.cachyos` (from Chaotic-Nyx `pkgsx86_64_v3`).
 * **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS x86-64-v3 and proton-ge-bin as extraCompatPackages — Proton now comes from the chaotic-nyx overlay/binary cache, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
@@ -88,7 +87,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
-* **Overlays applied**: `nix-cachyos-kernel` (kernel overlay), `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `deepseek-harness` (exposes `modules/packages/_deepseek-harness`), `chaotic-nyx` (bleeding-edge packages: proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
+* **Overlays applied**: `brave-debloater` (browser policies), `prime-agent` (exposes the custom Prime Agent package from `modules/packages/_prime-agent`), `deepseek-harness` (exposes `modules/packages/_deepseek-harness`), `chaotic-nyx` (bleeding-edge packages: linuxPackages_cachyos-lto, nvidia_cachyos, proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
 * **Memory optimization**: zRAM (`zstd`, 50% RAM, priority 100 > disk swap -2). NVMe LUKS swap (`/dev/mapper/swap`) preserved for hibernation.
 * **Snapshots (`modules/hosts/nixos/snapper.nix`)**: Snapper automated Btrfs snapshots for `/` and `/home` (hourly/daily/weekly retention, user access for `dinosaur`, `snapper-gui`).
 * **Lenovo Hardware & Battery (`modules/hardware/lenovo.nix`)**: `ideapad_laptop` kernel module, `services.thermald` for Intel Raptor Lake thermal management, `power-profiles-daemon` with KDE Plasma 6 ACPI `platform_profile` integration, `upower`, Battery Conservation Mode (enforced 80% charge limit on boot via tmpfiles).
@@ -193,7 +192,6 @@ Custom NixOS options:
 * `nvf` — `github:notashelf/nvf` (declarative Neovim config)
 * `avf` — `github:nix-community/nixos-avf` (Android Virtualization Framework)
 * `nix-index-database` — `github:nix-community/nix-index-database` (follows nixpkgs; for `comma`)
-* `nix-cachyos-kernel` — `github:xddxdd/nix-cachyos-kernel/release` (CachyOS kernels + overlay)
 * `chaotic` — `github:chaotic-cx/nyx/nyxpkgs-unstable` (Chaotic-Nyx: bleeding-edge packages + nyx binary cache; nixos host only)
 * `nixos-hardware` — `github:NixOS/nixos-hardware/master` (hardware modules)
 * `nixos-raspberrypi` — `github:nvmd/nixos-raspberrypi` (RPi-specific support)

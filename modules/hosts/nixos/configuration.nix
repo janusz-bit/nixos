@@ -10,14 +10,13 @@
 
     {
       nixpkgs.overlays = [
-        inputs.nix-cachyos-kernel.overlays.default
         self.overlays.brave-debloater
         self.overlays.prime-agent
         self.overlays.deepseek-harness
       ];
 
       boot = {
-        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3;
+        kernelPackages = pkgs.pkgsx86_64_v3.linuxPackages_cachyos-lto;
         supportedFilesystems = [ "btrfs" ];
         binfmt.emulatedSystems = [ "aarch64-linux" ];
 
