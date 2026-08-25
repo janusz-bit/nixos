@@ -118,7 +118,8 @@
         git
         tea # Gitea official CLI client
         prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
-        deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
+        # deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
+        antigravity-cli
       ];
 
       # User configuration
