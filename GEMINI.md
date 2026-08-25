@@ -70,7 +70,7 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale). Default user: `dinosaur`.
-* **Kernel**: CachyOS kernel with LTO (`pkgs.linuxPackages_cachyos-lto`) via the `chaotic` (Chaotic-Nyx) input.
+* **Kernel**: CachyOS kernel with LTO (`pkgs.pkgsx86_64_v3.linuxPackages_cachyos-lto`) via the `chaotic` (Chaotic-Nyx) input.
 * **Storage**: Disko-managed encrypted Btrfs with LUKS on `/dev/nvme1n1`. Partitions: 6G ESP (vfat `/boot`), 36G LUKS swap, rest LUKS+Btrfs (`/root`, `/home`, `/nix` subvolumes, `compress=zstd`, `noatime`). Working hibernation configured (`/dev/mapper/swap`).
 * **Bootloader**: Limine, with a Windows EFI dual-boot entry. `efi.canTouchEfiVariables = true`.
 * **binfmt emulation**: `aarch64-linux` emulated systems enabled (`boot.binfmt.emulatedSystems`).

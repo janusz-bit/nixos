@@ -16,7 +16,7 @@
       ];
 
       boot = {
-        kernelPackages = pkgs.linuxPackages_cachyos-lto;
+        kernelPackages = pkgs.pkgsx86_64_v3.linuxPackages_cachyos-lto;
         supportedFilesystems = [ "btrfs" ];
         binfmt.emulatedSystems = [ "aarch64-linux" ];
 
