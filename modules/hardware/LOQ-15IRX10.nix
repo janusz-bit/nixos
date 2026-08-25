@@ -39,6 +39,7 @@
 
       imports = [
         self.modules.nixos.hardware-lenovo
+        self.modules.nixos.build-flags-x86-64-v3
         inputs.nixos-hardware.nixosModules.common-cpu-intel
         inputs.nixos-hardware.nixosModules.common-gpu-intel
         inputs.nixos-hardware.nixosModules.common-gpu-nvidia
