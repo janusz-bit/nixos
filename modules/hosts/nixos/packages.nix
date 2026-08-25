@@ -62,6 +62,7 @@ _: {
         losange
         freecad-qt6
         antigravity-ide-fhs
+        antigravity-cli
       ];
 
       hardware.wooting.enable = true;
