@@ -23,7 +23,7 @@
           modesetting.enable = true;
           powerManagement.enable = true;
           powerManagement.finegrained = lib.mkDefault true;
-          open = true;
+          open = false;
           nvidiaSettings = true;
           package = config.boot.kernelPackages.nvidiaPackages.cachyos;
           prime = {
