@@ -25,9 +25,17 @@
           powerManagement.finegrained = lib.mkDefault true;
           open = false;
           nvidiaSettings = true;
-          package = config.boot.kernelPackages.nvidiaPackages.cachyos;
+          package = config.boot.kernelPackages.nvidiaPackages.cachyos.overrideAttrs (prev: {
+            passthru = prev.passthru // {
+              mod = prev.passthru.mod.overrideAttrs (_: {
+                allowedReferences = null;
+              });
+              open = prev.passthru.open.overrideAttrs (_: {
+                allowedReferences = null;
+              });
+            };
+          });
           prime = {
-            offload.enable = lib.mkDefault true;
             offload.enableOffloadCmd = lib.mkDefault true;
             sync.enable = lib.mkDefault false;
 
