@@ -11,7 +11,6 @@
     {
       nixpkgs.overlays = [
         self.overlays.brave-debloater
-        self.overlays.prime-agent
         self.overlays.deepseek-harness
       ];
 

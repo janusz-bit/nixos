@@ -15,9 +15,7 @@
     {
       networking.hostName = "raspberry-pi-4";
 
-      # Pakiet prime-agent z inputu llm-agents (numtide/llm-agents.nix).
       nixpkgs.overlays = [
-        self.overlays.prime-agent
         self.overlays.deepseek-harness
       ];
 
@@ -115,7 +113,7 @@
         nix
         git
         tea # Gitea official CLI client
-        prime-agent # self-improving agent AI (RLM) — flake.overlays.prime-agent
+        inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent # self-improving agent AI (RLM)
         # deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
         antigravity-cli
       ];

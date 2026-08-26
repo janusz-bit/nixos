@@ -20,7 +20,7 @@ Integrated technologies handling the system's core capabilities include:
 * **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides CachyOS kernel (`linux_cachyos`, `linuxPackages_cachyos-lto`), CachyOS NVIDIA drivers (`nvidia_cachyos`), `pkgsx86_64_v3`, `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git` etc.; its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
 * **github-actions-nix**: Auto-generates GitHub Actions workflows (`github:synapdeck/github-actions-nix`).
 * **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
-* **llm-agents (numtide/llm-agents.nix)**: Centralized Nix packages for AI coding agents and development tools (`github:numtide/llm-agents.nix`). Supplies `prime-agent` via `flake.overlays.prime-agent` and numtide binary cache (`cache.numtide.com`).
+* **llm-agents (numtide/llm-agents.nix)**: Centralized Nix packages for AI coding agents and development tools (`github:numtide/llm-agents.nix`). Supplies `prime-agent` via `inputs.llm-agents.packages.${system}.prime-agent`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
 * **TriliumNext**: Note-taking server and desktop client (pinned to specific commit `744646d07bff459d1db305b1c0a8ea0c99b9c27c`).
 * **Pre-commit Hooks**: Enforces formatting (`nixfmt`), linting (`statix`, `deadnix`) and workflow sync. The same checks run in CI via `checks.<system>.pre-commit` (built by the `lint` workflow).
@@ -80,7 +80,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
-* **Overlays applied**: `brave-debloater` (browser policies), `prime-agent` (exposes `prime-agent` from `llm-agents.nix`), `deepseek-harness` (exposes `modules/packages/_deepseek-harness`), `chaotic-nyx` (bleeding-edge packages: linuxPackages_cachyos-lto, nvidia_cachyos, proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
+* **Overlays applied**: `brave-debloater` (browser policies), `deepseek-harness` (exposes `modules/packages/_deepseek-harness`), `chaotic-nyx` (bleeding-edge packages: linuxPackages_cachyos-lto, nvidia_cachyos, proton-cachyos_x86_64-v3 etc., via `chaotic.nixosModules.default`).
 * **Memory optimization**: zRAM (`zstd`, 50% RAM, priority 100 > disk swap -2). NVMe LUKS swap (`/dev/mapper/swap`) preserved for hibernation.
 * **Snapshots (`modules/hosts/nixos/snapper.nix`)**: Snapper automated Btrfs snapshots for `/` and `/home` (hourly/daily/weekly retention, user access for `dinosaur`, `snapper-gui`).
 * **Lenovo Hardware & Battery (`modules/hardware/lenovo.nix`)**: `ideapad_laptop` kernel module, `services.thermald` for Intel Raptor Lake thermal management, `power-profiles-daemon` with KDE Plasma 6 ACPI `platform_profile` integration, `upower`, Battery Conservation Mode (enforced 80% charge limit on boot via tmpfiles).
@@ -113,8 +113,8 @@ A headless `aarch64-linux` deployment for network services. Default user: `nixos
 * **Trilium**: Note-taking server on port 8081 (flake input `trilium` pinned to specific commit, used as `trilium-server` NixOS module — not an overlay).
 * **Fan control**: Custom Python-based systemd service (`pwm-fan`, `rpi-lgpio` package with `RPI_LGPIO_REVISION` override) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
 * **LED control** (`modules/hosts/raspberry-pi-4/leds-off.nix`): All LEDs disabled via DT overlays (`hardware.raspberry-pi."4".leds` — eth, act, pwr) and systemd-tmpfiles rules (mmc0, default-on).
-* **Prime Agent CLI** (via `flake.overlays.prime-agent` from `llm-agents.nix`): Self-improving coding agent (RLM) package from `numtide/llm-agents.nix`, available system-wide as `prime-agent` after rebuild.
-* **Overlays applied**: `prime-agent` (from `llm-agents.nix`), `deepseek-harness` (custom DeepSeek Harness package from `modules/packages/_deepseek-harness`), plus `opencode-config` from base.
+* **Prime Agent CLI**: Self-improving coding agent (RLM) package from `numtide/llm-agents.nix` (`inputs.llm-agents.packages.${system}.prime-agent`), available system-wide as `prime-agent` after rebuild.
+* **Overlays applied**: `deepseek-harness` (custom DeepSeek Harness package from `modules/packages/_deepseek-harness`), plus `opencode-config` from base.
 * **State version**: `26.05`.
 
 ### 4. `wsl` (Windows Subsystem for Linux)
@@ -236,5 +236,5 @@ nix build .#raspberry-pi-4-sd-image
 * 16 age-encrypted secrets
 * 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
 * 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
-* 4 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `prime-agent`, `deepseek-harness`
+* 3 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `deepseek-harness`
 * Channel: `nixos-unstable`

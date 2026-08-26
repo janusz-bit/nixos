@@ -38,11 +38,9 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
-      "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
-      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
   };
 
