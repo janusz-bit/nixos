@@ -15,9 +15,7 @@
     {
       networking.hostName = "raspberry-pi-4";
 
-      # Pakiet prime-agent (modules/packages/_prime-agent) — ten sam co na
-      # hoście nixos. LLMGATEWAY_API_KEY eksportuje base-agenix na każdym
-      # hoście, więc seed models.json działa bez zmian.
+      # Pakiet prime-agent z inputu llm-agents (numtide/llm-agents.nix).
       nixpkgs.overlays = [
         self.overlays.prime-agent
         self.overlays.deepseek-harness
