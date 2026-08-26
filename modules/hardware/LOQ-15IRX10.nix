@@ -23,7 +23,7 @@
           modesetting.enable = true;
           powerManagement.enable = true;
           powerManagement.finegrained = lib.mkDefault true;
-          open = false;
+          open = true;
           nvidiaSettings = true;
           package = config.boot.kernelPackages.nvidiaPackages.cachyos.overrideAttrs (prev: {
             passthru = prev.passthru // {
