@@ -46,20 +46,20 @@
               require_approval = false; # lub lista zaufanych narzędzi
             };
             model = {
-              provider = "custom";
-              base_url = "https://api.llmgateway.io/v1";
-              default = "qwen3.8-max";
+              provider = "ollama-cloud";
+              base_url = "https://ollama.com/v1";
+              default = "glm-5.3-flash:cloud";
             };
-            providers.llm-gateway = {
-              base_url = "https://api.llmgateway.io/v1";
-              key_env = "LLMGATEWAY_API_KEY";
+            providers.ollama-cloud = {
+              base_url = "https://ollama.com/v1";
+              key_env = "OLLAMA_API_KEY";
             };
             agent.reasoning_effort = "max";
             web.backend = "ddgs";
             auxiliary.vision = {
-              provider = "custom";
-              base_url = "https://api.llmgateway.io/v1";
-              model = "qwen3.8-max";
+              provider = "ollama-cloud";
+              base_url = "https://ollama.com/v1";
+              model = "glm-5.3-flash:cloud";
             };
           };
           environmentFiles = [

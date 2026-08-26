@@ -5,7 +5,7 @@ _: {
         opencodeJson = prev.writeText "opencode.json" ''
           {
             "$schema": "https://opencode.ai/config.json",
-            "model": "llmgateway/kimi-k3",
+            "model": "ollama-cloud/glm-5.3-flash:cloud",
             "plugin": [
               "superpowers@git+https://github.com/obra/superpowers.git",
               "caveman-opencode-plugin"
@@ -59,8 +59,8 @@ _: {
                   "apiKey": "{env:OLLAMA_API_KEY}"
                 },
                 "models": {
-                  "glm-5.2:cloud": {
-                    "name": "glm-5.2:cloud"
+                  "glm-5.3-flash:cloud": {
+                    "name": "glm-5.3-flash:cloud"
                   }
                 }
               },
