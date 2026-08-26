@@ -11,7 +11,6 @@ _: {
         vesktop
         vlc
         tor-browser
-        pkgs.proton-cachyos_x86_64_v3 # z chaotic-nyx (binary cache, bez własnego builda)
         # proton-ge-bin
         # niri
         alacritty
@@ -70,18 +69,6 @@ _: {
       programs = {
         # Install firefox.
         firefox.enable = true;
-
-        steam = {
-          enable = true;
-          remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-          dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server hosting
-          extraCompatPackages = [
-            pkgs.proton-cachyos_x86_64_v3 # z chaotic-nyx
-            pkgs.proton-ge-bin
-          ];
-        };
-
-        gamemode.enable = true; # for performance mode
 
         obs-studio = {
           enable = true;

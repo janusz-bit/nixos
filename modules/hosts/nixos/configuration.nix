@@ -25,6 +25,32 @@
         kernelParams = [ "resume=/dev/mapper/swap" ];
         # Opcjonalnie, ale zalecane przy hibernacji na LUKS:
         # boot.initrd.systemd.enable = true;
+
+        # CachyOS Gaming Sysctls & Tweaks
+        kernel.sysctl = {
+          # 1. Gry, Proton & Wine (split lock mitigation off, max map count dla UE5/Starfield)
+          "kernel.split_lock_mitigate" = 0;
+          "vm.max_map_count" = 2147483642;
+          "fs.file-max" = 2097152;
+
+          # 2. Pamięć & zRAM Tuning (CachyOS: agresywne zRAM, mniej agresywne zrzucanie pagecache)
+          "vm.swappiness" = 150;
+          "vm.vfs_cache_pressure" = 50;
+          "vm.dirty_ratio" = 10;
+          "vm.dirty_background_ratio" = 5;
+          "vm.dirty_writeback_centisecs" = 1500;
+          "vm.dirty_expire_centisecs" = 3000;
+          "vm.watermark_boost_factor" = 0;
+          "vm.watermark_scale_factor" = 125;
+          "vm.compaction_proactiveness" = 0;
+
+          # 3. Sieć o niskich opóźnieniach (BBR + FQ qdisc)
+          "net.core.default_qdisc" = "fq";
+          "net.ipv4.tcp_congestion_control" = "bbr";
+          "net.ipv4.tcp_fastopen" = 3;
+          "net.core.netdev_max_backlog" = 16384;
+          "net.core.somaxconn" = 8192;
+        };
       };
 
       # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).
@@ -52,10 +78,18 @@
           ];
         };
 
+        # Sched-ext (BPF scheduler) — scx_lavd zoptymalizowany pod gry i hybrydowe rdzenie P+E
+        scx = {
+          enable = true;
+          scheduler = "scx_lavd";
+          extraArgs = [ "--performance" ];
+        };
+
+        # Ananicy-cpp z regułami CachyOS (git) — dynamiczne priorytety procesów gier i PipeWire
         ananicy = {
-          enable = false;
+          enable = true;
           package = pkgs.ananicy-cpp;
-          rulesProvider = pkgs.ananicy-rules-cachyos;
+          rulesProvider = pkgs.ananicy-rules-cachyos_git;
         };
 
         displayManager = {
@@ -95,9 +129,25 @@
           # If you want to use JACK applications, uncomment this
           #jack.enable = true;
 
-          # use the example session manager (no others are packaged yet so this is enabled by default,
-          # no need to redefine it in your config for now)
-          #media-session.enable = true;
+          # Low latency audio configuration (CachyOS profile: ~2.6ms buffer latency @ 48kHz)
+          extraConfig = {
+            pipewire."92-low-latency" = {
+              "context.properties" = {
+                "default.clock.rate" = 48000;
+                "default.clock.quantum" = 128;
+                "default.clock.min-quantum" = 32;
+                "default.clock.max-quantum" = 1024;
+              };
+            };
+            pipewire-pulse."92-low-latency" = {
+              "context.properties" = {
+                "default.clock.rate" = 48000;
+                "default.clock.quantum" = 128;
+                "default.clock.min-quantum" = 32;
+                "default.clock.max-quantum" = 1024;
+              };
+            };
+          };
         };
       };
 
@@ -121,7 +171,10 @@
 
       environment = {
         sessionVariables = {
-          GAMEMODERUNEXEC = "env __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia PROTON_ENABLE_WAYLAND=1 PROTON_FSR4_UPGRADE=1 PROTON_DLSS_UPGRADE=1 PROTON_XESS_UPGRADE=1";
+          GAMEMODERUNEXEC = "env __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia PROTON_ENABLE_WAYLAND=1 PROTON_ENABLE_NGX_UPDATER=1 PROTON_FSR4_UPGRADE=1 PROTON_DLSS_UPGRADE=1 PROTON_XESS_UPGRADE=1";
+          __GL_SHADER_DISK_CACHE = "1";
+          __GL_SHADER_DISK_CACHE_SIZE = "10737418240"; # 10 GB limit na cache shaderów NVIDIA
+          __GL_VRR_ALLOWED = "1";
         };
 
         etc."kcminputrc".text = ''
