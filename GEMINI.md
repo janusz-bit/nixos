@@ -61,13 +61,6 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 | `cat` | `bat` |
 | `hw` | `hwinfo --short` |
 
-#### GPU Aliases (`nixos` host only, via `modules/hosts/nixos/gpu.nix`)
-| Alias | Command |
-|---|---|
-| `gpu-status` | `gpu status` (drivers of both PCI functions + boot mode) |
-| `gpu-vfio` | `gpu vfio` (runtime: rebind GPU to vfio-pci) |
-| `gpu-host` | `gpu host` (runtime: rebind GPU back to nvidia) |
-
 ### 2. `nixos` (Main Workstation)
 An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Polish locale). Default user: `dinosaur`.
 * **Kernel**: CachyOS kernel with LTO (`pkgs.linuxPackages_cachyos-lto`) via the `chaotic` (Chaotic-Nyx) input.
@@ -78,7 +71,6 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **Desktop**: KDE Plasma 6 (Wayland) with SDDM (Wayland, autoNumlock). A **Niri** module exists (`nixos/niri.nix`) but is currently commented out/disabled.
 * **Audio**: Pipewire (with ALSA 32-bit and PulseAudio compat).
 * **Scheduler**: `scx` with `scx_lavd` (`--performance`); `ananicy-cpp` with CachyOS rules.
-* **GPU management** (`modules/hosts/nixos/gpu.nix` + `gpu.sh`): `gpu` command (wrapped shell script, runtime deps `pciutils`/`libvirt`/`kmod`/`coreutils`/`gnugrep` pinned in PATH; `sudo` intentionally left to the setuid wrapper) for the RTX 5060 Laptop GPU (VGA `0000:01:00.0` 10de:2d59 + audio `0000:01:00.1` 10de:22eb): `gpu status` (drivers + boot mode), `gpu vfio` (runtime rebind to vfio-pci), `gpu host` (runtime rebind back to nvidia), `gpu attach <vm>` / `gpu detach <vm>` (virsh hotplug of both PCI functions). Host-only aliases: `gpu-status` / `gpu-vfio` / `gpu-host`. Aliases defined via `environment.shellAliases`, auto-propagated to fish by nixpkgs. Driver package: `config.boot.kernelPackages.nvidiaPackages.cachyos` (from Chaotic-Nyx).
 * **Gaming** (`modules/hosts/nixos/gaming.nix`): Steam (with Proton-CachyOS x86-64-v3 and proton-ge-bin as extraCompatPackages — Proton now comes from the chaotic-nyx overlay/binary cache, gamescope session, protontricks), Heroic, Lutris, GameMode (renice -10, softrealtime, `performance` governor while gaming, screensaver inhibited), Gamescope (`capSysNice`), MangoHud, OBS Studio (CUDA), Mullvad VPN, Wooting keyboard support. `protonup-qt` for Proton management. Gaming sysctls: `vm.max_map_count=2147483642`, `kernel.split_lock_mitigate=0`.
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.

@@ -19,7 +19,6 @@
         self.modules.nixos.nixos-ai
         self.modules.nixos.nixos-appimage-run
         self.modules.nixos.nixos-gaming
-        self.modules.nixos.nixos-gpu
         self.modules.nixos.nixos-snapper
       ];
     };
