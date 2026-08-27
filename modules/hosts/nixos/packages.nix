@@ -4,6 +4,7 @@
     { pkgs, config, ... }:
     {
       environment.systemPackages = with pkgs; [
+        vscodium
         zed-editor
         kdePackages.partitionmanager
         qbittorrent-enhanced
