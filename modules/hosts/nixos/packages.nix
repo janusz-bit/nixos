@@ -18,7 +18,7 @@
         # niri
         alacritty
         sqlite
-        brave
+        # brave
         libreoffice-qt
         kdePackages.qrca
         signal-desktop
