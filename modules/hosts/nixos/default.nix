@@ -34,11 +34,6 @@
         # Chaotic-Nyx: overlay z bleeding-edge pakietami (proton-cachyos_x86_64_v3,
         # proton-ge-custom, mangohud_git, linux_cachyos...) + własny binary cache.
         inputs.chaotic.nixosModules.default
-        # Overlay z nix-cachyos-kernel - wystawia pkgs.cachyosKernels.*
-        # "pinned" = używa dokładnie tej rewizji nixpkgs co upstream => traienia w binary cache.
-        (_: {
-          nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
-        })
         (_: {
           customBot.flakeTarget = "nixos";
           customBot.defaultUser = "dinosaur";
