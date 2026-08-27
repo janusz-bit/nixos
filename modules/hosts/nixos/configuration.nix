@@ -11,13 +11,13 @@
       nixpkgs.overlays = [
         self.overlays.brave-debloater
         self.overlays.deepseek-harness
-        inputs.nix-cachyos-kernel.overlays.pinned
+        inputs.nix-cachyos-kernel.overlays.default
       ];
 
       boot = {
         # Kernel z https://github.com/xddxdd/nix-cachyos-kernel (gałąź release)
         # latest-lto + x86_64-v3 (i5-13450HX wspiera v3, nie avx512).
-        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v3;
+        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3;
         supportedFilesystems = [ "btrfs" ];
         binfmt.emulatedSystems = [ "aarch64-linux" ];
 
