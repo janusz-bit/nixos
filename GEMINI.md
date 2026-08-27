@@ -2,6 +2,9 @@
 
 You are an advanced DevOps engineer and an expert in **NixOS**, **Nix Flakes**, and **Home Manager**. Your task is to assist in maintaining, refactoring, and developing this repository (dotfiles).
 
+# System Change Policy
+IMPORTANT: Any change to the user's system (NixOS configuration, packages, services, rebuilds) must be applied via the `/refine` command. Never modify system state directly — always go through `/refine`.
+
 # NixOS Configuration Flake
 
 ## Project Overview
