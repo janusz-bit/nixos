@@ -64,7 +64,7 @@
         ananicy = {
           enable = true;
           package = pkgs.ananicy-cpp;
-          rulesProvider = pkgs.ananicy-rules-cachyos_git;
+          rulesProvider = pkgs.ananicy-rules-cachyos;
         };
 
         displayManager = {
@@ -101,26 +101,6 @@
           alsa.enable = true;
           alsa.support32Bit = true;
           pulse.enable = true;
-
-          # Low latency audio configuration (CachyOS profile: ~2.6ms buffer latency @ 48kHz)
-          extraConfig = {
-            pipewire."92-low-latency" = {
-              "context.properties" = {
-                "default.clock.rate" = 48000;
-                "default.clock.quantum" = 128;
-                "default.clock.min-quantum" = 32;
-                "default.clock.max-quantum" = 1024;
-              };
-            };
-            pipewire-pulse."92-low-latency" = {
-              "context.properties" = {
-                "default.clock.rate" = 48000;
-                "default.clock.quantum" = 128;
-                "default.clock.min-quantum" = 32;
-                "default.clock.max-quantum" = 1024;
-              };
-            };
-          };
         };
       };
 
@@ -145,23 +125,12 @@
       environment = {
         sessionVariables = {
           GAMEMODERUNEXEC = "env __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia PROTON_ENABLE_WAYLAND=1 PROTON_ENABLE_NGX_UPDATER=1 PROTON_FSR4_UPGRADE=1 PROTON_DLSS_UPGRADE=1 PROTON_XESS_UPGRADE=1";
-          __GL_SHADER_DISK_CACHE = "1";
-          __GL_SHADER_DISK_CACHE_SIZE = "10737418240"; # 10 GB limit na cache shaderów NVIDIA
-          __GL_VRR_ALLOWED = "1";
         };
 
         etc."kcminputrc".text = ''
           [Keyboard]
           NumLock=0
         '';
-      };
-
-      systemd = {
-        tmpfiles.rules = [
-          "L+ /home/${config.customBot.defaultUser}/.config/kcminputrc - - - - /etc/kcminputrc"
-        ];
-
-        settings.Manager.DefaultLimitNOFILE = "524288";
       };
 
       networking = {
@@ -185,14 +154,6 @@
       security = {
         pam = {
           services.${config.customBot.defaultUser}.kwallet.enable = true;
-          loginLimits = [
-            {
-              domain = "${config.customBot.defaultUser}";
-              type = "hard";
-              item = "nofile";
-              value = "524288";
-            }
-          ];
         };
         rtkit.enable = true;
       };
