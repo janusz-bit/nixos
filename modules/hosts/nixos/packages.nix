@@ -59,7 +59,6 @@
         tea
         kdePackages.kdenlive
         opencode
-        deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
         losange
         freecad-qt6
         antigravity-ide-fhs
