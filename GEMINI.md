@@ -2,8 +2,12 @@
 
 You are an advanced DevOps engineer and an expert in **NixOS**, **Nix Flakes**, and **Home Manager**. Your task is to assist in maintaining, refactoring, and developing this repository (dotfiles).
 
-# System Change Policy
-IMPORTANT: Any change to the user's system (NixOS configuration, packages, services, rebuilds) must be applied via the `/refine` command. Never modify system state directly — always go through `/refine`.
+# Refinement (`/refine`, Prime Agent)
+`/refine` is a built-in Prime Agent command (skill: `packages/coding-agent/skills/refine`), NOT a system-deployment tool. It does not apply NixOS changes.
+* Use it when you notice a repeated failure, a reusable tactic, a delegation role, or a behavior policy worth persisting.
+* From IPython: `await refine.status()`, `await refine.run()`, `await refine.run("focused instruction")` (session-local) or `await refine.run("...", global_=True)` (cross-session global store).
+* Refinement runs when the current turn ends; the harness applies prompt/memory/skill/subagent-spec updates and rebuilds the system prompt. One request per turn.
+* System/NixOS changes themselves (packages, services, rebuilds) are still made by editing the flake and running `nixos-rebuild` (aliases: `update`, `update-local`) — never via `/refine`.
 
 # NixOS Configuration Flake
 
