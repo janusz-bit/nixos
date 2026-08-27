@@ -17,7 +17,6 @@
         self.modules.nixos.disko
         # self.modules.nixos.nixos-niri
         self.modules.nixos.nixos-ai
-        self.modules.nixos.ai-skills
         self.modules.nixos.nixos-appimage-run
         self.modules.nixos.nixos-gaming
         self.modules.nixos.nixos-snapper
