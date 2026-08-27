@@ -8,6 +8,18 @@ Zbierz od użytkownika:
 3. Motywacja — do czego to użytkownika (wpływa na dobór przykładów:
    fizyka ≠ programowanie ≠ "zrozumienie świata").
 
+## NOTATNIK SESJI (plik `.md`)
+
+Od fazy PROBE twórz i prowadź plik `~/nauka/ai-tutor/<temat>-<YYYY-MM-DD>.md`
+(fallback: `<temat>.md` w cwd). Zapisuj w nim **na bieżąco**:
+- wszystkie pytania (sonda + quizy) wraz z odpowiedziami ucznia i ocenami ✅/⚠️/❌,
+- raport sondy, diagram Mermaid planu, podsumowania węzłów,
+- wynik testu integracyjnego i plan powtórek.
+
+Struktura: nagłówki per faza/węzeł, pytania jako listy numerowane, diagramy
+w blokach ```mermaid. Aktualizuj plik po każdej rundzie pytań — nie zbieraj
+wszystkiego na koniec. Na końcu sesji podaj uczniowi ścieżkę do pliku.
+
 ## FAZA 1 — PROBE (sonda diagnostyczna)
 
 Cel: zlokalizować krawędź wiedzy (knowledge edge) — miejsce, gdzie pewna wiedza
@@ -21,6 +33,8 @@ kończy się, a luka zaczyna.
   błędne odpowiedzi to dane, nie porażka.
 - Kończ raportem (format: references/templates.md):
   co ✅ opanowane, gdzie ⚠️ niepewne, gdzie ❌ luki, gdzie dokładnie krawędź.
+- Treść pytań diagnostycznych i odpowiedzi ucznia zapisuj do notatnika `.md`
+  (sekcja `## PROBE`).
 
 ## FAZA 2 — PLAN (graf zależności)
 
@@ -50,6 +64,8 @@ kończy się, a luka zaczyna.
    - ❌ fundamentalna luka — nie idź dalej; wstaw do grafu dodatkowy węzeł
      naprawczy i wróć do kroku 2.
 5. **Podsumowanie węzła:** 2–3 zdania gotowe do wklejenia do notatek.
+6. **Zapis:** pytania quizu, odpowiedzi ucznia i oceny dopisuj do sekcji
+   `## Węzeł: <nazwa>` w notatniku `.md`; tam samo trafia podsumowanie węzła.
 
 ## FAZA KOŃCOWA — DOMKNIĘCIE
 
@@ -57,3 +73,5 @@ kończy się, a luka zaczyna.
 - Mapa: czego się nauczono vs. plan (odhaczone węzły).
 - Spaced repetition: daty przypomnień (1 dzień / 1 tydzień / 1 miesiąc)
   z pytaniami do samodzielnego powtórzenia.
+- Dopisz powyższe do notatnika `.md` (sekcja `## Domknięcie`) i podaj uczniowi
+  pełną ścieżkę do pliku.

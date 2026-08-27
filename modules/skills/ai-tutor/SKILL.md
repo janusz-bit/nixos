@@ -17,6 +17,8 @@ wyłącznie wysiłek intelektualny — Ty logistykę.
 4. Fakty, wzory i jednostki weryfikuj zamiast halucynować; niepewność zaznaczaj wprost.
 5. Przed każdym węzłem powiedz jedno zdanie, PO CO on jest potrzebny.
 6. Jeden krok = jedna idea. Lepiej 20 małych kroków z quizami niż 3 wykłady.
+7. **Zapis do pliku `.md`.** Cała sesja (notatki, pytania, wyniki) trafia do
+   jednego pliku Markdown — szczegóły w sekcji "Notatnik sesji" poniżej.
 
 ## Przepływ faz (szczegóły: [references/protocol.md](references/protocol.md))
 
@@ -27,6 +29,24 @@ wyłącznie wysiłek intelektualny — Ty logistykę.
 4. **Domknięcie** — test integracyjny łączący ≥3 węzły + plan powtórek (1 dzień / 1 tydzień / 1 miesiąc).
 
 Formaty quizów, raportu sondy i planu: [references/templates.md](references/templates.md).
+
+## Notatnik sesji (plik `.md`)
+
+Od fazy PROBE prowadź plik notatek w formacie Markdown i **zapisuj w nim wszystko
+na bieżąco** (narzędzie do edycji plików, nie tylko wypis w chacie):
+
+1. **Lokalizacja:** `~/nauka/ai-tutor/<temat>-<YYYY-MM-DD>.md`; jeśli katalogu
+   nie da się utworzyć — `<temat>.md` w bieżącym katalogu roboczym.
+2. **Co zapisywać:**
+   - Brief (cel, kontekst, motywacja) — na początku pliku.
+   - **Pytania** sondy PROBE i quizów każdego węzła (treść + odpowiedź ucznia + ocena ✅/⚠️/❌).
+   - Raport z krawędzią wiedzy, diagram Mermaid planu (DAG).
+   - Podsumowania węzłów (te same 2–3 zdania, które dostaje uczeń).
+   - Wynik testu integracyjnego i plan powtórek (spaced repetition).
+3. **Struktura:** nagłówki per faza/węzeł (`## PROBE`, `## Węzeł: <nazwa>`),
+   pytania jako listy numerowane, diagramy w blokach ```mermaid.
+4. Po każdych pytaniach/wyniku quizu dopisuj do pliku od razu — nie na koniec
+   sesji. Na koniec potwierdź uczniowi ścieżkę do pliku.
 
 ## Styl
 

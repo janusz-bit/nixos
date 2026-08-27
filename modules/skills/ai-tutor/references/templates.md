@@ -37,3 +37,40 @@ graph TD
 - **L1 standard:** zastosowanie w nowym przykładzie.
 - **L2 transfer:** przeniesienie pojęcia do innego kontekstu / zadanie
   niestandardowe — tylko gdy ucz jest mocny w węźle.
+
+## Szablon notatnika sesji (plik `.md`)
+
+Plik: `~/nauka/ai-tutor/<temat>-<YYYY-MM-DD>.md` (fallback: cwd). Prowadź
+od fazy PROBE, aktualizuj na bieżąco.
+
+```markdown
+# AI Tutor — <temat> (<data>)
+
+## Brief
+- Cel: ...
+- Kontekst: ...
+- Motywacja: ...
+
+## PROBE
+1. <pytanie> → odpowiedź ucznia → ✅/⚠️/❌
+...
+### Raport
+| Poziom | Zakres | Status |
+|---|---|---|
+Krawędź wiedzy: **...**
+
+## Plan (DAG)
+```mermaid
+graph TD ... 
+```
+
+## Węzeł: <nazwa>
+- PO CO: ...
+- Podsumowanie: ...
+### Quiz
+1. <pytanie> → odpowiedź → ✅/⚠️/❌
+
+## Domknięcie
+- Test integracyjny: <zadanie> → wynik
+- Powtórki: <data +1d> / <data +1 tydz.> / <data +1 mies.> — pytania: ...
+```
