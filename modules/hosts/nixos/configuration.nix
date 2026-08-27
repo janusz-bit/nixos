@@ -4,7 +4,6 @@
     {
       config,
       pkgs,
-      lib,
       ...
     }:
 
@@ -27,32 +26,6 @@
         kernelParams = [ "resume=/dev/mapper/swap" ];
         # Opcjonalnie, ale zalecane przy hibernacji na LUKS:
         # boot.initrd.systemd.enable = true;
-
-        # CachyOS Gaming Sysctls & Tweaks
-        kernel.sysctl = {
-          # 1. Gry, Proton & Wine (split lock mitigation off, max map count dla UE5/Starfield)
-          "kernel.split_lock_mitigate" = 0;
-          "vm.max_map_count" = 2147483642;
-          "fs.file-max" = 2097152;
-
-          # 2. Pamięć & zRAM Tuning (CachyOS: agresywne zRAM, mniej agresywne zrzucanie pagecache)
-          "vm.swappiness" = 150;
-          "vm.vfs_cache_pressure" = 50;
-          "vm.dirty_ratio" = 10;
-          "vm.dirty_background_ratio" = 5;
-          "vm.dirty_writeback_centisecs" = 1500;
-          "vm.dirty_expire_centisecs" = 3000;
-          "vm.watermark_boost_factor" = 0;
-          "vm.watermark_scale_factor" = 125;
-          "vm.compaction_proactiveness" = 0;
-
-          # 3. Sieć o niskich opóźnieniach (BBR + FQ qdisc)
-          "net.core.default_qdisc" = "fq";
-          "net.ipv4.tcp_congestion_control" = "bbr";
-          "net.ipv4.tcp_fastopen" = 3;
-          "net.core.netdev_max_backlog" = 16384;
-          "net.core.somaxconn" = 8192;
-        };
       };
 
       # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).
@@ -128,8 +101,6 @@
           alsa.enable = true;
           alsa.support32Bit = true;
           pulse.enable = true;
-          # If you want to use JACK applications, uncomment this
-          #jack.enable = true;
 
           # Low latency audio configuration (CachyOS profile: ~2.6ms buffer latency @ 48kHz)
           extraConfig = {
@@ -187,13 +158,10 @@
 
       systemd = {
         tmpfiles.rules = [
-          "d /home/${config.customBot.defaultUser}/.config 0755 ${config.customBot.defaultUser} ${config.customBot.defaultUser} -"
           "L+ /home/${config.customBot.defaultUser}/.config/kcminputrc - - - - /etc/kcminputrc"
         ];
 
-        settings.Manager = {
-          DefaultLimitNOFILE = "524288";
-        };
+        settings.Manager.DefaultLimitNOFILE = "524288";
       };
 
       networking = {
@@ -209,21 +177,7 @@
       # Set your time zone.
       time.timeZone = "Europe/Warsaw";
 
-      # Select internationalisation properties.
-      i18n = {
-        defaultLocale = "pl_PL.UTF-8";
-        extraLocaleSettings = {
-          LC_ADDRESS = "pl_PL.UTF-8";
-          LC_IDENTIFICATION = "pl_PL.UTF-8";
-          LC_MEASUREMENT = "pl_PL.UTF-8";
-          LC_MONETARY = "pl_PL.UTF-8";
-          LC_NAME = "pl_PL.UTF-8";
-          LC_NUMERIC = "pl_PL.UTF-8";
-          LC_PAPER = "pl_PL.UTF-8";
-          LC_TELEPHONE = "pl_PL.UTF-8";
-          LC_TIME = "pl_PL.UTF-8";
-        };
-      };
+      i18n.defaultLocale = "pl_PL.UTF-8";
 
       # Configure console keymap
       console.keyMap = "pl2";
