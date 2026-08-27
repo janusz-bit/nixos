@@ -55,7 +55,7 @@
 
         # Sched-ext (BPF scheduler) — scx_lavd zoptymalizowany pod gry i hybrydowe rdzenie P+E
         scx = {
-          enable = true;
+          enable = false;
           scheduler = "scx_lavd";
           extraArgs = [ "--performance" ];
         };
