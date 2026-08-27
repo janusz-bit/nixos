@@ -2,6 +2,13 @@
 
 You are an advanced DevOps engineer and an expert in **NixOS**, **Nix Flakes**, and **Home Manager**. Your task is to assist in maintaining, refactoring, and developing this repository (dotfiles).
 
+# Refinement (`/refine`, Prime Agent)
+`/refine` is a built-in Prime Agent command (skill: `packages/coding-agent/skills/refine`), NOT a system-deployment tool. It does not apply NixOS changes.
+* Use it when you notice a repeated failure, a reusable tactic, a delegation role, or a behavior policy worth persisting.
+* From IPython: `await refine.status()`, `await refine.run()`, `await refine.run("focused instruction")` (session-local) or `await refine.run("...", global_=True)` (cross-session global store).
+* Refinement runs when the current turn ends; the harness applies prompt/memory/skill/subagent-spec updates and rebuilds the system prompt. One request per turn.
+* System/NixOS changes themselves (packages, services, rebuilds) are still made by editing the flake and running `nixos-rebuild` (aliases: `update`, `update-local`) — never via `/refine`.
+
 # NixOS Configuration Flake
 
 ## Project Overview
@@ -20,6 +27,7 @@ Integrated technologies handling the system's core capabilities include:
 * **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides CachyOS kernel (`linux_cachyos`, `linuxPackages_cachyos-lto`), CachyOS NVIDIA drivers (`nvidia_cachyos`), `pkgsx86_64_v3`, `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git` etc.; its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
 * **github-actions-nix**: Auto-generates GitHub Actions workflows (`github:synapdeck/github-actions-nix`).
 * **hermes-agent**: Hermes AI agent NixOS module (`github:NousResearch/hermes-agent`). Now unpinned (tracks upstream); a comment in `flake.nix` records the previous pin (`3f2a389c...`) made because `topup.ts` introduced a broken `@hermes/shared/charge-settlement` import in `nix/tui.nix`.
+* **llm-agents (numtide/llm-agents.nix)**: Centralized Nix packages for AI coding agents and development tools (`github:numtide/llm-agents.nix`). Supplies `prime-agent` via `inputs.llm-agents.packages.${system}.prime-agent`.
 * **Gitea**: Self-hosted Git service with web UI and SSH access (`git.janusz-bit.com`).
 * **TriliumNext**: Note-taking server and desktop client (pinned to specific commit `744646d07bff459d1db305b1c0a8ea0c99b9c27c`).
 * **Pre-commit Hooks**: Enforces formatting (`nixfmt`), linting (`statix`, `deadnix`) and workflow sync. The same checks run in CI via `checks.<system>.pre-commit` (built by the `lint` workflow).
@@ -75,7 +83,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration. Custom extra packages: `icu`, `libxcrypt-legacy`, `python312`, `python312Packages.torch`.
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (temporarily uses the `ollama` package from the `nixpkgs-stable` input), Open WebUI currently **disabled** (`enable = false`), `uv`, `repomix`, Node.js, Python 3 with pip.
-* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, DeepSeek Harness (`dsh`), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
+* **Apps**: Zed, Brave, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), DeepSeek Harness (`dsh`), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`.
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
@@ -112,6 +120,7 @@ A headless `aarch64-linux` deployment for network services. Default user: `nixos
 * **Trilium**: Note-taking server on port 8081 (flake input `trilium` pinned to specific commit, used as `trilium-server` NixOS module — not an overlay).
 * **Fan control**: Custom Python-based systemd service (`pwm-fan`, `rpi-lgpio` package with `RPI_LGPIO_REVISION` override) for GPIO PWM fan control based on CPU temperature (GPIO BCM pin 14, thresholds: 60C=100%, 48C=50%, else 0%).
 * **LED control** (`modules/hosts/raspberry-pi-4/leds-off.nix`): All LEDs disabled via DT overlays (`hardware.raspberry-pi."4".leds` — eth, act, pwr) and systemd-tmpfiles rules (mmc0, default-on).
+* **Prime Agent CLI**: Self-improving coding agent (RLM) package from `numtide/llm-agents.nix` (`inputs.llm-agents.packages.${system}.prime-agent`), available system-wide as `prime-agent` after rebuild.
 * **Overlays applied**: `deepseek-harness` (custom DeepSeek Harness package from `modules/packages/_deepseek-harness`), plus `opencode-config` from base.
 * **State version**: `26.05`.
 
@@ -153,6 +162,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (pinned to v1.29.6, Go module)
   * `deepseek-harness` (v0.1.1-rc.2, `_deepseek-harness/`: budowany ze źródeł Git z `pnpm_11` + `fetchPnpmDeps` (fetcherVersion = 4), `DSH_CLIENT_COMMIT_HASH` przekazywane do kompilacji TS/client artifacts, dostarcza `dsh` i `deepseek-harness` wrappowane z Node.js i pnpm na PATH)
+  * Note: `prime-agent` is provided via `numtide/llm-agents.nix` flake input (local derivation `_prime-agent` replaced).
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
 

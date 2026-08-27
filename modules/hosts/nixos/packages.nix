@@ -59,6 +59,7 @@
         tea
         kdePackages.kdenlive
         opencode
+        inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent # self-improving agent AI (RLM)
         deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
         losange
         freecad-qt6

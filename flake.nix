@@ -35,6 +35,7 @@
     # because topup.ts introduced a broken @hermes/shared/charge-settlement
     # import in nix/tui.nix; upstream moved on and the pin was lifted.
     hermes-agent.url = "github:NousResearch/hermes-agent";
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   nixConfig = {
