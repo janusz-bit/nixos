@@ -4,6 +4,7 @@
     { pkgs, config, ... }:
     {
       environment.systemPackages = with pkgs; [
+        vscode
         vscodium
         zed-editor
         kdePackages.partitionmanager
