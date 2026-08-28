@@ -2,6 +2,10 @@
 {
   flake.modules.nixos.nixos-packages =
     { pkgs, config, ... }:
+    let
+      # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
+      hermes-desktop = inputs.hermes-agent.packages.${pkgs.system}.desktop;
+    in
     {
       environment.systemPackages = with pkgs; [
         vscode
@@ -63,6 +67,7 @@
         freecad-qt6
         antigravity-ide-fhs
         antigravity-cli
+        hermes-desktop
       ];
 
       hardware.wooting.enable = true;
