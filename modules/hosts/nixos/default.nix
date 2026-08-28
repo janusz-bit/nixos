@@ -37,6 +37,8 @@
         (_: {
           customBot.flakeTarget = "nixos";
           customBot.defaultUser = "dinosaur";
+          # Nadal używamy overlaya (pakiety), ale bez binary cache nyx.
+          chaotic.nyx.cache.enable = false;
         })
       ];
     };
