@@ -55,11 +55,12 @@
         "prime-agent/settings.json".text = settingsJson + "\n";
       };
 
-      systemd.tmpfiles.rules =
-        map (name: "L+ /home/${user}/.prime/agent/${name} - - - - /etc/prime-agent/${name}")
-          [
-            "models.json"
-            "settings.json"
-          ];
+      systemd.tmpfiles.rules = [
+        "d /home/${user}/.prime/agent 0700 ${user} users - -"
+      ]
+      ++ map (name: "L+ /home/${user}/.prime/agent/${name} - - - - /etc/prime-agent/${name}") [
+        "models.json"
+        "settings.json"
+      ];
     };
 }

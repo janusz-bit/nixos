@@ -55,7 +55,9 @@ A shared set of modules included in every system deployment (`modules/hosts/base
   (`defaultProvider = "ollama-cloud"`, `defaultModel = "glm-5.3-flash:cloud"`).
   Pliki generowane do `/etc/prime-agent/` i symlinkowane przez tmpfiles do
   `~/.prime/agent/` użytkownika `customBot.defaultUser`. Trade-off: zmiany
-  settings.json z TUI nie przetrwają rebuildu.
+  settings.json z TUI nie przetrwają rebuildu, a przy obecnym symlinku nie da
+  się ich w ogóle zapisać (zapis trafia w read-only store path; write-and-replace
+  podmienia symlink aż do następnej rundy tmpfiles po rebuildzie).
 * **Nix settings** (`modules/nix-settings.nix`): Weekly GC (delete older than 7d), auto-optimise-store, trusted-users = `@wheel`.
 * **Git** (`modules/hosts/base/git.nix`): user.name = `janusz-bit`, user.email = `janusz-bit@proton.me`, init.defaultBranch = `main`, `gh:` and `github:` rewritten to `https://github.com/`. `gh` CLI installed.
 * **SSH** (`modules/hosts/base/ssh.nix`): Key-only authentication, `ssh.startAgent = false`, `gnupg.agent.enable = true`. Cloudflared SSH proxy configured (`ssh.*` host pattern uses `cloudflared access ssh --hostname %h`).

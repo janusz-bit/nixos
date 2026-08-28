@@ -131,10 +131,10 @@ Expected: formatter bez zmian (lub tylko drobne kosmetyczne); brak findings.
 
 Run (z `/etc/nixos`):
 ```sh
-nix eval .#nixosConfigurations.nixos.config.environment.etc."prime-agent/models.json".text --raw | jq .
-nix eval .#nixosConfigurations.raspberry-pi-4.config.environment.etc."prime-agent/models.json".text --raw | jq .
-nix eval .#nixosConfigurations.wsl.config.environment.etc."prime-agent/settings.json".text --raw
-nix eval .#nixosConfigurations.droid.config.environment.etc."prime-agent/settings.json".text --raw
+nix eval '.#nixosConfigurations.nixos.config.environment.etc."prime-agent/models.json".text' --raw | jq .
+nix eval '.#nixosConfigurations.raspberry-pi-4.config.environment.etc."prime-agent/models.json".text' --raw | jq .
+nix eval '.#nixosConfigurations.wsl.config.environment.etc."prime-agent/settings.json".text' --raw
+nix eval '.#nixosConfigurations.droid.config.environment.etc."prime-agent/settings.json".text' --raw
 ```
 Expected: JSON z providerami `ollama` i `ollama-cloud`; settings z `defaultProvider: "ollama-cloud"`. Każdy eval kończy się kodem 0.
 
