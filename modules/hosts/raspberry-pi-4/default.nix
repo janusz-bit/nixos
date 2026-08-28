@@ -24,6 +24,7 @@
         self.modules.nixos.open-webui
         self.modules.nixos.ttyd
         self.modules.nixos.base-agenix
+        self.modules.nixos.base-prime-agent
         self.modules.nixos.rpi-specific
         self.modules.nixos.rpi-configuration
         inputs.nixos-hardware.nixosModules.raspberry-pi-4
