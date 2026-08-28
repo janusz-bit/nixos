@@ -20,6 +20,7 @@ let
       kdePackages.kleopatra
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent # self-improving agent AI (RLM)
       nix-update
       tlrc
       fzf
