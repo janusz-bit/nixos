@@ -47,9 +47,22 @@
       settingsJson = builtins.toJSON {
         defaultProvider = "ollama-cloud";
         defaultModel = "glm-5.3-flash:cloud";
+        # Wyłączona telemetria (pseudonimowe metryki użycia/wydajności —
+        # nigdy bez promptów, odpowiedzi, treści narzędzi, ścieżek, repo).
+        telemetry = {
+          enabled = false;
+        };
       };
     in
     {
+      # Zmienne środowiskowe jako druga warstwa (docs telemetry):
+      # PRIME_AGENT_TELEMETRY=0 nadpisuje settings, DO_NOT_TRACK=1 to
+      # standard respektowany też przez inne narzędzia.
+      environment.sessionVariables = {
+        PRIME_AGENT_TELEMETRY = "0";
+        DO_NOT_TRACK = "1";
+      };
+
       environment.etc = {
         "prime-agent/models.json".text = modelsJson + "\n";
         "prime-agent/settings.json".text = settingsJson + "\n";
