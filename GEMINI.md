@@ -47,6 +47,15 @@ A shared set of modules included in every system deployment (`modules/hosts/base
 * `environment.localBinInPath = true` (recommended for `uv`-installed binaries in `~/.local/bin`).
 * Default editor: `micro`.
 * **OpenCode**: Declarative configuration inline in `modules/overlays/opencode.nix` (Nix overlay generating `opencode.json` + `web-search-mcp.py` at build time). Default model: `ollama-cloud/glm-5.3-flash:cloud`. Plugins: `superpowers` (`superpowers@git+https://github.com/obra/superpowers.git`) and `caveman-opencode-plugin`; `websearch` permission set to `allow`; `external_directory` rule `"/nix/store/**": "allow"` so tools never prompt for `/nix/store` paths. Provider `llmgateway` (OpenAI-compatible, `https://api.llmgateway.io/v1`, apiKey from `{env:LLMGATEWAY_API_KEY}`) with models `claude-sonnet-4-6`, `gpt-5.5`, `gemini-3.1-pro`, `qwen3.8-max`, `kimi-k3`, `glm-5.2`. Provider `ollama` (OpenAI-compatible, `http://localhost:11434/v1`) with model `ornith:35b`. Provider `ollama-cloud` (OpenAI-compatible, `https://ollama.com/v1`, apiKey from `{env:OLLAMA_API_KEY}`) with model `glm-5.3-flash:cloud`. Provider `opencode` (OpenCode Cloud, `https://api.opencode.ai/v1`, apiKey from `{env:OPENCODE_GO_API_KEY}`) with models `glm-5.2`, `kimi-k3`. Local MCP servers: `web_search_and_fetch` via `uv run` (Ollama web_search/web_fetch API) and `nixos` via `pkgs.mcp-nixos` (`lib.getExe`; NixOS/Home Manager/nixpkgs/flakes/wiki search tools). The `opencode-config` overlay is applied in `base/configuration.nix`, so the wrapped `opencode` is available on all hosts.
+* **Prime Agent config** (`modules/hosts/base/prime-agent.nix`): deklaratywna
+  konfiguracja prime-agenta — `models.json` (providery `ollama` lokalny,
+  `http://localhost:11434/v1`, model `ornith:35b`, z `compat.supportsDeveloperRole/supportsReasoningEffort = false`;
+  oraz `ollama-cloud`, `https://ollama.com/v1`, model `glm-5.3-flash:cloud` z
+  `reasoning = true`, klucz z env `OLLAMA_API_KEY` z agenix) i `settings.json`
+  (`defaultProvider = "ollama-cloud"`, `defaultModel = "glm-5.3-flash:cloud"`).
+  Pliki generowane do `/etc/prime-agent/` i symlinkowane przez tmpfiles do
+  `~/.prime/agent/` użytkownika `customBot.defaultUser`. Trade-off: zmiany
+  settings.json z TUI nie przetrwają rebuildu.
 * **Nix settings** (`modules/nix-settings.nix`): Weekly GC (delete older than 7d), auto-optimise-store, trusted-users = `@wheel`.
 * **Git** (`modules/hosts/base/git.nix`): user.name = `janusz-bit`, user.email = `janusz-bit@proton.me`, init.defaultBranch = `main`, `gh:` and `github:` rewritten to `https://github.com/`. `gh` CLI installed.
 * **SSH** (`modules/hosts/base/ssh.nix`): Key-only authentication, `ssh.startAgent = false`, `gnupg.agent.enable = true`. Cloudflared SSH proxy configured (`ssh.*` host pattern uses `cloudflared access ssh --hostname %h`).
