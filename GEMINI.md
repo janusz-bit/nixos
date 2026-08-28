@@ -246,6 +246,7 @@ nix build .#raspberry-pi-4-sd-image
 * **Pre-commit hooks**: formatter, linters + `sync-github-actions` (keeps workflow YAML in sync with the Nix-generated definitions; deletes orphaned files first).
 * **Dev shell**: Always use `nix develop` to ensure pre-commit hooks and required tools are bootstrapped automatically.
 * **Secrets**: Never write API keys, passwords, or tokens directly in `.nix` files (they end up in the world-readable `/nix/store`). Always use Agenix with `environmentFiles` from age-encrypted secrets.
+* **Git workflow (mandatory)**: Any change to tracked files must be finished with a commit (local update) and a push to `origin` (published update) before the work is considered done. Never leave the working tree dirty or unpushed. Commit style: short lowercase summary prefixed with the area, e.g. `nixos: ...`, `docs: ...` (see `git log`).
 * **CI**: Tag push (`v*`) triggers build workflows. Tags auto-increment sequentially (v310, v311, ...) via `flake-release`. 7 workflows generated from `modules/github-actions.nix` (6 builds + `lint`).
 
 ## Repository Statistics
