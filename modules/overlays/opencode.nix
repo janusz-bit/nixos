@@ -98,7 +98,10 @@ _: {
               }
             },
             "permission": {
-              "websearch": "allow"
+              "websearch": "allow",
+              "external_directory": {
+                "/nix/store/**": "allow"
+              }
             },
             "mcp": {
               "web_search_and_fetch": {
