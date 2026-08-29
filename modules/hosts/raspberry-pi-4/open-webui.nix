@@ -38,6 +38,23 @@
           WEBUI_AUTH = "True";
           # Stateful Responses API (forwarding previous_response_id)
           ENABLE_RESPONSES_API_STATEFUL = "1";
+          # Per-connection protocol: forces BOTH OpenAI-compatible
+          # connections ("0" = Hermes Agent, "1" = LLM Gateway — indexes
+          # pair with OPENAI_API_BASE_URLS) into the Responses API, i.e.
+          # open-webui calls each backend's /v1/responses instead of
+          # /v1/chat/completions. Verified: Hermes 8642 answers /v1/responses
+          # with proper Responses format; LLM Gateway exposes the endpoint
+          # too (control probe: other paths 404, /v1/responses 402 billing).
+          # Without this, api_type would have to be toggled per connection
+          # in the web UI (Settings → Connections) — it has no env var and
+          # lives only in the SQLite `config` table. With
+          # ENABLE_PERSISTENT_CONFIG=False, env-driven DEFAULT_CONFIG has
+          # precedence over any DB-stored per-connection settings, so this
+          # is the single source of truth.
+          # NOTE: NixOS renders this as systemd Environment="KEY=…"; plain
+          # quotes get swallowed ({"0": → {0:), so the inner quotes are
+          # backslash-escaped — verified parsing with systemd-run.
+          OPENAI_API_CONFIGS = ''{\"0\":{\"api_type\":\"responses\"},\"1\":{\"api_type\":\"responses\"}}'';
           # Cookie settings: Cloudflare Tunnel terminates TLS, so the
           # browser sees HTTPS while the backend only sees HTTP on
           # 127.0.0.1. Without these, Starlette's SessionMiddleware
