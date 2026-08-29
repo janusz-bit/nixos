@@ -16,7 +16,6 @@
         self.modules.nixos.base-ssh
         self.modules.nixos.base-agenix
         self.modules.nixos.base-prime-agent
-        self.modules.nixos.base-prime-agent-zed
         self.modules.nixos.options
       ];
     };
