@@ -24,6 +24,7 @@
       packages.default = self'.packages.install-system;
 
       pre-commit.settings.hooks = {
+        gitleaks.enable = true;
         nixfmt.enable = true;
         statix.enable = true;
         deadnix = {
