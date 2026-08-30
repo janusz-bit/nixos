@@ -1,9 +1,14 @@
 # Helium Browser — pakiet z oficjalnych binariów (.deb), wzorowany na
 # pkgs/by-name/go/google-chrome/package.nix z nixpkgs.
 #
-# To szybki i pewny sposób: używa podpisanych buildów Helium z ich
-# releases na GitHubie. Sandbox Chromium działa tu w trybie user
-# namespaces (deb nie zawiera chrome-sandbox), więc nie trzeba suid.
+# Używa podpisanych buildów Helium z ich releases na GitHubie. Sandbox
+# Chromium działa tu w trybie user namespaces (deb nie zawiera
+# chrome-sandbox), więc nie trzeba suid.
+#
+# Lista `deps` jest obcięta względem google-chrome do tego, czego binary
+# *faktycznie* używa (patchelf --print-needed na helium*/binarkach +
+# znane dlopen-y Chromium): ICU, harfbuzz, snappy, flac, opus, bzip2,
+# krb5 itd. są skompilowane statycznie w binarce.
 {
   lib,
   stdenvNoCC,
@@ -13,25 +18,20 @@
   patchelf,
   testers,
 
-  # biblioteki linkowane dynamicznie (analogicznie do google-chrome)
+  # biblioteki, które binary linkują dynamicznie (DT_NEEDED)
   alsa-lib,
-  at-spi2-atk,
-  at-spi2-core,
-  atk,
+  at-spi2-atk, # libatk-bridge-2.0
+  at-spi2-core, # libatk-1.0, libatspi
   cairo,
   cups,
   dbus,
   expat,
-  fontconfig,
-  freetype,
-  gcc-unwrapped,
-  gdk-pixbuf,
+  fontconfig, # dlopen — enumeracja czcionek systemowych
+  gcc-unwrapped, # libgcc_s, libstdc++
   glib,
   gtk3,
-  gtk4,
-  libdrm,
-  libglvnd,
-  libkrb5,
+  gtk4, # dlopen — dialogi (GTK3/4, wybiera Chromium w runtime)
+  libglvnd, # dlopen — libGL/libEGL
   libx11,
   libxcb,
   libxcomposite,
@@ -42,50 +42,31 @@
   libxi,
   libxkbcommon,
   libxrandr,
-  libxrender,
-  libxscrnsaver,
-  libxshmfence,
-  libxtst,
-  libgbm,
+  libxscrnsaver, # dlopen — wykrywanie bezczynności
+  libxtst, # dlopen — automatyzacja inputu
+  libgbm, # mesa
   nspr,
   nss,
   pango,
-  pipewire,
-  vulkan-loader,
-  wayland,
-  libudev-zero ? null, # zamiast systemd-udevd
-  systemd,
+  pciutils, # dlopen — detekcja GPU
+  pipewire, # dlopen — udostępnianie ekranu/webcam
+  speechd-minimal, # dlopen — synteza mowy
+  systemd, # libudev
+  vulkan-loader, # zastępuje bundlowany libvulkan.so.1
+  wayland, # dlopen — ozone wayland
 
-  # runtime
-  libexif,
-  pciutils,
-
-  # dodatkowe
-  curl,
-  liberation_ttf,
-  util-linux,
-  wget,
-  xdg-utils,
-  flac,
-  harfbuzz,
-  icu,
-  libopus,
-  snappy,
-  speechd-minimal,
-  bzip2,
-  libcap,
-
+  # opcjonalne backendy
   libpulseaudio,
   pulseSupport ? true,
-
-  adwaita-icon-theme,
-  gsettings-desktop-schemas,
-
   libva,
   libvaSupport ? true,
 
-  addDriverRunpath,
+  # runtime env (ikony/schematy GSettings dla wrappera)
+  adwaita-icon-theme,
+  gsettings-desktop-schemas,
 
+  addDriverRunpath, # sterownik GPU (/run/opengl-driver) do rpath
+  xdg-utils,
   # dodatkowe argumenty CLI wbudowane w wrapper
   commandLineArgs ? "",
 }:
@@ -94,33 +75,21 @@ let
   pname = "helium";
   version = "0.16.2.1";
 
-  # Helium wymaga libopus zlibowanego z custom modes (jak upstream w helium-linux)
-  opusWithCustomModes' = libopus.override { withCustomModes = true; };
+  # biblioteki runtime + sterownik GPU (libGL/EGL z /run/opengl-driver)
+  rpath = lib.makeLibraryPath (deps ++ [ "${addDriverRunpath.driverLink}/lib" ]);
+  binpath = lib.makeBinPath [ xdg-utils ];
 
   deps = [
     alsa-lib
     at-spi2-atk
     at-spi2-core
-    atk
-    bzip2
     cairo
-    curl
     cups
     dbus
     expat
-    flac
     fontconfig
-    freetype
     gcc-unwrapped.lib
-    gdk-pixbuf
     glib
-    harfbuzz
-    icu
-    libcap
-    libdrm
-    libexif
-    libglvnd
-    libkrb5
     libx11
     libxcb
     libxcomposite
@@ -131,32 +100,24 @@ let
     libxi
     libxkbcommon
     libxrandr
-    libxrender
     libxscrnsaver
-    libxshmfence
     libxtst
     libgbm
+    libglvnd
     nspr
     nss
-    opusWithCustomModes'
     pango
     pciutils
     pipewire
-    snappy
     speechd-minimal
     systemd
-    util-linux
     vulkan-loader
     wayland
-    wget
-  ]
-  ++ lib.optional pulseSupport libpulseaudio
-  ++ lib.optional libvaSupport libva
-  ++ [
     gtk3
     gtk4
-  ];
-
+  ]
+  ++ lib.optional pulseSupport libpulseaudio
+  ++ lib.optional libvaSupport libva;
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   inherit pname version;
@@ -181,7 +142,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         .${debArch};
     };
 
-  strictDeps = false;
   dontConfigure = true;
   dontBuild = true;
 
@@ -205,9 +165,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook postUnpack
   '';
 
-  rpath = lib.makeLibraryPath deps;
-  binpath = lib.makeBinPath [ xdg-utils ];
-
   installPhase = ''
     runHook preInstall
 
@@ -224,17 +181,16 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     ln -v -s -t "$appdir" "${lib.getLib vulkan-loader}/lib/libvulkan.so.1"
 
     substituteInPlace $out/share/applications/helium.desktop \
-      --replace-fail "Exec=helium" "Exec=$exe" 
+      --replace-fail "Exec=helium" "Exec=$exe"
 
-    # skrypt-wraapper z deba eksportuje CHROME_WRAPPER i LD_LIBRARY_PATH
+    # skrypt-wrapper z deba eksportuje CHROME_WRAPPER i LD_LIBRARY_PATH
     # względem własnej lokalizacji — zostaw go w appdir i opakuj w makeWrapper
     substituteInPlace $appdir/helium-wrapper \
       --replace-fail 'export CHROME_VERSION_EXTRA=deb' 'export CHROME_VERSION_EXTRA=nix'
 
     makeWrapper "$appdir/helium-wrapper" "$exe" \
-      --prefix LD_LIBRARY_PATH : "$rpath" \
-      --prefix PATH            : "$binpath" \
-      --suffix PATH            : "${lib.makeBinPath [ xdg-utils ]}" \
+      --prefix LD_LIBRARY_PATH : "${rpath}" \
+      --prefix PATH            : "${binpath}" \
       --prefix XDG_DATA_DIRS   : "$XDG_ICON_DIRS:$GSETTINGS_SCHEMAS_PATH:${addDriverRunpath.driverLink}/share" \
       --chdir "$appdir" \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}" \
@@ -242,7 +198,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     # popraw interpreter i rpath w binarkach ELF
     for elf in $appdir/helium $appdir/chromedriver $appdir/helium_crashpad_handler; do
-      patchelf --set-rpath $rpath $elf || true
+      patchelf --set-rpath "${rpath}" $elf || true
       patchelf --set-interpreter ${bintools.dynamicLinker} $elf || true
     done
 
@@ -258,19 +214,16 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Private, fast, and honest web browser based on Chromium";
-    longDescription = ''
-      Helium is a fork of ungoogled-chromium with additional
-      privacy-oriented patches, prebuilt as a Debian package by upstream.
-    '';
-    homepage = "https://helium.computer/";
-    # Helium dystrybuuje swoje buildy na GPL-3.0
-    license = lib.licenses.gpl3Plus;
-    sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
-    platforms = [
-      "x86_64-linux"
-      "aarch64-linux"
+    homepage = "https://helium.computer";
+    license = [
+      lib.licenses.bsd3
+      lib.licenses.lgpl21
     ];
     mainProgram = "helium";
-    maintainers = [ ];
+    platforms = [
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
+    sourceProvenance = [ lib.sourceTypes.binaryBytecode ];
   };
 })
