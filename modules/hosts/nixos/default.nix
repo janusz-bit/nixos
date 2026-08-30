@@ -19,6 +19,7 @@
         self.modules.nixos.nixos-ai
         self.modules.nixos.ai-skills
         self.modules.nixos.nixos-appimage-run
+        self.modules.nixos.nixos-helium
         self.modules.nixos.nixos-gaming
         self.modules.nixos.nixos-snapper
       ];

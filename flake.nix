@@ -36,6 +36,10 @@
     # import in nix/tui.nix; upstream moved on and the pin was lifted.
     hermes-agent.url = "github:NousResearch/hermes-agent";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Helium Browser (pakiet binarny) z /home/dinosaur/helium-nix;
+    # nixpkgs.follows, by pakiet szedł z tym samym nixpkgs co system.
+    helium-nix.url = "path:/home/dinosaur/helium-nix";
+    helium-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   nixConfig = {
