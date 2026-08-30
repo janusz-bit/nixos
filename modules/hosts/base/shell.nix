@@ -48,6 +48,18 @@ let
     set -x _JAVA_AWT_WM_NONREPARENTING 1
   '';
 
+  # Wspólna konfiguracja tmux (dostępna na wszystkich hostach)
+  tmuxConfig = {
+    enable = true;
+    keyMode = "vi";
+    historyLimit = 100000;
+    terminal = "tmux-256color";
+    extraConfig = ''
+      # Obsługa myszy (przewijanie, zmiana rozmiaru paneli, wybór)
+      set -g mouse on
+    '';
+  };
+
   sharedPackages =
     pkgs: with pkgs; [
       fish
@@ -76,5 +88,8 @@ in
       };
 
       environment.systemPackages = sharedPackages pkgs;
+
+      # Terminal multiplexer (wspólny dla wszystkich hostów)
+      programs.tmux = tmuxConfig;
     };
 }
