@@ -1,16 +1,12 @@
-{ inputs, ... }:
-{
+_: {
   flake.modules.nixos.nixos-helium =
     { lib, pkgs, ... }:
-    let
-      # Helium Browser (fork ungoogled-chromium) z lokalnego flake'a
-      # /home/dinosaur/helium-nix (nixpkgs.follows łączyny z nixpkgs hosta,
-      # więc pakiet buduje się na tym samym drzewie nixpkgs co reszta systemu).
-      helium-package = inputs.helium-nix.packages.${pkgs.system}.helium-bin;
-    in
     {
+      # Helium Browser (fork ungoogled-chromium) — pełna implementacja w
+      # modules/packages/_helium (przeniesiona z ~/helium-nix); wspólna
+      # definicja per-system: /etc/nixos#packages.<system>.helium
       environment.systemPackages = [
-        helium-package
+        (pkgs.callPackage ../../packages/_helium { })
       ];
 
       # sandbox Chromium w buildach Helium działa przez user namespaces;
