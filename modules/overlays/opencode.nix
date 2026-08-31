@@ -60,7 +60,13 @@ _: {
                 },
                 "models": {
                   "glm-5.3-flash:cloud": {
-                    "name": "glm-5.3-flash:cloud"
+                    "name": "glm-5.3-flash:cloud",
+                    "attachment": true,
+                    "tool_call": true,
+                    "modalities": {
+                      "input": ["text", "image", "video"],
+                      "output": ["text"]
+                    }
                   }
                 }
               },
