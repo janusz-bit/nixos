@@ -105,18 +105,6 @@
       };
 
       hardware = {
-        # Samsung ML-2160 printer (SPL driver via splix)
-        printers = {
-          ensurePrinters = [
-            {
-              name = "Samsung-ML-2160";
-              location = "Home";
-              deviceUri = "usb://Samsung/ML-2160";
-              model = "samsung/ml2160.ppd";
-            }
-          ];
-          ensureDefaultPrinter = "Samsung-ML-2160";
-        };
         bluetooth.enable = true;
         enableAllFirmware = true;
         wirelessRegulatoryDatabase = true;
