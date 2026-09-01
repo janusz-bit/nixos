@@ -6,13 +6,13 @@ _: {
   # budujacego dokumentacje cpythona (passthru.doc) — reszta systemu
   # korzysta z normalnych wersji z nixpkgs. Usunac, gdy nixpkgs naprawi
   # docs-builder. Slad w temporary-fixes.md (poz. 1).
-  flake.overlays.python-docs-fix = final: prev: {
+  flake.overlays.python-docs-fix = _final: prev: {
     python311 =
       let
         docsBuilderPython = prev.python3.override {
           self = docsBuilderPython;
-          packageOverrides = pself: pprev: {
-            docutils = pprev.docutils.overridePythonAttrs (old: rec {
+          packageOverrides = _pself: pprev: {
+            docutils = pprev.docutils.overridePythonAttrs (_old: rec {
               version = "0.21.2";
               src = prev.fetchurl {
                 url = "mirror://sourceforge/docutils/docutils-${version}.tar.gz";
@@ -33,7 +33,8 @@ _: {
           };
         };
       in
-      prev.python311 // {
+      prev.python311
+      // {
         doc = prev.python311.doc.overrideAttrs (_old: {
           nativeBuildInputs = with docsBuilderPython.pkgs; [
             sphinxHook
