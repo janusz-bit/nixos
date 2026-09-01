@@ -21,6 +21,7 @@ let
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent # self-improving agent AI (RLM)
+      inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.dsh # DeepSeek agent harness
       nix-update
       tlrc
       fzf

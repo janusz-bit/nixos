@@ -10,7 +10,6 @@
       packages = {
         bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
         helium = pkgs.callPackage ./_helium { };
-        deepseek-harness = pkgs.callPackage ./_deepseek-harness { };
 
         raspberry-pi-4-sd-image =
           let

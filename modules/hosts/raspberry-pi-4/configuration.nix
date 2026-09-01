@@ -16,7 +16,6 @@
       networking.hostName = "raspberry-pi-4";
 
       nixpkgs.overlays = [
-        self.overlays.deepseek-harness
         self.overlays.python-docs-fix
       ];
 
@@ -114,7 +113,6 @@
         nix
         git
         tea # Gitea official CLI client
-        # deepseek-harness # modular agent harness CLI (dsh) — flake.overlays.deepseek-harness
         antigravity-cli
       ];
 

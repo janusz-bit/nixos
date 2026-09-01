@@ -10,7 +10,6 @@
     {
       nixpkgs.overlays = [
         self.overlays.brave-debloater
-        self.overlays.deepseek-harness
         inputs.nix-cachyos-kernel.overlays.default
       ];
 
