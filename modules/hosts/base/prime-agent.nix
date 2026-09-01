@@ -27,6 +27,16 @@
               {
                 id = "ornith:35b";
               }
+              {
+                # Kimi K3 (ollama cloud): thinking + vision + tools
+                # (ollama show kimi-k3:cloud — Capabilities).
+                id = "kimi-k3:cloud";
+                reasoning = true;
+                input = [
+                  "text"
+                  "image"
+                ];
+              }
             ];
           };
           ollama-cloud = {
