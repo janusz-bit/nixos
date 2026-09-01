@@ -5,7 +5,7 @@ _: {
   # Pin docutils 0.21.2 + sphinx 8.2.3 dotyczy WYLACZNIE srodowiska
   # budujacego dokumentacje cpythona (passthru.doc) — reszta systemu
   # korzysta z normalnych wersji z nixpkgs. Usunac, gdy nixpkgs naprawi
-  # docs-builder.
+  # docs-builder. Slad w temporary-fixes.md (poz. 1).
   flake.overlays.python-docs-fix = final: prev: {
     python311 =
       let
