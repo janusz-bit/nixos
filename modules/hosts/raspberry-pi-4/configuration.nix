@@ -17,6 +17,7 @@
 
       nixpkgs.overlays = [
         self.overlays.deepseek-harness
+        self.overlays.python-docs-fix
       ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
