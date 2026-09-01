@@ -98,9 +98,10 @@
         };
       };
 
-      # Workaround for python3.11-doc build failure with sphinx/docutils 0.22
+      # Docs re-enabled to test if python3.11-doc builds again with
+      # sphinx/docutils 0.22 (previously disabled as a workaround).
       # https://github.com/NixOS/nixpkgs/issues/499166
-      documentation.doc.enable = false;
+      documentation.doc.enable = true;
 
       environment.systemPackages = with pkgs; [
         micro
