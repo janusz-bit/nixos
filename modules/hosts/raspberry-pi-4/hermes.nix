@@ -124,6 +124,16 @@
       ];
 
       systemd = {
+        # ~/.hermes/.env holds TRILIUM_ETAPI_TOKEN and other keys.  The
+        # group-readable UMask=0027 (see serviceConfig below) would leave it
+        # 0640, letting the interactive nixos user read the token; this one
+        # file stays 0600 (hermes user only, like the agenix hermes-env
+        # secret).  tmpfiles covers reboots, ExecStartPre covers every
+        # gateway start (e.g. the agent rewriting .env with UMask applied).
+        tmpfiles.rules = [
+          "Z /var/lib/hermes/.hermes/.env 0600 hermes hermes -"
+        ];
+
         services = {
           ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
@@ -149,6 +159,10 @@
             # start lets the service recreate them with correct ownership.
             ExecStartPre = lib.mkBefore [
               "${pkgs.coreutils}/bin/rm -f /var/lib/hermes/.hermes/gateway.lock /var/lib/hermes/.hermes/gateway.pid /var/lib/hermes/.hermes/gateway_state.json"
+
+              # Tighten .env before the gateway reads it (see tmpfiles above).
+              # "-" prefix: ignore error when the file does not exist yet.
+              "-${pkgs.coreutils}/bin/chmod 0600 /var/lib/hermes/.hermes/.env"
             ];
           };
         };
