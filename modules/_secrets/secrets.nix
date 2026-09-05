@@ -23,6 +23,7 @@ in
 {
   "secret1.age" = mkSecret allHosts;
   "notes.age" = mkSecret allHosts;
+  "trilium-etapi.age" = mkSecret allHosts;
   "nextcloud-adminpass.age" = mkSecret allHosts;
   "GITHUB_TOKEN.age" = mkSecret allHosts;
   "cloudflared-tunnel.age" = mkSecret allHosts;

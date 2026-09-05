@@ -35,6 +35,12 @@
             group = "users";
             mode = "0440";
           };
+          trilium-etapi = {
+            file = customTop.secretsDir + "/trilium-etapi.age";
+            owner = "root";
+            group = "users";
+            mode = "0440";
+          };
           google-api-key = {
             file = customTop.secretsDir + "/google-api-key.age";
             owner = "root";

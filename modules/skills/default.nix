@@ -27,13 +27,16 @@
 
       skills = {
         ai-tutor = ./ai-tutor;
+        trilium-notes = ./trilium-notes;
       };
 
       # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
+      # Cały katalog skilla: SKILL.md, references/, a przy skillach pythonowych
+      # też src/ + pyproject.toml (bootstrap kernela Prime Agenta instaluje
+      # pakiety skilli przez `uv pip install --editable`).
       etcEntries = lib.mkMerge (
         lib.mapAttrsToList (name: path: {
-          "ai-skills/${name}/SKILL.md".source = "${path}/SKILL.md";
-          "ai-skills/${name}/references".source = "${path}/references";
+          "ai-skills/${name}".source = path;
         }) skills
       );
 
