@@ -68,6 +68,7 @@ let
       bat
       hw-probe
       fastfetch
+      p7zip # 7z (archiwizator; wymagany m.in. przez reshadelinux)
     ];
 in
 {
