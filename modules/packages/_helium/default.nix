@@ -17,7 +17,6 @@
   makeWrapper,
   patchelf,
   testers,
-  callPackage,
 
   # biblioteki, które binary linkują dynamicznie (DT_NEEDED)
   alsa-lib,
@@ -211,7 +210,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       package = finalAttrs.finalPackage;
       command = "helium --version";
     };
-    updateScript = callPackage ./update.nix { };
   };
 
   meta = {
