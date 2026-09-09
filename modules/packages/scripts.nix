@@ -14,6 +14,15 @@
             git add flake.lock .github/workflows
             git commit -m "flake.lock: update all inputs" flake.lock .github/workflows
           fi
+          echo "Updating helium..."
+          ${config.packages.helium.updateScript}/bin/update-helium \
+            "''$(git rev-parse --show-toplevel)/modules/packages/_helium/default.nix"
+          if ! git diff --exit-code --quiet -- modules/packages/_helium/default.nix; then
+            new_version=''$(grep -oP 'version = "\K[^"]+' modules/packages/_helium/default.nix | head -n1)
+            echo "Committing helium update to ''$new_version..."
+            git add modules/packages/_helium/default.nix
+            git commit -m "helium: update to ''$new_version" modules/packages/_helium/default.nix
+          fi
           echo "Updating bootdev-cli..."
           ${pkgs.lib.getExe pkgs.nix-update} --commit -F bootdev-cli
           echo "All packages updated!"

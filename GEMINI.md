@@ -169,7 +169,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`; `permission.external_directory` allows `/nix/store/**`). Applied via `self.overlays` in host configs and base.
 * **`modules/packages/`**: Custom packages and scripts.
   * `my-neovim` (nvf-based Neovim with gruvbox, LSP, Telescope, which-key, lualine, treesitter, nix/python/clang)
-  * `flake-update` (updates flake.lock, syncs workflows, updates `bootdev-cli` via `nix-update`)
+  * `flake-update` (updates flake.lock, syncs workflows, updates `helium` (own `updateScript` in `modules/packages/_helium/update.nix`) and `bootdev-cli` via `nix-update`)
   * `flake-release` (commits, auto-increments git tag, pushes)
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
@@ -216,7 +216,7 @@ Custom NixOS options:
 
 ## Dev Shell Tools
 Running `nix develop` provides:
-* `flake-update` – updates `flake.lock`, commits it, then updates the `bootdev-cli` package via `nix-update`.
+* `flake-update` – updates `flake.lock`, commits it, then updates the pinned local packages: `helium` (via its `passthru.updateScript`) and `bootdev-cli` (via `nix-update`).
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
 * Pre-commit hooks auto-installed: `gitleaks` (secret scan of the staged diff; NOT a built-in git-hooks-nix hook — defined as a custom hook in `modules/default.nix` with an explicit `entry`), `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.
 
