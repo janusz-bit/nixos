@@ -74,7 +74,7 @@
 
 let
   pname = "helium";
-  version = "0.16.2.1";
+  version = "0.16.6.1";
 
   # biblioteki runtime + sterownik GPU (libGL/EGL z /run/opengl-driver)
   rpath = lib.makeLibraryPath (deps ++ [ "${addDriverRunpath.driverLink}/lib" ]);
@@ -137,8 +137,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       url = "https://github.com/imputnet/helium-linux/releases/download/${version}/helium-bin_${version}-1_${debArch}.deb";
       hash =
         {
-          amd64 = "sha256-/mTzkjCOGmmIq0YIp0WhVCeGEA7WggKCad4SDmd8Q6Q=";
-          arm64 = "sha256-k52TZo6xJ0OpwCGLXPw3D39ZysKHBFzCeEmdy1P6m+4=";
+          amd64 = "sha256-PKyOtK5wFsP/qAtiR6IJfc+pVQaLiPyqtXkmwRBO6JU=";
+          arm64 = "sha256-PLPGYIVN3UwvABglCPYg/n5lYbusk/rXhZwE/ZdxSSU=";
         }
         .${debArch};
     };
