@@ -38,4 +38,5 @@ in
   "opencode.age" = mkSecret serverHosts;
   "open-webui-keys.age" = mkSecret serverHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
+  "openrouter-api-key.age" = mkSecret allHosts;
 }

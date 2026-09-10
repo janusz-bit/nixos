@@ -65,6 +65,12 @@
             group = "users";
             mode = "0440";
           };
+          openrouter-api-key = {
+            file = customTop.secretsDir + "/openrouter-api-key.age";
+            owner = "root";
+            group = "users";
+            mode = "0440";
+          };
         };
         identityPaths = [
           "/root/.ssh/id_ed25519"

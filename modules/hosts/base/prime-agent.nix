@@ -59,6 +59,35 @@
               }
             ];
           };
+          openrouter = {
+            baseUrl = "https://openrouter.ai/api/v1";
+            api = "openai-completions";
+            # Nazwa zmiennej env — wartość z agenix (base/agenix.nix).
+            apiKey = "OPENROUTER_API_KEY";
+            models = [
+              {
+                # DeepSeek V4.1 Flash (OpenRouter): 1M kontekstu,
+                # text+image->text, reasoning_effort + tools.
+                id = "deepseek/deepseek-v4.1-flash";
+                name = "DeepSeek V4.1 Flash (OpenRouter)";
+                reasoning = true;
+                input = [
+                  "text"
+                  "image"
+                ];
+                contextWindow = 1048576;
+                maxTokens = 384000;
+                # Ceny z OpenRouter (za 1M tokenów): $0.15 in / $0.60 out,
+                # cache read $0.003.
+                cost = {
+                  input = 0.15;
+                  output = 0.6;
+                  cacheRead = 0.003;
+                  cacheWrite = 0;
+                };
+              }
+            ];
+          };
         };
       };
 

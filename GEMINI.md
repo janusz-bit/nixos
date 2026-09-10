@@ -54,7 +54,11 @@ A shared set of modules included in every system deployment (`modules/hosts/base
   oraz `ollama-cloud`, `https://ollama.com/v1`, model `glm-5.3-flash:cloud` z
   `reasoning = true` i `input = ["text", "image"]` (czytanie zdjęć; schemat
   prime-agenta nie dopuszcza modalności `video` — filmy deklaruje się wyłącznie
-  w opencode), klucz z env `OLLAMA_API_KEY` z agenix) i `settings.json`
+  w opencode), klucz z env `OLLAMA_API_KEY` z agenix; oraz `openrouter`,
+  `https://openrouter.ai/api/v1`, model `deepseek/deepseek-v4.1-flash`
+  (reasoning + vision + tools, 1M kontekstu, 384k max output, cost
+  $0.15/$0.60/$0.003 za 1M tokenów), klucz z env `OPENROUTER_API_KEY` z agenix
+  (sekret `openrouter-api-key.age`, `agenix -e modules/_secrets/openrouter-api-key.age`)) i `settings.json`
   (`defaultProvider = "ollama-cloud"`, `defaultModel = "glm-5.3-flash:cloud"`, `telemetry.enabled = false` plus env `PRIME_AGENT_TELEMETRY=0` / `DO_NOT_TRACK=1` as a second layer).
   Pliki generowane do `/etc/prime-agent/` i symlinkowane przez tmpfiles do
   `~/.prime/agent/` użytkownika `customBot.defaultUser`. Trade-off: zmiany

@@ -47,11 +47,15 @@
       fishWrappers = [
         {
           name = "prime-agent";
-          description = "prime-agent z kluczem OLLAMA z agenix";
+          description = "prime-agent z kluczami OLLAMA/OPENROUTER z agenix";
           vars = [
             {
               var = "OLLAMA_API_KEY";
               secret = "ollama-api-key";
+            }
+            {
+              var = "OPENROUTER_API_KEY";
+              secret = "openrouter-api-key";
             }
           ];
         }
