@@ -56,6 +56,27 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (sprawdzać przy podbijaniu kernela / `nixos-hardware`); objawem powrotu
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
 
+### 3. `trilium-server` — `overrideAttrs` naprawiający `installPhase` (better-sqlite3 prebuilds)
+
+- **Od:** 2026-09-10 (ten commit)
+- **Pliki:** `modules/hosts/raspberry-pi-4/trilium.nix`
+  (`services.trilium-server.package`)
+- **Objaw:** budowa `trilium-server` 0.105.0 kończy się
+  `No such file or directory` w `installPhase`.
+- **Przyczyna:** bug nixpkgs — `installPhase` robi bezwarunkowe
+  `rm .../better-sqlite3/prebuilds/linuxmusl-x64.node`, ale tarballe 0.105.0
+  nie zawierają tego pliku (aarch64 zawiera tylko
+  `linuxmusl-arm64.node` + `linux-arm64.node`).
+- **Obejście:** `overrideAttrs` podmienia `installPhase` na wersję z
+  `find ... -name 'linuxmusl-*.node' -delete` (delete-if-present) — usuwa
+  prebuildy musl (pierwotny cel `rm`: byłyby błędnie autopatchowane na
+  glibc NixOS), działa dla obu architektur.
+- **Kiedy usunąć:** gdy nixpkgs naprawi `installPhase` (sprawdzać przy
+  podbijaniu trilium-server — wystarczy zwykły `package = pkgs.trilium-server;`).
+- **Jak usunąć:** skasować blok `package = pkgs.trilium-server.overrideAttrs`
+  w `modules/hosts/raspberry-pi-4/trilium.nix`, odpalić testowy build
+  `nix build nixpkgs#trilium-server`, potem `update-boot` na RPi.
+
 ## Zamknięte
 
 - **Pin `hermes-agent` `3f2a389c`** — zdjęty; upstream naprawił broken
