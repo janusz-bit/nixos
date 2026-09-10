@@ -49,8 +49,8 @@
             inherit runsOn;
             steps = mkBaseSteps ++ [
               {
-                name = "Update chaotic flake input";
-                run = "nix flake lock --update-input chaotic";
+                name = "Update nix-cachyos-kernel flake input";
+                run = "nix flake lock --update-input nix-cachyos-kernel";
               }
               {
                 name = "Build Kernel";
@@ -62,7 +62,7 @@
                   git config user.name "github-actions[bot]"
                   git config user.email "github-actions[bot]@users.noreply.github.com"
                   git add flake.lock
-                  git diff --cached --quiet || git commit -m "flake.lock: update chaotic"
+                  git diff --cached --quiet || git commit -m "flake.lock: update nix-cachyos-kernel"
                   git push
                 '';
               }
