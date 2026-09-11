@@ -39,6 +39,13 @@
           enable = true;
           settings.noLambdaPatternNames = true;
         };
+        # UWAGA: entry jest przypięte do store path zbudowanego w momencie
+        # wejścia do dev shella. Po zmianie `modules/github-actions.nix` stary
+        # hook nadal kopiuje workflowy z POPRZEDNIEJ wersji flake i cofa
+        # nowe YAML (objaw: "files were modified by this hook" + stary
+        # workflow w commicie — tak powstał incydent v504). Po edycji
+        # github-actions.nix: wyjść i wejść ponownie do `nix develop`
+        # (albo `SKIP=sync-github-actions git commit` + `nix run .#sync-github-actions`).
         sync-github-actions = {
           enable = true;
           name = "sync-github-actions";
