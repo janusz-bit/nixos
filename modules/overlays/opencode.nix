@@ -5,7 +5,7 @@ _: {
         opencodeJson = prev.writeText "opencode.json" ''
           {
             "$schema": "https://opencode.ai/config.json",
-            "model": "ollama-cloud/glm-5.3-flash:cloud",
+            "model": "ollama-cloud/deepseek-v4.1-flash:cloud",
             "plugin": [
               "superpowers@git+https://github.com/obra/superpowers.git",
               "caveman-opencode-plugin"
@@ -59,6 +59,15 @@ _: {
                   "apiKey": "{env:OLLAMA_API_KEY}"
                 },
                 "models": {
+                  "deepseek-v4.1-flash:cloud": {
+                    "name": "DeepSeek V4.1 Flash",
+                    "attachment": true,
+                    "tool_call": true,
+                    "modalities": {
+                      "input": ["text", "image"],
+                      "output": ["text"]
+                    }
+                  },
                   "glm-5.3-flash:cloud": {
                     "name": "glm-5.3-flash:cloud",
                     "attachment": true,
