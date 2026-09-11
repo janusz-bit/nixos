@@ -129,22 +129,4 @@ in
       # 26.11 evaluation warning and reduce the risk of data loss.
       boot.zfs.forceImportRoot = false;
     };
-
-  flake.homeModules.configuration =
-    {
-      pkgs,
-      config,
-      ...
-    }:
-
-    {
-      nixpkgs.config.allowUnfree = true;
-
-      home = {
-        packages = sharedPackages pkgs;
-        sessionVariables = sharedSessionVariables;
-        shellAliases = environmentShellAliases config;
-      };
-      nix.settings = sharedNixSettings;
-    };
 }

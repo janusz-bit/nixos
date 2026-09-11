@@ -4,10 +4,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     import-tree.url = "github:vic/import-tree";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     nvf.url = "github:notashelf/nvf";
     avf.url = "github:nix-community/nixos-avf";
@@ -18,7 +14,6 @@
     # NIE ustawiać inputs.nixpkgs.follows - musi mieć swój nixpkgs dla zgodności patchy!
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
