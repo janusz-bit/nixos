@@ -93,6 +93,10 @@
           ];
         };
         gc = {
+          # `automatic` domyslnie = false; bez tego nix.gc.dates jest ignorowane
+          # i serwer nigdy nie sprzata /nix/store (modul nix-settings nie jest
+          # importowany na tym hoscie - patrz base/default.nix).
+          automatic = true;
           dates = "daily";
           options = "--delete-older-than 3d";
         };
@@ -103,9 +107,7 @@
       documentation.doc.enable = true;
 
       environment.systemPackages = with pkgs; [
-        micro
-        htop
-        uv
+        # micro, htop i uv pochodza z base (sharedPackages) - nie duplikowac
         nodejs_22
         ripgrep
         ffmpeg

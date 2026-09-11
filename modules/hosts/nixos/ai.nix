@@ -19,7 +19,7 @@
       };
 
       environment.systemPackages = with pkgs; [
-        uv
+        # uv pochodzi z base (sharedPackages) - nie duplikowac
         repomix
         nodejs
         # python313 pinned: python3 (3.14) is too new for torchao, an unsloth dependency
