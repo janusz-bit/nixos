@@ -48,8 +48,8 @@
               {
                 # DeepSeek V4.1 Flash (ollama cloud): thinking + vision + tools,
                 # 1M kontekstu (ollama.com/library/deepseek-v4.1-flash, 2026-09-11).
-                # Tylko do wyboru — default pozostaje glm-5.3-flash:cloud
-                # (przełączenie z 46e43b2 zostało cofnięte w 4bb8f1b).
+                # Default od 2026-09-11 (ponowne wdrożenie 46e43b2, wcześniej
+                # cofnięte w 4bb8f1b); glm-5.3-flash:cloud zostaje jako fallback.
                 id = "deepseek-v4.1-flash:cloud";
                 reasoning = true;
                 input = [
@@ -105,7 +105,7 @@
 
       settingsJson = builtins.toJSON {
         defaultProvider = "ollama-cloud";
-        defaultModel = "glm-5.3-flash:cloud";
+        defaultModel = "deepseek-v4.1-flash:cloud";
         # Wyłączona telemetria (pseudonimowe metryki użycia/wydajności —
         # nigdy bez promptów, odpowiedzi, treści narzędzi, ścieżek, repo).
         telemetry = {

@@ -5,7 +5,7 @@ _: {
         opencodeJson = prev.writeText "opencode.json" ''
           {
             "$schema": "https://opencode.ai/config.json",
-            "model": "ollama-cloud/glm-5.3-flash:cloud",
+            "model": "ollama-cloud/deepseek-v4.1-flash:cloud",
             "plugin": [
               "superpowers@git+https://github.com/obra/superpowers.git",
               "caveman-opencode-plugin"
