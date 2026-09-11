@@ -59,6 +59,15 @@ _: {
                   "apiKey": "{env:OLLAMA_API_KEY}"
                 },
                 "models": {
+                  "deepseek-v4.1-flash:cloud": {
+                    "name": "DeepSeek V4.1 Flash",
+                    "attachment": true,
+                    "tool_call": true,
+                    "modalities": {
+                      "input": ["text", "image"],
+                      "output": ["text"]
+                    }
+                  },
                   "glm-5.3-flash:cloud": {
                     "name": "glm-5.3-flash:cloud",
                     "attachment": true,

@@ -46,6 +46,18 @@
             apiKey = "OLLAMA_API_KEY";
             models = [
               {
+                # DeepSeek V4.1 Flash (ollama cloud): thinking + vision + tools,
+                # 1M kontekstu (ollama.com/library/deepseek-v4.1-flash, 2026-09-11).
+                # Tylko do wyboru — default pozostaje glm-5.3-flash:cloud
+                # (przełączenie z 46e43b2 zostało cofnięte w 4bb8f1b).
+                id = "deepseek-v4.1-flash:cloud";
+                reasoning = true;
+                input = [
+                  "text"
+                  "image"
+                ];
+              }
+              {
                 id = "glm-5.3-flash:cloud";
                 reasoning = true;
                 # Czytanie zdjęć: schemat prime-agenta dopuszcza wyłącznie
