@@ -27,14 +27,11 @@ in
   "nextcloud-adminpass.age" = mkSecret allHosts;
   "GITHUB_TOKEN.age" = mkSecret allHosts;
   "cloudflared-tunnel.age" = mkSecret allHosts;
-  "attic-server-token.age" = mkSecret allHosts;
   "cachix-authtoken-token.age" = mkSecret allHosts;
   "ollama-api-key.age" = mkSecret allHosts;
   "google-api-key.age" = mkSecret allHosts;
   "hermes-env.age" = mkSecret serverHosts;
   "hermes-api-key.age" = mkSecret serverHosts;
-  "hermes-webui-env.age" = mkSecret serverHosts;
-  "librechat-env.age" = mkSecret serverHosts;
   "opencode.age" = mkSecret serverHosts;
   "open-webui-keys.age" = mkSecret serverHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
