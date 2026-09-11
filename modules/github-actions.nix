@@ -45,6 +45,11 @@
             workflowDispatch = { };
           };
           permissions.contents = "write";
+          # Recznie odpalany workflow — bez sensu dwa rownolegle buildy kernela
+          concurrency = {
+            group = "cachyos-kernel-update";
+            cancelInProgress = false;
+          };
           jobs.update-and-build = {
             inherit runsOn;
             steps = mkBaseSteps ++ [
@@ -78,11 +83,24 @@
           runsOn,
           runName ? "Build ${name} by @\${{ github.actor }}",
           kernelTarget ? null,
+          # `tags = false` dla ciezkich buildow. Build toplevela `nixos` trwa
+          # 3-5 h i w wiekszosci pada na infrastrukturze CI (cache.nixos.org,
+          # limity api.github.com), wiec nie odpalamy go przy kazdym tagu —
+          # zostaje PR + reczny workflow_dispatch.
+          tags ? true,
         }:
         {
           inherit name runName;
+          # Least privilege: buildy tylko czytaja repo.
+          permissions.contents = "read";
+          # Ten sam workflow dla tego samego refa nie odpala sie dwa razy.
+          # cancelInProgress = false — nie zabijamy buildow w trakcie.
+          concurrency = {
+            group = "build-${name}-\${{ github.ref }}";
+            cancelInProgress = false;
+          };
           on = {
-            push.tags = [ "v*" ];
+            push = if tags then { tags = [ "v*" ]; } else null;
             pullRequest.branches = [ "master" ];
             workflowDispatch = { };
           };
@@ -157,11 +175,14 @@
                   cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
                 # Na razie wylaczone — kernel budowany recznie, nie w CI
                 kernelTarget = cfg.kernelTarget or null;
+                tags = cfg.tags or true;
               }
             )
             {
               nixos = {
                 arch = "x86_64-linux";
+                # Ciezki build (~400 pakietow, 3-5 h) — tylko PR i dispatch.
+                tags = false;
               };
               raspberry-pi-4 = {
                 arch = "aarch64-linux";
