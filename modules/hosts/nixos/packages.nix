@@ -25,6 +25,10 @@
         # brave
         libreoffice-qt
         kdePackages.qrca
+        # Plugin Wallpaper Engine dla Plazmy 6 (typ tapety "Wallpaper Engine").
+        # Wymaga Steam + Wallpaper Engine (wersja Windows, przez Proton) — ścieżkę
+        # do biblioteki Steam ustawia się w ustawieniach tapety (~/.local/share/Steam).
+        kdePackages.wallpaper-engine-plugin
         signal-desktop
         element-desktop
         (prismlauncher.override {
