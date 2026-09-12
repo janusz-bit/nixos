@@ -170,6 +170,14 @@ _: {
             # Restart sesji, żeby KWin na świeżo wykrył powracającą GPU
             systemctl stop display-manager.service 2>/dev/null || true
 
+            # Reset dGPU zanim wróci pod nvidia: Windows z aktywnym sterownikiem
+            # zostawia kartę w stanie, który potrafi wywrócić inicjalizację
+            # ACPI/SBIOS po rebindzie (hard freeze obserwowany 2026-09-12 13:04).
+            if ! echo 1 > "/sys/bus/pci/devices/$VGA_SLOT/reset" 2>/dev/null; then
+              log "UWAGA: reset dGPU nie powiódł się, kontynuuję"
+            fi
+            sleep 2
+
             # reattach do oryginalnych sterowników (nvidia / snd_hda_intel)
             virsh --connect qemu:///system nodedev-reattach "$VGA_NODE" >/dev/null 2>&1 || true
             virsh --connect qemu:///system nodedev-reattach "$AUDIO_NODE" >/dev/null 2>&1 || true
@@ -189,13 +197,24 @@ _: {
               sleep 2
             done
 
+            # Usuń nieświeże węzły /dev/nvidia* — mają STALE numery major
+            # (nvidia-uvm dostaje major dynamicznie), a udev nie nadpisze ich
+            # (mknod kończy się błędem, gdy plik istnieje). Proces otwierający
+            # taki węzeł trafia na złe urządzenie — realny wektor zamrożenia.
+            rm -f /dev/nvidia* 2>/dev/null || true
+
             # doładuj sterowniki NVIDIA
             modprobe nvidia 2>/dev/null || true
             modprobe nvidia_modeset 2>/dev/null || true
             modprobe nvidia_drm 2>/dev/null || true
             modprobe nvidia_uvm 2>/dev/null || true
 
+            # chwila na ustabilizowanie nvidia-drm (sondy ACPI/backlight)
+            sleep 3
             systemctl start display-manager.service
+
+            # CUDA dopiero po ożywieniu sesji — mniejsze ryzyko wyścigu z KWin
+            sleep 5
             systemctl start ollama.service 2>/dev/null || true
             log "dGPU zwrócona hostowi (PRIME offload/CUDA znów dostępne)"
             exit 0
