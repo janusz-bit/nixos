@@ -22,6 +22,8 @@ _: {
       # Nazwa VM, dla której działa dynamiczny przekaz GPU
       vmName = "win11";
       cfgUser = config.customBot.defaultUser;
+      # szablon VM w /nix/store — nietykalny dla obcinania plików w repo przy boot
+      vfioVmXml = pkgs.writeText "win11-vm.xml" (builtins.readFile ./win11-vm.xml);
 
       qemuHook = pkgs.writeShellApplication {
         name = "vfio-qemu-hook";
@@ -253,6 +255,31 @@ _: {
       systemd.tmpfiles.rules = [
         "f /dev/shm/looking-glass 0660 ${cfgUser} qemu-libvirtd -"
       ];
+
+      # Deklaratywne zdefiniowanie VM z szablonu w /nix/store.
+      # Powód: plik win11-vm.xml w repo bywał obcinany do 0 bajtów przy reboot
+      # (obserwowane 2x na BTRFS, mtime w minuty po starcie systemu) — kopia w
+      # store jest nietykalna. Unit jest idempotentny: definiuje tylko wtedy,
+      # gdy domena jeszcze nie istnieje (ręczne zmiany przez virt-manager
+      # zostają nietknięte).
+      systemd.services.vfio-define-vm = {
+        description = "Idempotentne zdefiniowanie domeny ${vmName} z szablonu w /nix/store";
+        after = [ "libvirtd.service" ];
+        wants = [ "libvirtd.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          if ! ${pkgs.libvirt}/bin/virsh -c qemu:///system dominfo ${vmName} >/dev/null 2>&1; then
+            echo "vfio-define-vm: domena ${vmName} nie istnieje, definiuję z ${vfioVmXml}"
+            ${pkgs.libvirt}/bin/virsh -c qemu:///system define ${vfioVmXml}
+          else
+            echo "vfio-define-vm: domena ${vmName} już istnieje - pomijam"
+          fi
+        '';
+      };
 
       # -c qemu:///system jest konieczne: jako nie-root virsh domyślnie łączy się
       # z qemu:///session (pusta, osobna instancja) i nie widzi systemowych domen

@@ -3,7 +3,9 @@
   Szczegóły modułu: modules/hosts/nixos/vfio.nix. Inspiracja: gist CRTified.
 
   Instalacja:
-    1. dysk:        sudo qemu-img create -f qcow2 /var/lib/libvirt/images/win11.qcow2 128G
+    1. dysk:        virsh -c qemu:///system vol-create-as default win11.qcow2 512G format qcow2
+#                (albo: sudo qemu-img create -f qcow2 /var/lib/libvirt/images/win11.qcow2 512G;
+#                qcow2 jest sparse, wiec sufit 512G kosztuje okolo 200 KiB do pierwszego zapisu)
     2. definicja:   sudo virsh define /etc/nixos/modules/hosts/nixos/win11-vm.xml
     3. start:       vm-start   (albo sudo virsh start win11)
     4. ekran:       vm-console (SPICE) — Windows 11 instaluje się przez pasowaną GPU;
@@ -76,6 +78,18 @@
       <driver name="qemu" type="qcow2" discard="unmap"/>
       <source file="/var/lib/libvirt/images/win11.qcow2"/>
       <target dev="sda" bus="sata"/>
+    </disk>
+    <!-- instalacyjny CD-ROM po USB: OVMF bootuje z USB natywnie, zas SATA cdrom
+         nie wspiera hot-plug. ISO musi lezec w /var/lib/libvirt/images/, bo
+         katalog domowy ma tryb 700 i qemu-libvirtd dostaje EACCES.
+         Podmiana plyty (uwaga: opcje narzedzia zmiany zawieraja podwojne myslniki,
+         ktore sa zakazane w komentarzu XML):
+         virsh -c qemu:///system change-media win11 sdb <sciezka-do-iso> insert config -->
+    <disk type="file" device="cdrom">
+      <driver name="qemu" type="raw"/>
+      <source file="/var/lib/libvirt/images/win11.iso"/>
+      <target dev="sdb" bus="usb"/>
+      <readonly/>
     </disk>
     <controller type="usb" model="qemu-xhci"/>
     <interface type="network">
