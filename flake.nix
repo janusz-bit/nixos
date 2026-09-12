@@ -34,7 +34,13 @@
     # Nie ma go w nixpkgs; używamy community flake'a. NIE ustawiać
     # nixpkgs.follows — pakiet wymaga nowszego nixpkgs (Qt 6.10, clang 22)
     # niż nasz pin (sama zasada co przy nix-cachyos-kernel).
-    waywallen.url = "github:gettbitgirl/nix-waywallen";
+    waywallen = {
+      url = "github:gettbitgirl/nix-waywallen";
+      # Podbicie waywallen-display do v0.3.3: naprawa "plasma empty displays
+      # on login" (reconnect backoff w plugins/qml/WaywallenDisplay.cpp).
+      # Bez tego plugin KDE nie łączy się z daemonem -> "No displays registered".
+      inputs.waywallen-display-src.url = "github:waywallen/waywallen-display/v0.3.3";
+    };
   };
 
   nixConfig = {

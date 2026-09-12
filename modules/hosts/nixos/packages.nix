@@ -9,6 +9,11 @@
       # (image/video/wallhaven + open-wallpaper-engine dla tapet .pkg)
       waywallen = inputs.waywallen.packages.${pkgs.system}.waywallen;
       # Backend wyświetlania dla Plazmy 6 (pauza przy oknach, input myszy)
+      # UWAGA: kpackage waywallen-kde z flake'a community ma zepsuty układ plików
+      # (Plugin/qmldir wskazuje na nieistniejące QML). Działający plugin tapety
+      # instalowany jest z oficjalnego zipa v0.3.3-embed przez kpackagetool6
+      # do ~/.local/share/plasma/wallpapers/ (profil usera przykrywa systemowy).
+      # Do usunięcia, gdy community naprawi packaging: https://github.com/gettbitgirl/nix-waywallen
       waywallen-kde = inputs.waywallen.packages.${pkgs.system}.waywallen-kde;
     in
     {

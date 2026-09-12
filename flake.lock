@@ -1012,16 +1012,16 @@
     "waywallen-display-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1786207473,
-        "narHash": "sha256-vKBo7JlaxZc0YkbBA6GPsF/Mpa9vqoQP9O9eRoMRNMU=",
+        "lastModified": 1786855242,
+        "narHash": "sha256-zqDI++m4lMeggrjq7GtTso6pn6NDVqvipEFvpDe0lC8=",
         "owner": "waywallen",
         "repo": "waywallen-display",
-        "rev": "6fe5cc5d1fe01d7b2e5b1611e7ff29b46bdf6b6b",
+        "rev": "e017b78c3c0c321230666741c049259af82cd500",
         "type": "github"
       },
       "original": {
         "owner": "waywallen",
-        "ref": "v0.3.1",
+        "ref": "v0.3.3",
         "repo": "waywallen-display",
         "type": "github"
       }
