@@ -8,31 +8,9 @@
       # Waywallen (flake nix-waywallen): unified = daemon + UI + pluginy
       # (image/video/wallhaven + open-wallpaper-engine dla tapet .pkg)
       waywallen = inputs.waywallen.packages.${pkgs.system}.waywallen;
-      # Plugin tapety dla Plazmy 6: oficjalny wariant "embed" z release
-      # waywallen-display (moduł QML skompilowany i wbudowany w kpackage,
-      # więc samowystarczalny). Kpackage z flake'a community ma zepsuty
-      # układ plików (Plugin/qmldir wskazuje na nieistniejące QML), stąd
-      # własna derivacja. To podpisany hashem prekompilowany zip
-      # oficjalnego releasu (x86_64) — nie buduje się ze źródeł.
-      waywallen-kde-plugin = pkgs.stdenvNoCC.mkDerivation {
-        pname = "waywallen-kde-plugin";
-        version = "0.3.3";
-        src = pkgs.fetchurl {
-          url = "https://github.com/waywallen/waywallen-display/releases/download/v0.3.3/waywallen-kde-0.3.3-x86_64-embed.zip";
-          hash = "sha256-0SGuTy/KLSZkts1qb1x3GticUwOI3CQVWyRNhzOuBZ4=";
-        };
-        nativeBuildInputs = [ pkgs.unzip ];
-        dontBuild = true;
-        dontFixup = true;
-        installPhase = ''
-          runHook preInstall
-          # setup.sh sam wchodzi do jedynego katalogu zipa (source root)
-          mkdir -p $out/share/plasma/wallpapers/org.waywallen.kde
-          cp -r . $out/share/plasma/wallpapers/org.waywallen.kde/
-          runHook postInstall
-        '';
-        meta.description = "Waywallen KDE Plasma 6 wallpaper plugin (official embed package)";
-      };
+      # Plugin tapety dla Plazmy 6 — szczegóły w
+      # modules/packages/_waywallen-kde-plugin/default.nix
+      waywallen-kde-plugin = pkgs.callPackage ../../packages/_waywallen-kde-plugin { };
     in
     {
       environment.systemPackages = with pkgs; [

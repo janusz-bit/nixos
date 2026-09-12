@@ -10,6 +10,7 @@
       packages = {
         bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
         helium = pkgs.callPackage ./_helium { };
+        waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };
 
         raspberry-pi-4-sd-image =
           let
