@@ -48,8 +48,8 @@
               {
                 # DeepSeek V4.1 Flash (ollama cloud): thinking + vision + tools,
                 # 1M kontekstu (ollama.com/library/deepseek-v4.1-flash, 2026-09-11).
-                # Default od 2026-09-11 (ponowne wdrożenie 46e43b2, wcześniej
-                # cofnięte w 4bb8f1b); glm-5.3-flash:cloud zostaje jako fallback.
+                # Tylko do wyboru — default wraca do glm-5.3-flash:cloud
+                # (przełączenie z 2026-09-11 cofnięte 2026-09-12).
                 id = "deepseek-v4.1-flash:cloud";
                 reasoning = true;
                 input = [
@@ -58,6 +58,8 @@
                 ];
               }
               {
+                # GLM 5.3 Flash (ollama cloud) — default od 2026-09-12
+                # (deepseek-v4.1-flash:cloud wraca do roli fallbacku).
                 id = "glm-5.3-flash:cloud";
                 reasoning = true;
                 # Czytanie zdjęć: schemat prime-agenta dopuszcza wyłącznie
@@ -105,7 +107,7 @@
 
       settingsJson = builtins.toJSON {
         defaultProvider = "ollama-cloud";
-        defaultModel = "deepseek-v4.1-flash:cloud";
+        defaultModel = "glm-5.3-flash:cloud";
         # Wyłączona telemetria (pseudonimowe metryki użycia/wydajności —
         # nigdy bez promptów, odpowiedzi, treści narzędzi, ścieżek, repo).
         telemetry = {

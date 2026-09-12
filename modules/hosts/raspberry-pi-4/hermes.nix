@@ -48,7 +48,7 @@
             model = {
               provider = "ollama-cloud";
               base_url = "https://ollama.com/v1";
-              default = "deepseek-v4.1-flash:cloud"; # deepseek-v4.1-flash przyjmuje tez sufiks :cloud (zweryfikowane HTTP 200, 2026-09-11)
+              default = "glm-5.3-flash:cloud"; # GLM 5.3 Flash (ollama cloud) — default wraca z 2026-09-12
             };
             providers.ollama-cloud = {
               base_url = "https://ollama.com/v1";
@@ -59,7 +59,7 @@
             auxiliary.vision = {
               provider = "ollama-cloud";
               base_url = "https://ollama.com/v1";
-              model = "deepseek-v4.1-flash:cloud"; # vision: text+image->text (DeepSeek V4.1 Flash)
+              model = "glm-5.3-flash:cloud"; # vision: text+image->text (GLM 5.3 Flash)
             };
           };
           environmentFiles = [
