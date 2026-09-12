@@ -33,6 +33,7 @@
   # biblioteki, których binarki szukają w systemie (DT_NEEDED bez rpath /
   # dlopen): AppRun AppImage eksportował LD_LIBRARY_PATH z usr/lib, wrapper
   # odtwarza to zachowanie i dokłada biblioteki z nixpkgs
+  cairo, # libcairo.so.2 — weweb-renderer ma je w DT_NEEDED
   libglvnd, # libGL/libEGL (UI, renderery, CEF)
   vulkan-loader, # podmienia bundlowany libvulkan.so.1
   mesa, # dla rpath libcef.so (dlopen GL/EGL/wayland w CEF)
@@ -100,6 +101,7 @@ let
     alsa-lib
     at-spi2-atk
     at-spi2-core
+    cairo
     cups
     dbus
     expat
