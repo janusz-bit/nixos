@@ -254,10 +254,12 @@ _: {
         "f /dev/shm/looking-glass 0660 ${cfgUser} qemu-libvirtd -"
       ];
 
+      # -c qemu:///system jest konieczne: jako nie-root virsh domyślnie łączy się
+      # z qemu:///session (pusta, osobna instancja) i nie widzi systemowych domen
       environment.shellAliases = {
-        vm-start = "virsh start ${vmName}";
-        vm-stop = "virsh shutdown ${vmName}";
-        vm-status = "virsh list --all";
+        vm-start = "virsh -c qemu:///system start ${vmName}";
+        vm-stop = "virsh -c qemu:///system shutdown ${vmName}";
+        vm-status = "virsh -c qemu:///system list --all";
         vm-console = "virt-viewer -c qemu:///system ${vmName}";
       };
     };
