@@ -102,7 +102,7 @@ An `x86_64-linux` deployment for a **Lenovo LOQ-15IRX10** laptop (Nvidia GPU, Po
 * **AppImage support** (`modules/hosts/nixos/appimage-run.nix`): `programs.appimage` enabled with binfmt registration (custom extra packages dropped as unused).
 * **Containers**: Podman with Docker compatibility, DNS enabled.
 * **AI Tools** (`modules/hosts/nixos/ai.nix`): Ollama (`services.ollama`, package from nixpkgs), Open WebUI currently **disabled** (`enable = false`), `repomix`, Node.js, Python 3.13 with `pip` + `unsloth` (pinned to 3.13: python 3.14 is too new for `torchao`, an unsloth dependency); `uv` is not listed here — it comes from the base shared package list.
-* **Apps**: Zed, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), DeepSeek Harness (`dsh`), `hermes-desktop` (Electron desktop shell for Hermes Agent from `inputs.hermes-agent.packages.*.desktop`, state in `~/.hermes`), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`, VS Code, VSCodium, `helium` (Helium browser, local package `modules/packages/_helium`, auto-updated via `flake-update`), `freecad-qt6`, `antigravity-ide-fhs`, `antigravity-cli`. Brave is **not** installed — `# brave` is commented out in `modules/hosts/nixos/packages.nix`; only the `brave-debloater` policy overlay is applied.
+* **Apps**: Zed, Firefox, LibreOffice (`libreoffice-qt`), Vesktop, Signal, Element, Tor Browser, qBittorrent-enhanced, Trilium, Joplin, Nextcloud client, PrismLauncher, Lutris, VLC, Haruna, Elisa, Kdenlive, Alacritty, sbctl, bootdev-cli, ungoogled-chromium, foliate (ebook reader), OpenCode, Prime Agent (self-improving AI coding agent), DeepSeek Harness (`dsh`), `hermes-desktop` (Electron desktop shell for Hermes Agent from `inputs.hermes-agent.packages.*.desktop`, state in `~/.hermes`), losange, KDE Partition Manager, KDE QRCA, KDE KCalc, `sqlite`, `protonup-qt`, VS Code, VSCodium, `helium` (Helium browser, local package `modules/packages/_helium`, auto-updated via `flake-update`), `freecad-qt6`, `antigravity-ide-fhs`, `antigravity-cli`, `waywallen` (dynamiczne tapety Wayland, lokalny pakiet `modules/packages/_waywallen` + plugin Plasma `waywallen-kde-plugin`). Brave is **not** installed — `# brave` is commented out in `modules/hosts/nixos/packages.nix`; only the `brave-debloater` policy overlay is applied.
 * **Compilers & build tools**: `cmake`, `ninja`, `clang`, `clang-tools`, `lldb`, `boost`, `wine64`, `pkgs.pkgsCross.mingwW64.buildPackages.gcc` (MinGW cross-compiler).
 * **Gitea CLI**: `tea` installed (for interacting with `git.janusz-bit.com`).
 * **Sync**: Syncthing (user data in `~/Sync`).
@@ -177,12 +177,14 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`; `permission.external_directory` allows `/nix/store/**`), `python-docs-fix.nix` (`python-docs-fix`: pins docutils 0.21.2 + sphinx 8.2.3 in the cpython docs-builder — nixpkgs#499166 workaround, tracked in `temporary-fixes.md`; applied on `raspberry-pi-4` only). Applied via `self.overlays` in host configs and base.
 * **`modules/packages/`**: Custom packages and scripts.
   * `my-neovim` (nvf-based Neovim with gruvbox, LSP, Telescope, which-key, lualine, treesitter, nix/python/clang)
-  * `flake-update` (updates flake.lock, syncs workflows, updates `helium` and `bootdev-cli` via `nix-update`)
+  * `flake-update` (updates flake.lock, syncs workflows, updates `helium`, `waywallen` and `bootdev-cli` via `nix-update`)
   * `flake-release` (commits, auto-increments git tag, pushes)
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
   * `bootdev-cli` (Go module, auto-updated via `nix-update` in `flake-update`; currently v1.32.2)
   * `helium` (Helium browser from `imputnet/helium-linux` release `.deb`s; auto-updated via `nix-update` in `flake-update`, two passes: x86_64 version+hash, then `--version skip` for the aarch64 hash)
+  * `waywallen` (dynamiczne tapety Wayland z oficjalnego AppImage v0.3.9 + prebuild pluginu open-wallpaper-engine v0.2.9; auto-updated via `nix-update` in `flake-update`, dwa pasy jak helium — `oweVersion` bumpowany ręcznie)
+  * `waywallen-kde-plugin` (plugin tapety dla Plazmy 6 z release waywallen-display v0.3.3)
   * Note: `prime-agent` and DeepSeek Harness (`dsh`) are provided via the `numtide/llm-agents.nix` flake input (local derivations `_prime-agent` and `_deepseek-harness` removed).
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
 * **`modules/templates/`**: Project scaffolds. `nix flake init -t .` bootstraps a new `_project.nix` template.
@@ -226,7 +228,7 @@ Custom NixOS options:
 
 ## Dev Shell Tools
 Running `nix develop` provides:
-* `flake-update` – updates `flake.lock`, commits it, then updates the pinned local packages via `nix-update`: `helium` (two passes: x86_64 version+hash, then `--version skip` aarch64 hash) and `bootdev-cli`.
+* `flake-update` – updates `flake.lock`, commits it, then updates the pinned local packages via `nix-update`: `helium` and `waywallen` (two passes: x86_64 version+hash, then `--version skip` aarch64 hash) and `bootdev-cli`.
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
 * `repo-sync` (`modules/packages/scripts.nix`) – `git add -A` + commit, then `git pull --rebase --autostash` and `git push`.
 * Pre-commit hooks auto-installed: `gitleaks` (secret scan of the staged diff; NOT a built-in git-hooks-nix hook — defined as a custom hook in `modules/default.nix` with an explicit `entry`), `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.

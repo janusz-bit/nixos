@@ -5,9 +5,10 @@
     let
       # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
       hermes-desktop = inputs.hermes-agent.packages.${pkgs.system}.desktop;
-      # Waywallen (flake nix-waywallen): unified = daemon + UI + pluginy
-      # (image/video/wallhaven + open-wallpaper-engine dla tapet .pkg)
-      waywallen = inputs.waywallen.packages.${pkgs.system}.waywallen;
+      # Waywallen — pakiet lokalny (AppImage + plugin open-wallpaper-engine):
+      # daemon + UI + pluginy image/video/wallhaven + tapety Wallpaper Engine
+      # (.pkg/web). Szczegóły w modules/packages/_waywallen/default.nix
+      waywallen = pkgs.callPackage ../../packages/_waywallen { };
       # Plugin tapety dla Plazmy 6 — szczegóły w
       # modules/packages/_waywallen-kde-plugin/default.nix
       waywallen-kde-plugin = pkgs.callPackage ../../packages/_waywallen-kde-plugin { };

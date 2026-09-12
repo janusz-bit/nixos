@@ -644,22 +644,6 @@
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
       }
     },
-    "nixpkgs_11": {
-      "locked": {
-        "lastModified": 1784796856,
-        "narHash": "sha256-wWFrV5/Qbm+lyt5x20E/bSbfJiGKMo4RCxZV8cl/WZI=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e2587caef70cea85dd97d7daab492899902dbf5d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1788614874,
@@ -824,23 +808,6 @@
         "type": "github"
       }
     },
-    "open-wallpaper-engine-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786296465,
-        "narHash": "sha256-0Nm0O1oKQB3gLRomSx9HGOE8+bq+lSMOC1o6fXcRoO0=",
-        "owner": "waywallen",
-        "repo": "open-wallpaper-engine",
-        "rev": "ebdf46dde2524f4781b7bb2c5ba9000456adb086",
-        "type": "github"
-      },
-      "original": {
-        "owner": "waywallen",
-        "ref": "v0.2.3",
-        "repo": "open-wallpaper-engine",
-        "type": "github"
-      }
-    },
     "pyproject-build-systems": {
       "inputs": {
         "nixpkgs": [
@@ -908,8 +875,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_9",
-        "nvf": "nvf",
-        "waywallen": "waywallen"
+        "nvf": "nvf"
       }
     },
     "systems": {
@@ -985,61 +951,6 @@
       "original": {
         "owner": "pyproject-nix",
         "repo": "uv2nix",
-        "type": "github"
-      }
-    },
-    "waywallen": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_11",
-        "open-wallpaper-engine-src": "open-wallpaper-engine-src",
-        "waywallen-display-src": "waywallen-display-src",
-        "waywallen-src": "waywallen-src"
-      },
-      "locked": {
-        "lastModified": 1786527482,
-        "narHash": "sha256-q1juMUobQ6q6RgzaSNINLRy9utGVlJCxQHzm0zWfCwc=",
-        "owner": "gettbitgirl",
-        "repo": "nix-waywallen",
-        "rev": "128f486356f50f3d35a3fbf615c9560e8ea64aee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gettbitgirl",
-        "repo": "nix-waywallen",
-        "type": "github"
-      }
-    },
-    "waywallen-display-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786855242,
-        "narHash": "sha256-zqDI++m4lMeggrjq7GtTso6pn6NDVqvipEFvpDe0lC8=",
-        "owner": "waywallen",
-        "repo": "waywallen-display",
-        "rev": "e017b78c3c0c321230666741c049259af82cd500",
-        "type": "github"
-      },
-      "original": {
-        "owner": "waywallen",
-        "ref": "v0.3.3",
-        "repo": "waywallen-display",
-        "type": "github"
-      }
-    },
-    "waywallen-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786383648,
-        "narHash": "sha256-QToR+Qh6aDzOEWtjf6fbbhqMzB0a+JFaWibL4AqqBNs=",
-        "owner": "waywallen",
-        "repo": "waywallen",
-        "rev": "dc99becb8de700593800718eabe9c1d1986becee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "waywallen",
-        "ref": "v0.3.3",
-        "repo": "waywallen",
         "type": "github"
       }
     }

@@ -31,16 +31,10 @@
     hermes-agent.url = "github:NousResearch/hermes-agent";
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine).
-    # Nie ma go w nixpkgs; używamy community flake'a. NIE ustawiać
-    # nixpkgs.follows — pakiet wymaga nowszego nixpkgs (Qt 6.10, clang 22)
-    # niż nasz pin (sama zasada co przy nix-cachyos-kernel).
-    waywallen = {
-      url = "github:gettbitgirl/nix-waywallen";
-      # Podbicie waywallen-display do v0.3.3: naprawa "plasma empty displays
-      # on login" (reconnect backoff w plugins/qml/WaywallenDisplay.cpp).
-      # Bez tego plugin KDE nie łączy się z daemonem -> "No displays registered".
-      inputs.waywallen-display-src.url = "github:waywallen/waywallen-display/v0.3.3";
-    };
+    # Dawniej flake nix-waywallen; teraz pakiet lokalny z oficjalnego AppImage
+    # + prebuildu open-wallpaper-engine (modules/packages/_waywallen).
+    # Plugin KDE Plasma: modules/packages/_waywallen-kde-plugin (release
+    # v0.3.3 waywallen-display — naprawa "plasma empty displays on login").
   };
 
   nixConfig = {

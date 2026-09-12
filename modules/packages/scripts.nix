@@ -29,6 +29,23 @@
           fi
           echo "Updating bootdev-cli..."
           ${pkgs.lib.getExe pkgs.nix-update} --commit -F bootdev-cli
+          echo "Updating waywallen..."
+          # Dwa pasy jak przy helium: x86_64 (wersja + hash), potem
+          # aarch64 (hash bez zmiany wersji). OweVersion (plugin
+          # open-wallpaper-engine) bumpuje się RĘCZNIE w
+          # modules/packages/_waywallen/default.nix + `nix hash file`.
+          ww_old=''$(grep -oP 'version = "\K[^"]+' modules/packages/_waywallen/default.nix | head -n1)
+          ${pkgs.lib.getExe pkgs.nix-update} --system x86_64-linux -F waywallen
+          ${pkgs.lib.getExe pkgs.nix-update} --system aarch64-linux -F waywallen --version skip
+          if ! git diff --exit-code --quiet -- modules/packages/_waywallen/default.nix; then
+            ww_new=''$(grep -oP 'version = "\K[^"]+' modules/packages/_waywallen/default.nix | head -n1)
+            echo "Committing waywallen update (''$ww_old -> ''$ww_new)..."
+            git add modules/packages/_waywallen/default.nix
+            git commit \
+              -m "waywallen: ''$ww_old -> ''$ww_new" \
+              -m "Diff: https://github.com/waywallen/waywallen/compare/v''$ww_old...v''$ww_new" \
+              modules/packages/_waywallen/default.nix
+          fi
           echo "All packages updated!"
         '';
 
