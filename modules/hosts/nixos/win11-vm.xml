@@ -1,0 +1,118 @@
+<!--
+  Przykładowa VM Windows 11 z dynamicznie przekazywaną dGPU (NVIDIA 0000:01:00).
+  Szczegóły modułu: modules/hosts/nixos/vfio.nix. Inspiracja: gist CRTified.
+
+  Instalacja:
+    1. dysk:        sudo qemu-img create -f qcow2 /var/lib/libvirt/images/win11.qcow2 128G
+    2. definicja:   sudo virsh define /etc/nixos/modules/hosts/nixos/win11-vm.xml
+    3. start:       vm-start   (albo sudo virsh start win11)
+    4. ekran:       vm-console (SPICE) — Windows 11 instaluje się przez pasowaną GPU;
+                    ekran SPICE służy jako fallback/wyświetlacz dodatkowy.
+  Uwagi:
+    - Klawiatura/mysz przez SPICE (tablet USB) — wystarcza do instalacji i gier.
+    - Disk jest na SATA (sterowniki virtio nie są potrzebne do instalacji).
+    - TPM 2.0 (swtpm) i UEFI (firmware=efi) spełniają wymagania Windows 11.
+    - kvm hidden + hyperv vendor_id ukrywają KVM przed sterownikiem NVIDIA.
+-->
+<domain type="kvm">
+  <name>win11</name>
+  <memory unit="GiB">16</memory>
+  <currentMemory unit="GiB">16</currentMemory>
+  <vcpu placement="static">8</vcpu>
+  <iothreads>1</iothreads>
+  <cputune>
+    <!-- 4 P-core-i5-13450HX (CPUs 0-7, z HT) dla vCPU; emulator/iothread na E-core (12-15) -->
+    <vcpupin vcpu="0" cpuset="0"/>
+    <vcpupin vcpu="1" cpuset="2"/>
+    <vcpupin vcpu="2" cpuset="4"/>
+    <vcpupin vcpu="3" cpuset="6"/>
+    <vcpupin vcpu="4" cpuset="1"/>
+    <vcpupin vcpu="5" cpuset="3"/>
+    <vcpupin vcpu="6" cpuset="5"/>
+    <vcpupin vcpu="7" cpuset="7"/>
+    <emulatorpin cpuset="12-15"/>
+    <iothreadpin iothread="1" cpuset="12-15"/>
+  </cputune>
+  <os firmware="efi">
+    <type arch="x86_64" machine="q35">hvm</type>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv>
+      <relaxed state="on"/>
+      <vapic state="on"/>
+      <spinlocks state="on" retries="8191"/>
+      <vpindex state="on"/>
+      <runtime state="on"/>
+      <synic state="on"/>
+      <stimer state="on"/>
+      <reset state="on"/>
+      <frequencies state="on"/>
+      <tlbflush state="on"/>
+      <ipi state="on"/>
+      <vendor_id state="on" value="1234567890ab"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+    <vmport state="off"/>
+  </features>
+  <cpu mode="host-passthrough" check="none" migratable="off">
+    <topology sockets="1" dies="1" cores="4" threads="2"/>
+    <cache mode="passthrough"/>
+  </cpu>
+  <clock offset="localtime">
+    <timer name="rtc" tickpolicy="catchup"/>
+    <timer name="pit" tickpolicy="delay"/>
+    <timer name="hpet" present="no"/>
+    <timer name="hypervclock" present="yes"/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2" discard="unmap"/>
+      <source file="/var/lib/libvirt/images/win11.qcow2"/>
+      <target dev="sda" bus="sata"/>
+    </disk>
+    <controller type="usb" model="qemu-xhci"/>
+    <interface type="network">
+      <mac address="52:54:00:11:22:33"/>
+      <source network="default"/>
+      <model type="e1000e"/>
+    </interface>
+    <input type="tablet" bus="usb"/>
+    <input type="keyboard" bus="usb"/>
+    <graphics type="spice" autoport="yes">
+      <listen type="address" address="127.0.0.1"/>
+      <image compression="off"/>
+    </graphics>
+    <channel type="spicevmc">
+      <target type="virtio" name="com.redhat.spice.0"/>
+    </channel>
+    <video>
+      <model type="virtio"/>
+    </video>
+    <memballoon model="none"/>
+    <tpm model="tpm-crb">
+      <backend type="emulator" version="2.0"/>
+    </tpm>
+    <!-- przekaz dGPU: karta + HDMI audio; managed=no — podpięciem zarządza hook -->
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source>
+        <address domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
+      </source>
+    </hostdev>
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source>
+        <address domain="0x0000" bus="0x01" slot="0x00" function="0x1"/>
+      </source>
+    </hostdev>
+    <shmem name="looking-glass">
+      <model type="ivshmem-plain"/>
+      <size unit="M">32</size>
+    </shmem>
+  </devices>
+</domain>

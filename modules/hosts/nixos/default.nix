@@ -23,6 +23,7 @@
         self.modules.nixos.nixos-dbd
         self.modules.nixos.nixos-gaming
         self.modules.nixos.nixos-snapper
+        self.modules.nixos.nixos-vfio
       ];
     };
 
