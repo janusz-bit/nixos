@@ -6,7 +6,10 @@
       services = {
         ollama = {
           enable = true;
-          # package = pkgs.ollama; # domyślnie z nixpkgs
+          # Wariant CUDA: wrapuje binarkę z LD_LIBRARY_PATH (runpath OpenGL),
+          # więc ollama znajduje libcuda.so.1 sterownika NVIDIA i widzi dGPU.
+          # Bez tego wykrywanie kończy się cicho na CPU (id=cpu w logu).
+          package = pkgs.ollama-cuda;
         };
         open-webui = {
           enable = false;

@@ -8,6 +8,9 @@
 #     wyładowuje moduły NVIDIA, podpina 0000:01:00.0 (karta) i 0000:01:00.1
 #     (HDMI audio) pod vfio-pci, po czym wznawia sesję — Plasma wstaje na iGPU.
 #   - Po zamknięciu VM hook robi odwrotnie (reattach + modprobe + restart sesji).
+#   - Sesja użytkownika jest pinowana do iGPU przez symlink bez dwukropków
+#     (/dev/dri/igpu-card, KWin dzieli KWIN_DRM_DEVICES po ":"); greeter i boot
+#     pozostają domyślne. Funkcja audio dGPU zostaje na vfio-pci między cyklami.
 #   - Monitor na wyjściu HDMI dGPU pokazuje obraz dopiero po zwrocie GPU do hosta.
 #   - Definicja przykładowej VM: modules/hosts/nixos/win11-vm.xml (virsh define).
 _: {
@@ -178,20 +181,23 @@ _: {
             fi
             sleep 2
 
-            # reattach do oryginalnych sterowników (nvidia / snd_hda_intel)
+            # Reattach TYLKO VGA. Funkcja audio zostaje na vfio-pci:
+            # jej powrót pod snd_hda_intel sprawiał, że PipeWire nowej sesji
+            # otwierał PCM karty NVIDIA (kernel: „Enabling HDA controller”
+            # w momencie logowania) — a to pchnięcie poprzedzało oba
+            # zamrożenia (2026-09-12 13:03 i 13:18). Monitor jest na iGPU,
+            # więc host nie potrzebuje HDMI audio dGPU.
             virsh --connect qemu:///system nodedev-reattach "$VGA_NODE" >/dev/null 2>&1 || true
-            virsh --connect qemu:///system nodedev-reattach "$AUDIO_NODE" >/dev/null 2>&1 || true
 
             try=0
             while true; do
-              if ! driver_of "$VGA_SLOT" | grep -q vfio-pci && ! driver_of "$AUDIO_SLOT" | grep -q vfio-pci; then
+              if ! driver_of "$VGA_SLOT" | grep -q vfio-pci; then
                 break
               fi
               echo "$VGA_SLOT" > /sys/bus/pci/drivers_probe 2>/dev/null || true
-              echo "$AUDIO_SLOT" > /sys/bus/pci/drivers_probe 2>/dev/null || true
               try=$((try + 1))
               if [ "$try" -ge 10 ]; then
-                log "UWAGA: sloty nadal na vfio-pci po reattach"
+                log "UWAGA: slot VGA nadal na vfio-pci po reattach"
                 break
               fi
               sleep 2
@@ -208,6 +214,25 @@ _: {
             modprobe nvidia_modeset 2>/dev/null || true
             modprobe nvidia_drm 2>/dev/null || true
             modprobe nvidia_uvm 2>/dev/null || true
+
+            # Gwarancja świeżych węzłów z POPRAWNYMI majorami — udev bywa w tym
+            # w wyścigu (mknod EEXIST przy równoległych zdarzeniach), a CUDA
+            # wymaga zgodności (nvidia-uvm dostaje major dynamiczny per modprobe).
+            while read -r minor; do
+              [ -n "$minor" ] || continue
+              [ -e "/dev/nvidia$minor" ] || mknod -m 666 "/dev/nvidia$minor" c 195 "$minor"
+            done < <(cat /proc/driver/nvidia/gpus/*/information | grep Minor | cut -d ' ' -f 4)
+            [ -e /dev/nvidiactl ] || mknod -m 666 /dev/nvidiactl c 195 255
+            [ -e /dev/nvidia-modeset ] || mknod -m 666 /dev/nvidia-modeset c 195 254
+            uvm_major="$(grep nvidia-uvm /proc/devices | cut -d ' ' -f 1)"
+            rm -f /dev/nvidia-uvm /dev/nvidia-uvm-tools
+            mknod -m 666 /dev/nvidia-uvm c "$uvm_major" 0
+            mknod -m 666 /dev/nvidia-uvm-tools c "$uvm_major" 1
+
+            # Awaryjne odtworzenie symlinka bez dwukropków (KWin rozbija
+            # KWIN_DRM_DEVICES po ":"). Podstawą jest reguła udev + tmpfiles.
+            mkdir -p /dev/dri
+            ln -sfn /dev/dri/by-path/pci-0000:00:02.0-card /dev/dri/igpu-card
 
             # chwila na ustabilizowanie nvidia-drm (sondy ACPI/backlight)
             sleep 3
@@ -241,8 +266,13 @@ _: {
       ];
 
       # /dev/vfio/<grupa-IOMMU> dla qemu działającego bez roota
+      # + stabilny symlink /dev/dri/igpu-card na kartę iGPU. KWin rozbija
+      # KWIN_DRM_DEVICES po dwukropkach (by-path zawiera adres PCI), więc
+      # musimy dać mu ścieżkę bez ":". DEVPATH jest niezależny od kolejności
+      # reguł (nie zależy od ENV{ID_PATH} ustawianego w 60-drm.rules).
       services.udev.extraRules = ''
         SUBSYSTEM=="vfio", OWNER="root", GROUP="kvm", MODE="0660"
+        SUBSYSTEM=="drm", KERNEL=="card[0-9]*", DEVPATH=="*/0000:00:02.0/drm/*", SYMLINK+="dri/igpu-card"
       '';
 
       virtualisation.libvirtd = {
@@ -285,6 +315,17 @@ _: {
         # bufor współdzielony looking-glass (używany, gdy VM ma urządzenie shmem)
         tmpfiles.rules = [
           "f /dev/shm/looking-glass 0660 ${cfgUser} qemu-libvirtd -"
+
+          # Kopia zapasowa symlinka dla KWin (podstawą jest reguła udev).
+          # Cel może być przejściowo "wiszący" — do zakończenia coldplug udev.
+          "L+ /dev/dri/igpu-card - - - - /dev/dri/by-path/pci-0000:00:02.0-card"
+
+          # Pinning sesji użytkownika do iGPU (greeter celowo zostaje domyślny —
+          # boot wygląda identycznie jak dziś). Plasma 6 źródłuje
+          # ~/.config/plasma-workspace/env/*.sh na starcie sesji, więc zmienna
+          # trafia tylko do KWin zalogowanego użytkownika.
+          "d /home/${cfgUser}/.config/plasma-workspace/env 0755 ${cfgUser} users - -"
+          "f+ /home/${cfgUser}/.config/plasma-workspace/env/igpu-kwin.sh 0644 ${cfgUser} users - export KWIN_DRM_DEVICES=/dev/dri/igpu-card"
         ];
 
         # Deklaratywne zdefiniowanie VM z szablonu w /nix/store.
