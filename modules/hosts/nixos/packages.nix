@@ -8,13 +8,31 @@
       # Waywallen (flake nix-waywallen): unified = daemon + UI + pluginy
       # (image/video/wallhaven + open-wallpaper-engine dla tapet .pkg)
       waywallen = inputs.waywallen.packages.${pkgs.system}.waywallen;
-      # Backend wyświetlania dla Plazmy 6 (pauza przy oknach, input myszy)
-      # UWAGA: kpackage waywallen-kde z flake'a community ma zepsuty układ plików
-      # (Plugin/qmldir wskazuje na nieistniejące QML). Działający plugin tapety
-      # instalowany jest z oficjalnego zipa v0.3.3-embed przez kpackagetool6
-      # do ~/.local/share/plasma/wallpapers/ (profil usera przykrywa systemowy).
-      # Do usunięcia, gdy community naprawi packaging: https://github.com/gettbitgirl/nix-waywallen
-      waywallen-kde = inputs.waywallen.packages.${pkgs.system}.waywallen-kde;
+      # Plugin tapety dla Plazmy 6: oficjalny wariant "embed" z release
+      # waywallen-display (moduł QML skompilowany i wbudowany w kpackage,
+      # więc samowystarczalny). Kpackage z flake'a community ma zepsuty
+      # układ plików (Plugin/qmldir wskazuje na nieistniejące QML), stąd
+      # własna derivacja. To podpisany hashem prekompilowany zip
+      # oficjalnego releasu (x86_64) — nie buduje się ze źródeł.
+      waywallen-kde-plugin = pkgs.stdenvNoCC.mkDerivation {
+        pname = "waywallen-kde-plugin";
+        version = "0.3.3";
+        src = pkgs.fetchurl {
+          url = "https://github.com/waywallen/waywallen-display/releases/download/v0.3.3/waywallen-kde-0.3.3-x86_64-embed.zip";
+          hash = "sha256-0SGuTy/KLSZkts1qb1x3GticUwOI3CQVWyRNhzOuBZ4=";
+        };
+        nativeBuildInputs = [ pkgs.unzip ];
+        dontBuild = true;
+        dontFixup = true;
+        installPhase = ''
+          runHook preInstall
+          # setup.sh sam wchodzi do jedynego katalogu zipa (source root)
+          mkdir -p $out/share/plasma/wallpapers/org.waywallen.kde
+          cp -r . $out/share/plasma/wallpapers/org.waywallen.kde/
+          runHook postInstall
+        '';
+        meta.description = "Waywallen KDE Plasma 6 wallpaper plugin (official embed package)";
+      };
     in
     {
       environment.systemPackages = with pkgs; [
@@ -39,7 +57,7 @@
         # Nie wymaga Steama/Protonu; tapety Wallpaper Engine przez wbudowany
         # plugin open-wallpaper-engine. Ustawianie tapet: aplikacja waywallen.
         waywallen
-        waywallen-kde
+        waywallen-kde-plugin
         signal-desktop
         element-desktop
         (prismlauncher.override {
