@@ -30,6 +30,11 @@
     # import in nix/tui.nix; upstream moved on and the pin was lifted.
     hermes-agent.url = "github:NousResearch/hermes-agent";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine).
+    # Nie ma go w nixpkgs; używamy community flake'a. NIE ustawiać
+    # nixpkgs.follows — pakiet wymaga nowszego nixpkgs (Qt 6.10, clang 22)
+    # niż nasz pin (sama zasada co przy nix-cachyos-kernel).
+    waywallen.url = "github:gettbitgirl/nix-waywallen";
   };
 
   nixConfig = {

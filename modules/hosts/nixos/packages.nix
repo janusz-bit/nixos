@@ -5,6 +5,11 @@
     let
       # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
       hermes-desktop = inputs.hermes-agent.packages.${pkgs.system}.desktop;
+      # Waywallen (flake nix-waywallen): unified = daemon + UI + pluginy
+      # (image/video/wallhaven + open-wallpaper-engine dla tapet .pkg)
+      waywallen = inputs.waywallen.packages.${pkgs.system}.waywallen;
+      # Backend wyświetlania dla Plazmy 6 (pauza przy oknach, input myszy)
+      waywallen-kde = inputs.waywallen.packages.${pkgs.system}.waywallen-kde;
     in
     {
       environment.systemPackages = with pkgs; [
@@ -25,10 +30,11 @@
         # brave
         libreoffice-qt
         kdePackages.qrca
-        # Plugin Wallpaper Engine dla Plazmy 6 (typ tapety "Wallpaper Engine").
-        # Wymaga Steam + Wallpaper Engine (wersja Windows, przez Proton) — ścieżkę
-        # do biblioteki Steam ustawia się w ustawieniach tapety (~/.local/share/Steam).
-        kdePackages.wallpaper-engine-plugin
+        # Waywallen — dynamiczne tapety (zamiennik Wallpaper Engine Plugin).
+        # Nie wymaga Steama/Protonu; tapety Wallpaper Engine przez wbudowany
+        # plugin open-wallpaper-engine. Ustawianie tapet: aplikacja waywallen.
+        waywallen
+        waywallen-kde
         signal-desktop
         element-desktop
         (prismlauncher.override {
