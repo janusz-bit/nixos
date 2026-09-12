@@ -138,10 +138,10 @@ _: {
           if [ "$OPERATION" = "prepare" ]; then
             log "prepare: oddaję dGPU pod VM $GUEST_NAME"
 
-            # 1. Zatrzymaj CUDA/ollamę. Sesji graficznej NIE zatrzymujemy:
-            #    kompozycja jest przypięta do iGPU (KWIN_DRM_DEVICES), więc nie
-            #    trzyma dGPU i przełączenie GPU nie wylogowuje użytkownika.
+            # 1. Zatrzymaj wszystko, co może trzymać dGPU (sesja graficzna, CUDA/ollama)
             systemctl stop ollama.service 2>/dev/null || true
+            systemctl stop display-manager.service || fail "nie mogę zatrzymać display-manager"
+            sleep 2
 
             # 2. Upewnij się, że nic nie trzyma GPU (ubij zbłąkane procesy)
             kill_gpu_holders
@@ -158,15 +158,18 @@ _: {
             modprobe vfio_pci 2>/dev/null || true
             virsh --connect qemu:///system net-start default >/dev/null 2>&1 || true
 
-            log "dGPU przekazana VM $GUEST_NAME; sesja graficzna pozostała nietknięta (KWin na iGPU)"
+            # 5. Sesja graficzna wraca — teraz na iGPU
+            systemctl start display-manager.service || log "UWAGA: display-manager nie wystartował"
+            log "dGPU przekazana VM $GUEST_NAME; sesja graficzna działa na iGPU"
             exit 0
           fi
 
           if [ "$OPERATION" = "release" ]; then
             log "release: zwracam dGPU hostowi"
 
-            # Sesji graficznej nie ruszamy (przypięta do iGPU); KWin wykryje
-            # powracającą GPU sam, przez udev.
+            # Restart sesji, żeby KWin na świeżo wykrył powracającą GPU
+            systemctl stop display-manager.service 2>/dev/null || true
+
             # reattach do oryginalnych sterowników (nvidia / snd_hda_intel)
             virsh --connect qemu:///system nodedev-reattach "$VGA_NODE" >/dev/null 2>&1 || true
             virsh --connect qemu:///system nodedev-reattach "$AUDIO_NODE" >/dev/null 2>&1 || true
@@ -192,8 +195,9 @@ _: {
             modprobe nvidia_drm 2>/dev/null || true
             modprobe nvidia_uvm 2>/dev/null || true
 
+            systemctl start display-manager.service
             systemctl start ollama.service 2>/dev/null || true
-            log "dGPU zwrócona hostowi (PRIME offload/CUDA znów dostępne); sesja bez zmian"
+            log "dGPU zwrócona hostowi (PRIME offload/CUDA znów dostępne)"
             exit 0
           fi
 
@@ -248,12 +252,6 @@ _: {
           pciutils
         ];
 
-        # Przypięcie kompozycji do iGPU (Intel 0000:00:02.0): KWin nie otwiera
-        # dGPU, więc sterownik NVIDIA da się wyładować bez zabijania sesji.
-        # Uwaga: monitor/eDP muszą wisieć na iGPU (tak jest u nas: DP-1 + eDP-1).
-        # Jeśli kiedyś podepniesz monitor do wyjścia dGPU — usuń przypięcia.
-        sessionVariables.KWIN_DRM_DEVICES = "/dev/dri/by-path/pci-0000:00:02.0-card";
-
         # -c qemu:///system jest konieczne: jako nie-root virsh domyślnie łączy się
         # z qemu:///session (pusta, osobna instancja) i nie widzi systemowych domen
         shellAliases = {
@@ -264,11 +262,7 @@ _: {
         };
       };
 
-      # greeter SDDM też odpala kwin_wayland — bez pinningu trzymałby dGPU;
-      # env ustawiony na service display-manager dziedziczy greeter i sesja
       systemd = {
-        services.display-manager.environment.KWIN_DRM_DEVICES = "/dev/dri/by-path/pci-0000:00:02.0-card";
-
         # bufor współdzielony looking-glass (używany, gdy VM ma urządzenie shmem)
         tmpfiles.rules = [
           "f /dev/shm/looking-glass 0660 ${cfgUser} qemu-libvirtd -"
