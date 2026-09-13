@@ -88,6 +88,17 @@
         # Install firefox.
         firefox.enable = true;
 
+        # Plasma Browser Integration — rozszerzenie "Plasma Integration"
+        # (plasma-browser-integration@kde.org, w Helium) łączy się z hostem
+        # przez native messaging. Moduł plasma6 w nixpkgs ustawia już
+        # enablePlasmaBrowserIntegration + pakiet, ale manifesty hosta w
+        # /etc/chromium i /etc/opt/chrome wystawia dopiero ta opcja —
+        # NICZEGO nie instaluje, pisze tylko polityki i manifesty do /etc.
+        # Bez tego Helium (.deb) i ungoogled-chromium pokazują błąd
+        # "Specified native messaging host not found." Firefox jest podpięty
+        # przez moduł plasma6 (programs.firefox.nativeMessagingHosts).
+        chromium.enable = true;
+
         obs-studio = {
           enable = true;
 
