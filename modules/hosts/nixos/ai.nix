@@ -25,6 +25,8 @@
         # uv pochodzi z base (sharedPackages) - nie duplikowac
         repomix
         nodejs
+        # skill: obscura — headless antidetect browser dla agentów (modules/skills/obscura)
+        obscura
         # python313 pinned: python3 (3.14) is too new for torchao, an unsloth dependency
         (pkgs.python313.withPackages (
           python-pkgs: with python-pkgs; [

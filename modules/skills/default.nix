@@ -28,6 +28,7 @@
       skills = {
         ai-tutor = ./ai-tutor;
         trilium-notes = ./trilium-notes;
+        obscura = ./obscura;
       };
 
       # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
