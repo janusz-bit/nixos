@@ -31,10 +31,20 @@
         obscura = ./obscura;
       };
 
+      # Skille pythonowe (src/ + pyproject.toml). Kernel Prime Agenta działa na
+      # PRIME_AGENT_KERNEL_PYTHON (read-only env z flake llm-agents), więc
+      # bootstrap NIE zrobi `uv pip install --editable` — tylko sprawdza
+      # `import <skill>` i wyłącza skill z warningiem, gdy import się nie uda.
+      # Dlatego src/ trafia do PYTHONPATH (sessionVariables -> prime-agent ->
+      # kernel) i skill jest importowalny out-of-the-box. Nowy skill pythonowy:
+      # dodaj do `skills` ORAZ do `pythonSkills`.
+      pythonSkills = [ "trilium-notes" ];
+      pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
+
       # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
       # Cały katalog skilla: SKILL.md, references/, a przy skillach pythonowych
-      # też src/ + pyproject.toml (bootstrap kernela Prime Agenta instaluje
-      # pakiety skilli przez `uv pip install --editable`).
+      # też src/ + pyproject.toml (kernel Prime Agenta importuje je z PYTHONPATH,
+      # bo PRIME_AGENT_KERNEL_PYTHON to read-only env — bez uv pip install).
       etcEntries = lib.mkMerge (
         lib.mapAttrsToList (name: path: {
           "ai-skills/${name}".source = path;
@@ -96,6 +106,9 @@
     in
     {
       environment.etc = etcEntries;
+
+      # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
+      environment.sessionVariables.PYTHONPATH = lib.concatStringsSep ":" pythonSkillSrcs;
 
       systemd = {
         tmpfiles.rules = [

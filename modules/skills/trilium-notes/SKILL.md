@@ -5,9 +5,12 @@ description: Read, search, edit and organize the user's Trilium notes (daily not
 
 # Trilium Notes (MCP)
 
-HTTP MCP server at `http://127.0.0.1:8081/mcp` (TriliumNext 0.105 built-in),
-Bearer auth with the ETAPI token from `/run/agenix/trilium-etapi`
-(loaded automatically into `TRILIUM_ETAPI_TOKEN` at import time).
+HTTP MCP server (TriliumNext 0.105 built-in), Bearer auth with the ETAPI token
+from `/run/agenix/trilium-etapi` (loaded automatically into
+`TRILIUM_ETAPI_TOKEN` at import time). Server URL is host-dependent via
+`TRILIUM_MCP_URL` (defaults to the raspberry-pi-4 server, `127.0.0.1:8081`;
+the `nixos` workstation sets `http://127.0.0.1:37840/mcp` for its desktop
+Trilium in `modules/hosts/nixos/ai.nix`).
 
 ## Usage
 
@@ -44,7 +47,15 @@ Note IDs are Trilium NoteIds (e.g. `gizBJ1qzBFsT`), not titles.
 
 ## Details
 
-- Server: systemd unit `trilium-server`, port 8081, data dir `/var/lib/trilium`.
+- Server (raspberry-pi-4): systemd unit `trilium-server`, port 8081, data dir
+  `/var/lib/trilium`.
+- Server (nixos): desktop app `trilium-desktop` (packages.nix), run manually;
+  ETAPI/MCP on 127.0.0.1:37840, data dir `~/.local/share/trilium-data`,
+  config `~/.config/trilium-37840/`.
+- The Python package is NOT installed by the kernel bootstrap
+  (`PRIME_AGENT_KERNEL_PYTHON` points to a read-only env, so
+  `uv pip install --editable` can't work there). It is importable thanks to
+  `PYTHONPATH` set from `modules/skills/default.nix` (pythonSkills).
 - The ETAPI token is shared with the Hermes agent (its `~/.hermes/.env`).
   Rotate in Trilium UI (Settings -> ETAPI tokens), then update BOTH the
   agenix secret (`modules/_secrets/trilium-etapi.age` via

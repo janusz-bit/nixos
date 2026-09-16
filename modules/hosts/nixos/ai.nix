@@ -21,6 +21,14 @@
         };
       };
 
+      environment.sessionVariables = {
+        # Skill trilium-notes (modules/skills/trilium-notes): na tym hoście działa
+        # desktopowy Trilium (trilium-desktop w packages.nix, uruchamiany ręcznie,
+        # ETAPI/MCP na 127.0.0.1:37840), a nie trilium-server:8081 z raspberry-pi-4
+        # (default w skillu).
+        TRILIUM_MCP_URL = "http://127.0.0.1:37840/mcp";
+      };
+
       environment.systemPackages = with pkgs; [
         # uv pochodzi z base (sharedPackages) - nie duplikowac
         repomix
