@@ -113,6 +113,16 @@
         telemetry = {
           enabled = false;
         };
+        # Notatki Trilium (desktop na localhost:37840) przez MCP.
+        # Token tylko przez zmienną środowiskową — literalne sekrety
+        # prime-agent odrzuca (docs: packages/coding-agent/docs/mcp-integrations.md).
+        mcpServers = {
+          trilium-notes = {
+            type = "http";
+            url = "http://127.0.0.1:37840/mcp";
+            bearerTokenEnvVar = "TRILIUM_ETAPI_TOKEN";
+          };
+        };
       };
     in
     {

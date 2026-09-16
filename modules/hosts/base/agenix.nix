@@ -57,6 +57,10 @@
               var = "OPENROUTER_API_KEY";
               secret = "openrouter-api-key";
             }
+            {
+              var = "TRILIUM_ETAPI_TOKEN";
+              secret = "trilium-etapi";
+            }
           ];
         }
         {
