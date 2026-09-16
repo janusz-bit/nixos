@@ -45,6 +45,22 @@ Key tools: `search_notes`, `get_note`, `get_note_content`, `get_subtree`,
 `set_note_content`, `rename_note`, `delete_note`, `set_attribute`.
 Note IDs are Trilium NoteIds (e.g. `gizBJ1qzBFsT`), not titles.
 
+
+## Formatting notes (markdown-first)
+
+Write note content with native Trilium/markdown structures only.
+Do NOT use inline `style=` attributes, custom CSS classes or wrapper `div`s -
+they are a maintenance burden and break the theme.
+
+Use:
+
+- `h2`/`h3`/`h4` headings, paragraphs, `<b>`/`<i>`, lists
+- `<blockquote>` for callouts, formulas, answers (instead of colored boxes)
+- `<strong>` for badges/labels (e.g. **PYTHON**, **SQL**)
+- native code blocks: `<pre><code class="language-text-x-python">` / `language-text-x-sql`
+- tables as CKEditor markup: `<figure class="table"><table><thead>...<tbody>` -
+  Trilium adds borders itself (cells must live in thead/tbody, not directly in table)
+- no `<nav>` (Trilium renders its own TOC from headings), no `var(--x)`
 ## Details
 
 - Server (raspberry-pi-4): systemd unit `trilium-server`, port 8081, data dir
