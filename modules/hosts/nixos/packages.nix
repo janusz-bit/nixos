@@ -54,6 +54,11 @@
         lutris
         bootdev-cli
         kdePackages.kcalc
+        # Narzędzia do rysowania (odpowiednik Windows Paint):
+        # KolourPaint — prosty paint z KDE; Pinta — jak Paint.NET
+        # (warstwy, historia zmian, efekty).
+        kdePackages.kolourpaint
+        pinta
         nextcloud-client
         haruna
         kdePackages.elisa
