@@ -59,6 +59,8 @@
         # (warstwy, historia zmian, efekty).
         kdePackages.kolourpaint
         pinta
+        # JupyterLab + notebook + ipykernel (metapakiet jupyter-all)
+        jupyter-all
         nextcloud-client
         haruna
         kdePackages.elisa
