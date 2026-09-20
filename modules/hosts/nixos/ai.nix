@@ -31,6 +31,8 @@
 
       environment.systemPackages = with pkgs; [
         # uv pochodzi z base (sharedPackages) - nie duplikowac
+        # OpenAI Codex CLI — agent kodujący w terminalu
+        codex
         repomix
         nodejs
         # skill: obscura — headless antidetect browser dla agentów (modules/skills/obscura)
