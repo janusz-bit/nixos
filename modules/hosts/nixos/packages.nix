@@ -54,6 +54,9 @@
         lutris
         bootdev-cli
         kdePackages.kcalc
+        # KRecorder — dyktafon (nagrywanie dźwięku z mikrofonu, lista nagrań,
+        # odtwarzacz; aplikacja KDE na Kirigami).
+        kdePackages.krecorder
         # Narzędzia do rysowania (odpowiednik Windows Paint):
         # KolourPaint — prosty paint z KDE; Pinta — jak Paint.NET
         # (warstwy, historia zmian, efekty).
