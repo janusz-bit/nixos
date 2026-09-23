@@ -90,6 +90,7 @@
         antigravity-ide-fhs
         antigravity-cli
         hermes-desktop
+        chatgpt
       ];
 
       hardware.wooting.enable = true;
