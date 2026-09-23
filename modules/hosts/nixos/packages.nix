@@ -90,7 +90,8 @@
         antigravity-ide-fhs
         antigravity-cli
         hermes-desktop
-        chatgpt
+        # chatgpt z nixpkgs usunięty: aarch64-darwin-only; ChatGPT Desktop dla
+        # x86_64-linux (deb) jest w modules/hosts/nixos/ai.nix z llm-agents.nix
       ];
 
       hardware.wooting.enable = true;

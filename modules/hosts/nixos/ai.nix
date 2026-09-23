@@ -31,8 +31,10 @@
 
       environment.systemPackages = with pkgs; [
         # uv pochodzi z base (sharedPackages) - nie duplikowac
-        # OpenAI Codex CLI — agent kodujący w terminalu
-        codex
+        # OpenAI Codex CLI — agent kodujący w terminalu (llm-agents.nix)
+        inputs.llm-agents.packages.${pkgs.system}.codex
+        # ChatGPT — desktopowa aplikacja OpenAI (llm-agents.nix)
+        inputs.llm-agents.packages.${pkgs.system}.chatgpt
         repomix
         nodejs
         # skill: obscura — headless antidetect browser dla agentów (modules/skills/obscura)
