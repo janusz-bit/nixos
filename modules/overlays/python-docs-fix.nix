@@ -29,6 +29,11 @@ _: {
                 substituteInPlace pyproject.toml --replace-fail "roman-numerals-py" "roman-numerals"
               '';
               doCheck = false;
+              # nixpkgs (>= 20b1ddd1, sphinx 9.1.0) dokłada fix-test-stemmer.patch —
+              # pasuje do 9.x, nie do 8.2.3 (hunk#2 kontekst 'findthisstemmedkey'
+              # vs 'findthisstemmedkei' w 8.2.3). Build docs nie używa testów
+              # (doCheck = false), więc patches można wyczyścić.
+              patches = [ ];
             });
           };
         };

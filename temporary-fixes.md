@@ -26,7 +26,11 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `TypeError: int() argument must be a string, a bytes-like object or a
   real number, not 'NoneType'` w
   `docutils/parsers/rst/states.py` (`parse_enumerator`), przy okazji
-  wywalając `system-path` i cały toplevel.
+  wywalając `system-path` i cały toplevel. Od nixpkgs `20b1ddd1aa5a`
+  (sphinx 9.1.0 + patch `fix-test-stemmer`) dodatkowo: patch ten nie
+  pasuje do 8.2.3 (hunk#2: kontekst `findthisstemmedkey` vs
+  `findthisstemmedkei` w 8.2.3) — overlay czyści `patches = []` przy
+  downgradzie sphinx.
 - **Przyczyna:** docs-builder cpythona buduje dokumentację przez
   `pkgsBuildBuild.python3` (3.14 + sphinx 9.1 + **docutils 0.23**); regresja
   w docutils ≥ 0.22 przy enumerowanych listach RST. Upstream:
@@ -41,6 +45,36 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 - **Jak usunąć:** skasować `modules/overlays/python-docs-fix.nix`, wywalić
   `self.overlays.python-docs-fix` z `nixpkgs.overlays` w konfiguracji
   raspberry-pi-4, odpalić testowy build docs, potem `update-boot`.
+
+### 1b. `droid` — poprawiony `arm64-balloon.patch` dla kernela 6.1.188
+
+- **Od:** 2026-09-24 (ten commit)
+- **Pliki:** `modules/hosts/droid-android/_kernel-patches.nix`,
+  `modules/hosts/droid-android/arm64-balloon-6.1.188.patch`,
+  `modules/hosts/droid-android/virtual-cpufreq.patch`
+- **Objaw:** CI (tag v507, workflow `droid`) pada na
+  `linux-config-6.1.188.drv` — GNU patch przy `arm64-balloon.patch` z avf
+  wykrywa `Reversed (or previously applied) patch detected!`, pomija hunk
+  (`1 out of 1 hunk ignored`, `*.rej`) i build kernela pada.
+- **Przyczyna:** `flake.lock` update (6fb67a5) przesunął nixpkgs na
+  `20b1ddd1aa5a` (linux 6.1.187 → 6.1.188). Stable patch 6.1.188 wstawił blok
+  „disable indirect descriptors" (komentarz +
+  `__virtio_clear_bit(VIRTIO_RING_F_INDIRECT_DESC)`) między
+  `__virtio_clear_bit(vdev, VIRTIO_BALLOON_F_REPORTING)` a
+  `__virtio_clear_bit(vdev, VIRTIO_F_ACCESS_PLATFORM)` w
+  `virtballoon_validate`. Ostatni hunk avf patcha (usunięcie
+  `ACCESS_PLATFORM`) zakładał stary kontekst — patch nie znajduje go z
+  fuzz=2, a odwrotny match (kontekst `pusta linia` + `/*` występuje w pliku)
+  wyzwala fałszywe „Reversed (or previously applied)".
+- **Obejście:** `boot.kernelPatches = lib.mkForce` w droid-android z
+  poprawionym patchem (hunk przesunięty za blok indirect-desc —
+  zweryfikowany na vanilla 6.1.188: `nix build …kernel.configfile`
+  przechodzi, `VIRTIO_F_ACCESS_PLATFORM` usunięte, `SND_VIRTIO=m`,
+  `ANDROID_V_CPUFREQ_VIRT=y`, `IKCONFIG(_PROC)=y`) + cpufreq patch lokalnie
+  (bez fetchgit w ewaluacji opcji). `structuredExtraConfig` 1:1 z avf.
+- **Kiedy usunąć:** gdy nixos-avf naprawi patch (sprawdzać przy podbijaniu
+  `avf` inputu); wtedy usunąć `_kernel-patches.nix` i wpis w
+  `droid-android/default.nix` — moduł avf wróci do własnych patchy.
 
 ### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
 

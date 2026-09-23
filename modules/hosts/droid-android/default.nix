@@ -15,6 +15,7 @@
       self.modules.nixos.base
       inputs.avf.nixosModules.avf
       self.modules.nixos.droid-stateVersion
+      ./_kernel-patches.nix
       (
         { lib, pkgs, ... }:
         {
