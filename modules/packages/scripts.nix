@@ -34,6 +34,13 @@
           echo "Syncing GitHub Actions workflows from the updated flake..."
           nix run .#sync-github-actions
 
+          # Hermes' filtered Python source may not be materialized when
+          # flake check first reaches hermes-desktop. Evaluating its drvPath
+          # directly makes the source available without building the package.
+          nix eval --impure --raw --expr \
+            '(builtins.getFlake (toString ./. )).inputs."hermes-agent".packages.x86_64-linux.desktop.drvPath' \
+            > /dev/null
+
           echo "Checking flake outputs for both architectures..."
           nix flake check --all-systems --no-build
 
