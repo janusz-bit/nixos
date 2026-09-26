@@ -11,6 +11,7 @@
       age.secrets.nextcloud-adminpass = {
         file = customTop.secretsDir + "/nextcloud-adminpass.age";
         owner = "nextcloud";
+        group = "users";
         mode = "0440";
       };
       services = {

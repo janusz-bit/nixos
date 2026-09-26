@@ -10,11 +10,15 @@
     {
       age.secrets.open-webui-hermes-env = {
         file = customTop.secretsDir + "/hermes-env.age";
+        group = "users";
+        mode = "0440";
       };
       # OPENAI_API_KEYS (Hermes + LLM Gateway keys) — must stay out of
       # environment {} so it never lands in the world-readable nix store
       age.secrets.open-webui-keys = {
         file = customTop.secretsDir + "/open-webui-keys.age";
+        group = "users";
+        mode = "0440";
       };
 
       services.open-webui = {
