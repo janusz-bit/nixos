@@ -37,9 +37,6 @@
           echo "Checking flake outputs for both architectures..."
           nix flake check --all-systems --no-build
 
-          echo "Building updated local packages..."
-          nix build --no-link .#helium .#waywallen .#bootdev-cli
-
           git add -A -- flake.lock .github/workflows \
             modules/packages/_helium/default.nix \
             modules/packages/_bootdev-cli/default.nix \
