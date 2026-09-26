@@ -34,6 +34,7 @@ in
   "hermes-api-key.age" = mkSecret serverHosts;
   "opencode.age" = mkSecret serverHosts;
   "open-webui-keys.age" = mkSecret serverHosts;
+  "jupyter-password.age" = mkSecret serverHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
   "openrouter-api-key.age" = mkSecret allHosts;
 }

@@ -22,6 +22,7 @@
         self.modules.nixos.leds-off
         self.modules.nixos.hermes
         self.modules.nixos.open-webui
+        self.modules.nixos.jupyterlab
         self.modules.nixos.ttyd
         self.modules.nixos.ai-skills
         self.modules.nixos.base-shell
