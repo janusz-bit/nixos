@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  coreutils,
   buildGoModule,
   fetchFromGitHub,
   installShellFiles,
@@ -21,6 +22,12 @@ buildGoModule (finalAttrs: {
   };
 
   vendorHash = "sha256-LCvJDsg4MANhQ0V/ymP1heCN5rFNgeOYCYILsPdXYag=";
+
+  # Upstream's timeout test calls /bin/sleep, which is absent in the Nix sandbox.
+  postPatch = ''
+    substituteInPlace version/version_test.go \
+      --replace-fail /bin/sleep ${lib.getExe' coreutils "sleep"}
+  '';
 
   ldflags = [
     "-s"

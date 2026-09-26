@@ -183,9 +183,9 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
   * `flake-release` (commits, auto-increments git tag, pushes)
   * `install-system` (default package; runs disko, clones repo, nixos-install)
   * `raspberry-pi-4-sd-image` (aarch64 SD card image build)
-  * `bootdev-cli` (Go module, auto-updated via `nix-update` in `flake-update`; currently v1.32.2)
+  * `bootdev-cli` (Go module, auto-updated via `nix-update` in `flake-update`)
   * `helium` (Helium browser from `imputnet/helium-linux` release `.deb`s; auto-updated via `nix-update` in `flake-update`, two passes: x86_64 version+hash, then `--version skip` for the aarch64 hash)
-  * `waywallen` (dynamiczne tapety Wayland z oficjalnego AppImage v0.3.9 + prebuild pluginu open-wallpaper-engine v0.2.9; auto-updated via `nix-update` in `flake-update`, dwa pasy jak helium — `oweVersion` bumpowany ręcznie)
+  * `waywallen` (dynamiczne tapety Wayland z oficjalnego AppImage + prebuild pluginu open-wallpaper-engine; auto-updated via `nix-update` in `flake-update`, dwa pasy jak helium — `oweVersion` bumpowany ręcznie)
   * `waywallen-kde-plugin` (plugin tapety dla Plazmy 6 z release waywallen-display v0.3.3)
   * Note: `prime-agent` and DeepSeek Harness (`dsh`) are provided via the `numtide/llm-agents.nix` flake input (local derivations `_prime-agent` and `_deepseek-harness` removed).
   * Note: Proton-CachyOS x86-64-v3 is no longer built locally (`_proton-bin` derivation removed); it comes from the chaotic-nyx overlay + binary cache.
@@ -230,7 +230,7 @@ Custom NixOS options:
 
 ## Dev Shell Tools
 Running `nix develop` provides:
-* `flake-update` – requires a clean Git worktree, updates `flake.lock` and local packages via `nix-update` (`helium` and `waywallen` in two architecture passes, plus `bootdev-cli`), regenerates workflows from the updated flake, evaluates checks for both systems, then creates one commit if anything changed. It skips the dev shell's potentially stale workflow hook after running the fresh generator explicitly.
+* `flake-update` – requires a clean Git worktree, updates `flake.lock` and local packages via `nix-update` (`helium` and `waywallen` in two architecture passes, plus `bootdev-cli`), regenerates workflows from the updated flake, evaluates checks for both systems, builds the three local packages, then creates one commit if anything changed. It skips the dev shell's potentially stale workflow hook after running the fresh generator explicitly.
 * `flake-release` – commits, auto-increments the git tag, pushes to GitHub.
 * `repo-sync` (`modules/packages/scripts.nix`) – `git add -A` + commit, then `git pull --rebase --autostash` and `git push`.
 * Pre-commit hooks auto-installed: `gitleaks` (secret scan of the staged diff; NOT a built-in git-hooks-nix hook — defined as a custom hook in `modules/default.nix` with an explicit `entry`), `nixfmt` formatter, `statix` lint, `deadnix` lint (with `noLambdaPatternNames`), `sync-github-actions` (syncs generated workflow YAML to `.github/workflows/`). The sync script deletes stale workflow files first, so no orphaned YAML survives a refactor.
