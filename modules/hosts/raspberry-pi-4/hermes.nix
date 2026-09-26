@@ -46,15 +46,21 @@
               require_approval = false; # lub lista zaufanych narzędzi
             };
             model = {
-              provider = "ollama-cloud";
-              base_url = "https://ollama.com/v1";
-              default = "glm-5.3-flash:cloud"; # GLM 5.3 Flash (ollama cloud) — default wraca z 2026-09-12
+              provider = "openai-codex";
+              base_url = "https://chatgpt.com/backend-api/codex";
+              default = "gpt-6-sol";
             };
+            fallback_providers = [
+              {
+                provider = "ollama-cloud";
+                model = "glm-5.3-flash:cloud";
+              }
+            ];
             providers.ollama-cloud = {
               base_url = "https://ollama.com/v1";
               key_env = "OLLAMA_API_KEY";
             };
-            agent.reasoning_effort = "max";
+            agent.reasoning_effort = "xhigh";
             web.backend = "ddgs";
             auxiliary.vision = {
               provider = "ollama-cloud";
