@@ -33,6 +33,8 @@
         # uv pochodzi z base (sharedPackages) - nie duplikowac
         # OpenAI Codex CLI — agent kodujący w terminalu (llm-agents.nix)
         inputs.llm-agents.packages.${pkgs.system}.codex
+        # Claude Code — agent kodujący w terminalu (llm-agents.nix)
+        inputs.llm-agents.packages.${pkgs.system}.claude-code
         # ChatGPT — desktopowa aplikacja OpenAI (llm-agents.nix)
         inputs.llm-agents.packages.${pkgs.system}.chatgpt
         repomix
