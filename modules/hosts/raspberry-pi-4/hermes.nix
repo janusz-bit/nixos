@@ -155,6 +155,23 @@
             # cannot open in append mode (PermissionError). Removing them before
             # start lets the service recreate them with correct ownership.
             ExecStartPre = lib.mkBefore [
+              # Hermes keeps OAuth credentials at 0600. If an interactive
+              # login creates auth.json as nixos/root, the service cannot read
+              # it. Repair ownership without replacing the stored tokens.
+              "+${pkgs.writeShellScript "hermes-auth-ownership" ''
+                set -eu
+                auth_dir=/var/lib/hermes/.hermes
+                if [ -d "$auth_dir" ] && [ ! -L "$auth_dir" ]; then
+                  ${pkgs.coreutils}/bin/chown hermes:hermes "$auth_dir"
+                  ${pkgs.coreutils}/bin/chmod u+rwx "$auth_dir"
+                  for auth_file in "$auth_dir/auth.json" "$auth_dir/auth.lock"; do
+                    if [ -f "$auth_file" ] && [ ! -L "$auth_file" ]; then
+                      ${pkgs.coreutils}/bin/chown hermes:hermes "$auth_file"
+                      ${pkgs.coreutils}/bin/chmod 0600 "$auth_file"
+                    fi
+                  done
+                fi
+              ''}"
               "${pkgs.coreutils}/bin/rm -f /var/lib/hermes/.hermes/gateway.lock /var/lib/hermes/.hermes/gateway.pid /var/lib/hermes/.hermes/gateway_state.json"
             ];
           };
