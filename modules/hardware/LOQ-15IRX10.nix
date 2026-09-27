@@ -9,7 +9,9 @@
       lib,
       ...
     }:
-
+    let
+      nvidiaLatest = config.boot.kernelPackages.nvidiaPackages.latest;
+    in
     {
       services.xserver.videoDrivers = [ "nvidia" ];
 
@@ -25,7 +27,13 @@
           powerManagement.finegrained = lib.mkDefault true;
           open = true;
           nvidiaSettings = true;
-          package = config.boot.kernelPackages.nvidiaPackages.latest;
+          # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
+          # but NVIDIA 615.71.09 already ships the corrected signature.
+          package = nvidiaLatest // {
+            open = nvidiaLatest.open.overrideAttrs (old: {
+              postPatch = lib.replaceString "--replace-fail" "--replace-warn" (old.postPatch or "");
+            });
+          };
           prime = {
             offload.enableOffloadCmd = lib.mkDefault true;
             sync.enable = lib.mkDefault false;

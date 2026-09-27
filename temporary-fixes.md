@@ -14,7 +14,25 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 ## Aktywne
 
-### 1. `python-docs-fix` — pin docutils 0.21.2 + sphinx 8.2.3 w docs-builderze cpythona
+### 1. NVIDIA open 615.71.09 — nieaktualny patch GPIO z nix-cachyos-kernel
+
+- **Od:** 2026-09-28.
+- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`hardware.nvidia.package`).
+- **Objaw:** `nvidia-open-615.71.09-7.2.4` kończy `patchPhase` błędem
+  `pattern static inline int __to_hwgpio(const struct gpio_device *gdev, doesn't match anything`.
+- **Przyczyna:** [nix-cachyos-kernel](https://github.com/xddxdd/nix-cachyos-kernel/blob/444d135dde71c1de547cf7bfd73e67145e67aebb/kernel-cachyos/packages.nix#L27-L45)
+  wymusza zamianę sygnatury z `const` na bez `const`; źródło
+  [NVIDIA 615.71.09](https://github.com/NVIDIA/open-gpu-kernel-modules/commit/61dcc93)
+  ma już poprawną sygnaturę.
+- **Obejście:** tylko dla otwartego modułu NVIDIA zamienić w `postPatch`
+  `--replace-fail` na `--replace-warn`. Jeżeli starsze źródło zawiera `const`,
+  zamiana nadal działa; przy obecnym źródle brak wzorca nie blokuje budowy.
+- **Kiedy usunąć:** gdy `nix-cachyos-kernel` usunie zbędny patch lub doda
+  sprawdzenie obecności starej sygnatury. Po aktualizacji inputu sprawdzić
+  `postPatch` w derywacji `hardware.nvidia.package.open`, usunąć override
+  i zbudować moduł ponownie.
+
+### 2. `python-docs-fix` — pin docutils 0.21.2 + sphinx 8.2.3 w docs-builderze cpythona
 
 - **Od:** 2026-09-01 (commit `79d96fa`)
 - **Pliki:** `modules/overlays/python-docs-fix.nix` + wpis
@@ -46,7 +64,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `self.overlays.python-docs-fix` z `nixpkgs.overlays` w konfiguracji
   raspberry-pi-4, odpalić testowy build docs, potem `update-boot`.
 
-### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
+### 3. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
 
 - **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
 - **Pliki:** `modules/hosts/raspberry-pi-4/configuration.nix`
