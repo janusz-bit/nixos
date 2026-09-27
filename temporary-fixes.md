@@ -46,36 +46,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `self.overlays.python-docs-fix` z `nixpkgs.overlays` w konfiguracji
   raspberry-pi-4, odpalić testowy build docs, potem `update-boot`.
 
-### 1b. `droid` — poprawiony `arm64-balloon.patch` dla kernela 6.1.188
-
-- **Od:** 2026-09-24 (ten commit)
-- **Pliki:** `modules/hosts/droid-android/_kernel-patches.nix`,
-  `modules/hosts/droid-android/arm64-balloon-6.1.188.patch`,
-  `modules/hosts/droid-android/virtual-cpufreq.patch`
-- **Objaw:** CI (tag v507, workflow `droid`) pada na
-  `linux-config-6.1.188.drv` — GNU patch przy `arm64-balloon.patch` z avf
-  wykrywa `Reversed (or previously applied) patch detected!`, pomija hunk
-  (`1 out of 1 hunk ignored`, `*.rej`) i build kernela pada.
-- **Przyczyna:** `flake.lock` update (6fb67a5) przesunął nixpkgs na
-  `20b1ddd1aa5a` (linux 6.1.187 → 6.1.188). Stable patch 6.1.188 wstawił blok
-  „disable indirect descriptors" (komentarz +
-  `__virtio_clear_bit(VIRTIO_RING_F_INDIRECT_DESC)`) między
-  `__virtio_clear_bit(vdev, VIRTIO_BALLOON_F_REPORTING)` a
-  `__virtio_clear_bit(vdev, VIRTIO_F_ACCESS_PLATFORM)` w
-  `virtballoon_validate`. Ostatni hunk avf patcha (usunięcie
-  `ACCESS_PLATFORM`) zakładał stary kontekst — patch nie znajduje go z
-  fuzz=2, a odwrotny match (kontekst `pusta linia` + `/*` występuje w pliku)
-  wyzwala fałszywe „Reversed (or previously applied)".
-- **Obejście:** `boot.kernelPatches = lib.mkForce` w droid-android z
-  poprawionym patchem (hunk przesunięty za blok indirect-desc —
-  zweryfikowany na vanilla 6.1.188: `nix build …kernel.configfile`
-  przechodzi, `VIRTIO_F_ACCESS_PLATFORM` usunięte, `SND_VIRTIO=m`,
-  `ANDROID_V_CPUFREQ_VIRT=y`, `IKCONFIG(_PROC)=y`) + cpufreq patch lokalnie
-  (bez fetchgit w ewaluacji opcji). `structuredExtraConfig` 1:1 z avf.
-- **Kiedy usunąć:** gdy nixos-avf naprawi patch (sprawdzać przy podbijaniu
-  `avf` inputu); wtedy usunąć `_kernel-patches.nix` i wpis w
-  `droid-android/default.nix` — moduł avf wróci do własnych patchy.
-
 ### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
 
 - **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
@@ -91,6 +61,11 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
 
 ## Zamknięte
+
+- **`droid` AVF kernel patch (6.1.188)** — zamknięte 2026-09-27. Po migracji
+  `nixosConfigurations.droid` do `nixOnDroidConfigurations.droid` nie budujemy
+  kernela Android VM. Usunięto `_kernel-patches.nix`,
+  `arm64-balloon-6.1.188.patch` i `virtual-cpufreq.patch`.
 
 - **`trilium-server` `overrideAttrs` (better-sqlite3 prebuilds)** — zamknięte
   2026-09-11. nixpkgs ma już w `installPhase` delete-if-present

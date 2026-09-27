@@ -17,8 +17,8 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cache.cachix.url}
-              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
+              extra-substituters = ${customTop.cache.cachix.url} https://nix-on-droid.cachix.org
+              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey} nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqvHJ9XCp+nidK7qkMQrU=
               build-fallback = true
             '';
           };
@@ -82,6 +82,7 @@
           buildTarget,
           runsOn,
           runName ? "Build ${name} by @\${{ github.actor }}",
+          command ? null,
           kernelTarget ? null,
           # `tags = false` dla ciezkich buildow. Build toplevela `nixos` trwa
           # 3-5 h i w wiekszosci pada na infrastrukturze CI (cache.nixos.org,
@@ -111,7 +112,11 @@
                 steps = mkBaseSteps ++ [
                   {
                     inherit name;
-                    run = "nix build \".#${buildTarget}\" --show-trace --accept-flake-config";
+                    run =
+                      if command == null then
+                        "nix build \".#${buildTarget}\" --show-trace --accept-flake-config"
+                      else
+                        command;
                   }
                 ];
               };
@@ -173,6 +178,8 @@
                 runsOn = archToRunner."${cfg.arch}";
                 buildTarget =
                   cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
+                command = cfg.command or null;
+                runName = cfg.runName or "Build ${name} by @\${{ github.actor }}";
                 # Na razie wylaczone — kernel budowany recznie, nie w CI
                 kernelTarget = cfg.kernelTarget or null;
                 tags = cfg.tags or true;
@@ -196,6 +203,10 @@
               };
               droid = {
                 arch = "aarch64-linux";
+                runName = "Evaluate Nix-on-Droid by @\${{ github.actor }}";
+                # An Android uid/gid is only available on the device; CI checks
+                # the activation derivation without building a runner-specific one.
+                command = "nix eval --impure --raw .#nixOnDroidConfigurations.droid.activationPackage.drvPath --show-trace --accept-flake-config";
               };
               lint = {
                 arch = "x86_64-linux";

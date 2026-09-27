@@ -20,7 +20,7 @@ Integrated technologies handling the system's core capabilities include:
 * **Disko**: Automates disk partitioning and formatting (encrypted Btrfs with LUKS).
 * **NixOS-WSL**: Provides configurations for Windows Subsystem for Linux.
 * **nvf**: Declarative Neovim configuration framework.
-* **nixos-avf**: NixOS support for Android Virtualization Framework.
+* **nix-on-droid**: User-space Nix environment in the Nix-on-Droid Android app (not a NixOS/AVF virtual machine).
 * **nixos-hardware**: Common hardware modules (`github:NixOS/nixos-hardware/master`).
 * **chaotic (Chaotic-Nyx)**: Bleeding-edge packages and binary cache (`github:chaotic-cx/nyx/nyxpkgs-unstable`). Provides `proton-cachyos_x86_64_v3`, `proton-ge-custom`, `mangohud_git`, `pkgsx86_64_v3` etc. (the CachyOS **kernel** now comes from the separate `nix-cachyos-kernel` input, not chaotic); its `nixosModules.default` adds the nyx overlay, registry and the `nyx-cache.chaotic.cx` substituter. Applied to the `nixos` host only.
 * **nix-cachyos-kernel**: CachyOS kernel packages (`github:xddxdd/nix-cachyos-kernel`, branch `release` = builds covered by a binary cache). Its overlay (`inputs.nix-cachyos-kernel.overlays.default`) supplies `pkgs.cachyosKernels`; the `nixos` host runs `linuxPackages-cachyos-bore-lto-x86_64-v3` (i5-13450HX supports x86-64-v3, not AVX-512). MUST NOT set `inputs.nixpkgs.follows` — it needs its own nixpkgs for patch compatibility.
@@ -35,7 +35,7 @@ Integrated technologies handling the system's core capabilities include:
 The `modules/hosts/` directory contains isolated definitions targeting different deployment vectors. Each host is built upon a shared foundation but customized for its specific role.
 
 ### 1. `base` (The Foundation)
-A shared foundation defined in `modules/hosts/base/default.nix` (8 modules: `base-configuration`, `base-shell`, `base-git`, `nix-settings`, `base-ssh`, `base-agenix`, `base-prime-agent`, `options`). `nixos`, `wsl` and `droid` import the whole `base` module; `raspberry-pi-4` imports only 6 of them (`modules/hosts/raspberry-pi-4/default.nix` skips `nix-settings` and `base-ssh`, so it sets its own `nix.gc`/`nix.settings` locally and does not get the base SSH agent/cloudflared proxy settings).
+A shared foundation defined in `modules/hosts/base/default.nix` (8 modules: `base-configuration`, `base-shell`, `base-git`, `nix-settings`, `base-ssh`, `base-agenix`, `base-prime-agent`, `options`). `nixos` and `wsl` import the whole `base` module; `raspberry-pi-4` imports only 6 of them (`modules/hosts/raspberry-pi-4/default.nix` skips `nix-settings` and `base-ssh`, so it sets its own `nix.gc`/`nix.settings` locally and does not get the base SSH agent/cloudflared proxy settings). `droid` is not a NixOS host and does not import these modules.
 * Sets up the core CLI experience: `bash` is set as the login shell (to avoid compatibility issues like broken recovery environments), but automatically `exec`s `fish` for interactive sessions. Includes custom aliases (`eza`, `bat`), the `done` fish plugin for long-command notifications, and a `fish_greeting` function that runs `fastfetch` (`fastfetch` is a package gated by `customBot.enableFastfetch`, not an alias).
 * Configures fundamental services: Git defaults, SSH security (key-only authentication), Agenix secrets handling, core Nix settings, `vulnix` vulnerability scanning.
 * Shared packages (`modules/hosts/base/configuration.nix`): `micro-full`, `nil`, `nixd`, `nixfmt-tree`, `uv`, `toybox`, `statix`, `kdePackages.kleopatra`, `cachix`, `agenix`, `prime-agent` and `dsh` (both from `inputs.llm-agents`), `nix-update`, `tlrc`, `fzf`, `hw-probe`, `htop`, `cloudflared`, `vulnix`.
@@ -157,14 +157,13 @@ A minimal `x86_64-linux` environment bridging NixOS into a Windows host.
 * Obsidian module available but currently commented out.
 * **State version**: `25.05`.
 
-### 5. `droid` (Android Virtualization Framework)
-A reduced `aarch64-linux` footprint for Android (via `nixos-avf`).
-* Includes `base` modules; `fastfetch` and visual elements disabled.
-* Default user: `droid`.
-* `ollama` package installed.
-* Fixes bogus terminal size (`$COLUMNS=131072`) on Android/AVF at bash init.
-* `customBot.flakeTarget = "droid"`.
-* **State version**: `26.05`.
+### 5. `droid` (Nix-on-Droid)
+An `aarch64-linux` user-space environment in the Nix-on-Droid app, defined as `nixOnDroidConfigurations.droid` in `modules/hosts/droid-android/`. It is NOT `nixosConfigurations.droid` and does not support NixOS options, systemd services, the `base` module or `nixos-rebuild`.
+* Packages: `git`, `micro`, `ollama` (CLI; Android runtime compatibility must be tested on the device).
+* Nix-on-Droid state version: `24.05` for a fresh install (independent of the old AVF NixOS state version); if an existing Nix-on-Droid installation has a different state version, keep its current value.
+* Install the Nix-on-Droid app (F-Droid), then in its terminal run `nix-on-droid switch --flake github:janusz-bit/nixos#droid`; rollback with `nix-on-droid rollback`. No Android device is accessible from the CI runner or RPi4, so only flake evaluation is tested there.
+* The Nix-on-Droid binary cache supplies the upstream hardcoded Android `proot` binary. Do not build the activation package on CI: it embeds the runner UID/GID rather than the Android app's UID/GID. CI evaluates its derivation instead.
+* Old AVF NixOS secrets/agenix and system services are NOT migrated into the Android app. The old AVF SSH recipient remains in `modules/_secrets/secrets.nix`; removing its decryption access requires separately re-encrypting the `.age` files.
 
 ## Repository Architecture
 The repository uses a highly modular structure powered by `flake-parts` and `import-tree`, which auto-discovers and maps the codebase logically.
@@ -173,7 +172,7 @@ The repository uses a highly modular structure powered by `flake-parts` and `imp
 * **`modules/args.nix`**: Defines `customTop` arguments passed to all modules. Contains: repository info (`github:janusz-bit/nixos`, `/etc/nixos`), email (`janusz-bit@proton.me`), site domain (`janusz-bit.com`), Cachix cache info, `secretsDir`.
 * **`modules/options.nix`**: Custom NixOS options (`customBot`): `flakeTarget` (default: `"default"`), `enableFastfetch` (default: `true`), `defaultUser` (default: `"nixos"`).
 * **`modules/default.nix`**: Integration module. Defines `systems` (`x86_64-linux`, `aarch64-linux`), `devShells`, formatter (`nixfmt-tree`), pre-commit hooks (`gitleaks`, `nixfmt`, `statix`, `deadnix`, `sync-github-actions`), and exposes `flake-update`, `flake-release` and `repo-sync` packages in the dev shell.
-* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 7 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl`, `droid` (build on tag push `v*` / PR to master), `lint` (builds `checks.x86_64-linux.pre-commit` — gitleaks + nixfmt/statix/deadnix + workflow sync), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out; updates the `nix-cachyos-kernel` flake input and rebuilds the CachyOS kernel). The `nixos` build is the exception: `tags = false`, so it runs only on PRs to `master` and on manual `workflow_dispatch` — the toplevel build takes 3–5 h and mostly fails on CI infrastructure. Every build workflow gets `permissions.contents = "read"` (least privilege) and a `concurrency` group `build-<name>-${ github.ref }` with `cancelInProgress = false` (same workflow + same ref never runs twice, in-flight builds are not cancelled); `cachyos-kernel-update` has its own `cachyos-kernel-update` concurrency group. The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. The sync script deletes orphaned workflow files before copying, so a refactor cannot leave stale YAML behind.
+* **`modules/github-actions.nix`**: CI/CD factory that auto-generates GitHub Actions workflows. Generates 7 workflows from a config map: `nixos`, `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (build on tag push `v*` / PR to master), `droid` (Nix-on-Droid activation derivation evaluation, not a NixOS build), `lint` (builds `checks.x86_64-linux.pre-commit` — gitleaks + nixfmt/statix/deadnix + workflow sync), `cachyos-kernel-update` (manual `workflow_dispatch` only — daily cron currently commented out; updates the `nix-cachyos-kernel` flake input and rebuilds the CachyOS kernel). The `nixos` build is the exception: `tags = false`, so it runs only on PRs to `master` and on manual `workflow_dispatch` — the toplevel build takes 3–5 h and mostly fails on CI infrastructure. Every build workflow gets `permissions.contents = "read"` (least privilege) and a `concurrency` group `build-<name>-${ github.ref }` with `cancelInProgress = false` (same workflow + same ref never runs twice, in-flight builds are not cancelled); `cachyos-kernel-update` has its own `cachyos-kernel-update` concurrency group. The separate `build-kernel` job machinery exists but is currently disabled (kernel built manually, not in CI). Maps `x86_64-linux` to `ubuntu-latest`, `aarch64-linux` to `ubuntu-24.04-arm`. The sync script deletes orphaned workflow files before copying, so a refactor cannot leave stale YAML behind.
 * **`modules/hardware/`**: Hardware-specific profiling. Stores Lenovo LOQ-15IRX10 patches, `x86-64-v3` CPU optimization, `M27Q.icm` color profile, and a `facter.json` inventory.
 * **`modules/agenix/` & `modules/_secrets/`**: Cryptographic secrets. 15 age-encrypted files (GitHub token, Cachix token, Cloudflare tunnel, Nextcloud adminpass, Trilium ETAPI token, Hermes env/API key, Ollama API key, Google API key, LLM Gateway API key, OpenRouter API key, OpenCode API key, Open WebUI env/keys, notes, `secret1` (shared SSH authorized keys)) stored safely in the repo, decryptable only by target machines. Secrets defined in `modules/_secrets/secrets.nix` with per-host SSH public keys. `hermes-env`, `hermes-api-key`, `opencode` and `open-webui-keys` target only `nixos` and `raspberry-pi-4` (not `droid-android`); `llmgateway-api-key` and `openrouter-api-key` target all hosts; `secret1` is used on `raspberry-pi-4` for user SSH authorized keys. The unused `attic-server-token.age`, `hermes-webui-env.age` and `librechat-env.age` secrets were removed.
 * **`modules/overlays/`**: Nixpkgs patches (flake-level overlays). `brave.nix` (`brave-debloater`: extensive Brave browser policy hardening — disables AI, rewards, wallet, VPN, tor, telemetry, sync, password manager, autofill, etc.; sets AdGuard DNS-over-HTTPS), `opencode.nix` (`opencode-config`: wraps `opencode` with inline `opencode.json` config + `web-search-mcp.py` MCP server, sets `OPENCODE_CONFIG` env var and `OPENCODE_DISABLE_AUTOUPDATE`; `permission.external_directory` allows `/nix/store/**`), `python-docs-fix.nix` (`python-docs-fix`: pins docutils 0.21.2 + sphinx 8.2.3 in the cpython docs-builder — nixpkgs#499166 workaround, tracked in `temporary-fixes.md`; applied on `raspberry-pi-4` only). Applied via `self.overlays` in host configs and base.
@@ -216,7 +215,7 @@ Custom NixOS options:
 * `flake-parts` — `github:hercules-ci/flake-parts` (flake module system)
 * `nixos-wsl` — `github:nix-community/NixOS-WSL/main` (WSL support)
 * `nvf` — `github:notashelf/nvf` (declarative Neovim config)
-* `avf` — `github:nix-community/nixos-avf` (Android Virtualization Framework)
+* `nix-on-droid` — `github:nix-community/nix-on-droid` (Android app and configuration module system; follows nixpkgs)
 * `nix-index-database` — `github:nix-community/nix-index-database` (follows nixpkgs; for `comma`)
 * `chaotic` — `github:chaotic-cx/nyx/nyxpkgs-unstable` (Chaotic-Nyx: bleeding-edge packages + nyx binary cache; nixos host only)
 * `nix-cachyos-kernel` — `github:xddxdd/nix-cachyos-kernel/release` (CachyOS kernel packages; no `nixpkgs.follows` on purpose)
@@ -273,6 +272,6 @@ nix build .#raspberry-pi-4-sd-image
 * 66 `.nix` files, ~4010 LOC total (`git ls-files '*.nix' | xargs wc -l`)
 * 15 age-encrypted secrets (`modules/_secrets/*.age`)
 * 7 workflow `.yml` files in `.github/workflows/` (all auto-generated from `modules/github-actions.nix`)
-* 5 host configurations: `nixos`, `raspberry-pi-4`, `wsl`, `droid`, `default` (alias for `nixos`)
+* 4 NixOS configurations: `nixos`, `raspberry-pi-4`, `wsl`, `default` (alias for `nixos`); additionally `nixOnDroidConfigurations.droid`
 * 3 Nixpkgs overlays: `brave-debloater`, `opencode-config`, `python-docs-fix`
 * Channel: `nixos-unstable`

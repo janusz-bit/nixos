@@ -6,7 +6,10 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     nvf.url = "github:notashelf/nvf";
-    avf.url = "github:nix-community/nixos-avf";
+    nix-on-droid = {
+      url = "github:nix-community/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
@@ -40,9 +43,11 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
+      "https://nix-on-droid.cachix.org"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
+      "nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqvHJ9XCp+nidK7qkMQrU="
     ];
   };
 

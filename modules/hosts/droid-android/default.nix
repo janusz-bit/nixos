@@ -1,44 +1,13 @@
+{ inputs, ... }:
 {
-  inputs,
-  self,
-  config,
-  ...
-}:
-{
-  flake.modules.nixos.droid-stateVersion = _: {
-    system.stateVersion = "26.05";
-  };
-
-  flake.nixosConfigurations.droid = inputs.nixpkgs.lib.nixosSystem {
-    system = "aarch64-linux";
+  # Nix-on-Droid runs inside the Android app, not as an AVF NixOS guest.
+  flake.nixOnDroidConfigurations.droid = inputs.nix-on-droid.lib.nixOnDroidConfiguration {
+    pkgs = import inputs.nixpkgs {
+      system = "aarch64-linux";
+      overlays = [ inputs.nix-on-droid.overlays.default ];
+    };
     modules = [
-      self.modules.nixos.base
-      inputs.avf.nixosModules.avf
-      self.modules.nixos.droid-stateVersion
-      ./_kernel-patches.nix
-      (
-        { lib, pkgs, ... }:
-        {
-          customBot = {
-            flakeTarget = "droid";
-            enableFastfetch = false;
-            defaultUser = "droid";
-          };
-
-          environment.systemPackages = with pkgs; [
-            ollama
-          ];
-
-          programs.bash.interactiveShellInit = lib.mkBefore ''
-            # Fix for bogus screen size on Android/AVF
-            if [ "$COLUMNS" = "131072" ] || [ "$COLUMNS" = "0" ] || [ -z "$COLUMNS" ]; then
-              export COLUMNS=80
-              export LINES=24
-              stty cols 80 rows 24 2>/dev/null || true
-            fi
-          '';
-        }
-      )
+      ./_nix-on-droid.nix
     ];
   };
 }
