@@ -75,7 +75,7 @@
 
 let
   pname = "waywallen";
-  version = "0.4.2";
+  version = "0.4.3";
   oweVersion = "0.2.9";
 
   arch =
@@ -144,8 +144,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     url = "https://github.com/waywallen/waywallen/releases/download/v${finalAttrs.version}/waywallen-${finalAttrs.version}-${arch}.AppImage";
     hash =
       {
-        aarch64 = "sha256-VE5UphSsIsP2J/mwJCeBZelO+tXt17B1leBCsMt4mJw=";
-        x86_64 = "sha256-iQky6BhUoRj4UosICt8lsBOPLhBLg2Ta7OwUuhYAIH8=";
+        aarch64 = "sha256-SJLak8Mkuc4wGxpJEBbyAa41whoQy+2cPvNPaE/HGuw=";
+        x86_64 = "sha256-eMaUjkoUEt3pj/egM+hoKkRh5nrB6oNo2UEsml8Sl04=";
       }
       .${arch};
   };
