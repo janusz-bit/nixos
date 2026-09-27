@@ -76,6 +76,7 @@
           restartSec = 5;
 
           extraPackages = with pkgs; [
+            codex
             uv
             nodejs_22
             ripgrep
