@@ -43,11 +43,9 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
-      "https://nix-on-droid.cachix.org"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
-      "nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqvHJ9XCp+nidK7qkMQrU="
     ];
   };
 
