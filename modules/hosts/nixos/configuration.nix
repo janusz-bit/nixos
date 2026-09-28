@@ -125,6 +125,11 @@
         '';
       };
 
+      # facter domyślnie ustawia useDHCP na wykrytych interfejsach, co włącza
+      # dhcpcd obok NetworkManagera (dwa klienty DHCP na enp8s0: zdublowane
+      # trasy domyślne, konflikt DHCPv6). Adresy daje wyłącznie NetworkManager.
+      hardware.facter.detected.dhcp.enable = false;
+
       # Set your time zone.
       time.timeZone = "Europe/Warsaw";
 
