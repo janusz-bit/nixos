@@ -6,10 +6,10 @@ _: {
       limine = {
         enable = true;
         # Podpis limine kluczami sbctl (/var/lib/sbctl/keys) + suma kontrolna
-        # konfiguracji wbudowana w binarkę. Sam podpis niczego nie wymusza —
-        # ochronę daje dopiero Secure Boot włączony w firmware po
-        # `sudo sbctl enroll-keys -m` (-m = klucze Microsoftu, potrzebne
-        # dla Windowsa i opcjonalnych ROM-ów GPU).
+        # konfiguracji wbudowana w binarkę. Secure Boot jest włączony w
+        # firmware z własnymi kluczami. Firmware Insyde ukrywa zmienne EFI
+        # przed Linuksem, więc `sbctl enroll-keys` nie działa — procedura
+        # (export .auth + efi-updatevar, odtworzenie dbx) jest w AGENTS.md.
         secureBoot.enable = true;
         extraEntries = ''
           /Windows
