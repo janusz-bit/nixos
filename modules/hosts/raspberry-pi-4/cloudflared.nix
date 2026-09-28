@@ -1,19 +1,11 @@
-{ self, customTop, ... }:
+{ customTop, ... }:
 {
   flake.modules.nixos.cloudflared =
+    { config, ... }:
     {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    {
-      age.secrets.cloudflared-tunnel = {
-        file = customTop.secretsDir + "/cloudflared-tunnel.age";
-        owner = "root";
-        group = "users";
-        mode = "0440";
-      };
+      # Moduł cloudflared czyta plik przez LoadCredential (DynamicUser),
+      # więc wystarcza domyślne root:root 0400.
+      age.secrets.cloudflared-tunnel.file = customTop.secretsDir + "/cloudflared-tunnel.age";
       services.cloudflared = {
         enable = true;
         tunnels = {
@@ -51,7 +43,8 @@
                 };
               };
               "notes.${customTop.site.full}" = "http://localhost:8081";
-              "ttyd.${customTop.site.full}" = "http://localhost:8082";
+              # nginx z Basic Auth przed ttyd (modules/hosts/raspberry-pi-4/ttyd.nix)
+              "ttyd.${customTop.site.full}" = "http://localhost:8083";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
               "git.${customTop.site.full}" = "http://localhost:3000";
             };

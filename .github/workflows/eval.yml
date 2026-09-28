@@ -2,7 +2,7 @@
 
 concurrency:
   cancel-in-progress: false
-  group: build-lint-${{ github.ref }}
+  group: build-eval-${{ github.ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,9 +23,12 @@ jobs:
         with:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
-      - name: lint
-        run: nix build ".#checks.x86_64-linux.pre-commit" --show-trace --accept-flake-config
-name: lint
+      - name: eval
+        run: |-
+          nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+name: eval
 "on":
   pull_request:
     branches:
@@ -38,4 +41,4 @@ name: lint
   workflow_dispatch: {}
 permissions:
   contents: read
-run-name: Build lint by @${{ github.actor }}
+run-name: Evaluate hosts by @${{ github.actor }}

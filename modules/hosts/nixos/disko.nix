@@ -8,7 +8,9 @@
         disk = {
           main = {
             type = "disk";
-            device = "/dev/nvme1n1";
+            # Stabilna ścieżka: numeracja nvme0/nvme1 zmienia się między bootami, a
+            # drugi dysk (Micron 1 TB) to Windows — install-system robi destroy.
+            device = "/dev/disk/by-id/nvme-WD_BLACK_SN850X_4000GB_244363800090";
             content = {
               type = "gpt";
               partitions = {

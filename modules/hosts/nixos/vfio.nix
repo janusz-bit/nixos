@@ -25,8 +25,9 @@ _: {
       # Nazwa VM, dla której działa dynamiczny przekaz GPU
       vmName = "win11";
       cfgUser = config.customBot.defaultUser;
+      userHome = config.users.users.${cfgUser}.home;
       # szablon VM w /nix/store — nietykalny dla obcinania plików w repo przy boot
-      vfioVmXml = pkgs.writeText "win11-vm.xml" (builtins.readFile ./win11-vm.xml);
+      vfioVmXml = ./win11-vm.xml;
 
       qemuHook = pkgs.writeShellApplication {
         name = "vfio-qemu-hook";
@@ -134,7 +135,7 @@ _: {
           }
 
           # Hook obsługuje wyłącznie VM z przekazywaną GPU
-          if [ "$GUEST_NAME" != "win11" ]; then
+          if [ "$GUEST_NAME" != "${vmName}" ]; then
             exit 0
           fi
 
@@ -323,9 +324,11 @@ _: {
           # Pinning sesji użytkownika do iGPU (greeter celowo zostaje domyślny —
           # boot wygląda identycznie jak dziś). Plasma 6 źródłuje
           # ~/.config/plasma-workspace/env/*.sh na starcie sesji, więc zmienna
-          # trafia tylko do KWin zalogowanego użytkownika.
-          "d /home/${cfgUser}/.config/plasma-workspace/env 0755 ${cfgUser} users - -"
-          "f+ /home/${cfgUser}/.config/plasma-workspace/env/igpu-kwin.sh 0644 ${cfgUser} users - export KWIN_DRM_DEVICES=/dev/dri/igpu-card"
+          # trafia tylko do KWin zalogowanego użytkownika. Eksport jest
+          # warunkowy: plik zostaje w $HOME po wyłączeniu modułu, a bez
+          # symlinka KWin dostałby nieistniejące urządzenie DRM.
+          "d ${userHome}/.config/plasma-workspace/env 0755 ${cfgUser} users - -"
+          "f+ ${userHome}/.config/plasma-workspace/env/igpu-kwin.sh 0644 ${cfgUser} users - [ -e /dev/dri/igpu-card ] && export KWIN_DRM_DEVICES=/dev/dri/igpu-card"
         ];
 
         # Deklaratywne zdefiniowanie VM z szablonu w /nix/store.

@@ -3,15 +3,10 @@
   flake.modules.nixos.nixos-packages =
     { pkgs, config, ... }:
     let
+      user = config.customBot.defaultUser;
+      home = config.users.users.${user}.home;
       # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
-      hermes-desktop = inputs.hermes-agent.packages.${pkgs.system}.desktop;
-      # Waywallen — pakiet lokalny (AppImage + plugin open-wallpaper-engine):
-      # daemon + UI + pluginy image/video/wallhaven + tapety Wallpaper Engine
-      # (.pkg/web). Szczegóły w modules/packages/_waywallen/default.nix
-      waywallen = pkgs.callPackage ../../packages/_waywallen { };
-      # Plugin tapety dla Plazmy 6 — szczegóły w
-      # modules/packages/_waywallen-kde-plugin/default.nix
-      waywallen-kde-plugin = pkgs.callPackage ../../packages/_waywallen-kde-plugin { };
+      hermes-desktop = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop;
     in
     {
       environment.systemPackages = with pkgs; [
@@ -25,16 +20,15 @@
         vesktop
         vlc
         tor-browser
-        # proton-ge-bin
-        # niri
         alacritty
         sqlite
-        # brave
         libreoffice-qt
         kdePackages.qrca
         # Waywallen — dynamiczne tapety (zamiennik Wallpaper Engine Plugin).
         # Nie wymaga Steama/Protonu; tapety Wallpaper Engine przez wbudowany
         # plugin open-wallpaper-engine. Ustawianie tapet: aplikacja waywallen.
+        # waywallen*, bootdev-cli i helium to pakiety lokalne z overlaya
+        # local-packages (modules/packages/packages.nix).
         waywallen
         waywallen-kde-plugin
         signal-desktop
@@ -139,9 +133,9 @@
 
         syncthing = {
           enable = true;
-          user = "${config.customBot.defaultUser}";
-          dataDir = "/home/${config.customBot.defaultUser}/Sync";
-          configDir = "/home/${config.customBot.defaultUser}/.config/syncthing";
+          inherit user;
+          dataDir = "${home}/Sync";
+          configDir = "${home}/.config/syncthing";
           openDefaultPorts = true;
         };
       };

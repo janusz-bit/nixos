@@ -12,10 +12,8 @@ let
       micro-full
       nil
       nixd
-      # self.packages.${pkgs.stdenv.hostPlatform.system}.my-neovim
       nixfmt-tree
       uv
-      toybox
       statix
       cachix
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -48,9 +46,6 @@ let
       optionalStr = cond: str: if cond then str else "";
     in
     {
-      # Pushing
-      push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | CACHIX_AUTH_TOKEN=$(cat ${config.age.secrets.cachix-authtoken.path}) cachix push ${customTop.cache.cachix.name}";
-
       # Update systemu
       update = update_alias "switch" true;
       update-boot = update_alias "boot" true;
@@ -64,11 +59,13 @@ let
       "flakes"
     ];
     extra-substituters = [
-      "${customTop.cache.cachix.url}"
-    ];
+      customTop.cache.cachix.url
+    ]
+    ++ map (c: c.url) customTop.cache.inputs;
     extra-trusted-public-keys = [
-      "${customTop.cache.cachix.pubKey}"
-    ];
+      customTop.cache.cachix.pubKey
+    ]
+    ++ map (c: c.pubKey) customTop.cache.inputs;
   };
 in
 {
@@ -76,6 +73,7 @@ in
     {
       pkgs,
       config,
+      lib,
       ...
     }:
 
@@ -85,22 +83,23 @@ in
 
       nixpkgs = {
         config.allowUnfree = true;
-        overlays = [ self.overlays.opencode-config ];
+        overlays = [
+          self.overlays.opencode-config
+          self.overlays.local-packages
+        ];
       };
 
       networking = {
-        nameservers = [
+        # mkDefault: na WSL resolv.conf generuje Windows (wsl-settings.nix).
+        nameservers = lib.mkDefault [
           "9.9.9.9"
           "149.112.112.112"
           "2620:fe::fe"
           "2620:fe::9"
         ];
 
-        firewall = {
-          enable = true;
-          allowedTCPPorts = [ 22 ];
-          allowedUDPPorts = [ ];
-        };
+        # Port 22 otwiera services.openssh.openFirewall (domyślnie true).
+        firewall.enable = true;
       };
 
       environment = {
@@ -121,6 +120,10 @@ in
         nix-index-database.comma.enable = true;
 
         direnv.enable = true;
+
+        # Tylko w fish: token cachix wstrzykuje funkcja `cachix-push`
+        # (base/agenix.nix), niewidoczna dla innych procesów.
+        fish.shellAliases.push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
       };
 
       # The ZFS module is pulled in by default by nixpkgs even when ZFS

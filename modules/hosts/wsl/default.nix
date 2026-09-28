@@ -1,7 +1,6 @@
 {
   inputs,
   self,
-  config,
   ...
 }:
 {
@@ -10,7 +9,6 @@
     {
       imports = [
         self.modules.nixos.wsl-stateVersion
-        # self.modules.nixos.wsl-obsidian
         inputs.nixos-wsl.nixosModules.default
         self.modules.nixos.wsl-settings
       ];

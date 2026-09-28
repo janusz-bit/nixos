@@ -32,39 +32,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `postPatch` w derywacji `hardware.nvidia.package.open`, usunąć override
   i zbudować moduł ponownie.
 
-### 2. `python-docs-fix` — pin docutils 0.21.2 + sphinx 8.2.3 w docs-builderze cpythona
-
-- **Od:** 2026-09-01 (commit `79d96fa`)
-- **Pliki:** `modules/overlays/python-docs-fix.nix` + wpis
-  `self.overlays.python-docs-fix` w `nixpkgs.overlays`
-  (`modules/hosts/raspberry-pi-4/configuration.nix`)
-- **Objaw:** budowa `python3.11-3.11.16-doc` (ciągnięta przez
-  `documentation.doc.enable = true` + `python311` w `systemPackages` →
-  `system-path`) kończy się:
-  `TypeError: int() argument must be a string, a bytes-like object or a
-  real number, not 'NoneType'` w
-  `docutils/parsers/rst/states.py` (`parse_enumerator`), przy okazji
-  wywalając `system-path` i cały toplevel. Od nixpkgs `20b1ddd1aa5a`
-  (sphinx 9.1.0 + patch `fix-test-stemmer`) dodatkowo: patch ten nie
-  pasuje do 8.2.3 (hunk#2: kontekst `findthisstemmedkey` vs
-  `findthisstemmedkei` w 8.2.3) — overlay czyści `patches = []` przy
-  downgradzie sphinx.
-- **Przyczyna:** docs-builder cpythona buduje dokumentację przez
-  `pkgsBuildBuild.python3` (3.14 + sphinx 9.1 + **docutils 0.23**); regresja
-  w docutils ≥ 0.22 przy enumerowanych listach RST. Upstream:
-  <https://github.com/NixOS/nixpkgs/issues/499166> (stan na 2026-09-01: otwarte).
-- **Obejście:** overlay podmienia środowisko budujące `passthru.doc` na
-  python3.14 z docutils 0.21.2 + sphinx 8.2.3. Interpreter python3.11 i
-  reszta systemu zostają na normalnych wersjach. Zweryfikowane lokalnie:
-  pełny build docs przechodzi; dry-run toplevela buduje wyłącznie
-  docutils/sphinx/hook/theme + `python3.11-3.11.16-doc`.
-- **Kiedy usunąć:** gdy #499166 zostanie zamknięte albo zwykłe
-  `nix build nixpkgs#python311.doc` zbuduje się bez overlaya.
-- **Jak usunąć:** skasować `modules/overlays/python-docs-fix.nix`, wywalić
-  `self.overlays.python-docs-fix` z `nixpkgs.overlays` w konfiguracji
-  raspberry-pi-4, odpalić testowy build docs, potem `update-boot`.
-
-### 3. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
+### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
 
 - **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
 - **Pliki:** `modules/hosts/raspberry-pi-4/configuration.nix`
@@ -79,6 +47,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
 
 ## Zamknięte
+
+- **`python-docs-fix` (pin docutils/sphinx w docs-builderze cpythona,
+  nixpkgs#499166)** — zamknięte 2026-09-28. Budowę `python3.11-doc` ciągnęło
+  tylko `documentation.doc.enable = true` + `python311` w `systemPackages`
+  raspberry-pi-4; headless serwer ma teraz `documentation.doc.enable = false`,
+  więc overlay `modules/overlays/python-docs-fix.nix` usunięto (issue upstream
+  nadal otwarte — przy ponownym włączeniu dokumentacji wróci błąd).
 
 - **`droid` AVF kernel patch (6.1.188)** — zamknięte 2026-09-27. Po migracji
   `nixosConfigurations.droid` do `nixOnDroidConfigurations.droid` nie budujemy

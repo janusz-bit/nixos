@@ -14,6 +14,7 @@
 # (linki do /etc/ai-skills) mają pierwszeństwo — importer nigdy ich nie
 # nadpisuje: nix pozostaje źródłem prawdy.
 # Inne agenty (opencode, gemini-cli) celowo NIE dostają symlinków.
+{ inputs, ... }:
 {
   flake.modules.nixos.ai-skills =
     {
@@ -23,7 +24,8 @@
       ...
     }:
     let
-      user = config.customBot.defaultUser or "dinosaur";
+      user = config.customBot.defaultUser;
+      primeAgentDir = "${config.users.users.${user}.home}/.prime/agent";
 
       skills = {
         ai-tutor = ./ai-tutor;
@@ -35,11 +37,24 @@
       # PRIME_AGENT_KERNEL_PYTHON (read-only env z flake llm-agents), więc
       # bootstrap NIE zrobi `uv pip install --editable` — tylko sprawdza
       # `import <skill>` i wyłącza skill z warningiem, gdy import się nie uda.
-      # Dlatego src/ trafia do PYTHONPATH (sessionVariables -> prime-agent ->
-      # kernel) i skill jest importowalny out-of-the-box. Nowy skill pythonowy:
+      # Dlatego src/ trafia do PYTHONPATH wrappera prime-agenta (-> kernel) i
+      # skill jest importowalny out-of-the-box. Nowy skill pythonowy:
       # dodaj do `skills` ORAZ do `pythonSkills`.
       pythonSkills = [ "trilium-notes" ];
       pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
+
+      # PYTHONPATH tylko dla prime-agenta — globalna zmienna sesji trafiałaby
+      # do każdego procesu Pythona (venvy, uv, nix-shell) i mogła przesłaniać
+      # moduły. hiPrio: wygrywa z niezawiniętym prime-agentem z base.
+      primeAgentWithSkills = pkgs.symlinkJoin {
+        name = "prime-agent-with-skills";
+        paths = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/prime-agent \
+            --prefix PYTHONPATH : ${lib.escapeShellArg (lib.concatStringsSep ":" pythonSkillSrcs)}
+        '';
+      };
 
       # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
       # Cały katalog skilla: SKILL.md, references/, a przy skillach pythonowych
@@ -52,11 +67,11 @@
       );
 
       # Automatyczny import: symlink każdego skilla do katalogu skilli Prime Agenta.
-      primeSkillLinks = map (
-        name: "L+ /home/${user}/.prime/agent/skills/${name} - - - - /etc/ai-skills/${name}"
-      ) (lib.attrNames skills);
+      primeSkillLinks = map (name: "L+ ${primeSkillsDir}/${name} - - - - /etc/ai-skills/${name}") (
+        lib.attrNames skills
+      );
 
-      primeSkillsDir = "/home/${user}/.prime/agent/skills";
+      primeSkillsDir = "${primeAgentDir}/skills";
 
       # Import skilli z katalogu drop-in /etc/ai:
       # 1. symlink każdego podkatalogu z SKILL.md do katalogu skilli Prime Agenta,
@@ -108,12 +123,15 @@
       environment.etc = etcEntries;
 
       # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
-      environment.sessionVariables.PYTHONPATH = lib.concatStringsSep ":" pythonSkillSrcs;
+      environment.systemPackages = [ (lib.hiPrio primeAgentWithSkills) ];
 
       systemd = {
         tmpfiles.rules = [
-          # Drop-in na skille runtime; grupa users może dodawać skille bez sudo.
-          "d /etc/ai 0775 root users - -"
+          # Drop-in na skille runtime — zapisywalny tylko przez defaultUsera
+          # (on i jego Prime Agent dodają skille bez sudo). Wcześniej 0775
+          # root:users: na RPi agent hermes (grupa users) mógł podrzucić skill
+          # ładowany automatycznie przez prime-agenta użytkownika nixos.
+          "d /etc/ai 0755 ${user} root - -"
           # Katalog skilli Prime Agenta zapisywalny przez usługę (User = user).
           # Bez tego tmpfiles utworzy go jako root i importer nie zapisze linku.
           "d ${primeSkillsDir} 0755 ${user} users - -"
@@ -134,7 +152,7 @@
             NoNewPrivileges = true;
             PrivateTmp = true;
             ProtectSystem = "strict";
-            ReadWritePaths = [ "/home/${user}/.prime/agent" ];
+            ReadWritePaths = [ primeAgentDir ];
           };
         };
 

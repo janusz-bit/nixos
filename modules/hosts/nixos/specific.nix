@@ -5,6 +5,12 @@ _: {
     boot.loader = {
       limine = {
         enable = true;
+        # Podpis limine kluczami sbctl (/var/lib/sbctl/keys) + suma kontrolna
+        # konfiguracji wbudowana w binarkę. Sam podpis niczego nie wymusza —
+        # ochronę daje dopiero Secure Boot włączony w firmware po
+        # `sudo sbctl enroll-keys -m` (-m = klucze Microsoftu, potrzebne
+        # dla Windowsa i opcjonalnych ROM-ów GPU).
+        secureBoot.enable = true;
         extraEntries = ''
           /Windows
             protocol: efi

@@ -1,12 +1,18 @@
 _: {
-  flake.modules.nixos.wsl-settings = _: {
-    wsl = {
-      enable = true;
-      defaultUser = "nixos";
-      useWindowsDriver = true;
-      startMenuLaunchers = true;
-    };
+  flake.modules.nixos.wsl-settings =
+    { config, ... }:
+    {
+      wsl = {
+        enable = true;
+        inherit (config.customBot) defaultUser;
+        useWindowsDriver = true;
+        startMenuLaunchers = true;
+      };
 
-    environment.sessionVariables.ZED_ALLOW_EMULATED_GPU = "1";
-  };
+      # resolv.conf generuje WSL (wsl.wslConf.network.generateResolvConf) —
+      # serwery DNS z base i tak byłyby ignorowane (ostrzeżenie ewaluacji).
+      networking.nameservers = [ ];
+
+      environment.sessionVariables.ZED_ALLOW_EMULATED_GPU = "1";
+    };
 }

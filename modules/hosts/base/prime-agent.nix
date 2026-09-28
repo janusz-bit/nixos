@@ -10,6 +10,7 @@
     { config, ... }:
     let
       user = config.customBot.defaultUser;
+      agentDir = "${config.users.users.${user}.home}/.prime/agent";
 
       modelsJson = builtins.toJSON {
         providers = {
@@ -113,25 +114,28 @@
         telemetry = {
           enabled = false;
         };
-        # Notatki Trilium (desktop na localhost:37840) przez MCP.
-        # Token tylko przez zmienną środowiskową — literalne sekrety
-        # prime-agent odrzuca (docs: packages/coding-agent/docs/mcp-integrations.md).
+        # Notatki Trilium przez MCP (endpoint zależny od hosta —
+        # customBot.triliumMcpUrl). Token tylko przez zmienną środowiskową —
+        # literalne sekrety prime-agent odrzuca
+        # (docs: packages/coding-agent/docs/mcp-integrations.md).
         mcpServers = {
           trilium-notes = {
             type = "http";
-            url = "http://127.0.0.1:37840/mcp";
+            url = config.customBot.triliumMcpUrl;
             bearerTokenEnvVar = "TRILIUM_ETAPI_TOKEN";
           };
         };
       };
     in
     {
-      # Zmienne środowiskowe jako druga warstwa (docs telemetry):
-      # PRIME_AGENT_TELEMETRY=0 nadpisuje settings, DO_NOT_TRACK=1 to
-      # standard respektowany też przez inne narzędzia.
       environment.sessionVariables = {
+        # Zmienne środowiskowe jako druga warstwa (docs telemetry):
+        # PRIME_AGENT_TELEMETRY=0 nadpisuje settings, DO_NOT_TRACK=1 to
+        # standard respektowany też przez inne narzędzia.
         PRIME_AGENT_TELEMETRY = "0";
         DO_NOT_TRACK = "1";
+        # Skill trilium-notes (modules/skills/trilium-notes) — ten sam endpoint.
+        TRILIUM_MCP_URL = config.customBot.triliumMcpUrl;
       };
 
       environment.etc = {
@@ -140,9 +144,9 @@
       };
 
       systemd.tmpfiles.rules = [
-        "d /home/${user}/.prime/agent 0700 ${user} users - -"
+        "d ${agentDir} 0700 ${user} users - -"
       ]
-      ++ map (name: "L+ /home/${user}/.prime/agent/${name} - - - - /etc/prime-agent/${name}") [
+      ++ map (name: "L+ ${agentDir}/${name} - - - - /etc/prime-agent/${name}") [
         "models.json"
         "settings.json"
       ];

@@ -1,4 +1,4 @@
-{ inputs, self, ... }:
+{ inputs, customTop, ... }:
 {
   flake.modules.nixos.nixos-configuration =
     {
@@ -9,8 +9,10 @@
 
     {
       nixpkgs.overlays = [
-        self.overlays.brave-debloater
-        inputs.nix-cachyos-kernel.overlays.default
+        # pinned = ten sam nixpkgs, którym Hydra autora buduje kernele, więc
+        # kernel przychodzi z cache attic.xuyh0120.win/lantian (customTop.cache)
+        # zamiast kompilować się lokalnie po każdym bumpie naszego nixpkgs.
+        inputs.nix-cachyos-kernel.overlays.pinned
       ];
 
       boot = {
@@ -20,11 +22,8 @@
         supportedFilesystems = [ "btrfs" ];
         binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-        # Working hibernation
+        # Working hibernation (resumeDevice sam dodaje parametr resume=)
         resumeDevice = "/dev/mapper/swap";
-        kernelParams = [ "resume=/dev/mapper/swap" ];
-        # Opcjonalnie, ale zalecane przy hibernacji na LUKS:
-        # boot.initrd.systemd.enable = true;
       };
 
       # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).
@@ -43,14 +42,10 @@
         };
         btrfs.autoScrub.enable = true;
         flatpak.enable = true;
-        fail2ban = {
-          enable = true;
-          maxretry = 5;
-          ignoreIP = [
-            "127.0.0.1/8"
-            "192.168.1.0/24"
-          ];
-        };
+
+        # SSH tylko z domowego LAN-u (reguła firewall niżej) — nie z każdej
+        # sieci, do której podłączy się laptop.
+        openssh.openFirewall = false;
 
         # Sched-ext (BPF scheduler) — scx_lavd zoptymalizowany pod gry i hybrydowe rdzenie P+E
         scx = {
@@ -66,6 +61,8 @@
           rulesProvider = pkgs.ananicy-rules-cachyos;
         };
 
+        # Plasma 6 + SDDM na Waylandzie — serwer X nie jest potrzebny
+        # (XWayland uruchamia KWin); opcje xkb działają bez xserver.enable.
         displayManager = {
           sddm = {
             wayland.enable = true;
@@ -75,16 +72,9 @@
         };
         desktopManager.plasma6.enable = true;
 
-        # Enable the X11 windowing system.
-        # You can disable this if you're only using the Wayland session.
-        xserver = {
-          enable = true;
-
-          # Configure keymap in X11
-          xkb = {
-            layout = "pl";
-            variant = "";
-          };
+        xserver.xkb = {
+          layout = "pl";
+          variant = "";
         };
 
         # Enable CUPS to print documents.
@@ -114,7 +104,9 @@
           GAMEMODERUNEXEC = "env __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia PROTON_ENABLE_WAYLAND=1 PROTON_ENABLE_NGX_UPDATER=1 PROTON_FSR4_UPGRADE=1 PROTON_DLSS_UPGRADE=1 PROTON_XESS_UPGRADE=1";
         };
 
-        etc."kcminputrc".text = ''
+        # Num Lock włączony w sesji Plasmy (0 = włącz). KDE czyta domyślne
+        # konfiguracje z XDG_CONFIG_DIRS, czyli /etc/xdg — nie z /etc.
+        etc."xdg/kcminputrc".text = ''
           [Keyboard]
           NumLock=0
         '';
@@ -127,7 +119,10 @@
           wifi.powersave = false;
           wifi.macAddress = "preserve";
         };
-        firewall.allowedUDPPorts = [ 5353 ];
+        # iptables (networking.nftables jest wyłączone)
+        firewall.extraCommands = ''
+          iptables -A nixos-fw -p tcp -s ${customTop.lan.subnet} --dport 22 -j nixos-fw-accept
+        '';
       };
 
       # Set your time zone.
@@ -138,12 +133,8 @@
       # Configure console keymap
       console.keyMap = "pl2";
 
-      security = {
-        pam = {
-          services.${config.customBot.defaultUser}.kwallet.enable = true;
-        };
-        rtkit.enable = true;
-      };
+      # KWallet przez PAM (login/sddm/kde) konfiguruje moduł plasma6.
+      security.rtkit.enable = true;
 
       # Define a user account. Don't forget to set a password with ‘passwd’.
       users.users = {

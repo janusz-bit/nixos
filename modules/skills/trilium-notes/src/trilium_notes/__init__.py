@@ -8,7 +8,8 @@ Usage in the kernel:
     r = await trilium_notes.search_notes(query="Nix")
     r = await trilium_notes.get_note_content(noteId="gizBJ1qzBFsT")
 
-The ETAPI token lives in agenix (/run/agenix/trilium-etapi, root:users 0440)
+The ETAPI token lives in agenix (/run/agenix/trilium-etapi, owned by the host's
+default user, 0400; group hermes may read it on raspberry-pi-4)
 and is loaded into TRILIUM_ETAPI_TOKEN for the runtime's bearer-token auth.
 """
 
@@ -22,7 +23,7 @@ __all__ = ["TriliumMcp", "trilium"]
 
 
 _TOKEN_ENV = "TRILIUM_ETAPI_TOKEN"
-# agenix secret: owner root, group users, mode 0440 (modules/hosts/base/agenix.nix).
+# agenix secret: owner customBot.defaultUser, mode 0400 (modules/agenix/agenix.nix).
 _TOKEN_FILE = "/run/agenix/trilium-etapi"
 
 

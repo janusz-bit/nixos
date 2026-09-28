@@ -224,6 +224,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       "aarch64-linux"
       "x86_64-linux"
     ];
-    sourceProvenance = [ lib.sourceTypes.binaryBytecode ];
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
 })

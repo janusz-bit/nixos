@@ -1,24 +1,21 @@
-{ self, customTop, ... }:
+{ customTop, ... }:
 {
   flake.modules.nixos.nextcloud =
+    { config, pkgs, ... }:
     {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    {
+      # nextcloud-setup czyta plik przez LoadCredential.
       age.secrets.nextcloud-adminpass = {
         file = customTop.secretsDir + "/nextcloud-adminpass.age";
         owner = "nextcloud";
-        group = "users";
-        mode = "0440";
+        mode = "0400";
       };
       services = {
         nextcloud = {
           enable = true;
           hostName = "${customTop.site.full}";
-          package = pkgs.nextcloud34;
+          # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
+          # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
+          package = pkgs.nextcloud35;
 
           database.createLocally = true;
 
@@ -37,13 +34,13 @@
           # pressure (RPi4 typically runs with <200 MB free), PHP-FPM cannot
           # spawn new children for upload processing, causing uploads to fail
           # silently. 24 children × 55 MB = ~1.3 GB — fits comfortably.
+          # ondemand: prywatna instancja przez większość czasu stoi bezczynnie,
+          # więc nie trzymamy w RAM-ie zapasowych workerów.
           poolSettings = {
-            pm = "dynamic";
+            pm = "ondemand";
             "pm.max_children" = 24;
             "pm.max_requests" = 500;
-            "pm.max_spare_servers" = 6;
-            "pm.min_spare_servers" = 2;
-            "pm.start_servers" = 4;
+            "pm.process_idle_timeout" = "30s";
           };
 
           phpOptions = {

@@ -1,5 +1,4 @@
 {
-  self,
   inputs,
   customTop,
   ...
@@ -8,16 +7,14 @@
   flake.modules.nixos.rpi-configuration =
     {
       config,
-      lib,
       pkgs,
       ...
     }:
+    let
+      keys = import "${customTop.secretsDir}/keys.nix";
+    in
     {
       networking.hostName = "raspberry-pi-4";
-
-      nixpkgs.overlays = [
-        self.overlays.python-docs-fix
-      ];
 
       # Fix for missing dw-hdmi module on RPi4 generic image
       boot = {
@@ -65,73 +62,53 @@
       networking.networkmanager.enable = true;
       time.timeZone = "Europe/Warsaw";
 
-      # Security hardening
-      services.openssh = {
-        enable = true;
-        settings.PasswordAuthentication = false;
-        settings.KbdInteractiveAuthentication = false;
-      };
+      # SSH: bazowe ustawienia (tylko klucze) z base-ssh. Logowanie roota
+      # kluczem zostaje — to ścieżka administracyjna przez tunel
+      # (`Host ssh.*` → `User root` w base-ssh).
+      services.openssh.settings.PermitRootLogin = "prohibit-password";
+      # Headless: bez x11-ssh-askpass (zależności X11).
+      programs.ssh.enableAskPassword = false;
 
-      # Fail2ban security
-      services.fail2ban = {
-        enable = true;
-        maxretry = 5;
-        ignoreIP = [
-          "127.0.0.1/8"
-          "192.168.1.0/24"
-        ];
-      };
+      # Stała sieć domowa — nie banuj hostów z LAN.
+      services.fail2ban.ignoreIP = [ customTop.lan.subnet ];
 
-      # More frequent Nix GC for small storage
+      # More frequent Nix GC for small storage (nadpisuje mkDefault z nix-settings)
       nix = {
-        settings = {
-          max-jobs = 2;
-          trusted-users = [
-            "root"
-            "@wheel"
-            "hermes"
-          ];
-        };
+        settings.max-jobs = 2;
         gc = {
-          # `automatic` domyslnie = false; bez tego nix.gc.dates jest ignorowane
-          # i serwer nigdy nie sprzata /nix/store (modul nix-settings nie jest
-          # importowany na tym hoscie - patrz base/default.nix).
-          automatic = true;
           dates = "daily";
           options = "--delete-older-than 3d";
         };
       };
 
-      # Docs w system-path. python3.11-doc buduje sie dzieki overlayowi
-      # python-docs-fix (nixpkgs#499166) — patrz temporary-fixes.md.
-      documentation.doc.enable = true;
+      # Serwer headless: bez /share/doc. Przy okazji nie buduje się
+      # python3.11-doc (nixpkgs#499166), więc overlay python-docs-fix jest zbędny.
+      documentation.doc.enable = false;
 
       environment.systemPackages = with pkgs; [
-        # micro, htop i uv pochodza z base (sharedPackages) - nie duplikowac
+        # micro, htop i uv pochodza z base (sharedPackages); git z base-git
         nodejs_22
         ripgrep
         ffmpeg
         python311
-        nix
-        git
         tea # Gitea official CLI client
         antigravity-cli
       ];
 
-      # User configuration
-      users.users.${config.customBot.defaultUser} = {
-        initialPassword = "${config.customBot.defaultUser}";
-        isNormalUser = true;
-        description = "${config.customBot.defaultUser}";
-        extraGroups = [
-          "networkmanager"
-          "wheel"
-        ];
-        openssh.authorizedKeys.keys =
-          let
-            secrets = import "${customTop.secretsDir}/secrets.nix";
-          in
-          secrets."secret1.age".publicKeys;
+      users.users = {
+        ${config.customBot.defaultUser} = {
+          initialPassword = "${config.customBot.defaultUser}";
+          isNormalUser = true;
+          description = "${config.customBot.defaultUser}";
+          extraGroups = [
+            "networkmanager"
+            "wheel"
+          ];
+          # Klucze roota laptopa i RPi (bez starej maszyny AVF droid-android).
+          openssh.authorizedKeys.keys = builtins.attrValues keys.hosts;
+        };
+        # Twój klucz z laptopa (ssh ssh.janusz-bit.com loguje się jako root).
+        root.openssh.authorizedKeys.keys = [ keys.users.janusz-bit ];
       };
     };
 }

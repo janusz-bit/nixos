@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - name: Install Nix
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -18,14 +18,13 @@ jobs:
             extra-substituters = https://janusz-bit.cachix.org https://nix-on-droid.cachix.org
             extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqvHJ9XCp+nidK7qkMQrU=
             build-fallback = true
-          nix_path: nixpkgs=channel:nixos-unstable
       - name: Setup Cachix
-        uses: cachix/cachix-action@v14
+        uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
         with:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
       - name: Update nix-cachyos-kernel flake input
-        run: nix flake lock --update-input nix-cachyos-kernel
+        run: nix flake update nix-cachyos-kernel
       - name: Build Kernel
         run: nix build ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" --show-trace --accept-flake-config
       - name: Commit updated flake.lock

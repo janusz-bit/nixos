@@ -4,22 +4,15 @@
     {
       config,
       lib,
-      pkgs,
       ...
     }:
     {
-      age.secrets.open-webui-hermes-env = {
-        file = customTop.secretsDir + "/hermes-env.age";
-        group = "users";
-        mode = "0440";
-      };
+      # Oba pliki czyta wyłącznie systemd (EnvironmentFile, jako root) przed
+      # startem sandboxa DynamicUser — domyślne root:root 0400 wystarcza.
+      age.secrets.open-webui-hermes-env.file = customTop.secretsDir + "/hermes-env.age";
       # OPENAI_API_KEYS (Hermes + LLM Gateway keys) — must stay out of
       # environment {} so it never lands in the world-readable nix store
-      age.secrets.open-webui-keys = {
-        file = customTop.secretsDir + "/open-webui-keys.age";
-        group = "users";
-        mode = "0440";
-      };
+      age.secrets.open-webui-keys.file = customTop.secretsDir + "/open-webui-keys.age";
 
       services.open-webui = {
         enable = true;
@@ -183,9 +176,7 @@
       systemd.services.open-webui.serviceConfig = {
         Restart = lib.mkForce "on-failure";
         # Second env file appended after the module's environmentFile:
-        # OPENAI_API_KEYS="<hermes key>;<llmgateway key>". Loaded by systemd
-        # (root) before the DynamicUser sandbox starts, so root:root 0400
-        # is fine.
+        # OPENAI_API_KEYS="<hermes key>;<llmgateway key>".
         EnvironmentFile = config.age.secrets.open-webui-keys.path;
       };
 

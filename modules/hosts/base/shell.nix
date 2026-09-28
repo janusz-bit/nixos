@@ -29,9 +29,9 @@ let
   };
 
   sharedFishInit = config: ''
-    # Ustawienia wtyczki 'done'
-    set -U __done_min_cmd_duration 10000
-    set -U __done_notification_urgency_level low
+    # Ustawienia wtyczki 'done' (-g: bez zapisu fish_variables przy każdym starcie)
+    set -g __done_min_cmd_duration 10000
+    set -g __done_notification_urgency_level low
 
     # Powitanie fastfetch
     ${lib.optionalString config.customBot.enableFastfetch ''

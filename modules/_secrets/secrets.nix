@@ -1,16 +1,16 @@
+# Reguły agenix CLI (agenix -e / -r). Plik może zawierać WYŁĄCZNIE wpisy
+# "<plik>.age" — klucze publiczne są w keys.nix.
+#
+# Odbiorca droid-android (stara maszyna AVF, root@debian) został usunięty.
+# Pliki .age zaszyfrowane jeszcze dla niego trzeba przeszyfrować:
+#   cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519
 let
-  nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkQRhJASMQB1ClDBwqnYGZXSSGAr1S2y5KaQ5Z0Fc5+ root@nixos";
-  droid-android = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG4dg51Pg4rlE4CaiHaHUovkCIgAuJuEqkDsEMAU8ut4 root@debian";
-  raspberry-pi-4 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGkxOS5ycYoTmCsw2/PyxFjPLa5A+qx7iFshCRI9uFBA root@raspberry-pi-4";
+  keys = import ./keys.nix;
+  inherit (keys.hosts) nixos raspberry-pi-4;
 
-  # All hosts share these secrets
+  # Laptop jest odbiorcą wszystkiego, bo to na nim edytujesz sekrety
+  # (agenix -e z kluczem roota laptopa).
   allHosts = [
-    nixos
-    droid-android
-    raspberry-pi-4
-  ];
-  # Server-only hosts (nixos + raspberry-pi-4)
-  serverHosts = [
     nixos
     raspberry-pi-4
   ];
@@ -30,10 +30,11 @@ in
   "cachix-authtoken-token.age" = mkSecret allHosts;
   "ollama-api-key.age" = mkSecret allHosts;
   "google-api-key.age" = mkSecret allHosts;
-  "hermes-env.age" = mkSecret serverHosts;
-  "hermes-api-key.age" = mkSecret serverHosts;
-  "opencode.age" = mkSecret serverHosts;
-  "open-webui-keys.age" = mkSecret serverHosts;
+  "hermes-env.age" = mkSecret allHosts;
+  "opencode.age" = mkSecret allHosts;
+  "open-webui-keys.age" = mkSecret allHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
   "openrouter-api-key.age" = mkSecret allHosts;
+  # Hasło Basic Auth ttyd (nginx) — osobne, NIE hasło admina Nextcloud.
+  "ttyd-password.age" = mkSecret allHosts;
 }

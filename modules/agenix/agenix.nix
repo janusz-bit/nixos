@@ -1,83 +1,40 @@
+# Sekrety użytkownika wspólne dla hostów (wrappery fish, nix access-tokens,
+# skille). Właścicielem jest customBot.defaultUser, tryb 0400 — nie grupa
+# `users`: na RPi do tej grupy należeli też użytkownicy usług (hermes).
+# Moduł usługi, który potrzebuje dostępu, dopisuje go jawnie u siebie
+# (np. trilium-etapi w modules/hosts/raspberry-pi-4/hermes.nix).
 { inputs, customTop, ... }:
 {
   flake.modules.nixos.agenix =
-    { ... }:
+    { config, lib, ... }:
+    let
+      userSecret = file: {
+        file = customTop.secretsDir + "/${file}";
+        owner = config.customBot.defaultUser;
+        mode = lib.mkDefault "0400";
+      };
+    in
     {
+      imports = [
+        inputs.agenix.nixosModules.default
+      ];
+
       age = {
         secrets = {
-          ollama-api-key = {
-            file = customTop.secretsDir + "/ollama-api-key.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          secret1 = {
-            file = customTop.secretsDir + "/secret1.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          github-token = {
-            file = customTop.secretsDir + "/GITHUB_TOKEN.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          cachix-authtoken = {
-            file = customTop.secretsDir + "/cachix-authtoken-token.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          notes = {
-            file = customTop.secretsDir + "/notes.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          trilium-etapi = {
-            file = customTop.secretsDir + "/trilium-etapi.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          google-api-key = {
-            file = customTop.secretsDir + "/google-api-key.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          hermes-api-key = {
-            file = customTop.secretsDir + "/hermes-api-key.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          opencode = {
-            file = customTop.secretsDir + "/opencode.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          llmgateway-api-key-shared = {
-            file = customTop.secretsDir + "/llmgateway-api-key.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
-          openrouter-api-key = {
-            file = customTop.secretsDir + "/openrouter-api-key.age";
-            owner = "root";
-            group = "users";
-            mode = "0440";
-          };
+          ollama-api-key = userSecret "ollama-api-key.age";
+          secret1 = userSecret "secret1.age";
+          github-token = userSecret "GITHUB_TOKEN.age";
+          cachix-authtoken = userSecret "cachix-authtoken-token.age";
+          notes = userSecret "notes.age";
+          trilium-etapi = userSecret "trilium-etapi.age";
+          google-api-key = userSecret "google-api-key.age";
+          opencode = userSecret "opencode.age";
+          llmgateway-api-key-shared = userSecret "llmgateway-api-key.age";
+          openrouter-api-key = userSecret "openrouter-api-key.age";
         };
         identityPaths = [
           "/root/.ssh/id_ed25519"
         ];
       };
-      imports = [
-        inputs.agenix.nixosModules.default
-      ];
     };
 }

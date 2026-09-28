@@ -19,12 +19,16 @@
 #   * funkcje fish trafiają do share/fish/vendor_functions.d w profilu
 #     systemowym (standard programs.fish.vendor.functions) — zero hard-
 #     kodowanego /home/$user i tmpfile-symlinków; własna funkcja użytkownika
-#     w ~/.config/fish/functions i tak ma pierwszeństwo w fish_function_path,
-#   * URL i publiczny klucz cachix z customTop (jedno źródło prawdy).
+#     w ~/.config/fish/functions i tak ma pierwszeństwo w fish_function_path.
 #
 # Wartości sekretów nigdy nie trafiają do /nix/store — wrappery zawierają
 # wyłącznie odwołania do plików age (same ścieżki).
-{ self, customTop, ... }:
+#
+# Granica ochrony: wrappery chronią przed PRZYPADKOWYM wyciekiem przez env
+# (logi, procesy potomne, cała sesja KDE). Pliki sekretów należą do
+# customBot.defaultUser (0400, modules/agenix/agenix.nix), więc proces
+# działający jako ten użytkownik nadal może je przeczytać wprost.
+{ self, ... }:
 {
   flake.modules.nixos.base-agenix =
     {
@@ -160,18 +164,6 @@
         ) fishWrappers;
       };
 
-      # Część publiczna ~/.config/nix/nix.conf (substitutery); token dołączany
-      # w runtime przez ExecStart — nigdy w /nix/store. URL i klucz cachix
-      # z customTop, żeby konfiguracja cache nie rozjeżdżała się z flakiem
-      # (flake.nix / nixConfig). Bez duplikatu cache.nixos.org.
-      nixConfPublic = pkgs.writeText "nix.conf.public" ''
-        substituters = https://cache.nixos.org ${customTop.cache.cachix.url}
-        trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= ${customTop.cache.cachix.pubKey}
-      '';
-
-      # Katalog domowy defaultUsera — z opcji, nie literalnie /home/<user>
-      # (może się zmienić np. między hostami).
-      home = config.users.users.${config.customBot.defaultUser}.home;
     in
     {
       imports = [ self.modules.nixos.agenix ];
@@ -195,6 +187,8 @@
           Restart = "on-failure";
           RestartSec = "5s";
         };
+        # Substitutery są w systemowym nix.conf (base-configuration) — tu
+        # wyłącznie token, który nie może trafić do /nix/store.
         script = ''
           set -euo pipefail
           # jawny PATH — jednostka --user nie musi nic odziedziczać
@@ -207,18 +201,10 @@
           # połówki pliku i żeby token nie lądował w pliku z luźnym trybem
           tmp="$(mktemp "$conf_dir/.nix.conf.XXXXXX")"
           trap 'rm -f "$tmp"' EXIT
-          {
-            cat ${nixConfPublic}
-            printf 'access-tokens = github.com=%s\n' "$(cat ${secretPath "github-token"})"
-          } > "$tmp"
+          printf 'access-tokens = github.com=%s\n' "$(cat ${secretPath "github-token"})" > "$tmp"
           chmod 600 "$tmp"
           mv -f "$tmp" "$conf"
         '';
       };
-
-      # Migracja: usuń symlinki wrappera ze starego wariantu (wskazywały na
-      # /etc/fish-functions, który już nie istnieje). Jednorazowa robota —
-      # do skasowania, gdy wszystkie hosty zbudują się z tym wariantem.
-      systemd.tmpfiles.rules = map (w: "r ${home}/.config/fish/functions/${w.name}.fish") fishWrappers;
     };
 }
