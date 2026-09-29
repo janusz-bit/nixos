@@ -45,8 +45,7 @@
           # `nvidia-smi -q -d POWER` pod obciążeniem
           # (Current Power Limit rośnie ponad bazowe TGP). Sprawdzone
           # 2026-09-29: nvidia-powerd nie blokuje D3cold (runtime_status =
-          # suspended bez monitora). HDMI jest wyprowadzone z dGPU, więc
-          # z podłączonym monitorem zewnętrznym `active` jest normalne.
+          # suspended, także z monitorem na DisplayPort).
           dynamicBoost.enable = true;
           # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
           # but NVIDIA 615.71.09 already ships the corrected signature.
