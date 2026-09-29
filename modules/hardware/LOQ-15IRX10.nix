@@ -43,9 +43,10 @@
           # na GPU w grach GPU-bound — bez demona GPU nie dostaje watów Dynamic
           # Boost wliczonych w maksymalne TGP laptopa. Kontrola:
           # `nvidia-smi -q -d POWER` pod obciążeniem
-          # (Current Power Limit rośnie ponad bazowe TGP). Gdyby dGPU przestało
-          # zasypiać w spoczynku (runtime_status ≠ suspended w
-          # /sys/bus/pci/devices/0000:01:00.0/power/), wyłączyć.
+          # (Current Power Limit rośnie ponad bazowe TGP). Sprawdzone
+          # 2026-09-29: nvidia-powerd nie blokuje D3cold (runtime_status =
+          # suspended bez monitora). HDMI jest wyprowadzone z dGPU, więc
+          # z podłączonym monitorem zewnętrznym `active` jest normalne.
           dynamicBoost.enable = true;
           # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
           # but NVIDIA 615.71.09 already ships the corrected signature.
