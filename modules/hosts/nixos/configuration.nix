@@ -24,6 +24,19 @@
 
         # Working hibernation (resumeDevice sam dodaje parametr resume=)
         resumeDevice = "/dev/mapper/swap";
+
+        # Kernel CachyOS ma CONFIG_ZSWAP_DEFAULT_ON=y, a moduł boot.zswap
+        # przy enable = false nic nie wyłącza: zswap kompresowałby strony
+        # przed zapisem do zRAM (podwójna kompresja, zmarnowany CPU).
+        kernelParams = [ "zswap.enabled=0" ];
+
+        # Strojenie pod swap w zRAM (jak 30-zram.rules i 70-cachyos-settings
+        # z CachyOS): dekompresja z RAM jest tańsza niż ponowny odczyt page
+        # cache z dysku, a readahead swapu (8 stron) nie ma sensu dla zRAM.
+        kernel.sysctl = {
+          "vm.swappiness" = 150;
+          "vm.page-cluster" = 0;
+        };
       };
 
       # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).

@@ -31,6 +31,14 @@
           powerManagement.finegrained = lib.mkDefault true;
           open = true;
           nvidiaSettings = true;
+          # Dynamic Boost (nvidia-powerd): z firmware przesuwa budżet mocy z CPU
+          # na GPU w grach GPU-bound — bez demona GPU nie dostaje watów Dynamic
+          # Boost wliczonych w maksymalne TGP laptopa. Kontrola:
+          # `nvidia-smi -q -d POWER` pod obciążeniem
+          # (Current Power Limit rośnie ponad bazowe TGP). Gdyby dGPU przestało
+          # zasypiać w spoczynku (runtime_status ≠ suspended w
+          # /sys/bus/pci/devices/0000:01:00.0/power/), wyłączyć.
+          dynamicBoost.enable = true;
           # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
           # but NVIDIA 615.71.09 already ships the corrected signature.
           package = nvidiaLatest // {
