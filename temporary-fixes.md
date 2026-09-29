@@ -46,6 +46,26 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (sprawdzać przy podbijaniu kernela / `nixos-hardware`); objawem powrotu
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
 
+### 3. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
+
+- **Od:** 2026-09-29.
+- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`services.udev.extraRules`).
+- **Objaw:** `/sys/bus/pci/devices/0000:01:00.0/power/control` = `on`
+  (domyślna wartość PCI), `runtime_status` stale `active` — RTX 5060 nigdy
+  nie przechodzi w D3cold mimo `powerManagement.finegrained = true`.
+- **Przyczyna:** reguły finegrained w nixpkgs
+  (`nixos/modules/hardware/video/nvidia.nix`) ustawiają `auto` wyłącznie na
+  `ACTION=="bind"`. Przy otwartych modułach nixpkgs ładuje `nvidia_uvm`
+  z `boot.kernelModules` (systemd-modules-load), więc GPU może zostać
+  zbindowane wcześniej, niż udev przetworzy zdarzenie; coldplug odtwarza
+  potem tylko `add`, na które reguła nie reaguje (najbardziej prawdopodobne
+  wyjaśnienie, niepotwierdzone logiem).
+- **Obejście:** reguła jak `71-nvidia.rules` z CachyOS-Settings —
+  `ACTION=="add|bind"` + `DRIVERS=="nvidia"`.
+- **Kiedy usunąć:** gdy reguły w nixpkgs obejmą `add` (lub przestaną ładować
+  `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
+  po restarcie `cat .../power/control` musi dać `auto`.
+
 ## Zamknięte
 
 - **`python-docs-fix` (pin docutils/sphinx w docs-builderze cpythona,

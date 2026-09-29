@@ -19,6 +19,14 @@
       # Włącza sterownik NVIDIA także bez serwera X (Wayland).
       services.xserver.videoDrivers = [ "nvidia" ];
 
+      # See temporary-fixes.md: reguły finegrained z nixpkgs włączają runtime
+      # PM tylko na ACTION=="bind"; tu dGPU zostawało z power/control = on
+      # (domyślne PCI), więc nigdy nie zasypiało (D3cold). Jak 71-nvidia.rules
+      # z CachyOS: także przy coldplug ("add"), gdy sterownik jest już zbindowany.
+      services.udev.extraRules = lib.mkIf config.hardware.nvidia.powerManagement.finegrained ''
+        ACTION=="add|bind", SUBSYSTEM=="pci", DRIVERS=="nvidia", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", TEST=="power/control", ATTR{power/control}="auto"
+      '';
+
       hardware = {
         facter.reportPath = ./facter.json;
         graphics = {
@@ -35,9 +43,9 @@
           # na GPU w grach GPU-bound — bez demona GPU nie dostaje watów Dynamic
           # Boost wliczonych w maksymalne TGP laptopa. Kontrola:
           # `nvidia-smi -q -d POWER` pod obciążeniem
-          # (Current Power Limit rośnie ponad bazowe TGP). Gdyby dGPU przestało
-          # zasypiać w spoczynku (runtime_status ≠ suspended w
-          # /sys/bus/pci/devices/0000:01:00.0/power/), wyłączyć.
+          # (Current Power Limit rośnie ponad bazowe TGP). Sprawdzone
+          # 2026-09-29: nvidia-powerd nie blokuje D3cold (runtime_status =
+          # suspended, także z monitorem na DisplayPort).
           dynamicBoost.enable = true;
           # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
           # but NVIDIA 615.71.09 already ships the corrected signature.
