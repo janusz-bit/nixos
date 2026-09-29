@@ -93,6 +93,8 @@
         python311
         tea # Gitea official CLI client
         antigravity-cli
+        # Claude Code — agent kodujący w terminalu (nixpkgs)
+        claude-code
       ];
 
       users.users = {
