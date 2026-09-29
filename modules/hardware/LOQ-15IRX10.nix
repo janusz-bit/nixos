@@ -19,6 +19,14 @@
       # Włącza sterownik NVIDIA także bez serwera X (Wayland).
       services.xserver.videoDrivers = [ "nvidia" ];
 
+      # See temporary-fixes.md: reguły finegrained z nixpkgs włączają runtime
+      # PM tylko na ACTION=="bind"; tu dGPU zostawało z power/control = on
+      # (domyślne PCI), więc nigdy nie zasypiało (D3cold). Jak 71-nvidia.rules
+      # z CachyOS: także przy coldplug ("add"), gdy sterownik jest już zbindowany.
+      services.udev.extraRules = lib.mkIf config.hardware.nvidia.powerManagement.finegrained ''
+        ACTION=="add|bind", SUBSYSTEM=="pci", DRIVERS=="nvidia", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", TEST=="power/control", ATTR{power/control}="auto"
+      '';
+
       hardware = {
         facter.reportPath = ./facter.json;
         graphics = {
