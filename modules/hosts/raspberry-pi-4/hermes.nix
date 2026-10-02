@@ -11,6 +11,22 @@
       lib,
       ...
     }:
+    let
+      # Oficjalny plugin Nous Research: każda tura Hermesa idzie przez
+      # niemodyfikowane CLI `claude` (subskrypcja Claude, bez klucza API);
+      # pętla agenta, narzędzia i kompakcja zostają po stronie Hermesa.
+      # Commit = wpis z katalogu pluginów hermes-agent
+      # (plugin-catalog/claude-subscription-directsdk.yaml, v0.3.0) — przy
+      # aktualizacji brać `sha` stamtąd, nie `main`.
+      claudeSubscriptionPlugin = pkgs.fetchFromGitHub {
+        # Nazwa trafia do symlinku $HERMES_HOME/plugins/nix-managed-<name>.
+        name = "claude-subscription-directsdk";
+        owner = "NousResearch";
+        repo = "hermes-plugin-claude-subscription-directsdk";
+        rev = "ef73726cfaf2fa0ee041e55572f406e2c24fed83";
+        hash = "sha256-kOQJWKqfGn41V21x/yjt8+i/MyQ2suctvbhf+x8djk8=";
+      };
+    in
     {
       imports = [
         inputs.hermes-agent.nixosModules.default
@@ -52,12 +68,28 @@
               # więc skutki prompt injection ogranicza konto `hermes`.
               require_approval = false;
             };
+            # „Mózg": Claude Code na subskrypcji (claudeSubscriptionPlugin).
+            # Logowanie jednorazowo na RPi, na koncie usługi:
+            #   sudo -u hermes -H claude auth login
+            # (dane w /var/lib/hermes/.claude, 0600 hermes). Plugin odmawia
+            # startu, gdy w środowisku usługi są ANTHROPIC_API_KEY,
+            # ANTHROPIC_AUTH_TOKEN lub ANTHROPIC_BASE_URL — nie dodawać ich
+            # do hermes-env.age.
             model = {
-              provider = "openai-codex";
-              base_url = "https://chatgpt.com/backend-api/codex";
-              default = "gpt-6-sol";
+              provider = "claude-subscription-directsdk-experimental";
+              # Aliasy pluginu: sonnet → claude-sonnet-5[1m], opus, haiku, fable.
+              default = "sonnet";
+              # Aktywacja scala ustawienia z config.yaml na dysku (deep merge),
+              # więc samo usunięcie klucza zostawiłoby tam stary URL Codexa.
+              base_url = "";
             };
+            # Poprzedni mózg (Codex) jako pierwszy zapas: brak logowania
+            # Claude albo wyczerpany limit subskrypcji nie zatrzymują agenta.
             fallback_providers = [
+              {
+                provider = "openai-codex";
+                model = "gpt-6-sol";
+              }
               {
                 provider = "ollama-cloud";
                 model = "glm-5.3-flash:cloud";
@@ -82,7 +114,11 @@
           restart = "always";
           restartSec = 5;
 
+          extraPlugins = [ claudeSubscriptionPlugin ];
+
           extraPackages = with pkgs; [
+            # `claude` na PATH usługi — wymagany przez claudeSubscriptionPlugin.
+            claude-code
             codex
             uv
             nodejs_22

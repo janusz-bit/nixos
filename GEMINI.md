@@ -46,7 +46,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - Imports the full base; overrides: GC daily/3d, `max-jobs = 2`, `documentation.doc.enable = false`, `PermitRootLogin = "prohibit-password"` (admin path: `ssh ssh.janusz-bit.com` as root via cloudflared), no ssh-askpass.
 - RPi vendor kernel with `PREEMPT_LAZY n` (`temporary-fixes.md`).
 - Services (all bound to localhost, exposed only through the tunnel `modules/hosts/raspberry-pi-4/cloudflared.nix`): Nextcloud 35 (Postgres, Redis, PHP-FPM `ondemand`), Open WebUI behind nginx (8080 → 3001), Trilium 8081, Gitea 3000, ttyd 8082 behind nginx Basic Auth 8083, SSH.
-- Hermes Agent (`hermes.nix`): runs as `hermes` without sudo, `wheel`, `disk`, `keys` or Nix trust; sharing with user `nixos` via the upstream 2770/UMask 0007 state dirs.
+- Hermes Agent (`hermes.nix`): runs as `hermes` without sudo, `wheel`, `disk`, `keys` or Nix trust; sharing with user `nixos` via the upstream 2770/UMask 0007 state dirs. Main model = Claude Code subscription through the `claude-subscription-directsdk` plugin (`extraPlugins`, commit from the Hermes plugin catalog); one-time login on the RPi: `sudo -u hermes -H claude auth login`. Fallbacks: `openai-codex`, then `ollama-cloud`.
 
 ## Secrets (agenix)
 - Recipients: `modules/_secrets/secrets.nix` (rules only — `*.age` entries), public keys in `modules/_secrets/keys.nix`. The laptop is a recipient of everything (secrets are edited there). Rekey after changing recipients: `cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519`.
@@ -58,7 +58,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - `nix.settings.trusted-users` stays default (root only).
 - No passwordless root paths for user or agent accounts (no `podman`/`docker` group, no NOPASSWD sudo for agents).
 - `/etc/ai` (runtime skill drop-in) is `0755`, owned by `customBot.defaultUser`.
-- Runtime-fetched code is pinned: opencode plugins (commit/version in `opencode.nix`), GitHub Actions (commit SHAs in `github-actions.nix`), MCP servers from nixpkgs rather than `uvx`/`uv run`.
+- Runtime-fetched code is pinned: opencode plugins (commit/version in `opencode.nix`), GitHub Actions (commit SHAs in `github-actions.nix`), Hermes plugins (commit in `hermes.nix`), MCP servers from nixpkgs rather than `uvx`/`uv run`.
 - ttyd credentials never on a command line (nginx `auth_basic` with a hash file generated from the agenix secret).
 
 ## Binary caches
