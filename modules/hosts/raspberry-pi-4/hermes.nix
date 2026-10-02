@@ -77,8 +77,10 @@
             # do hermes-env.age.
             model = {
               provider = "claude-subscription-directsdk-experimental";
-              # Aliasy pluginu: sonnet → claude-sonnet-5[1m], opus, haiku, fable.
-              default = "sonnet";
+              # Sonnet 5.5 pełnym ID: alias `sonnet` pluginu v0.3.0 jest przypięty
+              # do claude-sonnet-5 (pozostałe aliasy: opus, haiku, fable).
+              # `[1m]` wybiera okno 1M — bez sufiksu CLI stosuje 200K.
+              default = "claude-sonnet-5-5[1m]";
               # Aktywacja scala ustawienia z config.yaml na dysku (deep merge),
               # więc samo usunięcie klucza zostawiłoby tam stary URL Codexa.
               base_url = "";
