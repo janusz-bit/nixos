@@ -7,7 +7,7 @@
           set -euo pipefail
 
           cd "$(git rev-parse --show-toplevel)"
-          if [[ ! -f flake.nix || ! -f modules/packages/_helium/default.nix ]]; then
+          if [[ ! -f flake.nix || ! -f modules/packages/_waywallen/default.nix ]]; then
             echo "Run flake-update from the NixOS configuration repository." >&2
             exit 1
           fi
@@ -18,13 +18,10 @@
 
           echo "Updating flake inputs..."
           nix flake update
-          echo "Updating helium..."
-          ${pkgs.lib.getExe pkgs.nix-update} --system x86_64-linux -F helium
-          ${pkgs.lib.getExe pkgs.nix-update} --system aarch64-linux -F helium --version skip
           echo "Updating bootdev-cli..."
           ${pkgs.lib.getExe pkgs.nix-update} -F bootdev-cli
           echo "Updating waywallen..."
-          # Dwa pasy jak przy helium: x86_64 (wersja + hash), potem
+          # Dwa pasy: x86_64 (wersja + hash), potem
           # aarch64 (hash bez zmiany wersji). OweVersion (plugin
           # open-wallpaper-engine) bumpuje się RĘCZNIE w
           # modules/packages/_waywallen/default.nix + `nix hash file`.
@@ -35,7 +32,6 @@
           nix run .#sync-github-actions
 
           git add -A -- flake.lock .github/workflows \
-            modules/packages/_helium/default.nix \
             modules/packages/_bootdev-cli/default.nix \
             modules/packages/_waywallen/default.nix
           if git diff --cached --quiet; then

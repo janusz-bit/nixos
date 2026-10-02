@@ -6,7 +6,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 `/refine` is a built-in Prime Agent command (skill `packages/coding-agent/skills/refine`) for persisting tactics, policies and memory. It never deploys NixOS changes. From IPython: `await refine.status()`, `await refine.run("…")`, `await refine.run("…", global_=True)`. System changes are made only by editing this flake and running `nixos-rebuild` (aliases `update`, `update-local`).
 
 ## Repository map
-- `flake.nix` — inputs + `nixConfig` caches; outputs = `flake-parts` + `import-tree ./modules` (every `.nix` under `modules/` is a flake-parts module; paths containing a `_`-prefixed segment are ignored, e.g. `_secrets/`, `_hardware-configuration/`, `packages/_helium/`). No Home Manager.
+- `flake.nix` — inputs + `nixConfig` caches; outputs = `flake-parts` + `import-tree ./modules` (every `.nix` under `modules/` is a flake-parts module; paths containing a `_`-prefixed segment are ignored, e.g. `_secrets/`, `_hardware-configuration/`, `packages/_waywallen/`). No Home Manager.
 - `modules/args.nix` — `customTop` (repo, e-mail, domain `janusz-bit.com`, LAN `192.168.100.0/24`, binary caches, `secretsDir`).
 - `modules/options.nix` — `customBot.{flakeTarget, enableFastfetch, defaultUser, triliumMcpUrl}`.
 - `modules/hosts/base/` — shared NixOS base (`self.modules.nixos.base`), plus `fail2ban.nix` (imported by `nixos` and `raspberry-pi-4` only).
@@ -14,7 +14,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/hardware/` — LOQ-15IRX10, Lenovo tweaks, x86-64-v3 system features, `facter.json`. `M27Q.icm` is referenced by KWin (`~/.config/kwinoutputconfig.json` → `/etc/nixos/modules/hardware/M27Q.icm`) — do not move it.
 - `modules/agenix/agenix.nix` + `modules/_secrets/` — secrets (see below).
 - `modules/overlays/opencode.nix` — `opencode` wrapped with an inline, `builtins.toJSON`-generated `opencode.json` (providers, pinned plugins, MCP servers).
-- `modules/packages/` — overlay `local-packages` (`helium`, `waywallen`, `waywallen-kde-plugin`, `bootdev-cli`; also exposed as `packages.<system>.*` for `nix-update`), scripts (`flake-update`, `flake-release`, `repo-sync`), `install-system`, RPi SD image.
+- `modules/packages/` — overlay `local-packages` (`waywallen`, `waywallen-kde-plugin`, `bootdev-cli`; also exposed as `packages.<system>.*` for `nix-update`), scripts (`flake-update`, `flake-release`, `repo-sync`), `install-system`, RPi SD image.
 - `modules/skills/` — declarative Prime Agent skills.
 - `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
@@ -37,6 +37,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - **Insyde firmware quirk:** Linux sees only ~12 EFI variables (no `SecureBoot`, `SetupMode`, `PK`/`KEK`/`db`/`dbx`, `BootOrder`), so `sbctl status`/`sbctl enroll-keys`, `bootctl` and `efibootmgr` report nonsense. Reads: kernel log (`journalctl -k -b | grep -i "secure boot"`) or the TPM event log (`sudo tpm2_eventlog /sys/kernel/security/tpm0/binary_bios_measurements | grep -B3 -E 'UnicodeName: (SecureBoot|PK|KEK|db|dbx)$'`). Writes work through efitools. Key (re)enrollment, in Setup Mode: `sudo sbctl enroll-keys --microsoft --firmware-builtin db,KEK --export auth`, then `sudo efi-updatevar -f {db,KEK,PK}.auth {db,KEK,PK}` (PK last). Entering Setup Mode wipes `dbx` — restore it afterwards: `tail -c +5 /sys/firmware/efi/efivars/dbxDefault-8be4df61-93ca-11d2-aa0d-00e098032b8c > dbx.esl`, `sudo sign-efi-sig-list -a -k /var/lib/sbctl/keys/KEK/KEK.key -c /var/lib/sbctl/keys/KEK/KEK.pem dbx dbx.esl dbx.auth`, `sudo efi-updatevar -a -f dbx.auth dbx`. Never use "Erase all Secure Boot settings"/"Reset to Setup Mode" without a reason. Because `BootOrder` is invisible, `limine-install` recreates its NVRAM entry on every rebuild — never write boot entries manually with `efibootmgr`.
 - Snapper for `/` and `/home`; `.snapshots` subvolumes are created by tmpfiles `v` rules. Keep big churny dirs (Steam, `~/.cache`) in separate subvolumes.
 - NVIDIA PRIME offload + Dynamic Boost (`nvidia-powerd`), `nixpkgs.config.cudaCapabilities = [ "12.0" ]` (RTX 5060; CUDA packages are built locally), ollama-cuda.
+- Helium Browser (`helium.nix`) comes from the flake input `helium-browser` (`github:ominit/helium-browser-flake`, follows our `nixpkgs`); version bumps arrive with `nix flake update`.
 - SSH reachable only from `customTop.lan.subnet` (iptables rule; `openFirewall = false`).
 - zram (zstd) with zswap disabled (`zswap.enabled=0`; the CachyOS kernel enables it by default → double compression).
 - Gaming (`gaming.nix`: Steam + proton-cachyos from chaotic, `ntsync` module, gamemode with renice and power-profiles-daemon `performance` while a game runs, `dbdrun`), podman (rootless use; user is intentionally **not** in group `podman`).
@@ -68,7 +69,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions).
 - **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`.
 - CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `droid` (evaluation), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
-- `flake-update` updates `flake.lock` and local packages (`helium`, `waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
+- `flake-update` updates `flake.lock` and local packages (`waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
 - **Git (mandatory):** finish every change with a commit and a push to `origin`. Commit style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`).
 - **Skills:** store in `modules/skills/<name>/` (`SKILL.md` + `references/`; Python skills also `src/<pkg>/` + `pyproject.toml` and an entry in `pythonSkills`) and register in `modules/skills/default.nix`. Python skill sources reach the kernel through the `prime-agent` wrapper's `PYTHONPATH`. Runtime skills without a rebuild go to `/etc/ai/<name>/` (auto-linked by `prime-agent-skills-import`).
 - Temporary upstream workarounds must get an entry in `temporary-fixes.md` with a removal condition.

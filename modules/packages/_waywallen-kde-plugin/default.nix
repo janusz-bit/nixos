@@ -11,7 +11,7 @@
 # "Type P.PluginDisplay unavailable", a daemon widzi 0 pulpitów
 # ("No displays registered").
 #
-# Jak w _helium: podpisane hashem binarki z oficjalnego releasu
+# Podpisane hashem binarki z oficjalnego releasu
 # (fetchurl), nie budują się ze źródeł. Fix reconnect backoffu
 # ("plasma empty displays on login") jest dopiero od v0.3.3.
 {

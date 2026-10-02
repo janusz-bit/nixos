@@ -27,7 +27,7 @@
         # Waywallen — dynamiczne tapety (zamiennik Wallpaper Engine Plugin).
         # Nie wymaga Steama/Protonu; tapety Wallpaper Engine przez wbudowany
         # plugin open-wallpaper-engine. Ustawianie tapet: aplikacja waywallen.
-        # waywallen*, bootdev-cli i helium to pakiety lokalne z overlaya
+        # waywallen* i bootdev-cli to pakiety lokalne z overlaya
         # local-packages (modules/packages/packages.nix).
         waywallen
         waywallen-kde-plugin
@@ -100,7 +100,7 @@
         # enablePlasmaBrowserIntegration + pakiet, ale manifesty hosta w
         # /etc/chromium i /etc/opt/chrome wystawia dopiero ta opcja —
         # NICZEGO nie instaluje, pisze tylko polityki i manifesty do /etc.
-        # Bez tego Helium (.deb) i ungoogled-chromium pokazują błąd
+        # Bez tego Helium i ungoogled-chromium pokazują błąd
         # "Specified native messaging host not found." Firefox jest podpięty
         # przez moduł plasma6 (programs.firefox.nativeMessagingHosts).
         chromium.enable = true;
