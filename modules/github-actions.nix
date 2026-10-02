@@ -25,8 +25,8 @@
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cache.cachix.url} https://nix-on-droid.cachix.org
-              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey} nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqvHJ9XCp+nidK7qkMQrU=
+              extra-substituters = ${customTop.cache.cachix.url}
+              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
               build-fallback = true
             '';
           };
@@ -202,13 +202,6 @@
               };
               wsl = {
                 arch = "x86_64-linux";
-              };
-              droid = {
-                arch = "aarch64-linux";
-                runName = "Evaluate Nix-on-Droid by @\${{ github.actor }}";
-                # An Android uid/gid is only available on the device; CI checks
-                # the activation derivation without building a runner-specific one.
-                command = "nix eval --impure --raw .#nixOnDroidConfigurations.droid.activationPackage.drvPath --show-trace --accept-flake-config";
               };
               eval = {
                 arch = "x86_64-linux";

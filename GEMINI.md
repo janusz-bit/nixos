@@ -10,7 +10,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/args.nix` — `customTop` (repo, e-mail, domain `janusz-bit.com`, LAN `192.168.100.0/24`, binary caches, `secretsDir`).
 - `modules/options.nix` — `customBot.{flakeTarget, enableFastfetch, defaultUser, triliumMcpUrl}`.
 - `modules/hosts/base/` — shared NixOS base (`self.modules.nixos.base`), plus `fail2ban.nix` (imported by `nixos` and `raspberry-pi-4` only).
-- `modules/hosts/{nixos,raspberry-pi-4,wsl,droid-android}/` — hosts.
+- `modules/hosts/{nixos,raspberry-pi-4,wsl}/` — hosts.
 - `modules/hardware/` — LOQ-15IRX10, Lenovo tweaks, x86-64-v3 system features, `facter.json`. `M27Q.icm` is referenced by KWin (`~/.config/kwinoutputconfig.json` → `/etc/nixos/modules/hardware/M27Q.icm`) — do not move it.
 - `modules/agenix/agenix.nix` + `modules/_secrets/` — secrets (see below).
 - `modules/overlays/opencode.nix` — `opencode` wrapped with an inline, `builtins.toJSON`-generated `opencode.json` (providers, pinned plugins, MCP servers).
@@ -25,7 +25,6 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 | `nixos` (= `default`) | x86_64 | `dinosaur` | Lenovo LOQ-15IRX10 laptop, Plasma 6 (Wayland, no X server), stateVersion 25.11 |
 | `raspberry-pi-4` | aarch64 | `nixos` | headless home server behind Cloudflare Tunnel, stateVersion 26.05 |
 | `wsl` | x86_64 | `nixos` | NixOS-WSL, stateVersion 25.05 |
-| `droid` | aarch64 | — | `nixOnDroidConfigurations.droid` (Nix-on-Droid app, **not** NixOS; `nix-on-droid switch --flake github:janusz-bit/nixos#droid`) |
 
 ### Base (all NixOS hosts)
 bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `nix-index-database` + comma, direnv, Quad9 DNS (`mkDefault`; WSL clears it), firewall on, openssh key-only with `PermitRootLogin = "no"` by default, git config, agenix, Prime Agent config (`/etc/prime-agent/*.json` symlinked into `~/.prime/agent/`), nix: flakes, weekly GC (`mkDefault`), `nix.optimise.automatic`, caches from `customTop.cache`.
@@ -68,7 +67,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 ## Development workflow
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions).
 - **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`.
-- CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `droid` (evaluation), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
+- CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
 - `flake-update` updates `flake.lock` and local packages (`waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
 - **Git (mandatory):** finish every change with a commit and a push to `origin`. Commit style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`).
 - **Skills:** store in `modules/skills/<name>/` (`SKILL.md` + `references/`; Python skills also `src/<pkg>/` + `pyproject.toml` and an entry in `pythonSkills`) and register in `modules/skills/default.nix`. Python skill sources reach the kernel through the `prime-agent` wrapper's `PYTHONPATH`. Runtime skills without a rebuild go to `/etc/ai/<name>/` (auto-linked by `prime-agent-skills-import`).
