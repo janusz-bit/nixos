@@ -79,6 +79,8 @@ sudo nixos-rebuild switch --flake .#nixos          # or .#raspberry-pi-4 / .#wsl
 update / update-boot                               # remote flake (github:janusz-bit/nixos), --refresh
 update-local / update-local-boot                   # /etc/nixos
 push                                               # fish: build toplevel and push closure to cachix
-nix run github:janusz-bit/nixos                     # install-system (asks for confirmation, wipes the disko disk)
+nix run github:janusz-bit/nixos -- --sbctl-keys DIR --age-key FILE   # install-system, see below
 nix build .#raspberry-pi-4-sd-image
 ```
+
+`install-system` (`packages.default`, `modules/packages/install.nix`) runs from a live ISO (stock ISO: `nix --extra-experimental-features 'nix-command flakes' run …`), wipes the disko disk and installs the flake revision it was started from (`nix run .` = local tree); `/etc/nixos` gets a clone of origin. Before a reinstall back up `/var/lib/sbctl` and `/root/.ssh/id_ed25519` and pass them — without the sbctl keys the Secure Boot keys must be re-enrolled, without the age key agenix decrypts nothing.
