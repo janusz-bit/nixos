@@ -5,15 +5,11 @@
 # nie z GitHuba. /etc/nixos dostaje klon origin. Dysk: `--disk URZĄDZENIE`
 # albo wybór z listy (Enter = dysk z disko.nix).
 #
-# Czyszczony dysk zawiera jedyne kopie dwóch rzeczy, których nie odtworzy się
-# z repo — przed reinstalacją skopiuj je, np. na pendrive:
-#   sudo cp -a /var/lib/sbctl /root/.ssh/id_ed25519 /media/kopia/
-#   nix run . -- --sbctl-keys /media/kopia/sbctl --age-key /media/kopia/id_ed25519
-# - /var/lib/sbctl: klucze PK/KEK/db wpisane do firmware (secureBoot.enable).
-#   Bez kluczy limine-install przerywa nixos-install („no sbctl secure boot
-#   keys”), a nowe klucze trzeba wpisać do firmware procedurą z AGENTS.md.
-# - /root/.ssh/id_ed25519: tożsamość agenix (age.identityPaths), odbiorca
-#   hosts.nixos w modules/_secrets/keys.nix.
+# Klucze nie są potrzebne: klucze sbctl generuje limine-install
+# (secureBoot.autoGenerateKeys, firmware nietknięty), a klucz agenix i wpisanie
+# kluczy Secure Boot do firmware robi po instalacji `post-install`
+# (modules/packages/post-install.nix). Do tego czasu Secure Boot w BIOS
+# zostaje wyłączony, a sekrety agenix się nie odszyfrowują.
 { self, customTop, ... }:
 {
   perSystem =
@@ -39,20 +35,14 @@
         }).config.system.build.destroyFormatMount
       '';
       rev = self.rev or self.dirtyRev or "bez rewizji";
-      agePubKey = (import (customTop.secretsDir + "/keys.nix")).hosts.nixos;
-      # "typ klucz" bez komentarza — do porównania z `ssh-keygen -y`.
-      agePubKeyBody = lib.concatStringsSep " " (lib.take 2 (lib.splitString " " agePubKey));
       sw = "/nix/var/nix/profiles/system/sw/bin";
       usage = ''
-        Użycie: install-system [--disk URZĄDZENIE] [--sbctl-keys KATALOG] [--age-key PLIK]
+        Użycie: install-system [--disk URZĄDZENIE]
 
         Instaluje host nixos (rewizja ${rev}). CAŁY wybrany dysk zostanie wyczyszczony.
 
-          --disk URZĄDZENIE     dysk docelowy, np. /dev/disk/by-id/nvme-…; bez tej opcji
-                                wybór z listy (Enter = ${configuredDisk} z disko.nix)
-          --sbctl-keys KATALOG  kopia /var/lib/sbctl (klucze Secure Boot z firmware);
-                                bez niej generowane są nowe klucze
-          --age-key PLIK        kopia /root/.ssh/id_ed25519 (klucz agenix)
+          --disk URZĄDZENIE  dysk docelowy, np. /dev/disk/by-id/nvme-…; bez tej opcji
+                             wybór z listy (Enter = ${configuredDisk} z disko.nix)
       '';
     in
     {
@@ -61,8 +51,6 @@
         runtimeInputs = with pkgs; [
           git
           nixos-install-tools
-          openssh
-          sbctl
           util-linux
         ];
         text = ''
@@ -74,11 +62,6 @@
           die() {
             echo "install-system: $*" >&2
             exit 1
-          }
-          confirm() {
-            local answer
-            read -r -p "$1 [t/N] " answer
-            [[ "$answer" == [tT] ]]
           }
 
           # Stabilna ścieżka /dev/disk/by-id/… dla urządzenia (jak w disko.nix).
@@ -139,21 +122,10 @@
 
           args=("$@")
           disk=""
-          sbctl_keys=""
-          new_keys=""
-          age_key=""
           while [[ $# -gt 0 ]]; do
             case "$1" in
               --disk)
                 disk="''${2:?brak URZĄDZENIA}"
-                shift 2
-                ;;
-              --sbctl-keys)
-                sbctl_keys="$(realpath "''${2:?brak KATALOGU}")"
-                shift 2
-                ;;
-              --age-key)
-                age_key="$(realpath "''${2:?brak PLIKU}")"
                 shift 2
                 ;;
               -h | --help)
@@ -198,26 +170,6 @@
               ${diskoForDisk} --argstr disk "$disk")"
           fi
 
-          if [[ -n "$sbctl_keys" ]]; then
-            [[ -f "$sbctl_keys/GUID" && -f "$sbctl_keys/keys/db/db.key" ]] ||
-              die "$sbctl_keys nie jest kopią /var/lib/sbctl (brak GUID lub keys/db/db.key)"
-          else
-            echo "Brak --sbctl-keys: zostaną wygenerowane NOWE klucze Secure Boot. Firmware ma"
-            echo "wpisane stare, więc do czasu wpisania nowych (AGENTS.md) Secure Boot musi być wyłączony."
-            confirm "Kontynuować z nowymi kluczami?" || die "przerwano"
-            new_keys=1
-          fi
-
-          if [[ -n "$age_key" ]]; then
-            pub="$(ssh-keygen -y -f "$age_key")" || die "nie da się odczytać klucza $age_key"
-            [[ "$(cut -d' ' -f1-2 <<<"$pub")" == ${lib.escapeShellArg agePubKeyBody} ]] ||
-              die "$age_key nie jest kluczem hosts.nixos z modules/_secrets/keys.nix"
-          else
-            echo "Brak --age-key: agenix nie odszyfruje żadnego sekretu, dopóki nie wgrasz"
-            echo "/root/.ssh/id_ed25519 (odbiorca hosts.nixos w modules/_secrets/keys.nix)."
-            confirm "Kontynuować bez klucza agenix?" || die "przerwano"
-          fi
-
           work="$(mktemp -d)"
           trap 'rm -rf "$work"' EXIT
           git clone ${lib.escapeShellArg url} "$work/repo"
@@ -236,22 +188,6 @@
           mkdir -p "$mnt$(dirname "$place")"
           cp -a "$work/repo" "$mnt$place"
 
-          if [[ -n "$new_keys" ]]; then
-            # Domyślne ścieżki sbctl na live ISO, potem kopia jak przy przywracaniu.
-            sbctl create-keys
-            sbctl_keys=/var/lib/sbctl
-          fi
-          install -d -m 0755 "$mnt/var/lib/sbctl"
-          cp -a "$sbctl_keys/." "$mnt/var/lib/sbctl/"
-          chown -R root:root "$mnt/var/lib/sbctl"
-          chmod -R go= "$mnt/var/lib/sbctl/keys"
-
-          if [[ -n "$age_key" ]]; then
-            install -d -m 0700 "$mnt/root" "$mnt/root/.ssh"
-            install -m 0600 "$age_key" "$mnt/root/.ssh/id_ed25519"
-            echo ${lib.escapeShellArg agePubKey} >"$mnt/root/.ssh/id_ed25519.pub"
-          fi
-
           # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
           # bez nich kernel LTO kompiluje się lokalnie.
           nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#nixos"} \
@@ -268,24 +204,14 @@
           done
 
           echo
-          echo "Instalacja zakończona."
+          echo "Instalacja zakończona. Secure Boot w BIOS zostaw wyłączony."
           if [[ "$disk_dev" != "$(readlink -f "$configured_disk")" ]]; then
             echo "- disko.nix: ustaw disko.devices.disk.main.device = \"$disk\""
             echo "  (modules/hosts/nixos/disko.nix) — system działa i bez tego, ale install-system"
             echo "  proponuje dysk z disko.nix."
           fi
-          if [[ -n "$age_key" ]]; then
-            echo "- agenix: klucz przywrócony."
-          else
-            echo "- agenix: wgraj /root/.ssh/id_ed25519 albo wygeneruj nowy, wpisz go do keys.nix"
-            echo "  i przeszyfruj sekrety (agenix -r) kluczem innego odbiorcy."
-          fi
-          if [[ -n "$new_keys" ]]; then
-            echo "- Secure Boot: NOWE klucze w /var/lib/sbctl — wpisz je do firmware i odtwórz dbx"
-            echo "  (AGENTS.md), dopiero potem włącz Secure Boot. Zrób kopię /var/lib/sbctl."
-          else
-            echo "- Secure Boot: klucze przywrócone — włącz Secure Boot w firmware, jeśli był wyłączony dla ISO."
-          fi
+          echo "- Po uruchomieniu nowego systemu: nix run $place#post-install"
+          echo "  (klucz SSH roota dla agenix, potem Secure Boot)."
         '';
       };
     };
