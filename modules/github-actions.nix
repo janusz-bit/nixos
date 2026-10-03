@@ -200,6 +200,10 @@
                 arch = "aarch64-linux";
                 buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
               };
+              nixos-iso = {
+                arch = "x86_64-linux";
+                buildTarget = "packages.x86_64-linux.nixos-iso";
+              };
               wsl = {
                 arch = "x86_64-linux";
               };

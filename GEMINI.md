@@ -14,7 +14,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/hardware/` — LOQ-15IRX10, Lenovo tweaks, x86-64-v3 system features, `facter.json`. `M27Q.icm` is referenced by KWin (`~/.config/kwinoutputconfig.json` → `/etc/nixos/modules/hardware/M27Q.icm`) — do not move it.
 - `modules/agenix/agenix.nix` + `modules/_secrets/` — secrets (see below).
 - `modules/overlays/opencode.nix` — `opencode` wrapped with an inline, `builtins.toJSON`-generated `opencode.json` (providers, pinned plugins, MCP servers).
-- `modules/packages/` — overlay `local-packages` (`waywallen`, `waywallen-kde-plugin`, `bootdev-cli`; also exposed as `packages.<system>.*` for `nix-update`), scripts (`flake-update`, `flake-release`, `repo-sync`), `install-system`, `post-install`, RPi SD image.
+- `modules/packages/` — overlay `local-packages` (`waywallen`, `waywallen-kde-plugin`, `bootdev-cli`; also exposed as `packages.<system>.*` for `nix-update`), scripts (`flake-update`, `flake-release`, `repo-sync`), `install-system`, `post-install`, `nixos-iso` (bootable installer ISO), RPi SD image.
 - `modules/skills/` — declarative Prime Agent skills.
 - `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
@@ -67,7 +67,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 ## Development workflow
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions).
 - **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`.
-- CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
+- CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `nixos-iso`, `wsl` (tags `v*`, PR), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
 - `flake-update` updates `flake.lock` and local packages (`waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
 - **Git (mandatory):** finish every change with a commit and a push to `origin`. Commit style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`).
 - **Skills:** store in `modules/skills/<name>/` (`SKILL.md` + `references/`; Python skills also `src/<pkg>/` + `pyproject.toml` and an entry in `pythonSkills`) and register in `modules/skills/default.nix`. Python skill sources reach the kernel through the `prime-agent` wrapper's `PYTHONPATH`. Runtime skills without a rebuild go to `/etc/ai/<name>/` (auto-linked by `prime-agent-skills-import`).
@@ -82,6 +82,9 @@ push                                               # fish: build toplevel and pu
 nix run github:janusz-bit/nixos -- [--disk DEV]    # install-system (live ISO), see below
 nix run /etc/nixos#post-install [ssh|secure-boot]  # after install: agenix root key, Secure Boot enrollment
 nix build .#raspberry-pi-4-sd-image
+nix build .#packages.x86_64-linux.nixos-iso           # custom installer ISO for host nixos
 ```
 
 `install-system` (`packages.default`, `modules/packages/install.nix`) runs from a live ISO (stock ISO: `nix --extra-experimental-features 'nix-command flakes' run …`), wipes the target disk and installs the flake revision it was started from (`nix run .` = local tree); `/etc/nixos` gets a clone of origin. Target: `--disk DEV` or a picker (Enter = disko.nix device); another disk gets its disko script via `extendModules` (like `disko-install --disk`), the system itself is unchanged (mounts use `by-partlabel/disk-main-*`), so it refuses while another disk carries those labels. It needs no keys: limine-install generates sbctl keys, Secure Boot stays off in the firmware and agenix decrypts nothing until `post-install` (`modules/packages/post-install.nix`): `ssh` generates `/root/.ssh/id_ed25519` and writes it into `keys.nix` (then rekey on raspberry-pi-4, the other recipient of every secret), `secure-boot` runs the Insyde enrollment procedure above (asks for Setup Mode, restores dbx).
+
+`nixos-iso` (`modules/packages/iso.nix`) is the bootable-media version of the same flow: a stock `installation-cd-minimal.nix` installer with flakes pre-enabled and `install-system` pre-installed, so booting the ISO and running `install-system [--disk DEV]` as root (no password) is the whole flow — no `nix run github:...` or `--extra-experimental-features` needed. It still needs network (install-system clones the repo from GitHub and `nixos-install`s it). Legacy `isoImage.isoBaseName` collides with the new `image.baseName` default in `iso-image.nix` (both land at the same priority → "conflicting definition values") — set `image.baseName` directly with `lib.mkForce` instead. Write to USB: `dd` the file under `result/iso/*.iso`, or mount it in Ventoy.
