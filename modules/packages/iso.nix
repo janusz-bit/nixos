@@ -3,12 +3,18 @@
 # wpa_supplicant, sshd, root bez hasła na konsoli — jak każdy oficjalny ISO).
 # Dodatki względem stocka:
 #   - flakes włączone od razu (bez --extra-experimental-features);
-#   - wbudowany `install-system` (modules/packages/install.nix) — po
-#     zalogowaniu wystarczy `install-system [--disk URZĄDZENIE]`, bez
-#     `nix run github:janusz-bit/nixos`.
-# Sam install-system i tak klonuje repo z GitHuba (potrzebna sieć) i instaluje
-# rewizję flake'a wbudowaną w ten ISO (self) — ISO tylko eliminuje ręczne
-# wpisywanie `nix run` i flag flake'owych.
+#   - wbudowany `install-system` W WARIANCIE OFFLINE
+#     (modules/packages/install-offline.nix) — po zalogowaniu wystarczy
+#     `install-system [--disk URZĄDZENIE]`, BEZ SIECI: cały target system
+#     (toplevel hosta nixos) i kopia repo (self) są już w tym ISO, bo
+#     install-offline odwołuje się do nich w tekście skryptu — Nix dolicza
+#     je do zależności tego pakietu, a przez environment.systemPackages
+#     trafiają do squashfs ISO automatycznie (ten sam mechanizm, którym
+#     ${self} i disko script już trafiały do ISO wcześniej).
+# Koszt: ISO zawiera CAŁY closure hosta nixos (kernel CachyOS LTO, KDE,
+# gaming, NVIDIA...) — build trwa podobnie długo jak build samego hosta
+# (3-5 h) i ISO jest dużo większe niż stockowy installer (patrz
+# github-actions.nix: tags = false, tylko PR/dispatch, jak przy `nixos`).
 #
 # Build:  nix build .#packages.x86_64-linux.nixos-iso
 # Wynik:  result/iso/*.iso — nagraj na USB (dd/ventoy) albo wypal na DVD.
@@ -29,7 +35,7 @@
       "flakes"
     ];
 
-    environment.systemPackages = [ self.packages.x86_64-linux.install-system ];
+    environment.systemPackages = [ self.packages.x86_64-linux.install-system-offline ];
 
     services.getty.helpLine = ''
 
@@ -38,9 +44,9 @@
 
         install-system [--disk URZĄDZENIE]
 
-      Instaluje host `nixos` (laptop LOQ-15IRX10). CAŁY wybrany dysk
-      zostanie wyczyszczony. Bez --disk: wybór z listy (Enter = dysk
-      skonfigurowany w disko.nix).
+      Instaluje host `nixos` (laptop LOQ-15IRX10) BEZ INTERNETU — system
+      i repo są wbudowane w ten ISO. CAŁY wybrany dysk zostanie wyczyszczony.
+      Bez --disk: wybór z listy (Enter = dysk skonfigurowany w disko.nix).
     '';
   };
 }
