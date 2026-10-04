@@ -203,7 +203,7 @@
               nixos-iso = {
                 arch = "x86_64-linux";
                 buildTarget = "packages.x86_64-linux.nixos-iso";
-                # Od install-offline.nix (ISO w pełni offline) ISO zawiera
+                # ISO w pełni offline (modules/installer) zawiera
                 # cały closure hosta nixos — ten sam koszt (3-5 h) co build
                 # `nixos` ponizej, więc nie na każdy tag.
                 tags = false;

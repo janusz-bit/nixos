@@ -32,17 +32,6 @@ in
             };
           in
           image.config.system.build.sdImage;
-
-        nixos-iso =
-          let
-            image = inputs.nixpkgs.lib.nixosSystem {
-              modules = [
-                { nixpkgs.hostPlatform = "x86_64-linux"; }
-                self.modules.nixos.nixos-iso
-              ];
-            };
-          in
-          image.config.system.build.isoImage;
       };
     };
 }
