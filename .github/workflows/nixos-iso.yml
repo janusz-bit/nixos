@@ -30,9 +30,6 @@ name: nixos-iso
   pull_request:
     branches:
       - master
-  push:
-    tags:
-      - v*
   workflow_dispatch: {}
 permissions:
   contents: read

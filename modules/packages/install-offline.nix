@@ -12,10 +12,8 @@
 #     TYLKO kopiuje closure, który jest już lokalnie (bo install-offline
 #     odwołuje się do niego w tekście skryptu: Nix automatycznie dolicza go
 #     do zależności tego pakietu, a przez to — do squashfs ISO w iso.nix).
-#
-# Ograniczenie: wybór dysku INNEGO niż w disko.nix i tak ewaluuje flake'a na
-# nowo (patrz diskoForDisk) — ta rzadka ścieżka może potrzebować sieci.
-# Domyślny dysk (ten z disko.nix) jest w 100% offline.
+#   - skrypt disko jest gotowy dla dowolnego dysku (dowiązanie, patrz
+#     install.nix), więc wybór dysku spoza disko.nix też nie potrzebuje sieci.
 { self, customTop, ... }:
 {
   perSystem =
@@ -27,15 +25,12 @@
       user = config.customBot.defaultUser;
       inherit (config.users.users.${user}) group;
       configuredDisk = config.disko.devices.disk.main.device;
-      diskoForDisk = pkgs.writeText "disko-for-disk.nix" ''
-        { disk }:
-        let
-          system = (builtins.getFlake "${self}").nixosConfigurations.nixos;
-        in
-        (system.extendModules {
-          modules = [ { disko.devices.disk.main.device = system.pkgs.lib.mkForce disk; } ];
-        }).config.system.build.destroyFormatMount
-      '';
+      # Skrypt disko dla dowolnego dysku, bez sieci — opis w install.nix.
+      diskLink = "/run/install-system/disk";
+      disko =
+        (self.nixosConfigurations.nixos.extendModules {
+          modules = [ { disko.devices.disk.main.device = lib.mkForce diskLink; } ];
+        }).config.system.build.destroyFormatMount;
       rev = self.rev or self.dirtyRev or "bez rewizji";
       usage = ''
         Użycie: install-system [--disk URZĄDZENIE]
@@ -60,6 +55,7 @@
           configured_disk=${lib.escapeShellArg configuredDisk}
           mnt=${lib.escapeShellArg rootMountPoint}
           place=${lib.escapeShellArg place}
+          disk_link=${lib.escapeShellArg diskLink}
 
           usage() { printf '%s' ${lib.escapeShellArg usage}; }
           die() {
@@ -73,15 +69,7 @@
           # Wszystko, co może się nie udać, sprawdzamy PRZED czyszczeniem dysku.
           safety_checks
 
-          if [[ "$disk_dev" == "$(readlink -f "$configured_disk")" ]]; then
-            disko=${config.system.build.destroyFormatMount}
-          else
-            echo "Dysk spoza disko.nix — buduję skrypt disko dla $disk (potrzebna sieć)."
-            disko="$(nix-build --no-out-link --extra-experimental-features flakes \
-              ${diskoForDisk} --argstr disk "$disk")"
-          fi
-
-          confirm_and_wipe "$disko"
+          confirm_and_wipe ${disko}
 
           echo "Kopiuję repo z ISO (bez sieci) do $place..."
           mkdir -p "$mnt$(dirname "$place")"
@@ -89,6 +77,9 @@
           chmod -R u+w "$mnt$place"
           git -C "$mnt$place" init -q -b master
           git -C "$mnt$place" remote add origin ${lib.escapeShellArg url}
+          # Śledzenie origin/master od razu (git pull/push, repo-sync) — zadziała po fetch.
+          git -C "$mnt$place" config branch.master.remote origin
+          git -C "$mnt$place" config branch.master.merge refs/heads/master
           git -C "$mnt$place" add -A
           git -C "$mnt$place" \
             -c user.name=install-system -c user.email=install-system@localhost \
@@ -111,7 +102,7 @@
             echo "  proponuje dysk z disko.nix."
           fi
           echo "- $place to świeży 'git init' (origin ustawiony, bez wspólnej historii z GitHubem)."
-          echo "  Po podłączeniu do sieci: git -C $place fetch origin &&"
+          echo "  Po podłączeniu do sieci, przed post-install: git -C $place fetch origin &&"
           echo "  git -C $place reset --hard origin/master   (ściąga prawdziwą historię repo)."
           echo "- Po uruchomieniu nowego systemu: nix run $place#post-install"
           echo "  (klucz SSH roota dla agenix, potem Secure Boot)."

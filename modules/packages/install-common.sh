@@ -6,7 +6,7 @@
 #                            `nixos-install --system <gotowy closure>` — bez sieci)
 #
 # Tylko definicje funkcji — nic się nie wykonuje przy wczytaniu (`source`).
-# Wywołujący musi PRZED użyciem ustawić $configured_disk i $mnt oraz
+# Wywołujący musi PRZED użyciem ustawić $configured_disk, $mnt i $disk_link oraz
 # zdefiniować die() i usage() (parse_disk_arg woła usage() przy -h/błędzie).
 
 # Stabilna ścieżka /dev/disk/by-id/… dla urządzenia (jak w disko.nix).
@@ -116,13 +116,15 @@ safety_checks() {
   done < <(lsblk -rnpo NAME,PKNAME,PARTLABEL)
 }
 
-# $1 = katalog z disko-destroy-format-mount (realizowana ścieżka nix store).
-# Wymaga $disk, $disk_dev.
+# $1 = katalog z disko-destroy-format-mount zbudowanym dla dysku $disk_link
+# (dowiązanie, patrz install.nix). Wymaga $disk, $disk_dev, $disk_link.
 confirm_and_wipe() {
   echo "UWAGA: install-system SKASUJE CAŁY dysk $disk ($disk_dev, $(lsblk -dno SIZE,MODEL "$disk"))."
   read -r -p "Wpisz dokładnie 'SKASUJ' aby kontynuować: " answer
   [[ "$answer" == SKASUJ ]] || die "przerwano"
 
+  mkdir -p "$(dirname "$disk_link")"
+  ln -sfn "$disk_dev" "$disk_link"
   echo "Podaj to samo hasło dla obu wolumenów LUKS (swap i crypted) — initrd zapyta wtedy raz."
   "$1/bin/disko-destroy-format-mount" --yes-wipe-all-disks
 }

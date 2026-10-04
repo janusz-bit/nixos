@@ -25,19 +25,17 @@
       user = config.customBot.defaultUser;
       inherit (config.users.users.${user}) group;
       configuredDisk = config.disko.devices.disk.main.device;
-      # Skrypt disko dla dysku innego niż w disko.nix — ten sam mechanizm co
-      # `disko-install --disk main …` (extendModules z nadpisanym device).
-      # Instalowany system jest ten sam: fileSystems i LUKS wskazują
-      # /dev/disk/by-partlabel/disk-main-*, nie ścieżkę dysku.
-      diskoForDisk = pkgs.writeText "disko-for-disk.nix" ''
-        { disk }:
-        let
-          system = (builtins.getFlake "${self}").nixosConfigurations.nixos;
-        in
-        (system.extendModules {
-          modules = [ { disko.devices.disk.main.device = system.pkgs.lib.mkForce disk; } ];
-        }).config.system.build.destroyFormatMount
-      '';
+      # Skrypt disko dla DOWOLNEGO dysku, zbudowany z góry (bez ewaluacji
+      # flake'a w trakcie instalacji, więc także offline): urządzeniem jest
+      # dowiązanie, które confirm_and_wipe (install-common.sh) ustawia na
+      # wybrany dysk — disk-deactivate robi realpath, a sgdisk/blkid/partprobe
+      # przyjmują dowiązania jak /dev/disk/by-id/…. Instalowany system jest ten
+      # sam: fileSystems i LUKS wskazują /dev/disk/by-partlabel/disk-main-*.
+      diskLink = "/run/install-system/disk";
+      disko =
+        (self.nixosConfigurations.nixos.extendModules {
+          modules = [ { disko.devices.disk.main.device = lib.mkForce diskLink; } ];
+        }).config.system.build.destroyFormatMount;
       rev = self.rev or self.dirtyRev or "bez rewizji";
       usage = ''
         Użycie: install-system [--disk URZĄDZENIE]
@@ -61,6 +59,7 @@
           configured_disk=${lib.escapeShellArg configuredDisk}
           mnt=${lib.escapeShellArg rootMountPoint}
           place=${lib.escapeShellArg place}
+          disk_link=${lib.escapeShellArg diskLink}
 
           usage() { printf '%s' ${lib.escapeShellArg usage}; }
           die() {
@@ -74,16 +73,7 @@
           # Wszystko, co może się nie udać, sprawdzamy PRZED czyszczeniem dysku.
           safety_checks
 
-          if [[ "$disk_dev" == "$(readlink -f "$configured_disk")" ]]; then
-            disko=${config.system.build.destroyFormatMount}
-          else
-            echo "Dysk spoza disko.nix — buduję skrypt disko dla $disk."
-            disko="$(nix-build --no-out-link --extra-experimental-features flakes \
-              ${diskoForDisk} --argstr disk "$disk")"
-          fi
-
-          confirm_and_wipe "$disko"
-
+          # Klon przed czyszczeniem dysku — przy okazji sprawdza dostęp do sieci.
           work="$(mktemp -d)"
           trap 'rm -rf "$work"' EXIT
           git clone ${lib.escapeShellArg url} "$work/repo"
@@ -91,6 +81,8 @@
           if [[ "$origin_rev" != ${lib.escapeShellArg (self.rev or "")} ]]; then
             echo "UWAGA: instalowana jest rewizja ${rev}, a $place dostanie origin ($origin_rev)."
           fi
+
+          confirm_and_wipe ${disko}
 
           mkdir -p "$mnt$(dirname "$place")"
           cp -a "$work/repo" "$mnt$place"
