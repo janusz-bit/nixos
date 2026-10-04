@@ -95,9 +95,12 @@
               '';
           nixosInstall =
             if offline then
+              # substituters "": domknięcie jest w store ISO (nixos-install dokłada
+              # go jako auto?trusted=1) — bez tego nix odpytuje cache.nixos.org
+              # i bez sieci wypisuje ostrzeżenia z ponowieniami.
               ''
                 nixos-install --root "$mnt" --system ${config.system.build.toplevel} \
-                  --no-root-passwd --no-channel-copy
+                  --no-root-passwd --no-channel-copy --option substituters ""
               ''
             else
               # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
