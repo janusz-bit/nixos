@@ -76,7 +76,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 ## Commands
 ```sh
 sudo nixos-rebuild switch --flake .#nixos          # or .#raspberry-pi-4 / .#wsl
-update / update-boot                               # remote flake (github:janusz-bit/nixos), --refresh
+update / update-boot / update-reboot               # remote flake (github:janusz-bit/nixos), --refresh; update-reboot = boot + reboot on success
 update-local / update-local-boot                   # /etc/nixos
 push                                               # fish: build toplevel and push closure to cachix
 nix run github:janusz-bit/nixos -- [--disk DEV]    # install-system (live ISO), see below

@@ -37,18 +37,22 @@ let
   environmentShellAliases =
     config:
     let
-      update_alias =
+      rebuild =
         mode: remote:
         let
           flakeRef = if remote then customTop.repository.linkFlake else customTop.repository.place;
         in
-        "sudo nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${optionalStr remote " --refresh"}";
+        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${optionalStr remote " --refresh"}";
+      update_alias = mode: remote: "sudo ${rebuild mode remote}";
       optionalStr = cond: str: if cond then str else "";
     in
     {
       # Update systemu
       update = update_alias "switch" true;
       update-boot = update_alias "boot" true;
+      # Jedno sudo na całość: po długim buildzie osobne `sudo systemctl reboot`
+      # pytałoby znowu o hasło (wygasły timestamp) i reboot by nie nastąpił.
+      update-reboot = "sudo sh -c '${rebuild "boot" true} && systemctl reboot'";
       update-local = update_alias "switch" false;
       update-local-boot = update_alias "boot" false;
     };
