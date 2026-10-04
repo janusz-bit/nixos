@@ -48,10 +48,15 @@
           # ENABLE_PERSISTENT_CONFIG=False, env-driven DEFAULT_CONFIG has
           # precedence over any DB-stored per-connection settings, so this
           # is the single source of truth.
-          # NOTE: NixOS renders this as systemd Environment="KEY=…"; plain
-          # quotes get swallowed ({"0": → {0:), so the inner quotes are
-          # backslash-escaped — verified parsing with systemd-run.
-          OPENAI_API_CONFIGS = ''{\"0\":{\"api_type\":\"responses\"},\"1\":{\"api_type\":\"responses\"}}'';
+          # NOTE: write plain JSON here. NixOS already renders the unit line
+          # as Environment=${builtins.toJSON "KEY=value"}, which escapes the
+          # quotes for systemd itself. Hand-escaped \" got double-escaped,
+          # open-webui logged "OPENAI_API_CONFIGS is not valid JSON,
+          # ignoring" and silently fell back to /v1/chat/completions.
+          OPENAI_API_CONFIGS = builtins.toJSON {
+            "0".api_type = "responses";
+            "1".api_type = "responses";
+          };
           # Cookie settings: Cloudflare Tunnel terminates TLS, so the
           # browser sees HTTPS while the backend only sees HTTP on
           # 127.0.0.1. Without these, Starlette's SessionMiddleware
