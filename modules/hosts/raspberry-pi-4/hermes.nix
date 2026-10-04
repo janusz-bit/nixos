@@ -77,10 +77,11 @@
             # do hermes-env.age.
             model = {
               provider = "claude-subscription-directsdk-experimental";
-              # Sonnet 5.5 pełnym ID: alias `sonnet` pluginu v0.3.0 jest przypięty
-              # do claude-sonnet-5 (pozostałe aliasy: opus, haiku, fable).
-              # `[1m]` wybiera okno 1M — bez sufiksu CLI stosuje 200K.
-              default = "claude-sonnet-5-5[1m]";
+              # Opus 5.5 pełnym ID (= alias `opus` pluginu v0.3.0). Jest w katalogu
+              # pluginu (model_catalog.py) z oknem 1M, więc `[1m]` dokleja sam.
+              # Modele spoza katalogu (np. claude-sonnet-5-5) wymagają jawnego
+              # `[1m]` — bez sufiksu CLI stosuje 200K.
+              default = "claude-opus-5-5";
               # Aktywacja scala ustawienia z config.yaml na dysku (deep merge),
               # więc samo usunięcie klucza zostawiłoby tam stary URL Codexa.
               base_url = "";
@@ -101,6 +102,8 @@
               base_url = "https://ollama.com/v1";
               key_env = "OLLAMA_API_KEY";
             };
+            # Plugin przekazuje to do CLI jako `--effort xhigh` (Opus 5.5 domyślnie
+            # ma `medium`, więc ustawienie jest konieczne).
             agent.reasoning_effort = "xhigh";
             web.backend = "ddgs";
             auxiliary.vision = {
