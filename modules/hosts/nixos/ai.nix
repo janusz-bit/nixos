@@ -25,8 +25,9 @@
         # uv pochodzi z base (sharedPackages) - nie duplikowac
         # OpenAI Codex CLI — agent kodujący w terminalu (nixpkgs)
         codex
-        # Claude Code — agent kodujący w terminalu (nixpkgs)
-        claude-code
+        # Claude Code + przypięte pluginy i ich narzędzia
+        # (modules/overlays/claude-code.nix)
+        claude-code-bundle
         # ChatGPT — desktopowa aplikacja OpenAI (llm-agents.nix, deb x86_64)
         inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt
         repomix
