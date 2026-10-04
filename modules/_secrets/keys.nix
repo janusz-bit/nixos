@@ -9,5 +9,8 @@
   users = {
     # ~/.ssh/id_ed25519 użytkownika dinosaur na laptopie
     janusz-bit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdlN9e5I4IQy6Re4Z4+BFopT6ypB3nNXzdj4XeTDewO janusz-bit@proton.me";
+    # Telefon: Linux Terminal na Androidzie (AVF, Debian) — tylko SSH na RPi,
+    # NIE odbiorca agenix.
+    phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG4dg51Pg4rlE4CaiHaHUovkCIgAuJuEqkDsEMAU8ut4 root@debian";
   };
 }

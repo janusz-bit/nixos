@@ -106,8 +106,8 @@
             "networkmanager"
             "wheel"
           ];
-          # Klucze roota laptopa i RPi (bez starej maszyny AVF droid-android).
-          openssh.authorizedKeys.keys = builtins.attrValues keys.hosts;
+          # Klucze roota laptopa i RPi oraz telefonu (SSH z komórki).
+          openssh.authorizedKeys.keys = builtins.attrValues keys.hosts ++ [ keys.users.phone ];
         };
         # Twój klucz z laptopa (ssh ssh.janusz-bit.com loguje się jako root).
         root.openssh.authorizedKeys.keys = [ keys.users.janusz-bit ];
