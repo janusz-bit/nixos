@@ -14,6 +14,10 @@
 # (linki do /etc/ai-skills) mają pierwszeństwo — importer nigdy ich nie
 # nadpisuje: nix pozostaje źródłem prawdy.
 # Inne agenty (opencode, gemini-cli) celowo NIE dostają symlinków.
+#
+# Claude Code: osobna lista `claudeSkills` → /etc/claude-code/.claude/skills,
+# katalog skilli zarządzanych (policy) czytany przez każdego użytkownika hosta
+# w każdym katalogu roboczym — bez Home Managera i bez ~/.claude/skills.
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills =
@@ -32,6 +36,41 @@
         trilium-notes = ./trilium-notes;
         obscura = ./obscura;
       };
+
+      # Skille Claude Code (format SKILL.md jak wyżej). Claude Code na Linuksie
+      # ładuje skille zarządzane z /etc/claude-code/.claude/skills/<nazwa>
+      # (`claude --debug`: „Loading skills from: managed=…”), dla każdego
+      # użytkownika i projektu; symlinki są dozwolone. Wyłączenie per proces:
+      # CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. Prime Agent ich nie dostaje.
+      claudeSkills = {
+        nixos-system = nixosSystemSkill;
+      };
+
+      # nixos-system: statyczna treść + sekcja „This host” liczona z config
+      # hosta, na którym skill jest wdrożony (laptop i RPi dostają różne
+      # fakty, a ręcznie pisane rozjechałyby się z konfiguracją).
+      nixosSystemSkill = pkgs.writeTextDir "SKILL.md" (
+        builtins.readFile ./nixos-system/SKILL.md + nixosSystemHostFacts
+      );
+
+      nixosSystemHostFacts =
+        let
+          inherit (config.system.nixos) release;
+          nixLdLibs = lib.concatMapStringsSep ", " lib.getName config.programs.nix-ld.libraries;
+          fact = cond: text: lib.optionalString cond "- ${text}\n";
+        in
+        "\n## This host\n\n"
+        + "Generated from the flake at build time (`modules/skills/default.nix`).\n\n"
+        + fact true "Hostname `${config.networking.hostName}`, flake output `nixosConfigurations.${config.customBot.flakeTarget}`, platform `${pkgs.stdenv.hostPlatform.system}`."
+        + fact true "NixOS ${release}, `system.stateVersion = \"${config.system.stateVersion}\"` (never change it), kernel ${config.boot.kernelPackages.kernel.version}."
+        + fact true "Main interactive user: `${user}`."
+        + fact config.programs.nix-ld.enable "nix-ld libraries (all a prebuilt binary can find): ${nixLdLibs}."
+        + fact config.services.desktopManager.plasma6.enable "Desktop: KDE Plasma 6 on Wayland, no X server (Xwayland only)."
+        + fact config.hardware.nvidia.prime.offload.enableOffloadCmd "Hybrid GPU (NVIDIA PRIME offload): integrated GPU by default, `nvidia-offload <cmd>` runs a program on the NVIDIA dGPU."
+        + fact config.virtualisation.podman.enable "Rootless podman${lib.optionalString config.virtualisation.podman.dockerCompat " (`docker` = podman wrapper)"}; no Docker daemon."
+        + fact config.services.ollama.enable "Ollama listens on `${config.services.ollama.host}:${toString config.services.ollama.port}`."
+        + fact config.services.cloudflared.enable "Server: services bind to localhost and are published only through the Cloudflare Tunnel (`services.cloudflared`)."
+        + fact pkgs.stdenv.hostPlatform.isAarch64 "Low-power ARM board (`nix.settings.max-jobs = ${toString config.nix.settings.max-jobs}`): avoid local builds and heavy evaluations here.";
 
       # Skille pythonowe (src/ + pyproject.toml). Kernel Prime Agenta działa na
       # PRIME_AGENT_KERNEL_PYTHON (read-only env z flake llm-agents), więc
@@ -120,7 +159,12 @@
       '';
     in
     {
-      environment.etc = etcEntries;
+      environment.etc = lib.mkMerge [
+        etcEntries
+        (lib.mapAttrs' (
+          name: path: lib.nameValuePair "claude-code/.claude/skills/${name}" { source = path; }
+        ) claudeSkills)
+      ];
 
       # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
       environment.systemPackages = [ (lib.hiPrio primeAgentWithSkills) ];
