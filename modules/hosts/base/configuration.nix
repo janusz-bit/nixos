@@ -89,7 +89,6 @@ in
         config.allowUnfree = true;
         overlays = [
           self.overlays.opencode-config
-          self.overlays.claude-code-bundle
           self.overlays.local-packages
         ];
       };
