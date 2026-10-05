@@ -1,8 +1,14 @@
-{ inputs, ... }:
+{ inputs, customTop, ... }:
 {
   flake.modules.nixos.nixos-ai =
     { pkgs, ... }:
     {
+      # Claude Code dla tego repo: zawsze w devShellu (nixfmt/deadnix/jq dla
+      # hooków z .claude/, świeży hook pre-commit sync-github-actions).
+      # `env -C` nie zmienia katalogu bieżącej powłoki; argumenty przechodzą
+      # dalej (`claude-nixos --continue`).
+      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.place} nix develop -c claude";
+
       services = {
         ollama = {
           enable = true;

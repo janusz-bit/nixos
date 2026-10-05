@@ -19,6 +19,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/skills/` — declarative Prime Agent skills.
 - `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
+- `.claude/` — Claude Code project config: `settings.json` (permissions: read-only nix/git commands allowed, `git push` and `sudo` ask for confirmation, secrets and Secure Boot/disk writes denied) and `hooks/post-edit.sh` (nixfmt after every `.nix` edit; after `modules/github-actions.nix` also pre-commit refresh + workflow sync).
 
 ## Hosts
 | Host | Arch | User | Notes |
@@ -66,13 +67,20 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 `customTop.cache` (→ `nix.settings`) and `nixConfig` in `flake.nix` must list the same caches: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`.
 
 ## Development workflow
-- Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions).
-- **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`.
+- Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions). Claude Code: start it with the alias `claude-nixos` (host `nixos`, `modules/hosts/nixos/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
+- **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`. Claude Code's `.claude/hooks/post-edit.sh` does this automatically.
 - CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `nixos-iso` (PR + manual only, same cost as `nixos` since the ISO now bundles its whole closure), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
 - `flake-update` updates `flake.lock` and local packages (`waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
-- **Git (mandatory):** finish every change with a commit and a push to `origin`. Commit style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`).
+- **Git (mandatory):** commit every change; style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`). Push to `origin` only after verification (below) — `update` on every host deploys straight from GitHub, so a push is a deployment: host `nixos` after a successful `update-local`; `raspberry-pi-4`/`wsl` (no local switch) after verification steps 1–2. Experimental or large features (new services, wrappers, overlays): a branch + PR (CI `eval` and `lint` run on PRs), merged after testing on the target host.
 - **Skills:** store in `modules/skills/<name>/` (`SKILL.md` + `references/`; Python skills also `src/<pkg>/` + `pyproject.toml` and an entry in `pythonSkills`) and register in `modules/skills/default.nix`. Python skill sources reach the kernel through the `prime-agent` wrapper's `PYTHONPATH`. Runtime skills without a rebuild go to `/etc/ai/<name>/` (auto-linked by `prime-agent-skills-import`).
 - Temporary upstream workarounds must get an entry in `temporary-fixes.md` with a removal condition.
+
+## Verification (before every commit)
+A change is done only when it has been checked as far as possible without root. Report which steps ran and which did not.
+1. Evaluate every affected host: `nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` (`nixos`/`raspberry-pi-4` ~25 s, `wsl` ~8 s; aarch64 evaluates fine on x86_64). Changes in `base/`, `args.nix`, `options.nix`, overlays or `flake.nix` affect all three hosts.
+2. Generated configuration (`builtins.toJSON`, environment variables, systemd units, nginx/cloudflared config, wrapper scripts): evaluate and show the rendered value, e.g. `nix eval --raw .#nixosConfigurations.<host>.config.systemd.services.<svc>.environment.<VAR>`. Escaping and interpolation bugs pass step 1 and fail only at runtime.
+3. Host `nixos`, when packages, overlays, the kernel or services change: `nixos-rebuild build --flake .#nixos`, then `nix store diff-closures /run/current-system ./result`. Stop and ask before a build that would compile CUDA packages or the kernel locally (hours).
+4. Activation needs root and is done by the user in their own terminal (`update-local`), who reports the result. Not via `!`: it runs a non-interactive bash without shell aliases and without a tty for the sudo password. Then check the affected units (`systemctl status …`, `journalctl -u … -b`).
 
 ## Commands
 ```sh

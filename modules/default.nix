@@ -60,6 +60,9 @@
         '';
 
         packages = config.pre-commit.settings.enabledPackages ++ [
+          # jq: hook Claude Code (.claude/hooks/post-edit.sh) parsuje nim
+          # JSON z wejścia hooka.
+          pkgs.jq
           config.packages.flake-update
           config.packages.flake-release
           config.packages.repo-sync

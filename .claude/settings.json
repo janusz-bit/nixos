@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nix eval *)",
+      "Bash(nix build *)",
+      "Bash(nix flake check *)",
+      "Bash(nix flake metadata *)",
+      "Bash(nix store diff-closures *)",
+      "Bash(nixos-rebuild build *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(systemctl status *)",
+      "Bash(journalctl *)"
+    ],
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(sudo *)"
+    ],
+    "deny": [
+      "Read(//run/agenix/**)",
+      "Read(//run/agenix.d/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.config/nix/nix.conf)",
+      "Bash(git push *--force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(dd *)",
+      "Bash(sudo dd *)",
+      "Bash(sudo wipefs *)",
+      "Bash(sudo sbctl *)",
+      "Bash(sudo efi-updatevar *)",
+      "Bash(sudo efibootmgr *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit.sh",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}
