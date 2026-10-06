@@ -37,4 +37,6 @@ in
   "openrouter-api-key.age" = mkSecret allHosts;
   # Hasło Basic Auth ttyd (nginx) — osobne, NIE hasło admina Nextcloud.
   "ttyd-password.age" = mkSecret allHosts;
+  # Wi-Fi RPi (modules/hosts/raspberry-pi-4/wifi.nix): WIFI_SSID=…, WIFI_PSK=…
+  "wifi.age" = mkSecret allHosts;
 }

@@ -21,6 +21,7 @@
       self.modules.nixos.hermes
       self.modules.nixos.open-webui
       self.modules.nixos.ttyd
+      self.modules.nixos.rpi-wifi
       self.modules.nixos.ai-skills
       self.modules.nixos.rpi-specific
       self.modules.nixos.rpi-configuration
