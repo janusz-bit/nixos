@@ -55,6 +55,10 @@
         entrypoint = [
           (lib.getExe' pkgs.shadow "login")
         ];
+        # Obrazki w terminalu: xterm.js ładuje image addon (Sixel + iTerm2
+        # IIP). tmux przepuszcza Sixel dzięki terminal-features w
+        # modules/hosts/base/shell.nix (ttyd zgłasza się jako xterm-256color).
+        clientOptions.enableSixel = "true";
       };
 
       systemd.services.ttyd-htpasswd = {

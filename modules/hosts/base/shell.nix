@@ -57,6 +57,12 @@ let
     extraConfig = ''
       # Obsługa myszy (przewijanie, zmiana rozmiaru paneli, wybór)
       set -g mouse on
+
+      # Obrazki Sixel (np. chafa) przez tmux: klient z TERM=xterm-256color
+      # to Konsole, ttyd (enableSixel) albo Windows Terminal (WSL) — wszystkie
+      # obsługują Sixel. Alacritty (bez grafiki) ma własny terminfo i
+      # TERM=alacritty, więc tu nie pasuje.
+      set -as terminal-features ',xterm-256color:sixel'
     '';
   };
 
@@ -68,6 +74,7 @@ let
       bat
       fastfetch
       p7zip # 7z (archiwizator; wymagany m.in. przez reshadelinux)
+      chafa # obrazki w terminalu (Sixel/Kitty/iTerm2, fallback: znaki Unicode)
     ];
 in
 {
