@@ -12,6 +12,11 @@ _: {
         # Deduplikacja okresowym timerem zamiast auto-optimise-store, które
         # hardlinkuje przy każdym buildzie/substytucji i spowalnia rebuildy.
         optimise.automatic = true;
+        # Z demonem nix (root) rozmawiają tylko wheel i root (zawsze). Konta
+        # usług wystawionych przez tunel (nextcloud, gitea, open-webui…) nie
+        # potrzebują budować derywacji; host, którego usługa używa nix,
+        # dopisuje ją jawnie (raspberry-pi-4: hermes).
+        settings.allowed-users = [ "@wheel" ];
         # nix.settings.trusted-users celowo zostaje domyślne (tylko root) —
         # bez @wheel. Trusted user nixa może importować niepodpisane ścieżki
         # i zmieniać substitutery, czyli ma roota bez hasła, a jako użytkownik

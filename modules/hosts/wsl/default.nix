@@ -28,6 +28,9 @@
           enableFastfetch = false;
           flakeTarget = "wsl";
           defaultUser = "nixos";
+          # WSL nie jest odbiorcą sekretów (modules/_secrets/agenix-rules.nix):
+          # bez tego aktywacja agenix kończyła się błędem przy każdym switch.
+          userSecrets = [ ];
         };
       })
     ];

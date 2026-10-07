@@ -126,13 +126,37 @@ in
         direnv.enable = true;
 
         # Tylko w fish: token cachix wstrzykuje funkcja `cachix-push`
-        # (base/agenix.nix), niewidoczna dla innych procesów.
-        fish.shellAliases.push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
+        # (base/agenix.nix), niewidoczna dla innych procesów — i tylko na
+        # hostach, które ten token odszyfrowują.
+        fish.shellAliases = lib.mkIf (lib.elem "cachix-authtoken" config.customBot.userSecrets) {
+          push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
+        };
       };
 
-      # The ZFS module is pulled in by default by nixpkgs even when ZFS
-      # is not in use. Explicitly disable forceImportRoot to silence the
-      # 26.11 evaluation warning and reduce the risk of data loss.
-      boot.zfs.forceImportRoot = false;
+      boot = {
+        # The ZFS module is pulled in by default by nixpkgs even when ZFS
+        # is not in use. Explicitly disable forceImportRoot to silence the
+        # 26.11 evaluation warning and reduce the risk of data loss.
+        zfs.forceImportRoot = false;
+
+        # Żaden host nie jest routerem: przekierowania ICMP od hosta
+        # podszywającego się pod bramę (Wi-Fi w hotelu, LAN) nie zmieniają
+        # tras, a host ich nie wysyła.
+        kernel.sysctl = lib.mapAttrs (_: lib.mkDefault) {
+          "net.ipv4.conf.all.accept_redirects" = 0;
+          "net.ipv4.conf.default.accept_redirects" = 0;
+          "net.ipv4.conf.all.secure_redirects" = 0;
+          "net.ipv4.conf.default.secure_redirects" = 0;
+          "net.ipv6.conf.all.accept_redirects" = 0;
+          "net.ipv6.conf.default.accept_redirects" = 0;
+          "net.ipv4.conf.all.send_redirects" = 0;
+          "net.ipv4.conf.default.send_redirects" = 0;
+        };
+      };
+
+      # sudo (setuid) wykonywalne tylko dla wheel: konta usług i agent hermes
+      # nie mają reguł sudo, więc dla nich binarka była wyłącznie powierzchnią
+      # ataku (błędy klasy Baron Samedit).
+      security.sudo.execWheelOnly = true;
     };
 }

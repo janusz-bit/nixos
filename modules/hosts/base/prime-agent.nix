@@ -10,7 +10,8 @@
     { config, ... }:
     let
       user = config.customBot.defaultUser;
-      agentDir = "${config.users.users.${user}.home}/.prime/agent";
+      primeDir = "${config.users.users.${user}.home}/.prime";
+      agentDir = "${primeDir}/agent";
 
       modelsJson = builtins.toJSON {
         providers = {
@@ -144,6 +145,10 @@
       };
 
       systemd.tmpfiles.rules = [
+        # Rodzic jawnie: brakujące katalogi nadrzędne tmpfiles zakłada jako
+        # root:root 0755, a prime-agent pisze też obok agent/ (np.
+        # supervisor-owners) — na świeżej instalacji dostawałby EACCES.
+        "d ${primeDir} 0755 ${user} users - -"
         "d ${agentDir} 0700 ${user} users - -"
       ]
       ++ map (name: "L+ ${agentDir}/${name} - - - - /etc/prime-agent/${name}") [

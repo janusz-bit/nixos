@@ -1,9 +1,13 @@
-# Reguły agenix CLI (agenix -e / -r). Plik może zawierać WYŁĄCZNIE wpisy
-# "<plik>.age" — klucze publiczne są w keys.nix.
+# Reguły agenix CLI (agenix -e / -r / -c), wykrywane automatycznie w tym
+# katalogu (agenix-rules.nix; dawne secrets.nix agenix uznaje za przestarzałe).
+# Plik może zawierać WYŁĄCZNIE wpisy "<plik>.age" — klucze publiczne są
+# w keys.nix.
 #
-# Odbiorca droid-android (stara maszyna AVF, root@debian) został usunięty.
-# Pliki .age zaszyfrowane jeszcze dla niego trzeba przeszyfrować:
-#   cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519
+# Po każdej zmianie odbiorców: cd modules/_secrets && sudo agenix -r -i
+# /root/.ssh/id_ed25519, potem `agenix -c` musi pokazać same ✓ — pilnuje tego
+# checks.<system>.agenix-recipients (CI lint). Usunięty odbiorca może dalej
+# odszyfrować starą treść z historii publicznego repo: rekeying nie zastępuje
+# rotacji wartości.
 let
   keys = import ./keys.nix;
   inherit (keys.hosts) nixos raspberry-pi-4;

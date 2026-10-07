@@ -40,6 +40,19 @@
           customBot = {
             flakeTarget = "nixos";
             defaultUser = "dinosaur";
+            # Laptop: wszystkie sekrety użytkownika (tu się je edytuje).
+            userSecrets = [
+              "cachix-authtoken"
+              "github-token"
+              "google-api-key"
+              "llmgateway-api-key-shared"
+              "notes"
+              "ollama-api-key"
+              "opencode"
+              "openrouter-api-key"
+              "secret1"
+              "trilium-etapi"
+            ];
             # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840),
             # a nie trilium-server:8081 z raspberry-pi-4.
             triliumMcpUrl = "http://127.0.0.1:37840/mcp";

@@ -24,6 +24,10 @@
 # Wartości sekretów nigdy nie trafiają do /nix/store — wrappery zawierają
 # wyłącznie odwołania do plików age (same ścieżki).
 #
+# Wrapper i jednostka nix-access-tokens powstają tylko dla sekretów, które
+# host odszyfrowuje (customBot.userSecrets, modules/agenix/agenix.nix);
+# wrapper bez żadnego dostępnego sekretu nie powstaje wcale.
+#
 # Granica ochrony: wrappery chronią przed PRZYPADKOWYM wyciekiem przez env
 # (logi, procesy potomne, cała sesja KDE). Pliki sekretów należą do
 # customBot.defaultUser (0400, modules/agenix/agenix.nix), więc proces
@@ -43,8 +47,9 @@
       secretPath =
         name:
         (config.age.secrets.${name}
-          or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — zdefiniuj go w modules/agenix/agenix.nix")
+          or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — dodaj go do customBot.userSecrets hosta")
         ).path;
+      hasSecret = name: lib.elem name config.customBot.userSecrets;
 
       # Funkcje-wrappery: `name` = nazwa wykonywanego programu; `vars` =
       # zmienne środowiskowe podpinane pod sekrety agenix.
@@ -157,11 +162,16 @@
           ]
         );
 
+      # Tylko zmienne z sekretami obecnymi na hoście; wrapper bez nich znika.
+      activeWrappers = lib.filter (w: w.vars != [ ]) (
+        map (w: w // { vars = lib.filter (v: hasSecret v.secret) w.vars; }) fishWrappers
+      );
+
       fishWrappersPkg = pkgs.symlinkJoin {
         name = "fish-secret-wrappers";
         paths = map (
           w: pkgs.writeTextDir "share/fish/vendor_functions.d/${w.name}.fish" (mkSecretWrapper w)
-        ) fishWrappers;
+        ) activeWrappers;
       };
 
     in
@@ -175,17 +185,23 @@
       environment.systemPackages = [ fishWrappersPkg ];
 
       # === nix: access-tokens z agenix w pliku 0600 (zamiast NIX_CONFIG w profilu) ===
-      systemd.user.services.nix-access-tokens = {
+      systemd.user.services.nix-access-tokens = lib.mkIf (hasSecret "github-token") {
         description = "Render ~/.config/nix/nix.conf z access-tokensem z agenix (0600)";
         wantedBy = [ "default.target" ];
-        # oneshot z retryem: sekrety agenix są odszyfrowywane zanim sesja
-        # użytkownika ruszy, ale przy pierwszym logowaniu po instalacji
-        # lepiej by jednostka sprawdziła się drugi raz zamiast padnąć.
+        unitConfig = {
+          # Jednostka --user startuje w KAŻDYM menedżerze użytkownika (root,
+          # hermes, greeter). Sekret należy do defaultUsera; inni zapisywali
+          # sobie nix.conf z pustym tokenem, a GitHub odpowiadał wtedy 401.
+          ConditionUser = config.customBot.defaultUser;
+          # Brak pliku (świeża instalacja przed post-install) = pominięcie,
+          # nie pętla restartów.
+          ConditionPathExists = secretPath "github-token";
+        };
+        # Sekrety agenix są gotowe przed startem sesji, więc nie ma czego
+        # ponawiać — błąd ma być widoczny, a nie zapętlony.
         serviceConfig = {
           Type = "oneshot";
           UMask = "0077";
-          Restart = "on-failure";
-          RestartSec = "5s";
         };
         # Substitutery są w systemowym nix.conf (base-configuration) — tu
         # wyłącznie token, który nie może trafić do /nix/store.
@@ -193,6 +209,14 @@
           set -euo pipefail
           # jawny PATH — jednostka --user nie musi nic odziedziczać
           PATH="${pkgs.coreutils}/bin:$PATH"
+          # Zwykłe przypisanie: błąd odczytu przerywa skrypt (set -e), czego
+          # podstawienie w argumencie printf nie robiło — zapisywał się pusty
+          # token, a jednostka zgłaszała sukces.
+          token="$(cat ${lib.escapeShellArg (secretPath "github-token")})"
+          if [ -z "$token" ]; then
+            echo "nix-access-tokens: pusty sekret github-token" >&2
+            exit 1
+          fi
           conf_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/nix"
           conf="$conf_dir/nix.conf"
           mkdir -p "$conf_dir"
@@ -201,7 +225,7 @@
           # połówki pliku i żeby token nie lądował w pliku z luźnym trybem
           tmp="$(mktemp "$conf_dir/.nix.conf.XXXXXX")"
           trap 'rm -f "$tmp"' EXIT
-          printf 'access-tokens = github.com=%s\n' "$(cat ${secretPath "github-token"})" > "$tmp"
+          printf 'access-tokens = github.com=%s\n' "$token" > "$tmp"
           chmod 600 "$tmp"
           mv -f "$tmp" "$conf"
         '';
