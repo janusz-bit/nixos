@@ -25,8 +25,19 @@
       system,
       ...
     }:
+    let
+      # nixfmt 1.5.0 (GHC) zawisał na raspberry-pi-4 w ~9% uruchomień (100%
+      # CPU, czas głównie w jądrze; hook pre-commit stawał). Przyczyna: ~1 TB
+      # rezerwacji przestrzeni adresowej sterty GHC na tym jądrze aarch64 —
+      # z -xr1G 0/360 zawieszeń wobec 32/360. Wkompilowane przez
+      # -with-rtsopts (binarka nie przyjmuje opcji RTS); formatterowi 1 GB
+      # sterty wystarcza z zapasem. temporary-fixes.md.
+      nixfmtStable = pkgs.nixfmt.overrideAttrs (old: {
+        configureFlags = (old.configureFlags or [ ]) ++ [ "--ghc-option=-with-rtsopts=-xr1G" ];
+      });
+    in
     {
-      formatter = pkgs.nixfmt-tree;
+      formatter = pkgs.nixfmt-tree.override { nixfmtPackage = nixfmtStable; };
       # Instalator hosta nixos istnieje tylko dla x86_64 (modules/installer);
       # optionalAttrs, bo mkIf zostawia rzucający atrybut w lazyAttrsOf.
       packages = lib.optionalAttrs (system == "x86_64-linux") {
@@ -46,7 +57,10 @@
           entry = "${pkgs.gitleaks}/bin/gitleaks git --pre-commit --staged --redact --verbose";
           pass_filenames = false;
         };
-        nixfmt.enable = true;
+        nixfmt = {
+          enable = true;
+          package = nixfmtStable;
+        };
         statix.enable = true;
         deadnix = {
           enable = true;
