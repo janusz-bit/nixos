@@ -78,7 +78,10 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   aktywacji. Kontrola negatywna testu na module upstream: `/target-home`
   root → `hermes:hermes 750`.
 - **Obejście:** root zakłada tylko `stateDir`; resztę aktywacji wykonuje
-  `setpriv --reuid=hermes … --no-new-privs`. Tryb kontenerowy wyłączony asercją.
+  `setpriv --reuid=hermes … --no-new-privs`. Wpisy `HERMES_HOME` innych
+  właścicieli (stare uruchomienia CLI jako root/nixos) przejmuje kopią jako
+  hermes; oryginalne katalogi zostają jako `.foreign-<nazwa>` do ręcznego
+  usunięcia. Tryb kontenerowy wyłączony asercją.
 - **Kiedy usunąć:** gdy upstream przestanie pisać jako root w `stateDir`
   (zgłosić upstream). Do tego czasu przy każdym `nix flake update hermes-agent`
   nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
@@ -114,6 +117,32 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   ukrywała brak sterownika dysku root w initrd.
 - **Kiedy usunąć:** gdy `all-hardware.nix` przestanie wymagać modułów spoza
   jądra RPi — sprawdzić: usunąć flagę, `nix build .#raspberry-pi-4-sd-image`.
+
+### 8. nixfmt z wkompilowanym `-with-rtsopts=-xr1G` (zawieszenia na aarch64)
+
+- **Od:** 2026-10-07.
+- **Plik:** `modules/default.nix` (`nixfmtStable` → hook pre-commit `nixfmt`,
+  `formatter` dla `nix fmt`, a przez `enabledPackages` devShell
+  i `.claude/hooks/post-edit.sh`).
+- **Objaw:** `nixfmt` 1.5.0 na raspberry-pi-4 zawisa w ~9% uruchomień
+  (32/360 dla pojedynczych plików), 100% CPU, czas prawie wyłącznie w jądrze
+  (stat: utime 4, stime 143); `git commit` wisiał na hooku, a zabity hook nie
+  przywraca odłożonych przez pre-commit zmian (zostają
+  w `~/.cache/pre-commit/patch*`, `git apply` je odzyskuje). Pod `strace`
+  problem nie występuje (zależny od timingu).
+- **Przyczyna (zawężona pomiarem, nie potwierdzona w źródłach):** rezerwacja
+  ~1 TB przestrzeni adresowej sterty przez RTS GHC na jądrze RPi 6.18
+  (aarch64). Na kopii zbudowanej z `-rtsopts`: bez flag 6/90, `-V0` 6/90,
+  `-A64m` 7/90, `-xr1G` i `-xr256M` 0/90; pojedyncze pliki 32/360 vs 0/360
+  z `-xr1G`. (Wcześniejsza hipoteza o zegarze RTS była błędna — stockowa
+  binarka odrzucała tamte flagi i test liczył tylko timeouty.)
+- **Obejście:** nixfmt z `--ghc-option=-with-rtsopts=-xr1G` (stockowa binarka
+  nie przyjmuje opcji RTS). Kosztem jest lokalny build nixfmt (~3 min na RPi,
+  zależności z cache) po każdym bumpie nixpkgs; to samo w CI lint.
+- **Kiedy usunąć:** gdy stockowy nixfmt przestanie zawisać na RPi — test:
+  `for i in $(seq 120); do timeout 8 nixfmt --check modules/nix-settings.nix; [ $? -eq 124 ] && echo hang; done`
+  ze stockowym `nix shell nixpkgs#nixfmt` nie może dać żadnego `hang`.
+  Sprawdzić też inne programy GHC na RPi (shellcheck), jeśli zaczną wisieć.
 
 ## Zamknięte
 
