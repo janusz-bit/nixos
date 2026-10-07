@@ -27,8 +27,11 @@
     }:
     {
       formatter = pkgs.nixfmt-tree;
-      # Instalator hosta nixos istnieje tylko dla x86_64 (modules/installer).
-      packages.default = lib.mkIf (system == "x86_64-linux") self'.packages.install-system;
+      # Instalator hosta nixos istnieje tylko dla x86_64 (modules/installer);
+      # optionalAttrs, bo mkIf zostawia rzucający atrybut w lazyAttrsOf.
+      packages = lib.optionalAttrs (system == "x86_64-linux") {
+        default = self'.packages.install-system;
+      };
 
       pre-commit.settings.hooks = {
         # git-hooks-nix nie definiuje hooka gitleaks (nigdy nie istniał

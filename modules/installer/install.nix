@@ -344,7 +344,9 @@
           bez argumentu: oba kroki po kolei
       '';
     in
-    lib.mkIf (system == "x86_64-linux") {
+    # optionalAttrs, nie mkIf: przy mkIf atrybut zostaje w lazyAttrsOf i rzuca
+    # przy odczycie (nix flake check/show na aarch64). system to specialArg.
+    lib.optionalAttrs (system == "x86_64-linux") {
       # writeShellApplication uruchamia bash -n i shellcheck w checkPhase —
       # skrypty kasujące dysk i wpisujące klucze do firmware nie mogą
       # dotrzeć do live ISO z błędem składni. Bez wariantu offline: jego

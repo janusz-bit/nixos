@@ -59,16 +59,17 @@
   perSystem =
     { lib, system, ... }:
     {
-      packages.nixos-iso = lib.mkIf (system == "x86_64-linux") (
-        let
-          image = inputs.nixpkgs.lib.nixosSystem {
-            modules = [
-              { nixpkgs.hostPlatform = "x86_64-linux"; }
-              self.modules.nixos.nixos-iso
-            ];
-          };
-        in
-        image.config.system.build.isoImage
-      );
+      packages = lib.optionalAttrs (system == "x86_64-linux") {
+        nixos-iso =
+          let
+            image = inputs.nixpkgs.lib.nixosSystem {
+              modules = [
+                { nixpkgs.hostPlatform = "x86_64-linux"; }
+                self.modules.nixos.nixos-iso
+              ];
+            };
+          in
+          image.config.system.build.isoImage;
+      };
     };
 }
