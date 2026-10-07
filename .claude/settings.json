@@ -35,7 +35,25 @@
       "Bash(sudo wipefs *)",
       "Bash(sudo sbctl *)",
       "Bash(sudo efi-updatevar *)",
-      "Bash(sudo efibootmgr *)"
+      "Bash(sudo efibootmgr *)",
+      "Bash(git diff *--no-index*)",
+      "Bash(git diff *--output*)",
+      "Bash(git log *--output*)",
+      "Bash(git show *--output*)",
+      "Bash(nix eval *--impure*)",
+      "Bash(nix eval *--expr*)",
+      "Bash(nix eval *--file*)",
+      "Bash(nix eval -f *)",
+      "Bash(nix eval * -f *)",
+      "Bash(nix build *--impure*)",
+      "Bash(nix build *--expr*)",
+      "Bash(nix build *--file*)",
+      "Bash(nix build -f *)",
+      "Bash(nix build * -f *)",
+      "Bash(nix flake metadata *path:*)",
+      "Bash(nix flake metadata *--impure*)",
+      "Bash(nix flake check *--impure*)",
+      "Bash(nixos-rebuild build *--impure*)"
     ]
   },
   "hooks": {
