@@ -192,7 +192,13 @@
           # Jednostka --user startuje w KAŻDYM menedżerze użytkownika (root,
           # hermes, greeter). Sekret należy do defaultUsera; inni zapisywali
           # sobie nix.conf z pustym tokenem, a GitHub odpowiadał wtedy 401.
-          ConditionUser = config.customBot.defaultUser;
+          # root też: `sudo nixos-rebuild … --flake github:…` (aliasy update)
+          # czyta /root/.config/nix/nix.conf, a root czyta sekret mimo 0400.
+          # „|” = warunek wyzwalający: wystarczy jeden z dwóch.
+          ConditionUser = [
+            "|${config.customBot.defaultUser}"
+            "|root"
+          ];
           # Brak pliku (świeża instalacja przed post-install) = pominięcie,
           # nie pętla restartów.
           ConditionPathExists = secretPath "github-token";
