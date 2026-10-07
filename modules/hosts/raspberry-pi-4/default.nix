@@ -11,7 +11,9 @@
   flake.modules.nixos.raspberry-pi-4 = _: {
     imports = [
       self.modules.nixos.base
-      self.modules.nixos.fail2ban
+      # Bez fail2ban: SSH przychodzi tu tylko z LAN-u (zapora,
+      # rpi-configuration) albo przez tunel z pętli zwrotnej — oba źródła
+      # były na liście ignorowanych, więc jail nie mógł nikogo zbanować.
       self.modules.nixos.nextcloud
       self.modules.nixos.trilium
       self.modules.nixos.gitea
@@ -27,8 +29,20 @@
       self.modules.nixos.rpi-configuration
       inputs.nixos-hardware.nixosModules.raspberry-pi-4
       (_: {
-        customBot.flakeTarget = "raspberry-pi-4";
-        customBot.defaultUser = "nixos";
+        customBot = {
+          flakeTarget = "raspberry-pi-4";
+          defaultUser = "nixos";
+          # Serwer z internetu: tylko to, czego używa (prime-agent, hermes,
+          # nix access-tokens). Bez tokenu zapisu do cachix (zaufanego przez
+          # wszystkie hosty), kluczy opencode/gemini i notatek. RPi zostaje
+          # odbiorcą wszystkich plików .age (rekeying), ale ich nie odszyfrowuje.
+          userSecrets = [
+            "github-token"
+            "ollama-api-key"
+            "openrouter-api-key"
+            "trilium-etapi"
+          ];
+        };
       })
     ];
   };
