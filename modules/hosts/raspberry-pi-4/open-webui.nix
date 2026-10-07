@@ -7,11 +7,15 @@
       ...
     }:
     {
-      # Oba pliki czyta wyłącznie systemd (EnvironmentFile, jako root) przed
-      # startem sandboxa DynamicUser — domyślne root:root 0400 wystarcza.
-      age.secrets.open-webui-hermes-env.file = customTop.secretsDir + "/hermes-env.age";
+      # Czyta go wyłącznie systemd (EnvironmentFile, jako root) przed startem
+      # sandboxa DynamicUser — domyślne root:root 0400 wystarcza.
       # OPENAI_API_KEYS (Hermes + LLM Gateway keys) — must stay out of
-      # environment {} so it never lands in the world-readable nix store
+      # environment {} so it never lands in the world-readable nix store.
+      # Tu też WEBUI_SECRET_KEY (klucz HMAC sesji JWT; bez niego open-webui
+      # generuje słaby klucz z `random` na dysku). Celowo NIE cały
+      # hermes-env.age: przy ustawionym OPENAI_API_KEYS open-webui nie używa
+      # OPENAI_API_KEY (config.py:336), a kompromitacja internetowego
+      # open-webui (np. Functions admina) nie może dawać sekretów Hermesa.
       age.secrets.open-webui-keys.file = customTop.secretsDir + "/open-webui-keys.age";
 
       services.open-webui = {
@@ -20,8 +24,16 @@
         # Internal port — nginx reverse proxy listens on 8080 (cloudflared ingress target)
         port = 3001;
         environment = {
+          # Własny attrset zastępuje domyślną wartość opcji modułu, więc jej
+          # rezygnacje z telemetrii trzeba powtórzyć.
+          SCARF_NO_ANALYTICS = "True";
+          DO_NOT_TRACK = "True";
+          ANONYMIZED_TELEMETRY = "False";
           # Ensure env vars always override DB-stored PersistentConfig values
           ENABLE_PERSISTENT_CONFIG = "False";
+          # Publiczny adres (linki, przekierowania) zamiast domyślnego
+          # http://localhost:3001 z modułu.
+          WEBUI_URL = "https://chat.${customTop.site.full}";
           # OpenAI-compatible API → multiple backends. Semicolon-separated
           # lists, paired by index with OPENAI_API_KEYS (from
           # open-webui-keys.age): index 0 = Hermes Agent,
@@ -33,6 +45,11 @@
           ENABLE_OLLAMA_API = "false";
           # Require authentication (first registered user becomes admin)
           WEBUI_AUTH = "True";
+          # Konto admina już istnieje. Rejestracji nie da się wyłączyć w UI
+          # (ENABLE_PERSISTENT_CONFIG=False przywraca domyślne True przy
+          # każdym starcie), więc tylko tutaj.
+          ENABLE_SIGNUP = "False";
+          DEFAULT_USER_ROLE = "pending";
           # Stateful Responses API (forwarding previous_response_id)
           ENABLE_RESPONSES_API_STATEFUL = "1";
           # Per-connection protocol: forces BOTH OpenAI-compatible
@@ -59,20 +76,26 @@
           };
           # Cookie settings: Cloudflare Tunnel terminates TLS, so the
           # browser sees HTTPS while the backend only sees HTTP on
-          # 127.0.0.1. Without these, Starlette's SessionMiddleware
-          # encodes sessions in standard base64 (+, /, =), which strict
-          # browsers (Brave, Chrome strict) reject per RFC 6265 — the
-          # session cookie is dropped and login silently fails.
-          # SameSite=none requires Secure=true; both are satisfied here
-          # because Cloudflare serves HTTPS to the client.
-          # Refs: open-webui#26382, open-webui#15373
+          # 127.0.0.1. Secure=true is what fixes strict browsers (Brave,
+          # Chrome strict) dropping the session cookie (open-webui#26382,
+          # open-webui#15373). SameSite=lax: aplikacja jest first-party,
+          # a lax działa dla XHR z tej samej domeny i przekierowań OAuth.
+          # Dawne "none" razem z CORS '*' + allow_credentials pozwalało
+          # dowolnej stronie wykonywać zalogowane żądania do /api/*.
           WEBUI_SESSION_COOKIE_SECURE = "true";
-          WEBUI_SESSION_COOKIE_SAME_SITE = "none";
+          WEBUI_SESSION_COOKIE_SAME_SITE = "lax";
           WEBUI_AUTH_COOKIE_SECURE = "true";
-          WEBUI_AUTH_COOKIE_SAME_SITE = "none";
+          WEBUI_AUTH_COOKIE_SAME_SITE = "lax";
+          # Domyślne '*' z allow_credentials=True odbija każdy Origin.
+          CORS_ALLOW_ORIGIN = "https://chat.${customTop.site.full}";
+          # Nagłówki bezpieczeństwa ustawiane przez samą aplikację
+          # (utils/security_headers.py) — w nginx add_header nie dziedziczy
+          # się do lokacji z własnymi add_header (/_app, /static).
+          XFRAME_OPTIONS = "SAMEORIGIN";
+          XCONTENT_TYPE = "nosniff";
+          REFERRER_POLICY = "strict-origin-when-cross-origin";
+          HSTS = "max-age=31536000;includeSubDomains";
         };
-        # Shared API key with Hermes Agent (API_SERVER_KEY=OPENAI_API_KEY)
-        environmentFile = config.age.secrets.open-webui-hermes-env.path;
       };
 
       # ─────────────────────────────────────────────────────────────
@@ -115,6 +138,11 @@
               port = 8080;
             }
           ];
+          # Załączniki czatu i baz wiedzy: globalne 10 MB nginx odrzucało je
+          # kodem 413; 100 MB = limit pojedynczego żądania w Cloudflare.
+          extraConfig = ''
+            client_max_body_size 100m;
+          '';
 
           locations = {
             # ── Static assets: cache aggressively ──
@@ -162,10 +190,11 @@
               extraConfig = ''
                 # Don't cache dynamic content
                 proxy_cache off;
-                # Buffer responses so slow backend doesn't hold client connection
-                proxy_buffering on;
-                proxy_buffer_size 16k;
-                proxy_buffers 8 32k;
+                # Bez buforowania: odpowiedzi strumieniowe (SSE z
+                # /api/chat/completions) mają dochodzić token po tokenie,
+                # a nie paczkami. Backend jest lokalny, więc buforowanie
+                # i tak nie chroni przed wolnym upstreamem.
+                proxy_buffering off;
                 # Timeouts for long-running API calls (streaming, etc.)
                 proxy_read_timeout 300s;
                 proxy_send_timeout 300s;
@@ -180,8 +209,7 @@
       # stayed dead until the next reboot/rebuild.
       systemd.services.open-webui.serviceConfig = {
         Restart = lib.mkForce "on-failure";
-        # Second env file appended after the module's environmentFile:
-        # OPENAI_API_KEYS="<hermes key>;<llmgateway key>".
+        # OPENAI_API_KEYS="<hermes key>;<llmgateway key>" i WEBUI_SECRET_KEY.
         EnvironmentFile = config.age.secrets.open-webui-keys.path;
       };
 

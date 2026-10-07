@@ -20,7 +20,9 @@
             HTTP_PORT = 3000;
             DISABLE_SSH = false;
             START_SSH_SERVER = false;
-            SSH_DOMAIN = "git.${customTop.site.full}";
+            # git.* to wejście tunelu tylko dla HTTP; SSH (konto gitea)
+            # osiąga się przez ssh.* z ProxyCommand cloudflared (base-ssh).
+            SSH_DOMAIN = "ssh.${customTop.site.full}";
             SSH_PORT = 22;
           };
           service.DISABLE_REGISTRATION = true;

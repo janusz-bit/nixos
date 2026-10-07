@@ -8,5 +8,53 @@ _: {
       # Bylo potrzebne tylko dla nixpkgs z bezwarunkowym `rm` -
       # patrz temporary-fixes.md (pozycja zamknieta).
     };
+
+    systemd.services.trilium-server = {
+      # Ruch przychodzi wyłącznie z cloudflared (127.0.0.1). Bez zaufania do
+      # tego jednego przeskoku req.ip = 127.0.0.1 dla wszystkich: wspólny
+      # limit logowań (10 prób / 15 min) — bot blokował właściciela i
+      # synchronizację — i brak prawdziwych IP w logach. „loopback” ufa tylko
+      # proxy na pętli zwrotnej.
+      environment.TRILIUM_NETWORK_TRUSTEDREVERSEPROXY = "loopback";
+      serviceConfig = {
+        # Moduł zostawia Restart=no: po awarii notes.* i endpoint MCP dla
+        # agentów leżały do restartu systemu.
+        Restart = "on-failure";
+        RestartSec = "5s";
+        # Moduł ustawia tylko User/Group/PrivateTmp, a to usługa z internetu.
+        ProtectSystem = "strict";
+        ReadWritePaths = [ "/var/lib/trilium" ];
+        ProtectHome = true;
+        PrivateDevices = true;
+        NoNewPrivileges = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectKernelLogs = true;
+        ProtectControlGroups = true;
+        ProtectClock = true;
+        ProtectHostname = true;
+        ProtectProc = "invisible";
+        ProcSubset = "pid";
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        LockPersonality = true;
+        RemoveIPC = true;
+        RestrictAddressFamilies = [
+          "AF_UNIX"
+          "AF_INET"
+          "AF_INET6"
+        ];
+        CapabilityBoundingSet = "";
+        SystemCallArchitectures = "native";
+        SystemCallFilter = [
+          "@system-service"
+          "~@privileged"
+        ];
+        SystemCallErrorNumber = "EPERM";
+        UMask = "0077";
+        # MemoryDenyWriteExecute celowo wyłączone: JIT V8.
+      };
+    };
   };
 }
