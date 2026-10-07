@@ -1,7 +1,15 @@
 /result
+/result-*
 /.direnv
 /.pre-commit-config.yaml
 __pycache__/
 *.pyc
 .directory
 .claude/settings.local.json
+# W modules/_secrets tylko zaszyfrowane .age i reguły/klucze publiczne —
+# odszyfrowana wersja roboczo zapisana obok (np. `age -d x.age > x`) nie
+# trafi do publicznego repo przez `git add`.
+/modules/_secrets/*
+!/modules/_secrets/*.age
+!/modules/_secrets/agenix-rules.nix
+!/modules/_secrets/keys.nix

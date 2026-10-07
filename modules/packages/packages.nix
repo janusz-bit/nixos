@@ -6,8 +6,6 @@
 let
   # Pakiety lokalne — jedno źródło dla hostów (overlay) i dla
   # `packages.<system>` (nix build / nix-update w flake-update).
-  # bootdev-cli nadpisuje wersję z nixpkgs: lokalna jest aktualizowana
-  # przez flake-update i bywa nowsza.
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     waywallen = pkgs.callPackage ./_waywallen { };
@@ -15,7 +13,24 @@ let
   };
 in
 {
-  flake.overlays.local-packages = final: _prev: localPackages final;
+  flake.overlays.local-packages =
+    final: prev:
+    let
+      local = localPackages final;
+    in
+    local
+    // {
+      # Lokalny bootdev-cli (podbijany przez flake-update) tylko wtedy, gdy
+      # jest nowszy niż w nixpkgs — przy tej samej wersji pakiet z nixpkgs
+      # przychodzi z cache.nixos.org zamiast kompilować się lokalnie i w CI.
+      bootdev-cli =
+        if
+          prev ? bootdev-cli && final.lib.versionAtLeast prev.bootdev-cli.version local.bootdev-cli.version
+        then
+          prev.bootdev-cli
+        else
+          local.bootdev-cli;
+    };
 
   perSystem =
     { pkgs, ... }:
