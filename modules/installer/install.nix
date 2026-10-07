@@ -33,8 +33,16 @@
 # nie odszyfrowują.
 { self, customTop, ... }:
 {
+  # Tylko x86_64: wszystkie paczki instalują host `nixos`. Na aarch64 (RPi)
+  # `nix run .#post-install` nadpisałby hosts.nixos w keys.nix kluczem RPi.
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      system,
+      self',
+      ...
+    }:
     let
       inherit (self.nixosConfigurations.nixos) config;
       inherit (config.networking) hostName;
@@ -55,6 +63,11 @@
           modules = [ { disko.devices.disk.main.device = lib.mkForce diskLink; } ];
         }).config.system.build.destroyFormatMount;
       rev = self.rev or self.dirtyRev or "bez rewizji";
+      # Ścieżka, do której limine-install kopiuje i podpisuje (sbctl sign)
+      # loader — limine-install.py ignoruje błąd podpisu.
+      limineEfi = "${config.boot.loader.efi.efiSysMountPoint}/efi/${
+        if config.boot.loader.limine.efiInstallAsRemovable then "boot" else "limine"
+      }/BOOTX64.EFI";
       sw = "/nix/var/nix/profiles/system/sw/bin";
 
       mkInstallSystem =
@@ -105,9 +118,11 @@
             else
               # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
               # bez nich kernel LTO kompiluje się lokalnie.
+              # --no-channel-copy: system z flake'a nie potrzebuje kanału
+              # nixpkgs live ISO (nieaktualny <nixos>, ~150 MB).
               ''
                 nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#nixos"} \
-                  --no-root-passwd --option accept-flake-config true
+                  --no-root-passwd --no-channel-copy --option accept-flake-config true
               '';
           repoNote = lib.optionalString offline ''
             echo "- $place: źródła rewizji ${rev} bez historii z GitHuba (origin ustawiony)."
@@ -119,6 +134,7 @@
           name = "install-system";
           runtimeInputs = with pkgs; [
             git
+            gnugrep
             nixos-install-tools
             util-linux
           ];
@@ -213,32 +229,69 @@
               exec sudo "$0" "''${args[@]}"
             fi
 
+            # Jedna instalacja naraz: obie przestawiałyby to samo dowiązanie
+            # $disk_link, z którego korzysta wbudowany skrypt disko.
+            exec {lock}>/run/install-system.lock
+            flock -n "$lock" || die "install-system działa już w innej sesji"
+
             # Wszystko, co może się nie udać, sprawdzamy PRZED czyszczeniem dysku.
+            # Wyniki lsblk/findmnt/swapon przez podstawienie poleceń, nie
+            # `< <(…)`: błąd polecenia przerywa skrypt (errexit), zamiast dać
+            # pustą listę, która przepuściłaby kontrolę.
             [[ -d /sys/firmware/efi ]] || die "system nie jest uruchomiony w trybie UEFI"
             [[ -n "$disk" ]] || choose_disk
             [[ -b "$disk" ]] || die "nie ma dysku $disk"
             disk_dev="$(readlink -f "$disk")"
-            while read -r mountpoint; do
-              if [[ -n "$mountpoint" && "$mountpoint" != "$mnt" && "$mountpoint" != "$mnt"/* ]]; then
-                die "$disk jest w użyciu ($mountpoint) — uruchom install-system z live ISO"
+            [[ "$(lsblk -dnro TYPE "$disk_dev")" == disk && "$disk_dev" != /dev/zram* ]] \
+              || die "$disk nie jest całym dyskiem (partycja, loop, zram?)"
+            [[ "$(lsblk -dnro RO "$disk_dev")" == 0 ]] || die "$disk jest tylko do odczytu"
+
+            devs="$(lsblk -nlpo NAME "$disk_dev")"
+            active_swaps="$(swapon --show=NAME --noheadings --raw)"
+            target_swaps=()
+            while IFS= read -r dev; do
+              # findmnt -S: każdy punkt montowania urządzenia (lsblk pokazuje
+              # jeden); kod 1 = brak montowań.
+              if targets="$(findmnt -rn -o TARGET -S "$dev")"; then
+                while IFS= read -r target; do
+                  [[ "$target" == "$mnt" || "$target" == "$mnt"/* ]] \
+                    || die "$disk jest w użyciu ($dev → $target) — uruchom install-system z live ISO"
+                done <<<"$targets"
               fi
-            done < <(lsblk -nro MOUNTPOINT "$disk")
+              # Swap na docelowym dysku (np. włączony przez disko w przerwanym
+              # poprzednim uruchomieniu) wyłączamy po potwierdzeniu.
+              while IFS= read -r swap; do
+                if [[ -n "$swap" && "$(readlink -f "$swap")" == "$(readlink -f "$dev")" ]]; then
+                  target_swaps+=("$swap")
+                fi
+              done <<<"$active_swaps"
+            done <<<"$devs"
             # disko formatuje, a initrd otwiera partycje po by-partlabel/disk-main-*:
             # te same etykiety na innym dysku (np. po starej instalacji) oznaczają
             # sformatowanie albo uruchomienie złej partycji.
+            parts="$(lsblk -rnpo NAME,PKNAME,PARTLABEL)"
             while read -r part parent label; do
               if [[ "$label" == disk-main-* && "$parent" != "$disk_dev" ]]; then
                 die "$part na innym dysku ($parent) ma etykietę $label z disko.nix — odłącz ten dysk albo usuń jego etykiety"
               fi
-            done < <(lsblk -rnpo NAME,PKNAME,PARTLABEL)
+            done <<<"$parts"
 
             work="$(mktemp -d)"
             trap 'rm -rf "$work"' EXIT
             ${prepareRepo}
 
-            echo "UWAGA: install-system SKASUJE CAŁY dysk $disk ($disk_dev, $(lsblk -dno SIZE,MODEL "$disk"))."
+            echo "UWAGA: install-system SKASUJE CAŁY dysk $disk ($disk_dev, $(lsblk -dno SIZE,MODEL "$disk")):"
+            lsblk -o NAME,SIZE,FSTYPE,LABEL,PARTLABEL,MOUNTPOINTS "$disk_dev"
             read -r -p "Wpisz dokładnie 'SKASUJ' aby kontynuować: " answer
             [[ "$answer" == SKASUJ ]] || die "przerwano"
+
+            # Pozostałości przerwanego uruchomienia: swap i montowania w $mnt.
+            for swap in "''${target_swaps[@]}"; do
+              swapoff "$swap"
+            done
+            if mountpoint -q "$mnt"; then
+              umount -R "$mnt"
+            fi
 
             mkdir -p "$(dirname "$disk_link")"
             ln -sfn "$disk_dev" "$disk_link"
@@ -252,12 +305,22 @@
 
             enter() { nixos-enter --root "$mnt" --silent -- "$@"; }
             enter ${sw}/chown -R ${user}:${group} "$place"
-            # initialPassword z konfiguracji (root/root, ${user}/${user}) zastępujemy od razu.
+            # Konta powstają z zablokowanym hasłem (initialHashedPassword = "!"),
+            # więc bez tego kroku nie da się zalogować lokalnie — ale nie ma
+            # też żadnego znanego hasła. Trzy próby, potem jasna instrukcja
+            # (pętla bez końca kręciłaby się przy EOF na stdin).
             for account in root ${user}; do
               echo "Hasło dla $account:"
-              until enter ${sw}/passwd "$account"; do
+              ok=""
+              for _ in 1 2 3; do
+                if enter ${sw}/passwd "$account"; then
+                  ok=1
+                  break
+                fi
                 echo "Spróbuj ponownie."
               done
+              [[ -n "$ok" ]] \
+                || die "nie ustawiono hasła $account (konto zablokowane): nixos-enter --root $mnt -c 'passwd $account'"
             done
 
             echo
@@ -281,7 +344,17 @@
           bez argumentu: oba kroki po kolei
       '';
     in
-    {
+    lib.mkIf (system == "x86_64-linux") {
+      # writeShellApplication uruchamia bash -n i shellcheck w checkPhase —
+      # skrypty kasujące dysk i wpisujące klucze do firmware nie mogą
+      # dotrzeć do live ISO z błędem składni. Bez wariantu offline: jego
+      # tekst odwołuje się do toplevelu hosta, więc check budowałby cały system
+      # (różni się tylko gałęziami prepareRepo/nixosInstall).
+      checks.installer-scripts = pkgs.linkFarmFromDrvs "installer-scripts" [
+        self'.packages.install-system
+        self'.packages.post-install
+      ];
+
       packages = {
         install-system = mkInstallSystem { offline = false; };
         # Tylko dla ISO (iso.nix): `nix run` tej paczki ściągnąłby całe
@@ -294,6 +367,7 @@
             efitools
             openssh
             sbctl
+            sbsigntool
           ];
           text = ''
             place=${lib.escapeShellArg place}
@@ -354,6 +428,25 @@
                 /run/current-system/bin/switch-to-configuration boot
               fi
 
+              # Wszystko sprawdzamy i przygotowujemy PRZED pierwszym zapisem do
+              # firmware: po PK nie ma już Setup Mode, a niepodpisany loader
+              # albo puste dbx wychodzą dopiero po włączeniu Secure Boot.
+              # limine-install ignoruje błąd `sbctl sign`.
+              sbverify --cert /var/lib/sbctl/keys/db/db.pem ${lib.escapeShellArg limineEfi} >/dev/null \
+                || die "${limineEfi} nie jest podpisany kluczem db z /var/lib/sbctl — po włączeniu Secure Boot system by nie wystartował (sprawdź 'signing limine...' w switch-to-configuration boot)"
+              # Setup Mode czyści dbx; bez dbxDefault zostałoby puste (odwołane
+              # bootloadery Microsoftu znów by się uruchamiały).
+              [[ -f "$dbx_default" ]] || die "brak $dbx_default — po Setup Mode dbx byłoby puste; nie wpisuję kluczy"
+              cd "$work"
+              sbctl enroll-keys --microsoft --firmware-builtin=db,KEK --export auth
+              # Pierwsze 4 bajty pliku w efivarfs to atrybuty zmiennej.
+              tail -c +5 "$dbx_default" >dbx.esl
+              [[ -s dbx.esl ]] || die "puste $dbx_default"
+              sign-efi-sig-list -a -k "$kek/KEK.key" -c "$kek/KEK.pem" dbx dbx.esl dbx.auth
+              for f in db.auth KEK.auth PK.auth dbx.auth; do
+                [[ -s "$f" ]] || die "nie powstał $f"
+              done
+
               echo "Firmware Insyde ukrywa tryb Secure Boot przed Linuksem. W BIOS przełącz"
               echo "Secure Boot w Setup Mode (\"Reset to Setup Mode\" / \"Erase all Secure Boot"
               echo "settings\"; czyści to też dbx, które skrypt odtwarza z dbxDefault)."
@@ -362,20 +455,11 @@
                 return
               fi
 
-              cd "$work"
-              sbctl enroll-keys --microsoft --firmware-builtin=db,KEK --export auth
               efi-updatevar -f db.auth db
               efi-updatevar -f KEK.auth KEK
               # PK na końcu — jego wpisanie kończy Setup Mode.
               efi-updatevar -f PK.auth PK
-              if [[ -f "$dbx_default" ]]; then
-                # Pierwsze 4 bajty pliku w efivarfs to atrybuty zmiennej.
-                tail -c +5 "$dbx_default" >dbx.esl
-                sign-efi-sig-list -a -k "$kek/KEK.key" -c "$kek/KEK.pem" dbx dbx.esl dbx.auth
-                efi-updatevar -a -f dbx.auth dbx
-              else
-                echo "UWAGA: brak $dbx_default — dbx zostaje puste."
-              fi
+              efi-updatevar -a -f dbx.auth dbx
 
               echo "Klucze wpisane. Zrestartuj, włącz Secure Boot w BIOS i sprawdź:"
               echo "  journalctl -k -b | grep -i 'secure boot'"
@@ -394,6 +478,10 @@
                 exit 1
                 ;;
             esac
+            # Tylko na zainstalowanym hoście nixos: ssh_key nadpisałby
+            # hosts.nixos w keys.nix kluczem innej maszyny.
+            [[ "$(</proc/sys/kernel/hostname)" == ${lib.escapeShellArg hostName} && -d "$place/.git" ]] \
+              || die "post-install jest dla zainstalowanego hosta ${hostName} (repo w $place)"
             if [[ $EUID -ne 0 ]]; then
               exec sudo "$0" "''${args[@]}"
             fi

@@ -38,6 +38,11 @@
 
       environment.systemPackages = [ self.packages.x86_64-linux.install-system-offline ];
 
+      # Instalacja offline z konsoli — sshd stockowego installera (root,
+      # hasło po `passwd`) nie jest potrzebny w żadnej sieci, do której ISO
+      # podłączy NetworkManager.
+      services.openssh.enable = false;
+
       services.getty.helpLine = ''
 
         === janusz-bit/nixos ===
@@ -51,16 +56,19 @@
       '';
     };
 
-  perSystem = _: {
-    packages.nixos-iso =
-      let
-        image = inputs.nixpkgs.lib.nixosSystem {
-          modules = [
-            { nixpkgs.hostPlatform = "x86_64-linux"; }
-            self.modules.nixos.nixos-iso
-          ];
-        };
-      in
-      image.config.system.build.isoImage;
-  };
+  perSystem =
+    { lib, system, ... }:
+    {
+      packages.nixos-iso = lib.mkIf (system == "x86_64-linux") (
+        let
+          image = inputs.nixpkgs.lib.nixosSystem {
+            modules = [
+              { nixpkgs.hostPlatform = "x86_64-linux"; }
+              self.modules.nixos.nixos-iso
+            ];
+          };
+        in
+        image.config.system.build.isoImage
+      );
+    };
 }
