@@ -20,6 +20,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
 - `modules/hosts/raspberry-pi-4/_hermes-agent/` — vendored copy of upstream `nix/nixosModules.nix` (MIT) whose activation runs as the service user; the header lists the changes and the sync procedure (`temporary-fixes.md`).
 - `modules/checks/hermes-activation.nix` — NixOS VM test: the vendored Hermes activation never writes as root through agent-owned paths (symlink-attack matrix). Run: `nix build .#checks.<system>.hermes-activation` (needs kvm; ~3 min on the RPi).
+- `modules/checks/tuning.nix` — NixOS VM test (x86_64 only, the host's own CachyOS kernel): `nixos-tuning` is applied with the host's values and each CachyOS-derived change has an effect (A/B THP 409 vs 511, zram 100% vs 50%, sysrq 244 vs 16, stop timeout, oomd kill/omit). Run: `nix build -L .#checks.x86_64-linux.tuning` (needs kvm; ~2.5 min).
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
 - `.claude/` — Claude Code project config: `settings.json` (permissions: read-only nix/git commands allowed, `git push` and `sudo` ask for confirmation, secrets and Secure Boot/disk writes denied) and `hooks/post-edit.sh` (nixfmt after every `.nix` edit; after `modules/github-actions.nix` also pre-commit refresh + workflow sync).
 
@@ -42,7 +43,8 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - NVIDIA PRIME offload + Dynamic Boost (`nvidia-powerd`), `nixpkgs.config.cudaCapabilities = [ "12.0" ]` (RTX 5060; CUDA packages are built locally), ollama-cuda.
 - Helium Browser (`helium.nix`) comes from the flake input `helium-browser` (`github:ominit/helium-browser-flake`, follows our `nixpkgs`); version bumps arrive with `nix flake update`.
 - SSH reachable only from `customTop.lan.subnet` (iptables rule; `openFirewall = false`).
-- zram (zstd) with zswap disabled (`zswap.enabled=0`; the CachyOS kernel enables it by default → double compression).
+- `tuning.nix` (CachyOS-Settings, only items with a shown effect; the header lists what was skipped and why): zram zstd at 100% RAM with zswap disabled (`zswap.enabled=0`; the CachyOS kernel enables it by default → double compression), swappiness 150/page-cluster 0, dirty bytes, THP `max_ptes_none=409`, `DefaultTimeoutStopSec=10s` (system + user), `kernel.sysrq=244`, systemd-oomd on `system.slice` and `user@.service` (80%; KWin/session bus `omit` — drop-ins for KDE units via `systemd.user.units.*.text`, because `systemd.user.services` drop-ins add `Environment=PATH=…`).
+- No ananicy-cpp: with cgroup v2 nice only competes inside one cgroup (measured 50/50 across scopes), and its rules made GameMode refuse renice.
 - Gaming (`gaming.nix`: Steam + proton-cachyos from chaotic, `ntsync` module, gamemode with renice and power-profiles-daemon `performance` while a game runs, `dbdrun`), podman (rootless use; user is intentionally **not** in group `podman`).
 - VFIO (`vfio.nix`) is **disabled** (commented import in `nixos/default.nix`). If re-enabled: never pass a `by-path` value (contains `:`) to `KWIN_DRM_DEVICES` (KWin splits on `:` and crashes); `virtualisation.libvirtd.qemu.ovmf` no longer exists; use `virsh -c qemu:///system`; ISOs go to `/var/lib/libvirt/images/`.
 

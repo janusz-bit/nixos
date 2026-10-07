@@ -56,11 +56,17 @@ _: {
 
         # GameMode: dynamiczne zarządzanie priorytetami CPU/GPU i profili energetycznych.
         # Domyślnie (1.8.2) już: governor "performance", pinning gry na
-        # P-rdzenie (hybryda P+E), wyłączona mitygacja split-lock, ioprio BE/0.
+        # P-rdzenie (hybryda P+E), wyłączona mitygacja split-lock. GameMode
+        # pomija ioprio („ioprio was (0) but we expected (4)” w journalu),
+        # a scheduler NVMe `none` i tak ignoruje priorytety I/O.
         gamemode = {
           enable = true;
           settings = {
             # nice -10 dla procesów gry (gamemoded ma CAP_SYS_NICE z wrappera NixOS).
+            # Działa tylko względem procesów z tej samej cgroup (scope Steama:
+            # steamwebhelper, fossilize_replay); między aplikacjami decyduje
+            # cpu.weight. GameMode renicuje wątki tylko z nice 0 — dlatego bez
+            # ananicy-cpp (configuration.nix).
             general.renice = 10;
             custom = lib.mkIf config.services.power-profiles-daemon.enable {
               start = "${lib.getExe gamemodePowerProfile} start";
@@ -76,18 +82,7 @@ _: {
         # ale kernel CachyOS ma CONFIG_NTSYNC=m i nic nie ładuje modułu
         # (CachyOS robi to przez modules-load.d/ntsync.conf).
         kernelModules = [ "ntsync" ];
-
-        # Wartości z CachyOS-Settings (70-cachyos-settings.conf).
-        kernel.sysctl = {
-          # Domyślnie 20%/10% RAM (~6/3 GB przy 32 GB): duże zrzuty zapisu
-          # (pobieranie/aktualizacja w Steamie, cache shaderów) blokują I/O
-          # i dają przycięcia w grze. Mniejsze, częstsze porcje writeback.
-          "vm.dirty_bytes" = 268435456; # 256 MiB
-          "vm.dirty_background_bytes" = 67108864; # 64 MiB
-          # Watchdog NMI (HARDLOCKUP_DETECTOR_PERF): okresowe NMI na każdym
-          # rdzeniu i zajęty licznik PMU — zbędne na desktopie.
-          "kernel.nmi_watchdog" = 0;
-        };
+        # dirty_bytes i nmi_watchdog (70-cachyos-settings.conf): tuning.nix.
       };
 
       environment.systemPackages = [
