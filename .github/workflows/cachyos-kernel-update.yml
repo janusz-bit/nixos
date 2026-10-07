@@ -52,7 +52,17 @@ jobs:
             exit 0
           fi
           git commit -m "flake.lock: update nix-cachyos-kernel"
+          before="$(git rev-parse HEAD)"
           git pull --rebase origin "${GITHUB_REF_NAME}"
+          if [ "$(git rev-parse HEAD)" != "$before" ]; then
+            echo "master moved during the build; re-verifying the rebased commit"
+            nix build --show-trace --accept-flake-config \
+              ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" \
+              ".#nixosConfigurations.nixos.config.system.modulesTree"
+            nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          fi
           git push origin "HEAD:${GITHUB_REF_NAME}"
     timeout-minutes: 360
 name: cachyos-kernel-update

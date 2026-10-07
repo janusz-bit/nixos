@@ -135,6 +135,9 @@
                   # Push GITHUB_TOKEN-em nie uruchamia innych workflowów, więc
                   # weryfikacja musi być tutaj; rebase, bo build trwa godzinami
                   # i master mógł się przesunąć (wcześniej: non-fast-forward).
+                  # Gdy rebase coś zmienił, kombinacja jest budowana i
+                  # ewaluowana jeszcze raz przed pushem (bez zmian w kernelu
+                  # to szybkie no-opy z cache).
                   name = "Commit updated flake.lock and push";
                   run = ''
                     git config user.name "github-actions[bot]"
@@ -145,7 +148,15 @@
                       exit 0
                     fi
                     git commit -m "flake.lock: update nix-cachyos-kernel"
+                    before="$(git rev-parse HEAD)"
                     git pull --rebase origin "''${GITHUB_REF_NAME}"
+                    if [ "$(git rev-parse HEAD)" != "$before" ]; then
+                      echo "master moved during the build; re-verifying the rebased commit"
+                      nix build --show-trace --accept-flake-config \
+                        ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" \
+                        ".#nixosConfigurations.nixos.config.system.modulesTree"
+                      ${evalCommand hostToplevels}
+                    fi
                     git push origin "HEAD:''${GITHUB_REF_NAME}"
                   '';
                 }
