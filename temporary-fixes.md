@@ -14,25 +14,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 ## Aktywne
 
-### 1. NVIDIA open 615.71.09 — nieaktualny patch GPIO z nix-cachyos-kernel
-
-- **Od:** 2026-09-28.
-- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`hardware.nvidia.package`).
-- **Objaw:** `nvidia-open-615.71.09-7.2.4` kończy `patchPhase` błędem
-  `pattern static inline int __to_hwgpio(const struct gpio_device *gdev, doesn't match anything`.
-- **Przyczyna:** [nix-cachyos-kernel](https://github.com/xddxdd/nix-cachyos-kernel/blob/444d135dde71c1de547cf7bfd73e67145e67aebb/kernel-cachyos/packages.nix#L27-L45)
-  wymusza zamianę sygnatury z `const` na bez `const`; źródło
-  [NVIDIA 615.71.09](https://github.com/NVIDIA/open-gpu-kernel-modules/commit/61dcc93)
-  ma już poprawną sygnaturę.
-- **Obejście:** tylko dla otwartego modułu NVIDIA zamienić w `postPatch`
-  `--replace-fail` na `--replace-warn`. Jeżeli starsze źródło zawiera `const`,
-  zamiana nadal działa; przy obecnym źródle brak wzorca nie blokuje budowy.
-- **Kiedy usunąć:** gdy `nix-cachyos-kernel` usunie zbędny patch lub doda
-  sprawdzenie obecności starej sygnatury. Po aktualizacji inputu sprawdzić
-  `postPatch` w derywacji `hardware.nvidia.package.open`, usunąć override
-  i zbudować moduł ponownie.
-
-### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
+### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`) — do usunięcia
 
 - **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
 - **Pliki:** `modules/hosts/raspberry-pi-4/configuration.nix`
@@ -45,6 +27,14 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 - **Kiedy usunąć:** gdy nixpkgs/nixos-hardware naprawi konflikt
   (sprawdzać przy podbijaniu kernela / `nixos-hardware`); objawem powrotu
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
+- **Stan 2026-10-07:** warunek spełniony — nixos-hardware 06f9ecae
+  (`raspberry-pi/common/kernel.nix`) wymusza `PREEMPT = mkForce yes`,
+  `PREEMPT_LAZY = mkForce no`, a `raspberry-pi/4` sam ustawia
+  `boot.kernelPackages`. Usunięcie zmienia jednak derywację jądra (lokalna
+  kompilacja na RPi trwa godziny), więc zrobić to razem z najbliższym bumpem
+  jądra: skasować blok `boot.kernelPackages` w `configuration.nix` i argument
+  `inputs`, zbudować `nixosConfigurations.raspberry-pi-4` (najlepiej w CI
+  `raspberry-pi-4`, które wypycha wynik do Cachix).
 
 ### 3. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
 
@@ -65,8 +55,75 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 - **Kiedy usunąć:** gdy reguły w nixpkgs obejmą `add` (lub przestaną ładować
   `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
   po restarcie `cat .../power/control` musi dać `auto`.
+- **Druga hipoteza (audyt 2026-10-07, niezweryfikowana na laptopie):** facter
+  zapisał w `facter.json` sterownik `nvidia` i moduł graficzny facter dodaje go
+  do `boot.initrd.kernelModules` (efektywnie `[btrfs dm_mod i915 nvidia]`).
+  Bind następuje wtedy w initrd, którego udev nie ma `services.udev.extraRules`,
+  a po switch-root coldplug odtwarza tylko `add`. Test:
+  `hardware.facter.detected.boot.graphics.kernelModules = [ "i915" ]`,
+  `update-local-boot`, restart, sprawdzić `power/control` z regułą i bez niej.
+
+### 4. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
+
+- **Od:** 2026-10-07.
+- **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
+  (kopia `nix/nixosModules.nix` z NousResearch/hermes-agent @ 0a374d16, MIT),
+  import w `modules/hosts/raspberry-pi-4/hermes.nix`, test
+  `checks.<system>.hermes-activation`.
+- **Przyczyna:** aktywacja upstreamu (przy każdym switch i boot) robi jako root
+  `mkdir -p` + `chown`/`chmod` na `stateDir/{.hermes,home,workspace}` i
+  podkatalogach, `install`/merge `config.yaml` i `.env` — w katalogach, których
+  właścicielem jest agent (2770 hermes). Symlink podłożony przez agenta
+  (np. `/var/lib/hermes/home -> /etc`) daje mu roota przy najbliższej
+  aktywacji. Kontrola negatywna testu na module upstream: `/target-home`
+  root → `hermes:hermes 750`.
+- **Obejście:** root zakłada tylko `stateDir`; resztę aktywacji wykonuje
+  `setpriv --reuid=hermes … --no-new-privs`. Tryb kontenerowy wyłączony asercją.
+- **Kiedy usunąć:** gdy upstream przestanie pisać jako root w `stateDir`
+  (zgłosić upstream). Do tego czasu przy każdym `nix flake update hermes-agent`
+  nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
+  w nagłówku pliku) i uruchomić `hermes-activation`.
+
+### 5. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
+
+- **Od:** przed 2026-10 (wcześniej bez wpisu).
+- **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`ExecStartPre`, jako
+  użytkownik usługi).
+- **Przyczyna:** pliki blokady/stanu pozostałe po przerwanym procesie albo
+  utworzone przez sesję interaktywną blokowały start bramki (PermissionError).
+- **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje)
+  — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
+
+### 6. ISO — `image.baseName = lib.mkForce`
+
+- **Od:** przed 2026-10 (wcześniej bez wpisu).
+- **Plik:** `modules/installer/iso.nix`.
+- **Przyczyna:** legacy `isoImage.isoBaseName` i domyślne `image.baseName`
+  w `iso-image.nix` lądują na tym samym priorytecie („conflicting definition
+  values”).
+- **Kiedy usunąć:** gdy nixpkgs usunie alias `isoBaseName` albo rozdzieli
+  priorytety — sprawdzić: ustawić `isoImage.isoBaseName` bez `mkForce`,
+  `nix eval .#packages.x86_64-linux.nixos-iso.drvPath`.
+
+### 7. Obraz SD — `boot.initrd.allowMissingModules = true`
+
+- **Od:** przed 2026-10; 2026-10-07 przeniesione z hosta do `rpi-sdImage`.
+- **Plik:** `modules/hosts/raspberry-pi-4/sdImage.nix`.
+- **Przyczyna:** `sd-image-aarch64.nix` włącza `hardware.enableAllHardware`
+  (m.in. `dw-hdmi`), a jądro RPi tych modułów nie ma. Na hoście flaga tylko
+  ukrywała brak sterownika dysku root w initrd.
+- **Kiedy usunąć:** gdy `all-hardware.nix` przestanie wymagać modułów spoza
+  jądra RPi — sprawdzić: usunąć flagę, `nix build .#raspberry-pi-4-sd-image`.
 
 ## Zamknięte
+
+- **NVIDIA open 615.71.09 — `--replace-fail` → `--replace-warn` w `postPatch`
+  (`modules/hardware/LOQ-15IRX10.nix`)** — zamknięte 2026-10-07. Warunek
+  usunięcia spełniony: nix-cachyos-kernel b1332396 używa już
+  `substituteInPlace … --replace-quiet`, więc zamiana niczego nie dopasowywała —
+  `drvPath` `hardware.nvidia.package.open` z override i bez był identyczny
+  (`yiawrgcs…-nvidia-open-615.71.09-7.2.8.drv`). Override usunięty; przy okazji
+  nie maskuje już po cichu przyszłych `--replace-fail`.
 
 - **`python-docs-fix` (pin docutils/sphinx w docs-builderze cpythona,
   nixpkgs#499166)** — zamknięte 2026-09-28. Budowę `python3.11-doc` ciągnęło

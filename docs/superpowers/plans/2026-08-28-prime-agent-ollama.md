@@ -1,3 +1,8 @@
+> **Dokument historyczny** — plan/projekt zrealizowany 2026-08-28. Aktualny stan opisują
+> `AGENTS.md` i komentarze w modułach; część opisanych tu wzorców (globalne eksporty
+> sekretów, `group = users`, NOPASSWD dla hermes) jest dziś zabroniona. Nie wykonywać
+> kroków z tego pliku.
+
 # prime-agent + Ollama Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

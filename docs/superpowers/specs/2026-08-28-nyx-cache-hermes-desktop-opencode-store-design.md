@@ -1,3 +1,8 @@
+> **Dokument historyczny** — plan/projekt zrealizowany 2026-08-28. Aktualny stan opisują
+> `AGENTS.md` i komentarze w modułach; część opisanych tu wzorców (globalne eksporty
+> sekretów, `group = users`, NOPASSWD dla hermes) jest dziś zabroniona. Nie wykonywać
+> kroków z tego pliku.
+
 # Design: Nyx cache off, hermes-desktop, OpenCode /nix/store access
 
 Date: 2026-08-28
