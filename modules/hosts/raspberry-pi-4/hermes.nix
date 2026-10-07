@@ -26,14 +26,38 @@
         rev = "ef73726cfaf2fa0ee041e55572f406e2c24fed83";
         hash = "sha256-kOQJWKqfGn41V21x/yjt8+i/MyQ2suctvbhf+x8djk8=";
       };
+
+      cfg = config.services.hermes-agent;
+      common = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
+      hermesHome = "${cfg.stateDir}/.hermes";
+
+      # CLI hosta zawsze jako konto usługi. HERMES_HOME (pluginy, .env,
+      # config.yaml, mcp_servers.*.command) jest zapisywalny przez agenta, więc
+      # `hermes` uruchomiony jako root albo nixos wykonałby kod podłożony przez
+      # agenta z wyższymi uprawnieniami. Zamiast addToSystemPackages (globalne
+      # HERMES_HOME + CLI wywołującego) — opakowania przez sudo -u hermes.
+      hermesCli =
+        name:
+        pkgs.writeShellScriptBin name ''
+          exec /run/wrappers/bin/sudo -u ${cfg.user} -H -- ${pkgs.coreutils}/bin/env \
+            HERMES_HOME=${hermesHome} \
+            PATH=${
+              lib.makeBinPath (common.processPath { inherit pkgs cfg; })
+            }:/etc/profiles/per-user/${cfg.user}/bin:/run/current-system/sw/bin \
+            ${common.effectivePackage cfg}/bin/${name} "$@"
+        '';
     in
     {
       imports = [
-        inputs.hermes-agent.nixosModules.default
+        # Kopia modułu upstream bez zapisów roota w katalogach agenta
+        # (opis zmian w nagłówku pliku, temporary-fixes.md).
+        (import ./_hermes-agent/nixos-module.nix {
+          inputs.self = inputs.hermes-agent;
+        }).flake.nixosModules.default
       ];
 
-      # Pliki env łączy w $HERMES_HOME/.env aktywacja modułu (jako root),
-      # więc wystarczy 0400.
+      # Pliki env łączy w $HERMES_HOME/.env aktywacja modułu procesem z uid
+      # usługi (setpriv), więc muszą należeć do hermes; wystarczy 0400.
       age.secrets = {
         hermes-env = {
           file = customTop.secretsDir + "/hermes-env.age";
@@ -56,7 +80,8 @@
       services = {
         hermes-agent = {
           enable = true;
-          addToSystemPackages = true;
+          # CLI przez opakowania hermesCli (niżej), nie globalne HERMES_HOME.
+          addToSystemPackages = false;
           extraDependencyGroups = [
             "all"
             "messaging"
@@ -166,34 +191,47 @@
         hermes.extraGroups = [ "systemd-journal" ];
       };
 
+      # Agent korzysta z nix (nix shell/run w zadaniach); nix-settings
+      # dopuszcza do demona tylko wheel.
+      nix.settings.allowed-users = [ cfg.user ];
+
+      assertions = [
+        {
+          assertion = lib.elem "trilium-etapi" config.customBot.userSecrets;
+          message = "hermes: MCP trilium-notes potrzebuje sekretu trilium-etapi w customBot.userSecrets.";
+        }
+      ];
+
+      environment.systemPackages = map hermesCli [
+        "hermes"
+        "hermes-acp"
+        "hermes-agent"
+      ];
+
       systemd.services = {
         ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
 
-        # Clean stale lock/pid/state files before gateway start.
-        # Interactive sessions (run as nixos) can create these files owned
-        # by nixos:hermes with 0644 perms, which the hermes systemd service
-        # cannot open in append mode (PermissionError). Removing them before
-        # start lets the service recreate them with correct ownership.
-        hermes-agent.serviceConfig.ExecStartPre = lib.mkBefore [
-          # Hermes keeps OAuth credentials at 0600. If an interactive
-          # login creates auth.json as nixos/root, the service cannot read
-          # it. Repair ownership without replacing the stored tokens.
-          "+${pkgs.writeShellScript "hermes-auth-ownership" ''
-            set -eu
-            auth_dir=/var/lib/hermes/.hermes
-            if [ -d "$auth_dir" ] && [ ! -L "$auth_dir" ]; then
-              ${pkgs.coreutils}/bin/chown hermes:hermes "$auth_dir"
-              ${pkgs.coreutils}/bin/chmod u+rwx "$auth_dir"
-              for auth_file in "$auth_dir/auth.json" "$auth_dir/auth.lock"; do
-                if [ -f "$auth_file" ] && [ ! -L "$auth_file" ]; then
-                  ${pkgs.coreutils}/bin/chown hermes:hermes "$auth_file"
-                  ${pkgs.coreutils}/bin/chmod 0600 "$auth_file"
-                fi
-              done
-            fi
-          ''}"
-          "${pkgs.coreutils}/bin/rm -f /var/lib/hermes/.hermes/gateway.lock /var/lib/hermes/.hermes/gateway.pid /var/lib/hermes/.hermes/gateway_state.json"
-        ];
+        hermes-agent.serviceConfig = {
+          # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie
+          # blokują start (temporary-fixes.md). Bez „+”: katalog należy do
+          # hermes, więc rm działa jako użytkownik usługi niezależnie od
+          # właściciela pliku. Dawny krok roota naprawiający właściciela
+          # auth.json (chown przez ścieżki agenta = symlink TOCTOU do roota)
+          # usunięty — CLI działa już tylko jako hermes (hermesCli).
+          ExecStartPre = lib.mkBefore [
+            "${pkgs.coreutils}/bin/rm -f ${hermesHome}/gateway.lock ${hermesHome}/gateway.pid ${hermesHome}/gateway_state.json"
+          ];
+          # Agent wykonuje dowolne polecenia (require_approval = false) obok
+          # Nextcloud i Postgresa na 4 GB RAM; szczyt bramki ~1,1 GB
+          # (2026-10-07). MemoryHigh dławi i odzyskuje pamięć, MemoryMax kończy
+          # się OOM w obrębie cgroup usługi (Restart = always ją podnosi)
+          # zamiast globalnego OOM-killera trafiającego w usługi publiczne.
+          MemoryHigh = "1536M";
+          MemoryMax = "2G";
+          CPUWeight = 50;
+          IOWeight = 50;
+          TasksMax = 1024;
+        };
       };
     };
 }
