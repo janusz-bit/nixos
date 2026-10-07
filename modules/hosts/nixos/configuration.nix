@@ -25,27 +25,7 @@
         # Working hibernation (resumeDevice sam dodaje parametr resume=)
         resumeDevice = "/dev/mapper/swap";
 
-        # Kernel CachyOS ma CONFIG_ZSWAP_DEFAULT_ON=y, a moduł boot.zswap
-        # przy enable = false nic nie wyłącza: zswap kompresowałby strony
-        # przed zapisem do zRAM (podwójna kompresja, zmarnowany CPU).
-        kernelParams = [ "zswap.enabled=0" ];
-
-        # Strojenie pod swap w zRAM (jak 30-zram.rules i 70-cachyos-settings
-        # z CachyOS): dekompresja z RAM jest tańsza niż ponowny odczyt page
-        # cache z dysku, a readahead swapu (8 stron) nie ma sensu dla zRAM.
-        kernel.sysctl = {
-          "vm.swappiness" = 150;
-          "vm.page-cluster" = 0;
-        };
-      };
-
-      # Optymalizacja pamięci: zRAM ze zstd (priorytet 100 > swap dyskowy -2).
-      # Dysk NVMe LUKS swap (/dev/mapper/swap) pozostaje dedykowany pod hibernację.
-      zramSwap = {
-        enable = true;
-        algorithm = "zstd";
-        priority = 100;
-        memoryPercent = 50;
+        # zswap, zRAM, sysctl i THP: modules/hosts/nixos/tuning.nix.
       };
 
       services = {
@@ -67,12 +47,13 @@
           extraArgs = [ "--performance" ];
         };
 
-        # Ananicy-cpp z regułami CachyOS (git) — dynamiczne priorytety procesów gier i PipeWire
-        ananicy = {
-          enable = true;
-          package = pkgs.ananicy-cpp;
-          rulesProvider = pkgs.ananicy-rules-cachyos;
-        };
+        # Bez ananicy-cpp (reguły CachyOS): przy cgroup v2 każda aplikacja
+        # ma własny scope, a nice działa tylko wewnątrz jednej cgroup —
+        # zmierzone: nice -4 vs +15 w osobnych scope'ach 50/50 CPU, w jednym
+        # 91/9; ioclass ignoruje scheduler NVMe `none`. Za to ustawiał
+        # Konsoli/Steamowi nice -4/16, przez co GameMode odmawiał renice
+        # („Refused to renice … prio was (-4)”), a nixpkgs wymusza
+        # cgroup_realtime_workaround = true (KWin i Xwayland w root cgroup).
 
         # Plasma 6 + SDDM na Waylandzie — serwer X nie jest potrzebny
         # (XWayland uruchamia KWin); opcje xkb działają bez xserver.enable.
