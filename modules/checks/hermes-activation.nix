@@ -58,9 +58,13 @@
           with subtest("normal activation: state files owned by the service"):
               machine.succeed("install -o hermes -g hermes -m 0400 /dev/null /run/hermes-test.env")
               machine.succeed("echo TEST_SECRET=s3cret > /run/hermes-test.env")
-              # config.yaml left behind by another user (old CLI run as nixos)
+              # state left behind by the CLI run as root/nixos on the old module
               machine.succeed(f"install -o root -g hermes -m 0660 /dev/null {home}/config.yaml")
               machine.succeed(f"echo 'user_key: kept' > {home}/config.yaml")
+              machine.succeed(f"install -o root -g hermes -m 0644 /dev/null {home}/.hermes_history")
+              machine.succeed(f"echo old-prompt > {home}/.hermes_history")
+              machine.succeed(f"install -d -o root -g hermes -m 2755 {home}/runtime")
+              machine.succeed(f"echo '{{}}' > {home}/runtime/active_sessions.json")
               machine.succeed(activate)
               assert owner_mode(f"{home}/config.yaml") == "hermes:hermes 640", owner_mode(f"{home}/config.yaml")
               cfg = machine.succeed(f"cat {home}/config.yaml")
@@ -69,6 +73,15 @@
               machine.succeed(f"grep -qx TEST_SECRET=s3cret {home}/.env")
               machine.succeed(f"test -L {home}/plugins/nix-managed-stub-plugin")
               assert owner_mode("/var/lib/hermes") == "hermes:hermes 2770"
+
+          with subtest("foreign-owned entries are taken over without root"):
+              assert owner_mode(f"{home}/.hermes_history").startswith("hermes:hermes"), owner_mode(f"{home}/.hermes_history")
+              machine.succeed(f"grep -qx old-prompt {home}/.hermes_history")
+              assert owner_mode(f"{home}/runtime").startswith("hermes:hermes"), owner_mode(f"{home}/runtime")
+              machine.succeed(f"test -s {home}/runtime/active_sessions.json")
+              # the original stays aside for the administrator; hermes can write the new one
+              assert owner_mode(f"{home}/.foreign-runtime").startswith("root:hermes")
+              as_hermes(f"echo new >> {home}/.hermes_history && touch {home}/runtime/probe")
 
           # Each vector alone, so every code path that could follow it is reached.
           vectors = [

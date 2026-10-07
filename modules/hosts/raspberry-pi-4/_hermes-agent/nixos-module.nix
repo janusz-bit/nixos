@@ -506,6 +506,38 @@
                   chmod 2770 ${hermesHome} ${cfg.workingDirectory}
                   chmod 0750 ${cfg.stateDir}/home
 
+                  # Wpisy HERMES_HOME innych właścicieli (dawne uruchomienia CLI
+                  # jako root/nixos: config.yaml, .hermes_history, runtime/,
+                  # terminal-sessions/…) przejmujemy bez roota. Katalog należy do
+                  # cfg.user i nie ma bitu sticky, więc rename działa bez prawa
+                  # zapisu do samego wpisu: plik — kopia + mv (ta sama treść,
+                  # właściciel usługi), katalog — odłożenie jako .foreign-<nazwa>
+                  # i kopia zawartości. Odłożone katalogi usuwa administrator
+                  # (sudo rm -r …/.foreign-*); błąd jednego wpisu tylko ostrzega.
+                  for _entry in ${hermesHome}/* ${hermesHome}/.[!.]*; do
+                    if [ -L "$_entry" ] || [ ! -e "$_entry" ] || [ -O "$_entry" ]; then
+                      continue
+                    fi
+                    _name=''${_entry##*/}
+                    case "$_name" in
+                      .foreign-* | .*.own) continue ;;
+                    esac
+                    if [ -f "$_entry" ]; then
+                      if cp -- "$_entry" "${hermesHome}/.$_name.own"; then
+                        mv -f -- "${hermesHome}/.$_name.own" "$_entry"
+                      else
+                        rm -f -- "${hermesHome}/.$_name.own"
+                        echo "hermes-agent: nie przejęto $_entry (brak odczytu)" >&2
+                      fi
+                    elif [ -d "$_entry" ] && [ ! -e "${hermesHome}/.foreign-$_name" ]; then
+                      mv -- "$_entry" "${hermesHome}/.foreign-$_name"
+                      if ! cp -R -- "${hermesHome}/.foreign-$_name" "$_entry"; then
+                        echo "hermes-agent: niepełna kopia $_entry (oryginał: ${hermesHome}/.foreign-$_name)" >&2
+                      fi
+                      echo "hermes-agent: przejęto $_entry; usuń ${hermesHome}/.foreign-$_name (sudo rm -r)" >&2
+                    fi
+                  done
+
                   # Create subdirs, set setgid + group-writable, migrate existing files.
                   # Nix-managed .env/.managed stay 0640/0644; config.yaml uses
                   # configYamlMode (0660 under addToSystemPackages, else 0640).
@@ -519,15 +551,6 @@
                     find "${hermesHome}/$_subdir" -type f \
                       -exec chmod g+rw {} + 2>/dev/null || true
                   done
-
-                  # config.yaml zapisany kiedyś przez innego użytkownika (CLI jako
-                  # nixos/root) nie da się chmodować jako cfg.user; kopia przez
-                  # plik tymczasowy w tym samym katalogu daje plik usługi z tą
-                  # samą treścią, zanim merge ją zaktualizuje.
-                  if [ -e ${hermesHome}/config.yaml ] && [ ! -O ${hermesHome}/config.yaml ]; then
-                    cp ${hermesHome}/config.yaml ${hermesHome}/.config.yaml.own
-                    mv -f ${hermesHome}/.config.yaml.own ${hermesHome}/config.yaml
-                  fi
 
                   ${common.mkStateScript {
                     inherit pkgs cfg hermesHome;

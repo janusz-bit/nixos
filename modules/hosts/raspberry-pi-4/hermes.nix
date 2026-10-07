@@ -36,9 +36,16 @@
       # `hermes` uruchomiony jako root albo nixos wykonałby kod podłożony przez
       # agenta z wyższymi uprawnieniami. Zamiast addToSystemPackages (globalne
       # HERMES_HOME + CLI wywołującego) — opakowania przez sudo -u hermes.
+      # Sam agent (powłoki narzędzia terminala, `sudo -u hermes -i`) ma to
+      # opakowanie w PATH logowania: jako hermes uruchamia ono binarkę wprost —
+      # hermes nie ma sudo (execWheelOnly, NoNewPrivileges) i nie potrzebuje.
       hermesCli =
         name:
         pkgs.writeShellScriptBin name ''
+          if [ "$(${pkgs.coreutils}/bin/id -un)" = ${lib.escapeShellArg cfg.user} ]; then
+            export HERMES_HOME="''${HERMES_HOME:-${hermesHome}}"
+            exec ${common.effectivePackage cfg}/bin/${name} "$@"
+          fi
           exec /run/wrappers/bin/sudo -u ${cfg.user} -H -- ${pkgs.coreutils}/bin/env \
             HERMES_HOME=${hermesHome} \
             PATH=${
