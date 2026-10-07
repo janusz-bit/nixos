@@ -40,10 +40,13 @@ _: {
         RestrictSUIDSGID = true;
         LockPersonality = true;
         RemoveIPC = true;
+        # AF_NETLINK: os.networkInterfaces() (getifaddrs) w /api/network-addresses
+        # panelu MCP; zmiany przez netlink i tak wymagają CAP_NET_ADMIN.
         RestrictAddressFamilies = [
           "AF_UNIX"
           "AF_INET"
           "AF_INET6"
+          "AF_NETLINK"
         ];
         CapabilityBoundingSet = "";
         SystemCallArchitectures = "native";

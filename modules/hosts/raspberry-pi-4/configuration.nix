@@ -169,9 +169,11 @@
 
       users.users = {
         # Bez initialPassword: hasło równe nazwie użytkownika było publiczne
-        # (repo) przy koncie z wheel. Świeży obraz startuje z zablokowanym
-        # hasłem; pierwsze logowanie kluczem (root przez LAN/tunel), potem
-        # `passwd ${config.customBot.defaultUser}` (AGENTS.md).
+        # (repo) przy koncie z wheel. Istniejące konto zachowuje stary hash
+        # (mutableUsers) — raz `passwd ${config.customBot.defaultUser}`.
+        # Świeży obraz startuje z zablokowanym hasłem: Ethernet i `ssh root@<ip>`
+        # kluczem z LAN-u (Wi-Fi i tunel wymagają klucza agenix
+        # /root/.ssh/id_ed25519), potem passwd (AGENTS.md).
         ${config.customBot.defaultUser} = {
           isNormalUser = true;
           description = "${config.customBot.defaultUser}";

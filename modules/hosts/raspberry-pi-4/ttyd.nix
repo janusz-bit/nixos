@@ -92,14 +92,19 @@
           wantedBy = [ "nginx.service" ];
           before = [ "nginx.service" ];
           # Nowa treść sekretu nie zmienia ścieżki /run/agenix/ttyd-password —
-          # restart przy zmianie pliku .age odświeża hash bez rebootu.
-          restartTriggers = [ secretFile ];
+          # restart przy zmianie pliku .age odświeża hash bez rebootu. Hash
+          # treści, nie ścieżka: ścieżka w źródle flake'a zmienia się z każdym
+          # commitem i restartowała jednostkę przy każdym wdrożeniu.
+          restartTriggers = [ (builtins.hashFile "sha256" secretFile) ];
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
             Group = config.services.nginx.group;
             RuntimeDirectory = "ttyd-auth";
             RuntimeDirectoryMode = "0750";
+            # Zatrzymanie jednostki (switch) nie kasuje htpasswd — inaczej
+            # nginx odrzucał logowania ttyd do jej ponownego startu.
+            RuntimeDirectoryPreserve = "yes";
             LoadCredential = "password:${config.age.secrets.ttyd-password.path}";
             UMask = "0027";
           };
