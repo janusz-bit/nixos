@@ -105,13 +105,11 @@
         # przez moduł plasma6 (programs.firefox.nativeMessagingHosts).
         chromium.enable = true;
 
+        # Bez nadpisania cudaSupport: NVENC (obs-nvenc) jest budowany
+        # zawsze, a addDriverRunpath obejmuje wtyczki — override zmieniał tylko
+        # hash, więc OBS kompilował się lokalnie zamiast z cache.nixos.org.
         obs-studio = {
           enable = true;
-
-          # optional Nvidia hardware acceleration
-          package = pkgs.obs-studio.override {
-            cudaSupport = true;
-          };
 
           plugins = with pkgs.obs-studio-plugins; [
             wlrobs

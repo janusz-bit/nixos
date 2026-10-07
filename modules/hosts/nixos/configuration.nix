@@ -94,6 +94,11 @@
         printing = {
           enable = true;
           drivers = [ pkgs.splix ];
+          # Domyślnie włączany razem z avahi: demon root bez sandboxa, który
+          # tworzy kolejki z ogłoszeń DNS-SD z każdej sieci (wejście łańcucha
+          # RCE CUPS z 2024). Drukarki IPP Everywhere CUPS 2.4 i okno
+          # drukowania Plasmy wykrywają i bez niego.
+          browsed.enable = false;
         };
 
         # Enable sound with pipewire.
@@ -125,6 +130,20 @@
         '';
       };
 
+      # Bez oomd na zakresach użytkownika wyciek pamięci (przeglądarka, gra,
+      # model LLM na CPU, build CUDA) zapełniał 16 GB zRAM i 36 GB swapu, a
+      # pulpit stał minutami, zanim zadziałał OOM-killer jądra. oomd zabija
+      # najgorszy zakres aplikacji pod trwałą presją, nie całą sesję.
+      systemd.oomd.enableUserSlices = true;
+
+      # Laptop interaktywny (gry, Plasma): lokalne buildy (m.in. CUDA)
+      # ustępują pulpitowi — zalecenie z dokumentacji opcji dla komputerów
+      # używanych interaktywnie.
+      nix = {
+        daemonCPUSchedPolicy = "idle";
+        daemonIOSchedClass = "idle";
+      };
+
       networking = {
         hostName = "nixos";
         networkmanager = {
@@ -154,10 +173,13 @@
       # KWallet przez PAM (login/sddm/kde) konfiguruje moduł plasma6.
       security.rtkit.enable = true;
 
-      # Define a user account. Don't forget to set a password with ‘passwd’.
+      # Konta tworzone z zablokowanym hasłem: install-system ustawia hasła
+      # (passwd) zaraz po nixos-install. Dawne jawne initialPassword
+      # (root/root, użytkownik = nazwa) zostawały publiczne w repo, gdyby
+      # instalację przerwano przed tym krokiem.
       users.users = {
         ${config.customBot.defaultUser} = {
-          initialPassword = "${config.customBot.defaultUser}";
+          initialHashedPassword = "!";
           isNormalUser = true;
           description = "${config.customBot.defaultUser}";
           extraGroups = [
@@ -166,7 +188,7 @@
             "gamemode"
           ];
         };
-        root.initialPassword = "root";
+        root.initialHashedPassword = "!";
       };
     };
 
