@@ -18,6 +18,8 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/installer/` — everything for installing host `nixos`: `install.nix` (packages `install-system`, `install-system-offline`, `post-install`), `iso.nix` (`nixos-iso`, fully offline bootable installer ISO).
 - `modules/skills/` — declarative skills: Prime Agent (`skills`) and Claude Code (`claudeSkills`; `nixos-system` = NixOS specifics + a host section generated from `config`).
 - `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
+- `modules/hosts/raspberry-pi-4/_hermes-agent/` — vendored copy of upstream `nix/nixosModules.nix` (MIT) whose activation runs as the service user; the header lists the changes and the sync procedure (`temporary-fixes.md`).
+- `modules/checks/hermes-activation.nix` — NixOS VM test: the vendored Hermes activation never writes as root through agent-owned paths (symlink-attack matrix). Run: `nix build .#checks.<system>.hermes-activation` (needs kvm; ~3 min on the RPi).
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
 - `.claude/` — Claude Code project config: `settings.json` (permissions: read-only nix/git commands allowed, `git push` and `sudo` ask for confirmation, secrets and Secure Boot/disk writes denied) and `hooks/post-edit.sh` (nixfmt after every `.nix` edit; after `modules/github-actions.nix` also pre-commit refresh + workflow sync).
 
@@ -48,8 +50,8 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - Imports the full base; overrides: GC daily/3d, `max-jobs = 2`, `documentation.doc.enable = false`, `PermitRootLogin = "prohibit-password"` (admin path: `ssh ssh.janusz-bit.com` as root via cloudflared), no ssh-askpass.
 - RPi vendor kernel with `PREEMPT_LAZY n` (`temporary-fixes.md`).
 - Wi-Fi (`wifi.nix`): NetworkManager `ensureProfiles` profile `home-wifi`, SSID/PSK substituted at runtime from `wifi.age` (`WIFI_SSID=…`/`WIFI_PSK=…`), powersave off, regdom `PL`. Inactive (evaluation warning only) until `wifi.age` is tracked in git.
-- Services (all bound to localhost, exposed only through the tunnel `modules/hosts/raspberry-pi-4/cloudflared.nix`): Nextcloud 35 (Postgres, Redis, PHP-FPM `ondemand`), Open WebUI behind nginx (8080 → 3001), Trilium 8081, Gitea 3000, ttyd 8082 behind nginx Basic Auth 8083, SSH.
-- Hermes Agent (`hermes.nix`): runs as `hermes` without sudo, `wheel`, `disk`, `keys` or Nix trust; sharing with user `nixos` via the upstream 2770/UMask 0007 state dirs. Main model = Claude Code subscription through the `claude-subscription-directsdk` plugin (`extraPlugins`, commit from the Hermes plugin catalog); one-time login on the RPi: `sudo -u hermes -H claude auth login`. Fallbacks: `openai-codex`, then `ollama-cloud`.
+- Services (all bound to localhost, exposed only through the tunnel `modules/hosts/raspberry-pi-4/cloudflared.nix`): Nextcloud 35 (Postgres, Redis, PHP-FPM `ondemand`), Open WebUI behind nginx (8080 → 3001; CORS limited to `chat.janusz-bit.com`, `SameSite=lax` cookies, sign-up disabled, security headers; it gets only `open-webui-keys.age`, never the Hermes env file), Trilium 8081, Gitea 3000, ttyd 8082 behind nginx Basic Auth 8083, SSH.
+- Hermes Agent (`hermes.nix` + vendored module `_hermes-agent/`): runs as `hermes` without sudo, `wheel`, `disk`, `keys` or Nix trust; sharing with user `nixos` via the 2770/UMask 0007 state dirs. Activation writes into `/var/lib/hermes` only as `hermes` (setpriv) — never as root; entries of `HERMES_HOME` owned by other users (left by the old root/`nixos` CLI) are taken over by copy, original directories are kept as `.foreign-<name>` for the administrator to delete (`sudo rm -r /var/lib/hermes/.hermes/.foreign-*`). The CLI (`hermes`, `hermes-acp`, `hermes-agent`) is a wrapper that runs `sudo -u hermes` against the service `HERMES_HOME` (as `hermes` itself it execs the binary directly); never run the package binary as root or `nixos` (it would execute agent-writable plugins/config). Main model = Claude Code subscription through the `claude-subscription-directsdk` plugin (`extraPlugins`, commit from the Hermes plugin catalog); one-time login on the RPi: `sudo -u hermes -H claude auth login`. Fallbacks: `openai-codex`, then `ollama-cloud`.
 
 ## Secrets (agenix)
 - Recipients: `modules/_secrets/secrets.nix` (rules only — `*.age` entries), public keys in `modules/_secrets/keys.nix`. The laptop is a recipient of everything (secrets are edited there). Rekey after changing recipients: `cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519`.
@@ -61,6 +63,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - `nix.settings.trusted-users` stays default (root only).
 - No passwordless root paths for user or agent accounts (no `podman`/`docker` group, no NOPASSWD sudo for agents).
 - `/etc/ai` (runtime skill drop-in) is `0755`, owned by `customBot.defaultUser`.
+- Root never writes through paths an unprivileged account controls (no `chown`/`chmod`/`install`/merge as root inside `/var/lib/hermes`; use `setpriv` to the owner or symlink-safe `systemd-tmpfiles`).
 - Runtime-fetched code is pinned: opencode plugins (commit/version in `opencode.nix`), GitHub Actions (commit SHAs in `github-actions.nix`), Hermes plugins (commit in `hermes.nix`), MCP servers from nixpkgs rather than `uvx`/`uv run`.
 - ttyd credentials never on a command line (nginx `auth_basic` with a hash file generated from the agenix secret).
 

@@ -66,6 +66,40 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
   po restarcie `cat .../power/control` musi dać `auto`.
 
+### 4. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
+
+- **Od:** 2026-10-07.
+- **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
+  (kopia `nix/nixosModules.nix` z NousResearch/hermes-agent @ 0a374d16, MIT),
+  import w `modules/hosts/raspberry-pi-4/hermes.nix`, test
+  `checks.<system>.hermes-activation`.
+- **Przyczyna:** aktywacja upstreamu (przy każdym switch i boot) robi jako root
+  `mkdir -p` + `chown`/`chmod` na `stateDir/{.hermes,home,workspace}` i
+  podkatalogach, `install`/merge `config.yaml` i `.env` — w katalogach, których
+  właścicielem jest agent (2770 hermes). Symlink podłożony przez agenta
+  (np. `/var/lib/hermes/home -> /etc`) daje mu roota przy najbliższej
+  aktywacji. Kontrola negatywna testu na module upstream: `/target-home`
+  root → `hermes:hermes 750`.
+- **Obejście:** root zakłada tylko `stateDir`; resztę aktywacji wykonuje
+  `setpriv --reuid=hermes … --no-new-privs`. Wpisy `HERMES_HOME` innych
+  właścicieli (stare uruchomienia CLI jako root/nixos) przejmuje kopią jako
+  hermes; oryginalne katalogi zostają jako `.foreign-<nazwa>` do ręcznego
+  usunięcia. Tryb kontenerowy wyłączony asercją.
+- **Kiedy usunąć:** gdy upstream przestanie pisać jako root w `stateDir`
+  (zgłosić upstream). Do tego czasu przy każdym `nix flake update hermes-agent`
+  nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
+  w nagłówku pliku) i uruchomić `hermes-activation`.
+
+### 5. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
+
+- **Od:** przed 2026-10 (wcześniej bez wpisu).
+- **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`ExecStartPre`, jako
+  użytkownik usługi).
+- **Przyczyna:** pliki blokady/stanu pozostałe po przerwanym procesie albo
+  utworzone przez sesję interaktywną blokowały start bramki (PermissionError).
+- **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje)
+  — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
+
 ## Zamknięte
 
 - **`python-docs-fix` (pin docutils/sphinx w docs-builderze cpythona,
