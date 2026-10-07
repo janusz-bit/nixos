@@ -105,11 +105,17 @@
         # przez moduł plasma6 (programs.firefox.nativeMessagingHosts).
         chromium.enable = true;
 
-        # Bez nadpisania cudaSupport: NVENC (obs-nvenc) jest budowany
-        # zawsze, a addDriverRunpath obejmuje wtyczki — override zmieniał tylko
-        # hash, więc OBS kompilował się lokalnie zamiast z cache.nixos.org.
         obs-studio = {
           enable = true;
+
+          # cudaSupport dodaje autoAddDriverRunpath, który daje RUNPATH
+          # sterownika (/run/opengl-driver/lib) także binarce bin/obs-nvenc-test
+          # — sondzie, którą OBS uruchamia, by wykryć NVENC. Bez tego postFixup
+          # obejmuje tylko lib*.so i wtyczki, sonda nie ładuje libnvidia-encode
+          # i enkodery NVENC znikają. Kosztem jest lokalny build OBS.
+          package = pkgs.obs-studio.override {
+            cudaSupport = true;
+          };
 
           plugins = with pkgs.obs-studio-plugins; [
             wlrobs
