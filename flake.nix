@@ -35,6 +35,12 @@
     # Tracks upstream (unpinned). The previous pin to 3f2a389c... existed
     # because topup.ts introduced a broken @hermes/shared/charge-settlement
     # import in nix/tui.nix; upstream moved on and the pin was lifted.
+    # Celowo bez inputs.nixpkgs.follows: sprawdzone 2026-10-07 — na naszym
+    # nixpkgs (c59305b) hermes wymaga nodejs_26, który nie kompiluje się na
+    # aarch64 (V8: 'CHAR_BIT' was not declared, GCC 16), więc nie ma go też
+    # w cache. Wrócić do follows, gdy nodejs_26 z naszego nixpkgs zbuduje się
+    # (nix build .#nixosConfigurations.raspberry-pi-4.config.services.hermes-agent.package
+    # z follows). Moduł NixOS to kopia w repo (modules/hosts/raspberry-pi-4/_hermes-agent).
     hermes-agent.url = "github:NousResearch/hermes-agent";
     # Własny nixpkgs celowo — pakiety są w cache.numtide.com tylko dla niego.
     llm-agents.url = "github:numtide/llm-agents.nix";
