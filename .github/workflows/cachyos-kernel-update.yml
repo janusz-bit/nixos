@@ -7,33 +7,54 @@ jobs:
   update-and-build:
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force
+          df -h /
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: true
       - name: Install Nix
         uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24
         with:
           extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://janusz-bit.cachix.org
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters = https://janusz-bit.cachix.org https://attic.xuyh0120.win/lantian https://cache.numtide.com
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc= niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
             build-fallback = true
       - name: Setup Cachix
-        uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866
         with:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
+          pushFilter: (-ext4-fs\.img|-nixos-image-sd-card-[^/]*|-nixos-installer[^/]*\.iso|-squashfs\.img)$
       - name: Update nix-cachyos-kernel flake input
         run: nix flake update nix-cachyos-kernel
-      - name: Build Kernel
-        run: nix build ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" --show-trace --accept-flake-config
-      - name: Commit updated flake.lock
+      - name: Build kernel and all kernel modules (incl. NVIDIA)
+        run: |
+          nix build --show-trace --accept-flake-config \
+            ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" \
+            ".#nixosConfigurations.nixos.config.system.modulesTree"
+      - name: Evaluate all hosts
+        run: |-
+          nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+      - name: Commit updated flake.lock and push
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add flake.lock
-          git diff --cached --quiet || git commit -m "flake.lock: update nix-cachyos-kernel"
-          git push
+          if git diff --cached --quiet; then
+            echo "flake.lock unchanged"
+            exit 0
+          fi
+          git commit -m "flake.lock: update nix-cachyos-kernel"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+    timeout-minutes: 360
 name: cachyos-kernel-update
 "on":
   workflow_dispatch: {}

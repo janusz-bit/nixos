@@ -9,25 +9,39 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
       - name: Install Nix
         uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24
         with:
           extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://janusz-bit.cachix.org
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters = https://janusz-bit.cachix.org https://attic.xuyh0120.win/lantian https://cache.numtide.com
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc= niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
             build-fallback = true
       - name: Setup Cachix
-        uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866
         with:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
+          pushFilter: (-ext4-fs\.img|-nixos-image-sd-card-[^/]*|-nixos-installer[^/]*\.iso|-squashfs\.img)$
       - name: eval
         run: |-
           nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
           nix eval --raw .#nixosConfigurations.raspberry-pi-4.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
           nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.default.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.post-install.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.nixos-iso.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.aarch64-linux.raspberry-pi-4-sd-image.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.bootdev-cli.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.waywallen.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.x86_64-linux.waywallen-kde-plugin.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#devShells.x86_64-linux.default.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.aarch64-linux.bootdev-cli.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.aarch64-linux.waywallen.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#packages.aarch64-linux.waywallen-kde-plugin.drvPath --show-trace --accept-flake-config
+          nix eval --raw .#devShells.aarch64-linux.default.drvPath --show-trace --accept-flake-config
+    timeout-minutes: 45
 name: eval
 "on":
   pull_request:
@@ -36,9 +50,7 @@ name: eval
   push:
     branches:
       - master
-    tags:
-      - v*
   workflow_dispatch: {}
 permissions:
   contents: read
-run-name: Evaluate hosts by @${{ github.actor }}
+run-name: Evaluate flake outputs by @${{ github.actor }}

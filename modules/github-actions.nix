@@ -1,7 +1,12 @@
 { customTop, ... }:
 {
   perSystem =
-    { config, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       # Akcje przypięte do commitów (tag można przesunąć — a akcje widzą
       # CACHIX_AUTH_TOKEN i w cachyos-kernel-update mają contents: write).
@@ -9,36 +14,76 @@
       actions = {
         checkout = "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"; # v5
         installNix = "cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24"; # v31
-        cachix = "cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be"; # v14
+        # v17: node24 (v14 deklarował wycofany node20).
+        cachix = "cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866"; # v17
       };
 
+      # Wszystkie cache z customTop — te same co nix.settings hostów i
+      # nixConfig we flake.nix (checks.cache-config pilnuje zgodności), więc
+      # CI nie zależy od --accept-flake-config przy substitutorach.
+      caches = [ customTop.cache.cachix ] ++ customTop.cache.inputs;
+
+      # Obrazy (ext4 rootfs, karta SD, ISO, squashfs) nie są pobierane przez
+      # żaden host — nie zapychają limitu Cachix.
+      imagePushFilter = "(-ext4-fs\\.img|-nixos-image-sd-card-[^/]*|-nixos-installer[^/]*\\.iso|-squashfs\\.img)$";
+
       # Wspolne kroki dla wszystkich workflowow budujacych
-      mkBaseSteps = [
+      mkBaseSteps =
         {
-          name = "Checkout repository";
-          uses = actions.checkout;
+          # Tylko workflow, który pushuje commit (cachyos-kernel-update),
+          # zostawia token w .git/config; pozostałe kroki go nie potrzebują.
+          persistCredentials ? false,
+          # Ciężkie buildy x86 (nixos, kernel): obraz runnera ma ~20 GB
+          # wolnego, a domknięcie hosta nixos z lokalnym kernelem się nie mieści.
+          freeDiskSpace ? false,
+        }:
+        lib.optional freeDiskSpace {
+          name = "Free disk space";
+          run = ''
+            df -h /
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+            sudo docker image prune --all --force
+            df -h /
+          '';
         }
-        {
-          name = "Install Nix";
-          uses = actions.installNix;
-          with_ = {
-            extra_nix_config = ''
-              experimental-features = nix-command flakes
-              access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cache.cachix.url}
-              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
+        ++ [
+          {
+            name = "Checkout repository";
+            uses = actions.checkout;
+            with_.persist-credentials = persistCredentials;
+          }
+          {
+            name = "Install Nix";
+            uses = actions.installNix;
+            # experimental-features (nix-command flakes) i access-tokens
+            # z github.token dodaje sama akcja (install-nix.sh); KVM też.
+            with_.extra_nix_config = ''
+              extra-substituters = ${lib.concatMapStringsSep " " (c: c.url) caches}
+              extra-trusted-public-keys = ${lib.concatMapStringsSep " " (c: c.pubKey) caches}
               build-fallback = true
             '';
-          };
-        }
-        {
-          name = "Setup Cachix";
-          uses = actions.cachix;
-          with_ = {
-            name = "${customTop.cache.cachix.name}";
-            authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
-          };
-        }
+          }
+          {
+            name = "Setup Cachix";
+            uses = actions.cachix;
+            with_ = {
+              inherit (customTop.cache.cachix) name;
+              authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
+              pushFilter = imagePushFilter;
+            };
+          }
+        ];
+
+      evalCommand =
+        targets:
+        lib.concatMapStringsSep "\n" (
+          t: "nix eval --raw .#${t}.drvPath --show-trace --accept-flake-config"
+        ) targets;
+
+      hostToplevels = map (h: "nixosConfigurations.${h}.config.system.build.toplevel") [
+        "nixos"
+        "raspberry-pi-4"
+        "wsl"
       ];
 
       # Workflow aktualizujacy i budujacy CachyOS kernel
@@ -60,26 +105,51 @@
           };
           jobs.update-and-build = {
             inherit runsOn;
-            steps = mkBaseSteps ++ [
-              {
-                name = "Update nix-cachyos-kernel flake input";
-                run = "nix flake update nix-cachyos-kernel";
+            timeoutMinutes = 360;
+            steps =
+              mkBaseSteps {
+                persistCredentials = true;
+                freeDiskSpace = true;
               }
-              {
-                name = "Build Kernel";
-                run = "nix build \".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*\" --show-trace --accept-flake-config";
-              }
-              {
-                name = "Commit updated flake.lock";
-                run = ''
-                  git config user.name "github-actions[bot]"
-                  git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git add flake.lock
-                  git diff --cached --quiet || git commit -m "flake.lock: update nix-cachyos-kernel"
-                  git push
-                '';
-              }
-            ];
+              ++ [
+                {
+                  name = "Update nix-cachyos-kernel flake input";
+                  run = "nix flake update nix-cachyos-kernel";
+                }
+                {
+                  # Bump przesuwa też przypięty nixpkgs inputu, który decyduje
+                  # o sterowniku NVIDIA — kernel bez modułów to za mało, bo
+                  # push na master = wdrożenie (`update` na laptopie).
+                  name = "Build kernel and all kernel modules (incl. NVIDIA)";
+                  run = ''
+                    nix build --show-trace --accept-flake-config \
+                      ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" \
+                      ".#nixosConfigurations.nixos.config.system.modulesTree"
+                  '';
+                }
+                {
+                  name = "Evaluate all hosts";
+                  run = evalCommand hostToplevels;
+                }
+                {
+                  # Push GITHUB_TOKEN-em nie uruchamia innych workflowów, więc
+                  # weryfikacja musi być tutaj; rebase, bo build trwa godzinami
+                  # i master mógł się przesunąć (wcześniej: non-fast-forward).
+                  name = "Commit updated flake.lock and push";
+                  run = ''
+                    git config user.name "github-actions[bot]"
+                    git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                    git add flake.lock
+                    if git diff --cached --quiet; then
+                      echo "flake.lock unchanged"
+                      exit 0
+                    fi
+                    git commit -m "flake.lock: update nix-cachyos-kernel"
+                    git pull --rebase origin "''${GITHUB_REF_NAME}"
+                    git push origin "HEAD:''${GITHUB_REF_NAME}"
+                  '';
+                }
+              ];
           };
         };
 
@@ -99,6 +169,9 @@
           # Tanie sprawdzenia (lint, ewaluacja) odpalaja sie tez na kazdy
           # push do master — commity trafiaja tam bezposrednio.
           onMaster ? false,
+          # Domyślne 360 min GitHuba trzymało zawieszony eval/lint godzinami.
+          timeoutMinutes,
+          freeDiskSpace ? false,
         }:
         {
           inherit name runName;
@@ -121,8 +194,8 @@
             workflowDispatch = { };
           };
           jobs.build = {
-            inherit runsOn;
-            steps = mkBaseSteps ++ [
+            inherit runsOn timeoutMinutes;
+            steps = mkBaseSteps { inherit freeDiskSpace; } ++ [
               {
                 inherit name;
                 run =
@@ -141,12 +214,44 @@
         "aarch64-linux" = "ubuntu-24.04-arm";
       };
 
-      # Ewaluacja wszystkich hostów NixOS (sekundy zamiast godzin buildu) —
-      # łapie błędy ewaluacji przy każdym pushu do master.
-      evalHosts = [
-        "nixos"
-        "raspberry-pi-4"
-        "wsl"
+      # Ewaluacja (sekundy zamiast godzin buildu) wszystkiego, czego nie
+      # buduje żaden workflow przy każdym pushu: hosty, instalator
+      # (`nix run github:janusz-bit/nixos`), ISO, obraz SD, pakiety lokalne,
+      # devShelle.
+      evalTargets =
+        hostToplevels
+        ++ [
+          "packages.x86_64-linux.default"
+          "packages.x86_64-linux.post-install"
+          "packages.x86_64-linux.nixos-iso"
+          "packages.aarch64-linux.raspberry-pi-4-sd-image"
+        ]
+        ++
+          lib.concatMap
+            (
+              system:
+              map (p: "packages.${system}.${p}") [
+                "bootdev-cli"
+                "waywallen"
+                "waywallen-kde-plugin"
+              ]
+              ++ [ "devShells.${system}.default" ]
+            )
+            [
+              "x86_64-linux"
+              "aarch64-linux"
+            ];
+
+      # Testy repo (modules/checks, installer) — x86_64 z KVM (install-nix-action).
+      checkTargets = map (c: ".#checks.x86_64-linux.${c}") [
+        "pre-commit"
+        "gitleaks"
+        "cache-config"
+        "agenix-recipients"
+        "installer-scripts"
+        "pwm-fan"
+        "hermes-activation"
+        "rpi-services"
       ];
 
     in
@@ -185,6 +290,8 @@
                 runName = cfg.runName or "Build ${name} by @\${{ github.actor }}";
                 tags = cfg.tags or true;
                 onMaster = cfg.onMaster or false;
+                inherit (cfg) timeoutMinutes;
+                freeDiskSpace = cfg.freeDiskSpace or false;
               }
             )
             {
@@ -192,40 +299,51 @@
                 arch = "x86_64-linux";
                 # Ciezki build (~400 pakietow, 3-5 h) — tylko PR i dispatch.
                 tags = false;
+                timeoutMinutes = 360;
+                freeDiskSpace = true;
               };
               raspberry-pi-4 = {
                 arch = "aarch64-linux";
+                timeoutMinutes = 240;
               };
               raspberry-pi-4-sd-image = {
                 arch = "aarch64-linux";
                 buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
+                timeoutMinutes = 300;
               };
               nixos-iso = {
                 arch = "x86_64-linux";
-                buildTarget = "packages.x86_64-linux.nixos-iso";
-                # ISO w pełni offline (modules/installer) zawiera
-                # cały closure hosta nixos — ten sam koszt (3-5 h) co build
-                # `nixos` ponizej, więc nie na każdy tag.
+                runName = "Evaluate nixos-iso by @\${{ github.actor }}";
+                # ISO zawiera całe domknięcie hosta nixos (~52 GiB) plus
+                # ~17 GB squashfs i ISO w jednej derywacji — nie mieści się na
+                # standardowym runnerze (ENOSPC w mksquashfs). Tu tylko
+                # ewaluacja; ISO buduje się lokalnie na laptopie, gdzie
+                # domknięcie już jest w store (AGENTS.md).
+                command = evalCommand [ "packages.x86_64-linux.nixos-iso" ];
                 tags = false;
+                timeoutMinutes = 30;
               };
               wsl = {
                 arch = "x86_64-linux";
+                timeoutMinutes = 120;
               };
               eval = {
                 arch = "x86_64-linux";
-                runName = "Evaluate hosts by @\${{ github.actor }}";
+                runName = "Evaluate flake outputs by @\${{ github.actor }}";
                 onMaster = true;
-                command = builtins.concatStringsSep "\n" (
-                  map (
-                    host:
-                    "nix eval --raw .#nixosConfigurations.${host}.config.system.build.toplevel.drvPath --show-trace --accept-flake-config"
-                  ) evalHosts
-                );
+                # Tag wydania wskazuje commit z master, już sprawdzony.
+                tags = false;
+                command = evalCommand evalTargets;
+                timeoutMinutes = 45;
               };
               lint = {
                 arch = "x86_64-linux";
-                buildTarget = "checks.x86_64-linux.pre-commit";
+                runName = "Lint and test by @\${{ github.actor }}";
                 onMaster = true;
+                tags = false;
+                # --keep-going: każdy check raportuje wynik, nawet gdy inny pada.
+                command = "nix build ${lib.concatStringsSep " " checkTargets} --keep-going --show-trace --accept-flake-config -L";
+                timeoutMinutes = 90;
               };
             }
           // {

@@ -9,22 +9,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
       - name: Install Nix
         uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24
         with:
           extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://janusz-bit.cachix.org
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters = https://janusz-bit.cachix.org https://attic.xuyh0120.win/lantian https://cache.numtide.com
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc= niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
             build-fallback = true
       - name: Setup Cachix
-        uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866
         with:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
+          pushFilter: (-ext4-fs\.img|-nixos-image-sd-card-[^/]*|-nixos-installer[^/]*\.iso|-squashfs\.img)$
       - name: lint
-        run: nix build ".#checks.x86_64-linux.pre-commit" --show-trace --accept-flake-config
+        run: nix build .#checks.x86_64-linux.pre-commit .#checks.x86_64-linux.gitleaks .#checks.x86_64-linux.cache-config .#checks.x86_64-linux.agenix-recipients .#checks.x86_64-linux.installer-scripts .#checks.x86_64-linux.pwm-fan .#checks.x86_64-linux.hermes-activation .#checks.x86_64-linux.rpi-services --keep-going --show-trace --accept-flake-config -L
+    timeout-minutes: 90
 name: lint
 "on":
   pull_request:
@@ -33,9 +35,7 @@ name: lint
   push:
     branches:
       - master
-    tags:
-      - v*
   workflow_dispatch: {}
 permissions:
   contents: read
-run-name: Build lint by @${{ github.actor }}
+run-name: Lint and test by @${{ github.actor }}
