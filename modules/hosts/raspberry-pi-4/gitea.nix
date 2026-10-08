@@ -1,31 +1,24 @@
-{ self, customTop, ... }:
+{ customTop, ... }:
 {
-  flake.modules.nixos.gitea =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    {
-      services.gitea = {
-        enable = true;
-        database.type = "sqlite3";
+  flake.modules.nixos.gitea = _: {
+    services.gitea = {
+      enable = true;
+      database.type = "sqlite3";
 
-        settings = {
-          server = {
-            DOMAIN = "git.${customTop.site.full}";
-            ROOT_URL = "https://git.${customTop.site.full}/";
-            HTTP_ADDR = "127.0.0.1";
-            HTTP_PORT = 3000;
-            DISABLE_SSH = false;
-            START_SSH_SERVER = false;
-            SSH_DOMAIN = "git.${customTop.site.full}";
-            SSH_PORT = 22;
-          };
-          service.DISABLE_REGISTRATION = true;
-          session.COOKIE_SECURE = true;
+      settings = {
+        server = {
+          DOMAIN = "git.${customTop.site.full}";
+          ROOT_URL = "https://git.${customTop.site.full}/";
+          HTTP_ADDR = "127.0.0.1";
+          HTTP_PORT = 3000;
+          DISABLE_SSH = false;
+          START_SSH_SERVER = false;
+          SSH_DOMAIN = "git.${customTop.site.full}";
+          SSH_PORT = 22;
         };
+        service.DISABLE_REGISTRATION = true;
+        session.COOKIE_SECURE = true;
       };
     };
+  };
 }

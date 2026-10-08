@@ -50,7 +50,6 @@
 
       # Memory optimization: SSD swap and zRAM
       zramSwap.enable = true;
-      zramSwap.algorithm = "zstd";
       swapDevices = [
         {
           device = "/var/lib/swapfile";

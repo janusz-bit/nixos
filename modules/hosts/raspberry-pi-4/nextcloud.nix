@@ -12,7 +12,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = "${customTop.site.full}";
+          hostName = customTop.site.full;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
           package = pkgs.nextcloud35;
