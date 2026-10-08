@@ -14,25 +14,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 ## Aktywne
 
-### 1. NVIDIA open 615.71.09 — nieaktualny patch GPIO z nix-cachyos-kernel
-
-- **Od:** 2026-09-28.
-- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`hardware.nvidia.package`).
-- **Objaw:** `nvidia-open-615.71.09-7.2.4` kończy `patchPhase` błędem
-  `pattern static inline int __to_hwgpio(const struct gpio_device *gdev, doesn't match anything`.
-- **Przyczyna:** [nix-cachyos-kernel](https://github.com/xddxdd/nix-cachyos-kernel/blob/444d135dde71c1de547cf7bfd73e67145e67aebb/kernel-cachyos/packages.nix#L27-L45)
-  wymusza zamianę sygnatury z `const` na bez `const`; źródło
-  [NVIDIA 615.71.09](https://github.com/NVIDIA/open-gpu-kernel-modules/commit/61dcc93)
-  ma już poprawną sygnaturę.
-- **Obejście:** tylko dla otwartego modułu NVIDIA zamienić w `postPatch`
-  `--replace-fail` na `--replace-warn`. Jeżeli starsze źródło zawiera `const`,
-  zamiana nadal działa; przy obecnym źródle brak wzorca nie blokuje budowy.
-- **Kiedy usunąć:** gdy `nix-cachyos-kernel` usunie zbędny patch lub doda
-  sprawdzenie obecności starej sygnatury. Po aktualizacji inputu sprawdzić
-  `postPatch` w derywacji `hardware.nvidia.package.open`, usunąć override
-  i zbudować moduł ponownie.
-
-### 2. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
+### 1. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
 
 - **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
 - **Pliki:** `modules/hosts/raspberry-pi-4/configuration.nix`
@@ -46,7 +28,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (sprawdzać przy podbijaniu kernela / `nixos-hardware`); objawem powrotu
   problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
 
-### 3. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
+### 2. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
 
 - **Od:** 2026-09-29.
 - **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`services.udev.extraRules`).
@@ -66,7 +48,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
   po restarcie `cat .../power/control` musi dać `auto`.
 
-### 4. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
+### 3. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
 
 - **Od:** 2026-10-07.
 - **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
@@ -90,7 +72,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
   w nagłówku pliku) i uruchomić `hermes-activation`.
 
-### 5. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
+### 4. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
 
 - **Od:** przed 2026-10 (wcześniej bez wpisu).
 - **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`ExecStartPre`, jako
@@ -101,6 +83,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
 
 ## Zamknięte
+
+- **NVIDIA open 615.71.09 — nieaktualny patch GPIO z nix-cachyos-kernel** —
+  zamknięte 2026-10-09. Zablokowany `nix-cachyos-kernel`
+  (`kernel-cachyos/packages.nix`) używa już `--replace-quiet` dla sygnatury
+  `__to_hwgpio`, więc override `postPatch` (`--replace-fail` →
+  `--replace-warn`) w `modules/hardware/LOQ-15IRX10.nix` usunięto;
+  `hardware.nvidia.package` to znowu samo `nvidiaPackages.latest`.
 
 - **`python-docs-fix` (pin docutils/sphinx w docs-builderze cpythona,
   nixpkgs#499166)** — zamknięte 2026-09-28. Budowę `python3.11-doc` ciągnęło

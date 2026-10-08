@@ -7,9 +7,6 @@
       lib,
       ...
     }:
-    let
-      nvidiaLatest = config.boot.kernelPackages.nvidiaPackages.latest;
-    in
     {
       # Pakiety CUDA (ollama-cuda, OBS z cudaSupport) nie są w cache.nixos.org
       # i kompilują się lokalnie — tylko dla tej karty (Blackwell, sm_120)
@@ -47,13 +44,7 @@
           # 2026-09-29: nvidia-powerd nie blokuje D3cold (runtime_status =
           # suspended, także z monitorem na DisplayPort).
           dynamicBoost.enable = true;
-          # See temporary-fixes.md: CachyOS still patches a const GPIO argument,
-          # but NVIDIA 615.71.09 already ships the corrected signature.
-          package = nvidiaLatest // {
-            open = nvidiaLatest.open.overrideAttrs (old: {
-              postPatch = lib.replaceString "--replace-fail" "--replace-warn" (old.postPatch or "");
-            });
-          };
+          package = config.boot.kernelPackages.nvidiaPackages.latest;
           prime = {
             offload.enableOffloadCmd = lib.mkDefault true;
             sync.enable = lib.mkDefault false;
