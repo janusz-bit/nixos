@@ -91,6 +91,134 @@ A change is done only when it has been checked as far as possible without root. 
 3. Host `nixos`, when packages, overlays, the kernel or services change: `nixos-rebuild build --flake .#nixos`, then `nix store diff-closures /run/current-system ./result`. Stop and ask before a build that would compile CUDA packages or the kernel locally (hours).
 4. Activation needs root and is done by the user in their own terminal (`update-local`), who reports the result. Not via `!`: it runs a non-interactive bash without shell aliases and without a tty for the sudo password. Then check the affected units (`systemctl status …`, `journalctl -u … -b`).
 
+## Code quality rules
+
+These rules MUST be followed by every AI coding agent and contributor. They extend **Secrets**, **Security invariants**, **Development workflow** and **Verification** above; where two rules overlap, the stricter one wins.
+
+### Core principles
+
+All changes you make MUST be minimal, declarative and reproducible.
+
+"Minimal, declarative and reproducible" means:
+
+- the whole system state is described by this flake: no imperative changes (`nix-env`, `nix profile install`, editing `/etc`, `systemctl enable`, files dropped into `$HOME`) that the next rebuild silently undoes or that exist on one machine only
+- reuse before adding: a NixOS module option (`services.*`, `programs.*`, `hardware.*`) first, a nixpkgs package second, an existing flake input third, a local package in `modules/packages/_<name>/` last; a new flake input only when none of these fit, with the reason in a comment
+- no code beyond what the change needs: no speculative options, toggles or abstractions "for later", no wrapper for something a module option already does, no dead `let` bindings (i.e. no technical debt)
+- the narrowest scope: a host module when one host needs it, `modules/hosts/base/` only when every NixOS host needs it
+- pure evaluation: flake-only, no `--impure`, no `<nixpkgs>` lookups, no unhashed fetchers
+
+If a change is not minimal, declarative and verified before handing off to the user, you will be fined $100. You have permission to do another pass over the change if you believe it is not.
+
+### Preferred tools and patterns
+
+- Module layout: every `.nix` file under `modules/` is a flake-parts module (import-tree). A new NixOS module is exported as `flake.modules.nixos.<prefix>-<name>` (`base-*`, `nixos-*`, `rpi-*`, `wsl-*`) and imported explicitly in the host's `default.nix`. Anything that is not a flake-parts module (package definitions, hardware configs, vendored code, patches) **MUST** live under a `_`-prefixed path, otherwise import-tree imports it and evaluation breaks.
+- Shell scripts: `pkgs.writeShellApplication` with `runtimeInputs` (shellcheck runs at build time). **NEVER** use `writeShellScriptBin`/`writeScript` for new scripts with logic; migrate old ones when you touch them anyway. Longer scripts go into a sibling `.sh` file loaded with `builtins.readFile` (import-tree only imports `.nix`). `excludeShellChecks` only with a comment explaining why (pattern: `laptop-run` in `remote-agent.nix`).
+- Executables in units, wrappers and generated config: `lib.getExe pkg` / `lib.getExe' pkg "name"` instead of `${pkg}/bin/name` in new code.
+- Generated config files: `builtins.toJSON` or `pkgs.formats.<json|yaml|ini|toml>`. **NEVER** build JSON/YAML/INI by string concatenation. Every value interpolated into shell **MUST** go through `lib.escapeShellArg`.
+- Repo-wide constants (domain, LAN, e-mail, caches, repository URL) come from `customTop` (`modules/args.nix`); host-dependent values from `customBot` options (`modules/options.nix`, always with `type` and `description`). **NEVER** duplicate those literals in modules.
+- Runtime files and directories: `systemd.tmpfiles` rules or unit `StateDirectory`/`RuntimeDirectory`, not `mkdir`/`chown` in activation scripts.
+- Invariants that would otherwise fail at runtime: `assertions` with an actionable message (pattern: `ttyd.nix`). Degraded but valid configuration: `warnings` (pattern: `wifi.nix`).
+- CI: edit only `modules/github-actions.nix`. `.github/workflows/*.yml` are generated (`nix run .#sync-github-actions`) and **NEVER** edited by hand. Actions are pinned to commit SHAs.
+- Formatting: `nix fmt` (nixfmt-tree). Linting: statix and deadnix. All of them run as pre-commit hooks inside `nix develop`.
+
+### Nix code style
+
+- **MUST** pass `nixfmt`, `statix` and `deadnix --no-lambda-pattern-names` with no findings (pre-commit + CI `lint`). **NEVER** disable or skip a lint to get a commit through.
+- **MUST** use meaningful, descriptive attribute, binding and module names; a module is named after the feature, not after the change that added it.
+- Module arguments: request only what is used; `_:` for a module that uses none.
+- **NEVER** use `with lib;`. `with pkgs;` only for plain package lists (`environment.systemPackages`, `runtimeInputs`).
+- Prefer `let … in` and `inherit` over `rec { }`; packages use `finalAttrs` instead of `rec`.
+- Conditionals inside modules: `lib.mkIf`, `lib.mkMerge`, `lib.optionals`, `lib.optionalString`. **NEVER** wrap a module attrset in `if config.… then { … } else { }` (infinite recursion, lost merging).
+- Priorities: `lib.mkDefault` in `base/` for values hosts may override. `lib.mkForce` only with a comment naming the definition it overrides and why.
+- Platform: `pkgs.stdenv.hostPlatform.system`, never the deprecated `pkgs.system`.
+- Paths: relative path literals (`./file`). **NEVER** string paths into the repo, `/home/…` or `/etc/nixos/…` in Nix code (exception: files consumed at runtime by programs outside Nix, documented where they are referenced, e.g. `M27Q.icm`).
+- Three or more assignments with the same prefix in one attrset (`foo.a = …; foo.b = …;`) are nested into `foo = { … };` (statix `repeated_keys`).
+- **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗), in Nix code, scripts, comments or commit messages.
+- **NEVER** commit commented-out code. The only exception is a disabled import with a pointer to its re-enable procedure (pattern: `nixos-vfio` in `modules/hosts/nixos/default.nix`).
+- **NEVER** commit `builtins.trace`, `lib.traceVal` or debug `echo` lines.
+- Vendored code (`modules/hosts/raspberry-pi-4/_hermes-agent/`) keeps upstream style so it can be re-synced; changes there stay minimal and are listed in its header.
+
+### Comments and documentation
+
+- Comments explain **why**: upstream bug, measured effect, security reason, non-obvious Nix or module-system behaviour (priorities, `attrNamesToTrue` sorting, store-path reference scanning, `nixConfig` not inherited from inputs). Assume the reader knows NixOS well but not every nixpkgs internal.
+- **MUST** avoid redundant comments which are tautological or restate the attribute name.
+- **MUST** avoid comments which leak what this file contains, or leak the user's prompt.
+- Match the language of the surrounding comments (most modules are commented in Polish). AGENTS.md, `SKILL.md` files and commit messages are in English.
+- Every non-trivial module starts with a header comment: what it does, why it exists, how to verify or test it (patterns: `modules/hosts/nixos/tuning.nix`, `modules/hosts/nixos/remote-agent.nix`, `modules/checks/hermes-activation.nix`).
+- Every temporary upstream workaround gets an entry in `temporary-fixes.md` (removal condition + upstream link) and a code comment pointing to it.
+- **MUST** update AGENTS.md in the same commit when a change adds, removes or renames a module, host, service, secret, CI workflow, command or alias. AGENTS.md is a symlink to `GEMINI.md`: edit `GEMINI.md`. It stays a map; details belong in module headers.
+- Non-trivial architecture: write the design down in `docs/` (Markdown with mermaid diagrams) before implementing.
+
+### Flake inputs and dependencies
+
+- New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless their binary cache only matches their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`); then say so in a comment next to the input.
+- An input with its own binary cache: add the cache to both `nixConfig` in `flake.nix` and `customTop.cache` (see **Binary caches**).
+- Adding or removing an input: `nix flake lock` (does not bump other inputs). Updating one input: `nix flake update <input>`. Full updates only through `flake-update`.
+- Every fetcher has a real hash. **NEVER** commit `lib.fakeHash`.
+- Flakes see only git-tracked files: `git add` new files before `nix eval`/`nix build`, otherwise they are silently missing.
+
+### Local packages (`modules/packages/_<name>/default.nix`)
+
+- `callPackage` style with `mkDerivation (finalAttrs: { … })` / `buildGoModule (finalAttrs: { … })`; sources from `fetchFromGitHub` with `tag = "v${finalAttrs.version}"` where upstream tags releases.
+- `passthru.updateScript = nix-update-script { };` plus an entry in `flake-update` (`modules/packages/scripts.nix`) when the package should be bumped automatically.
+- `versionCheckHook` + `doInstallCheck = true` when the binary supports `--version`.
+- Complete `meta`: `description`, `homepage`, `license`, `mainProgram`, `platforms`; prebuilt binaries add `sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];`.
+- Register the package in `localPackages` (`modules/packages/packages.nix`), which exports both the overlay and `packages.<system>.<name>`.
+- Patch sources with `substituteInPlace --replace-fail` (fails loudly when upstream changes); `--replace-warn` only as a documented temporary fix.
+- Reference example: `modules/packages/_bootdev-cli/default.nix`.
+
+### Services and security
+
+- New services you write: dedicated user or `DynamicUser`, `NoNewPrivileges`, `ProtectSystem = "strict"`, `ProtectHome`, `PrivateTmp`, minimal `ReadWritePaths`; secrets through `LoadCredential` or `EnvironmentFile` from agenix.
+- RPi services bind to `127.0.0.1` or a Unix socket and are exposed only through the Cloudflare tunnel. Firewall exposure is always explicit (`openFirewall` set deliberately).
+- **NEVER** read or print decrypted secrets (`/run/agenix*`). **NEVER** put secret values in `.nix` files, unit `Environment=`, command lines (visible in `ps`) or logs.
+- **NEVER** weaken the firewall, SSH, sudo, `trusted-users` or a unit's sandboxing to make something work. Find the narrow fix, or stop and ask.
+
+### Evaluation and build cost
+
+- The RPi is slow (`max-jobs = 2`): evaluate only the hosts a change affects. x86_64 builds go through `laptop-run`, never locally on the RPi.
+- No import-from-derivation: never `import` or `builtins.readFile` a build output.
+- **NEVER** override widely used packages (glibc, openssl, mesa, python3, systemd, the kernel) or `nixpkgs.config` without need: it misses the binary caches and rebuilds everything downstream locally. Stop and ask before any change that compiles the kernel or CUDA packages (Verification step 3).
+- Check closure growth with `nix store diff-closures` and justify large increases.
+
+### Testing
+
+- Behaviour that evaluation cannot prove (activation, permissions, kernel/sysctl effects, service startup) gets a NixOS VM test: `pkgs.testers.runNixOSTest` in `modules/checks/<name>.nix`, run with `nix build -L .#checks.<system>.<name>`.
+- Tests take expected values from the host configuration instead of duplicating constants, and show the effect A/B where a change claims one (pattern: `modules/checks/tuning.nix`).
+- **NEVER** game the tests: do not weaken an assertion, loosen a tolerance, skip a subtest or change a test to match a broken implementation.
+- **NEVER** run VM tests or heavy builds in parallel: they compete for RAM and KVM, and failures and timings become meaningless.
+- **NEVER** save test logs or write-ups to files unless the user **explicitly** asks; report results in the console.
+
+### Version control
+
+- **MUST** write clear commit messages: `area: short lowercase summary` (`nixos:`, `rpi:`, `base:`, `installer:`, `skills:`, `docs:`), one logical change per commit.
+- **NEVER** force-push or rewrite `master`; undo changes with `git revert`.
+- **NEVER** commit `result*`, `.direnv`, `.pre-commit-config.yaml`, `.claude/settings.local.json`, credentials or decrypted secrets.
+- Release tags `vN` are sequential and never reused; create them only when the user asks (`flake-release`).
+
+### Agent-to-user behavior
+
+- **NEVER** write scratch scripts or notes into the worktree (flakes, `git add -A` and `repo-sync` pick them up); use `$TMPDIR`.
+- **NEVER** activate a configuration (`switch`, `boot`, `test`, `update*`): activation is done by the user (Verification step 4).
+- **NEVER** claim that something was built, evaluated or tested without real command output; state exactly which steps did not run and why.
+- Do not ask for clarification before implementation unless the change is impossible to implement without it.
+- When creating several subagents, launch each in a separate parallel tool call, and never let more than one of them build or run VM tests at the same time.
+- Before handing off to the user, report the verification steps that ran and their results in a Markdown table.
+
+### Before committing
+
+- [ ] Inside `nix develop`; pre-commit passes (gitleaks, nixfmt, statix, deadnix, sync-github-actions)
+- [ ] New files are `git add`ed
+- [ ] Every affected host evaluates (Verification step 1)
+- [ ] Generated values are rendered and inspected (step 2)
+- [ ] `nixos-rebuild build` + `nix store diff-closures` for host `nixos` when packages, overlays, the kernel or services changed (step 3)
+- [ ] VM tests covering the touched modules pass
+- [ ] Workflows regenerated if `modules/github-actions.nix` changed
+- [ ] AGENTS.md (`GEMINI.md`) and `temporary-fixes.md` updated
+- [ ] No secrets, no commented-out code, no debug traces
+
+**Remember:** prefer the simplest correct declarative solution. Cleverness is welcome only when it removes code or manual steps.
+
 ## Commands
 ```sh
 sudo nixos-rebuild switch --flake .#nixos          # or .#raspberry-pi-4 / .#wsl
