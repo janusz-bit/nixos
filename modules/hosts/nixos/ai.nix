@@ -17,14 +17,6 @@
           # Bez tego wykrywanie kończy się cicho na CPU (id=cpu w logu).
           package = pkgs.ollama-cuda;
         };
-        open-webui = {
-          enable = false;
-          environment = {
-            OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-            # Disable authentication
-            WEBUI_AUTH = "False";
-          };
-        };
       };
 
       environment.systemPackages = with pkgs; [

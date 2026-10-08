@@ -40,13 +40,6 @@
         # sieci, do której podłączy się laptop.
         openssh.openFirewall = false;
 
-        # Sched-ext (BPF scheduler) — scx_lavd zoptymalizowany pod gry i hybrydowe rdzenie P+E
-        scx = {
-          enable = false;
-          scheduler = "scx_lavd";
-          extraArgs = [ "--performance" ];
-        };
-
         # Bez ananicy-cpp (reguły CachyOS): przy cgroup v2 każda aplikacja
         # ma własny scope, a nice działa tylko wewnątrz jednej cgroup —
         # zmierzone: nice -4 vs +15 w osobnych scope'ach 50/50 CPU, w jednym
