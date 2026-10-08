@@ -14,21 +14,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 ## Aktywne
 
-### 1. `PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)
-
-- **Od:** patrz komentarz w `modules/hosts/raspberry-pi-4/configuration.nix`
-- **Pliki:** `modules/hosts/raspberry-pi-4/configuration.nix`
-  (`boot.kernelPackages`)
-- **Przyczyna:** `common-config.nix` w nixpkgs ustawia `PREEMPT_LAZY=yes`
-  dla kerneli ≥ 6.18, co koliduje z `PREEMPT=yes` kernela vendorowego RPi.
-  `nixos-hardware` hardcoduje `kernelPatches` wewnątrz `buildLinux`, więc
-  mechanizm `boot.kernelPatches` nie ma zastosowania — stąd `argsOverride`.
-  Ref: nixpkgs `d79e72ee0533cd5ce021dcd8863599e9dd290a33`.
-- **Kiedy usunąć:** gdy nixpkgs/nixos-hardware naprawi konflikt
-  (sprawdzać przy podbijaniu kernela / `nixos-hardware`); objawem powrotu
-  problemu byłoby konfliktowe Kconfig choice przy budowie kernela.
-
-### 2. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
+### 1. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
 
 - **Od:** 2026-09-29.
 - **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`services.udev.extraRules`).
@@ -48,7 +34,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
   po restarcie `cat .../power/control` musi dać `auto`.
 
-### 3. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
+### 2. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
 
 - **Od:** 2026-10-07.
 - **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
@@ -72,7 +58,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
   w nagłówku pliku) i uruchomić `hermes-activation`.
 
-### 4. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
+### 3. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
 
 - **Od:** przed 2026-10 (wcześniej bez wpisu).
 - **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`ExecStartPre`, jako
@@ -83,6 +69,14 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
 
 ## Zamknięte
+
+- **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte
+  2026-10-09. Zablokowany `nixos-hardware` (`raspberry-pi/common/kernel.nix`)
+  sam ustawia w `structuredExtraConfig` `PREEMPT = mkForce yes;
+  PREEMPT_LAZY = mkForce no;` dla `rpiVersion >= 3`, a `raspberry-pi/4`
+  domyślnie bierze ten sam `kernel.nix`. Blok `boot.kernelPackages`
+  z `modules/hosts/raspberry-pi-4/configuration.nix` usunięto; zbudowany
+  configfile ma `CONFIG_PREEMPT=y` i nie ma `CONFIG_PREEMPT_LAZY=y`.
 
 - **NVIDIA open 615.71.09 — nieaktualny patch GPIO z nix-cachyos-kernel** —
   zamknięte 2026-10-09. Zablokowany `nix-cachyos-kernel`
