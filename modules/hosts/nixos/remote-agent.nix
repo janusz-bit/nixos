@@ -27,19 +27,31 @@ let
   user = "claude-remote";
 in
 {
-  flake.modules.nixos.nixos-remote-agent = {
-    users = {
-      users.${user} = {
-        isNormalUser = true;
-        group = user;
-        description = "Claude Code z raspberry-pi-4 (eval/build, bez sudo)";
-        openssh.authorizedKeys.keys = [
-          ''from="${customTop.lan.subnet}",restrict ${keys.users.claude-rpi}''
-        ];
+  flake.modules.nixos.nixos-remote-agent =
+    { config, ... }:
+    let
+      inherit (config.users.users.${user}) home homeMode;
+    in
+    {
+      users = {
+        users.${user} = {
+          isNormalUser = true;
+          group = user;
+          description = "Claude Code z raspberry-pi-4 (eval/build, bez sudo)";
+          openssh.authorizedKeys.keys = [
+            ''from="${customTop.lan.subnet}",restrict ${keys.users.claude-rpi}''
+          ];
+        };
+        groups.${user} = { };
       };
-      groups.${user} = { };
+
+      # createHome zakłada katalog w aktywacji, a aktywacja przy starcie
+      # (`update-local-boot` + reboot) biegnie przed zamontowaniem podwolumenu
+      # /home — katalog ląduje wtedy pod punktem montowania i znika z widoku.
+      # tmpfiles działa po local-fs.target. Bezpieczne: /home to root:root 0755,
+      # więc claude-remote nie podmieni tej ścieżki na symlink.
+      systemd.tmpfiles.rules = [ "d ${home} ${homeMode} ${user} ${user} - -" ];
     };
-  };
 
   flake.modules.nixos.rpi-laptop-remote =
     { config, pkgs, ... }:
@@ -48,8 +60,10 @@ in
       # repo (~/work/<repo> konta claude-remote); bez CMD tylko synchronizuje.
       # Migawka = to, co widzi lokalny flake: pliki śledzone z niezacommitowanymi
       # zmianami + nowe pliki dodane do indeksu (nieśledzonych brak). Powstaje
-      # jako commit na tymczasowym indeksie — HEAD i indeks repo bez zmian —
-      # i jedzie przez `git push` (przyrostowo).
+      # jako drzewo na tymczasowym indeksie (HEAD i indeks repo bez zmian) i
+      # jedzie jako `git archive` przez ssh; na laptopie `git add -A`, więc
+      # tamtejszy flake (repo bez commitów) widzi dokładnie te same pliki.
+      # Bez `git push` — żadnego przepisywania refów.
       laptop-run = pkgs.writeShellApplication {
         name = "laptop-run";
         # SC2029: komendy dla ssh są celowo składane lokalnie (argumenty przez %q).
@@ -68,13 +82,15 @@ in
           cp "$(git -C "$repo" rev-parse --path-format=absolute --git-path index)" "$index"
           GIT_INDEX_FILE=$index git -C "$repo" add -u
           tree=$(GIT_INDEX_FILE=$index git -C "$repo" write-tree)
-          commit=$(git -C "$repo" commit-tree "$tree" -p HEAD -m "laptop-run snapshot")
 
-          ssh laptop "git init -q $qdest"
-          git -C "$repo" push -q --force "laptop:$dest" "$commit:refs/heads/laptop-run"
+          # Stare pliki precz (poza .git i `result` dla diff-closures), potem
+          # rozpakowanie migawki i indeks = migawka.
+          git -C "$repo" archive --format=tar "$tree" |
+            ssh laptop "mkdir -p $qdest && cd $qdest && git init -q &&
+              find . -mindepth 1 -maxdepth 1 ! -name .git ! -name result -exec rm -rf {} + &&
+              tar -xf - && git add -A"
 
-          # Bez -x: ignorowane `result` (dla diff-closures) zostaje.
-          remote="cd $qdest && git checkout -q -f --detach laptop-run && git clean -q -fd"
+          remote="cd $qdest"
           if (($#)); then
             remote+=" && $(printf '%q ' "$@")"
           fi
