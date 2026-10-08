@@ -147,7 +147,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 - Every non-trivial module starts with a header comment: what it does, why it exists, how to verify or test it (patterns: `modules/hosts/nixos/tuning.nix`, `modules/hosts/nixos/remote-agent.nix`, `modules/checks/hermes-activation.nix`).
 - Every temporary upstream workaround gets an entry in `temporary-fixes.md` (removal condition + upstream link) and a code comment pointing to it.
 - **MUST** update AGENTS.md in the same commit when a change adds, removes or renames a module, host, service, secret, CI workflow, command or alias. AGENTS.md is a symlink to `GEMINI.md`: edit `GEMINI.md`. It stays a map; details belong in module headers.
-- Non-trivial architecture: write the design down in `docs/` (Markdown with mermaid diagrams) before implementing.
+- Non-trivial architecture: write the design down in `docs/` (Markdown with mermaid diagrams) before implementing. Once it is implemented, delete the document or move the lasting facts into the module header; plans and checklists are not kept in the repo.
 
 ### Flake inputs and dependencies
 
