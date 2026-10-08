@@ -8,7 +8,6 @@
     imports = [
       self.modules.nixos.nixos-specific
       self.modules.nixos.nixos-configuration
-      self.modules.nixos.nixos-hardware-configuration
       self.modules.nixos.nixos-packages
       self.modules.nixos.nixos-podman
       self.modules.nixos.disko
