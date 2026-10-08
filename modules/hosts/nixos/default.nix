@@ -20,6 +20,7 @@
       self.modules.nixos.nixos-dbd
       self.modules.nixos.nixos-gaming
       self.modules.nixos.nixos-snapper
+      self.modules.nixos.nixos-remote-agent
       # VFIO + libvirt/virt-manager tymczasowo wyłączone.
       # Procedura ponownego włączenia: modules/hosts/nixos/vfio.nix.
       # self.modules.nixos.nixos-vfio
