@@ -19,6 +19,7 @@
       self.modules.nixos.pwm-fan
       self.modules.nixos.leds-off
       self.modules.nixos.hermes
+      self.modules.nixos.matrix
       self.modules.nixos.open-webui
       self.modules.nixos.ttyd
       self.modules.nixos.rpi-wifi

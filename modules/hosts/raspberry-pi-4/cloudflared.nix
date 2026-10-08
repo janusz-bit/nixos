@@ -47,6 +47,8 @@
               "ttyd.${customTop.site.full}" = "http://localhost:8083";
               "ssh.${customTop.site.full}" = "ssh://localhost:22";
               "git.${customTop.site.full}" = "http://localhost:3000";
+              # continuwuity (modules/hosts/raspberry-pi-4/matrix.nix)
+              "matrix.${customTop.site.full}" = "http://localhost:6167";
             };
           };
         };
