@@ -27,7 +27,6 @@
         customBot = {
           enableFastfetch = false;
           flakeTarget = "wsl";
-          defaultUser = "nixos";
         };
       })
     ];
