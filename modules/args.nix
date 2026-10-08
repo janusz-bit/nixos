@@ -17,7 +17,12 @@
     };
     # Domowa sieć LAN (laptop: enp8s0 192.168.100.14, RPi: 192.168.100.x).
     # SSH laptopa jest otwarte tylko z tej podsieci; fail2ban na RPi jej nie banuje.
-    lan.subnet = "192.168.100.0/24";
+    # lan.laptop: adres, pod którym RPi łączy się z laptopem (`ssh laptop`,
+    # remote-agent.nix); RPi nie ma mDNS. Zmiana adresu w routerze → popraw tutaj.
+    lan = {
+      subnet = "192.168.100.0/24";
+      laptop = "192.168.100.14";
+    };
     cache = {
       cachix = rec {
         name = "janusz-bit";
