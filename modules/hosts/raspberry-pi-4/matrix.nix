@@ -24,6 +24,10 @@
         # Bezpośrednio, z pominięciem tunelu.
         MATRIX_HOMESERVER = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
         MATRIX_ALLOWED_USERS = owner;
+        # Cel powiadomień (cron `deliver: "matrix"`, `hermes send matrix …`):
+        # DM z ${owner}. Nie przez /sethome — w trybie zarządzanym (Nix)
+        # Hermes nie zapisuje config.yaml, więc wybór zginąłby po restarcie.
+        MATRIX_HOME_ROOM = "!dTrQicK0YGC8YxepExnDhhmVWD9O2u3QRiTwj4YaY20";
         # TLS klientów kończy się w Cloudflare, więc treść rozmów chroni
         # dopiero E2EE. `required`: bez działającego szyfrowania adapter nie
         # startuje, zamiast po cichu przejść na tekst jawny.
