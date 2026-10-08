@@ -47,7 +47,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - `tuning.nix` (CachyOS-Settings, only items with a shown effect; the header lists what was skipped and why): zram zstd at 100% RAM with zswap disabled (`zswap.enabled=0`; the CachyOS kernel enables it by default → double compression), swappiness 150/page-cluster 0, dirty bytes, THP `max_ptes_none=409`, `DefaultTimeoutStopSec=10s` (system + user), `kernel.sysrq=244`, systemd-oomd on `system.slice` and `user@.service` (80%; KWin/session bus `omit` — drop-ins for KDE units via `systemd.user.units.*.text`, because `systemd.user.services` drop-ins add `Environment=PATH=…`).
 - No ananicy-cpp: with cgroup v2 nice only competes inside one cgroup (measured 50/50 across scopes), and its rules made GameMode refuse renice.
 - Gaming (`gaming.nix`: Steam + proton-cachyos from chaotic, `ntsync` module, gamemode with renice and power-profiles-daemon `performance` while a game runs, `dbdrun`), podman (rootless use; user is intentionally **not** in group `podman`).
-- VFIO (`vfio.nix`) is **disabled** (commented import in `nixos/default.nix`). If re-enabled: never pass a `by-path` value (contains `:`) to `KWIN_DRM_DEVICES` (KWin splits on `:` and crashes); `virtualisation.libvirtd.qemu.ovmf` no longer exists; use `virsh -c qemu:///system`; ISOs go to `/var/lib/libvirt/images/`.
+- VFIO passthrough (`vfio.nix` + `win11-vm.xml`, disabled) was removed; restore with `git show 3584010:modules/hosts/nixos/vfio.nix` (removing commit: `git log --diff-filter=D -- modules/hosts/nixos/vfio.nix`). Pitfalls if revived: never pass a `by-path` value (contains `:`) to `KWIN_DRM_DEVICES`; `virtualisation.libvirtd.qemu.ovmf` no longer exists.
 
 ### `raspberry-pi-4` (server)
 - Imports the full base; overrides: GC daily/3d, `max-jobs = 2`, `documentation.doc.enable = false`, `PermitRootLogin = "prohibit-password"` (admin path: `ssh ssh.janusz-bit.com` as root via cloudflared), no ssh-askpass.
@@ -134,7 +134,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 - Paths: relative path literals (`./file`). **NEVER** string paths into the repo, `/home/…` or `/etc/nixos/…` in Nix code (exception: files consumed at runtime by programs outside Nix, documented where they are referenced, e.g. `M27Q.icm`).
 - Three or more assignments with the same prefix in one attrset (`foo.a = …; foo.b = …;`) are nested into `foo = { … };` (statix `repeated_keys`).
 - **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗), in Nix code, scripts, comments or commit messages.
-- **NEVER** commit commented-out code. The only exception is a disabled import with a pointer to its re-enable procedure (pattern: `nixos-vfio` in `modules/hosts/nixos/default.nix`).
+- **NEVER** commit commented-out code. The only exception is a disabled import with a pointer to its re-enable procedure.
 - **NEVER** commit `builtins.trace`, `lib.traceVal` or debug `echo` lines.
 - Vendored code (`modules/hosts/raspberry-pi-4/_hermes-agent/`) keeps upstream style so it can be re-synced; changes there stay minimal and are listed in its header.
 
