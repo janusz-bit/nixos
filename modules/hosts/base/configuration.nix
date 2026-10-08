@@ -2,6 +2,7 @@
   inputs,
   self,
   customTop,
+  lib,
   ...
 }:
 let
@@ -42,9 +43,8 @@ let
         let
           flakeRef = if remote then customTop.repository.linkFlake else customTop.repository.place;
         in
-        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${optionalStr remote " --refresh"}";
+        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${config.customBot.flakeTarget}${lib.optionalString remote " --refresh"}";
       update_alias = mode: remote: "sudo ${rebuild mode remote}";
-      optionalStr = cond: str: if cond then str else "";
     in
     {
       # Update systemu
@@ -101,9 +101,6 @@ in
           "2620:fe::fe"
           "2620:fe::9"
         ];
-
-        # Port 22 otwiera services.openssh.openFirewall (domyślnie true).
-        firewall.enable = true;
       };
 
       environment = {

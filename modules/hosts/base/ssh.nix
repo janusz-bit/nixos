@@ -16,7 +16,6 @@ _: {
 
       programs = {
         ssh = {
-          startAgent = false;
           # Headless RPi wyłącza (x11-ssh-askpass ciągnie zależności X11).
           enableAskPassword = lib.mkDefault true;
           extraConfig = ''
