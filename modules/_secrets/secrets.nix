@@ -39,4 +39,7 @@ in
   "ttyd-password.age" = mkSecret allHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/wifi.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = mkSecret allHosts;
+  # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
+  # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
+  "hermes-matrix.age" = mkSecret allHosts;
 }
