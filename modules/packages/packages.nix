@@ -10,6 +10,7 @@ let
   # przez flake-update i bywa nowsza.
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
+    helium = pkgs.callPackage ./_helium { };
     waywallen = pkgs.callPackage ./_waywallen { };
     waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };
   };

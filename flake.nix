@@ -38,14 +38,6 @@
     hermes-agent.url = "github:NousResearch/hermes-agent";
     # Własny nixpkgs celowo — pakiety są w cache.numtide.com tylko dla niego.
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Helium Browser (fork ungoogled-chromium) — oficjalne binaria (tar.xz)
-    # spakowane przez flake'a; wersję i hashe bumpuje u nich GitHub Action,
-    # u nas `nix flake update`. Użycie: modules/hosts/nixos/helium.nix.
-    helium-browser = {
-      url = "github:ominit/helium-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-    };
     # Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine).
     # Dawniej flake nix-waywallen; teraz pakiet lokalny z oficjalnego AppImage
     # + prebuildu open-wallpaper-engine (modules/packages/_waywallen).

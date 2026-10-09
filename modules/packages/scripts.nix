@@ -21,10 +21,13 @@
             nix flake update
             echo "Updating bootdev-cli..."
             nix-update -F bootdev-cli
+            # helium i waywallen: dwa pasy — x86_64 (wersja + hash), potem
+            # aarch64 (hash bez zmiany wersji).
+            echo "Updating helium..."
+            nix-update --system x86_64-linux -F helium
+            nix-update --system aarch64-linux -F helium --version skip
             echo "Updating waywallen..."
-            # Dwa pasy: x86_64 (wersja + hash), potem
-            # aarch64 (hash bez zmiany wersji). OweVersion (plugin
-            # open-wallpaper-engine) bumpuje się RĘCZNIE w
+            # OweVersion (plugin open-wallpaper-engine) bumpuje się RĘCZNIE w
             # modules/packages/_waywallen/default.nix + `nix hash file`.
             nix-update --system x86_64-linux -F waywallen
             nix-update --system aarch64-linux -F waywallen --version skip
@@ -34,6 +37,7 @@
 
             git add -A -- flake.lock .github/workflows \
               modules/packages/_bootdev-cli/default.nix \
+              modules/packages/_helium/default.nix \
               modules/packages/_waywallen/default.nix
             if git diff --cached --quiet; then
               echo "Everything is already up to date."
