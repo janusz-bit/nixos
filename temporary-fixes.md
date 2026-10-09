@@ -68,6 +68,33 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 - **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje)
   — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
 
+### 4. Zed — Vulkan tylko z ICD Intela (`VK_LOADER_DRIVERS_SELECT`)
+
+- **Od:** 2026-10-10.
+- **Plik:** `modules/hosts/nixos/packages.nix` (`zed-editor-igpu`: `symlinkJoin`
+  + `wrapProgram $out/bin/zeditor --set VK_LOADER_DRIVERS_SELECT 'intel_icd*'`).
+- **Objaw:** `zeditor ~/projekt` zmienia
+  `/sys/bus/pci/devices/0000:01:00.0/power/runtime_status` z `suspended` na
+  `active` (zmierzone); pierwsze okno czeka na wybudzenie RTX 5060 z D3cold.
+- **Przyczyna:** Zed (wgpu) tworzy instancję Vulkan przy starcie, a ICD
+  NVIDII budzi dGPU już przy `vkCreateInstance`, choć Zed renderuje na iGPU
+  (błąd NVIDII 4770124). `ZED_DEVICE_ID` i `VK_LOADER_DEVICE_ID_FILTER` działają
+  dopiero po załadowaniu ICD, więc nie pomagają.
+  https://forums.developer.nvidia.com/t/550-67-nvidia-vulkan-icd-wakes-up-dgpu-on-initialization-and-exit/288095 ,
+  https://github.com/zed-industries/zed/issues/25320
+- **Obejście:** loader filtruje manifesty po nazwie pliku przed `dlopen`;
+  `intel_icd*` dopuszcza tylko `intel_icd.x86_64.json` (ANV), bez
+  `intel_hasvk_icd`, `nvidia_icd.json` i pozostałych ICD Mesy. Tylko dla Zeda
+  (Steam/gry/`GAMEMODERUNEXEC` potrzebują Vulkana NVIDII).
+- **Ograniczenie:** zmienną dziedziczą procesy uruchamiane z Zeda (wbudowany
+  terminal, taski, LSP) — gra albo `nvidia-offload` z terminala Zeda nie zobaczy
+  Vulkana NVIDII. CUDA/ollama bez zmian (nie używają loadera Vulkan).
+- **Kiedy usunąć:** gdy sterownik NVIDII przestanie budzić dGPU przy
+  `vkCreateInstance`. Sprawdzenie: usunąć nakładkę (wrócić do `zed-editor`),
+  przebudować, przy uśpionym dGPU uruchomić `zeditor ~/projekt; sleep 2;
+  cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status` — musi zostać
+  `suspended`.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

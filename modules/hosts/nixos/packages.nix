@@ -1,18 +1,41 @@
 { inputs, ... }:
 {
   flake.modules.nixos.nixos-packages =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     let
       user = config.customBot.defaultUser;
       home = config.users.users.${user}.home;
       # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
       hermes-desktop = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop;
+      # Zed przy starcie (wgpu, enumerate_adapters) tworzy instancję Vulkan,
+      # a ICD NVIDII budzi przy tym RTX 5060 z D3cold (zmierzone: runtime_status
+      # suspended -> active; opóźnia pierwsze okno), choć Zed renderuje na iGPU.
+      # Loader filtruje ICD po nazwie manifestu przed dlopen: zostaje tylko
+      # ANV (intel_icd.x86_64.json), bez intel_hasvk_icd, nvidia_icd i reszty
+      # Mesy. Tylko dla Zeda: Steam/gry potrzebują Vulkana NVIDII. Zmienną
+      # dziedziczą procesy z Zeda (terminal, taski, LSP), więc nvidia-offload
+      # z terminala Zeda nie zobaczy Vulkana NVIDII; CUDA bez zmian.
+      # Tymczasowe: temporary-fixes.md.
+      zed-editor-igpu = pkgs.symlinkJoin {
+        inherit (pkgs.zed-editor) pname version meta;
+        paths = [ pkgs.zed-editor ];
+        nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/zeditor \
+            --set VK_LOADER_DRIVERS_SELECT ${lib.escapeShellArg "intel_icd*"}
+        '';
+      };
     in
     {
       environment.systemPackages = with pkgs; [
         vscode
         vscodium
-        zed-editor
+        zed-editor-igpu
         kdePackages.partitionmanager
         qbittorrent-enhanced
         heroic # install heroic launcher
