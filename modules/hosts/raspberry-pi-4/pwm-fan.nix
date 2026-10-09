@@ -1,12 +1,6 @@
-{ self, ... }:
-{
+_: {
   flake.modules.nixos.pwm-fan =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { pkgs, ... }:
     {
       systemd.services.pwm-fan = {
         description = "Waveshare PWM Fan Control";

@@ -1,8 +1,8 @@
-{ self, customTop, ... }:
+{ customTop, ... }:
 let
   gitConfig = {
-    user.name = "${customTop.repository.user}";
-    user.email = "${customTop.email.full}";
+    user.name = customTop.repository.user;
+    user.email = customTop.email.full;
     init.defaultBranch = "main";
     url = {
       "https://github.com/" = {

@@ -1,7 +1,6 @@
 # Deklaratywna konfiguracja Prime Agenta (providers + default model).
 # Pliki generowane do /etc/prime-agent i symlinkowane przez tmpfiles do
-# ~/.prime/agent/ (domyślny katalog konfiguracji prime-agenta) — ten sam
-# wzorzec co modules/skills/default.nix.
+# ~/.prime/agent/ (domyślny katalog konfiguracji prime-agenta).
 # Klucz API ollama-cloud: "OLLAMA_API_KEY" to nazwa zmiennej środowiskowej
 # (prime-agent resolve'uje ją przez process.env); wartość pochodzi z agenix
 # (modules/hosts/base/agenix.nix), nigdy nie trafia do /nix/store.
@@ -114,6 +113,15 @@
         telemetry = {
           enabled = false;
         };
+        # Skille z modules/skills (ai-skills) i drop-in /etc/ai. Przy kolizji
+        # nazw wygrywa wcześniejszy wpis (prime-agent 0.9.8: loadSkills,
+        # first wins), więc deklaratywne mają pierwszeństwo. Brakujący katalog
+        # (WSL nie importuje ai-skills) prime-agent pomija bez błędu
+        # (package-manager.ts: collectFilesFromPaths, `!existsSync`).
+        skills = [
+          "/etc/ai-skills"
+          "/etc/ai"
+        ];
         # Notatki Trilium przez MCP (endpoint zależny od hosta —
         # customBot.triliumMcpUrl). Token tylko przez zmienną środowiskową —
         # literalne sekrety prime-agent odrzuca

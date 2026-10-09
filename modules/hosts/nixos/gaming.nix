@@ -37,15 +37,8 @@ _: {
     in
     {
       programs = {
-        # Gamescope: mikro-kompozytor Valve — niski frame latency, VRR, skalowanie FSR/integer
-        gamescope = {
-          enable = false;
-        };
-
         steam = {
           enable = true;
-          # Osobna sesja "Steam (Gamescope)" w SDDM
-          gamescopeSession.enable = false;
           # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
           protontricks.enable = true;
           remotePlay.openFirewall = true;

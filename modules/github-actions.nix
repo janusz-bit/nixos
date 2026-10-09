@@ -35,7 +35,7 @@
           name = "Setup Cachix";
           uses = actions.cachix;
           with_ = {
-            name = "${customTop.cache.cachix.name}";
+            name = customTop.cache.cachix.name;
             authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
           };
         }
@@ -47,11 +47,7 @@
         {
           inherit name;
           runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
-          on = {
-            # Na razie wylaczone — daily cron zakomentowany
-            # schedule = [ { cron = "0 2 * * *"; } ];
-            workflowDispatch = { };
-          };
+          on.workflowDispatch = { };
           permissions.contents = "write";
           # Recznie odpalany workflow — bez sensu dwa rownolegle buildy kernela
           concurrency = {

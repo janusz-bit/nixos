@@ -63,7 +63,6 @@
         kdePackages.elisa
         sbctl
         joplin-desktop
-        # bitwarden-desktop
         trilium-desktop
         foliate
         ungoogled-chromium
@@ -71,7 +70,7 @@
         cmake
         ninja
         clang
-        pkgs.pkgsCross.mingwW64.buildPackages.gcc
+        pkgsCross.mingwW64.buildPackages.gcc
         wine64
         clang-tools
         lldb

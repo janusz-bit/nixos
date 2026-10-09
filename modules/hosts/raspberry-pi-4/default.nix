@@ -30,7 +30,6 @@
       inputs.nixos-hardware.nixosModules.raspberry-pi-4
       (_: {
         customBot.flakeTarget = "raspberry-pi-4";
-        customBot.defaultUser = "nixos";
       })
     ];
   };

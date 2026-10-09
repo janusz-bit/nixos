@@ -17,8 +17,8 @@
       # Dedykowane hasło Basic Auth: modules/_secrets/ttyd-password.age
       # (agenix -e, plik śledzony w gicie). Celowo bez wartości zastępczej —
       # wcześniej brak pliku oznaczał po cichu hasło admina Nextcloud.
-      # Asercja i restartTriggers biorą ścieżkę z config, więc test VM
-      # (modules/checks/rpi-services.nix) podstawia własny zaszyfrowany plik.
+      # Asercja i restartTriggers biorą ścieżkę z config (nie z
+      # customTop.secretsDir), więc można ją podmienić bez zmian w tym module.
       secretFile = config.age.secrets.ttyd-password.file;
     in
     {

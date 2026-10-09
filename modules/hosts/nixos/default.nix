@@ -8,7 +8,6 @@
     imports = [
       self.modules.nixos.nixos-specific
       self.modules.nixos.nixos-configuration
-      self.modules.nixos.nixos-hardware-configuration
       self.modules.nixos.nixos-packages
       self.modules.nixos.nixos-podman
       self.modules.nixos.disko
@@ -22,9 +21,6 @@
       self.modules.nixos.nixos-snapper
       self.modules.nixos.nixos-remote-agent
       self.modules.nixos.nixos-tuning
-      # VFIO + libvirt/virt-manager tymczasowo wyłączone.
-      # Procedura ponownego włączenia: modules/hosts/nixos/vfio.nix.
-      # self.modules.nixos.nixos-vfio
     ];
   };
 
