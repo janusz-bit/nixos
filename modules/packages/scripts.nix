@@ -3,46 +3,52 @@
     { pkgs, ... }:
     {
       packages = {
-        flake-update = pkgs.writeShellScriptBin "flake-update" ''
-          set -euo pipefail
+        flake-update = pkgs.writeShellApplication {
+          name = "flake-update";
+          runtimeInputs = [ pkgs.nix-update ];
+          text = ''
+            cd "$(git rev-parse --show-toplevel)"
+            if [[ ! -f flake.nix || ! -f modules/packages/_waywallen/default.nix ]]; then
+              echo "Run flake-update from the NixOS configuration repository." >&2
+              exit 1
+            fi
+            if [[ -n "$(git status --porcelain)" ]]; then
+              echo "Commit or stash existing changes before running flake-update." >&2
+              exit 1
+            fi
 
-          cd "$(git rev-parse --show-toplevel)"
-          if [[ ! -f flake.nix || ! -f modules/packages/_waywallen/default.nix ]]; then
-            echo "Run flake-update from the NixOS configuration repository." >&2
-            exit 1
-          fi
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "Commit or stash existing changes before running flake-update." >&2
-            exit 1
-          fi
+            echo "Updating flake inputs..."
+            nix flake update
+            echo "Updating bootdev-cli..."
+            nix-update -F bootdev-cli
+            # helium i waywallen: dwa pasy — x86_64 (wersja + hash), potem
+            # aarch64 (hash bez zmiany wersji).
+            echo "Updating helium..."
+            nix-update --system x86_64-linux -F helium
+            nix-update --system aarch64-linux -F helium --version skip
+            echo "Updating waywallen..."
+            # OweVersion (plugin open-wallpaper-engine) bumpuje się RĘCZNIE w
+            # modules/packages/_waywallen/default.nix + `nix hash file`.
+            nix-update --system x86_64-linux -F waywallen
+            nix-update --system aarch64-linux -F waywallen --version skip
 
-          echo "Updating flake inputs..."
-          nix flake update
-          echo "Updating bootdev-cli..."
-          ${pkgs.lib.getExe pkgs.nix-update} -F bootdev-cli
-          echo "Updating waywallen..."
-          # Dwa pasy: x86_64 (wersja + hash), potem
-          # aarch64 (hash bez zmiany wersji). OweVersion (plugin
-          # open-wallpaper-engine) bumpuje się RĘCZNIE w
-          # modules/packages/_waywallen/default.nix + `nix hash file`.
-          ${pkgs.lib.getExe pkgs.nix-update} --system x86_64-linux -F waywallen
-          ${pkgs.lib.getExe pkgs.nix-update} --system aarch64-linux -F waywallen --version skip
+            echo "Syncing GitHub Actions workflows from the updated flake..."
+            nix run .#sync-github-actions
 
-          echo "Syncing GitHub Actions workflows from the updated flake..."
-          nix run .#sync-github-actions
-
-          git add -A -- flake.lock .github/workflows \
-            modules/packages/_bootdev-cli/default.nix \
-            modules/packages/_waywallen/default.nix
-          if git diff --cached --quiet; then
-            echo "Everything is already up to date."
-          else
-            # The dev shell's workflow hook may still point at the old lock.
-            # The fresh generator has already run above.
-            SKIP=sync-github-actions git commit -m "flake-update: update inputs and packages"
-          fi
-          echo "All packages updated!"
-        '';
+            git add -A -- flake.lock .github/workflows \
+              modules/packages/_bootdev-cli/default.nix \
+              modules/packages/_helium/default.nix \
+              modules/packages/_waywallen/default.nix
+            if git diff --cached --quiet; then
+              echo "Everything is already up to date."
+            else
+              # The dev shell's workflow hook may still point at the old lock.
+              # The fresh generator has already run above.
+              SKIP=sync-github-actions git commit -m "flake-update: update inputs and packages"
+            fi
+            echo "All packages updated!"
+          '';
+        };
 
         repo-sync = pkgs.writeShellScriptBin "repo-sync" ''
           set -euo pipefail

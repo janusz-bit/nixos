@@ -1,13 +1,11 @@
-{ inputs, ... }:
-{
+_: {
   flake.modules.nixos.nixos-helium =
     { pkgs, ... }:
     {
-      # Helium Browser (fork ungoogled-chromium) — pakiet z flake'a
-      # github:ominit/helium-browser-flake (input helium-browser).
+      # Helium Browser (fork ungoogled-chromium) — pakiet lokalny
+      # modules/packages/_helium (overlay local-packages); tam opis, czemu
+      # nie github:ominit/helium-browser-flake.
       # Sandbox Chromium działa na user namespaces (domyślnie włączone).
-      environment.systemPackages = [
-        inputs.helium-browser.packages.${pkgs.stdenv.hostPlatform.system}.helium
-      ];
+      environment.systemPackages = [ pkgs.helium ];
     };
 }
