@@ -71,6 +71,9 @@
         lutris
         bootdev-cli
         kdePackages.kcalc
+        # Kleopatra — GUI do kluczy OpenPGP/S/MIME. gpg-agent (z pinentry-qt
+        # od plasma6) włącza już base-ssh (programs.gnupg.agent).
+        kdePackages.kleopatra
         # KRecorder — dyktafon (nagrywanie dźwięku z mikrofonu, lista nagrań,
         # odtwarzacz; aplikacja KDE na Kirigami).
         kdePackages.krecorder
