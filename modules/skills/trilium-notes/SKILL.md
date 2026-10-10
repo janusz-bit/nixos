@@ -1,6 +1,6 @@
 ---
 name: trilium-notes
-description: Read, search, edit and organize the user's Trilium notes (daily notes, tasks, ideas, health, programming, diet/training) through Trilium's built-in MCP server. Use for anything about the user's notes - searching content, reading full notes, browsing the tree, creating/updating/removing notes, attributes and attachments.
+description: Use for anything about the user's Trilium notes (daily notes, tasks, ideas, health, programming, diet/training) - searching, reading full notes, browsing the tree, creating, updating or removing notes, attributes and attachments - through Trilium's built-in MCP server from the Python kernel.
 ---
 
 # Trilium Notes (MCP)

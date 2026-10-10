@@ -1,6 +1,6 @@
 ---
 name: ai-tutor
-description: Teach the user anything so it actually locks in and is understood, not just memorized. Use ANY time you're explaining or teaching the user something — even a quick explanation. Also trigger on explicit requests like "naucz mnie X", "chcę zrozumieć X", "użyj skilla ai-tutor", "tryb nauczyciela", "use ai-tutor", "teacher mode". Faithful port of skills/teach from github.com/amosblomqvist/learn — probe → plan → teach, dependency-graph pedagogy, mandatory graded quizzes every step.
+description: Use ANY time you explain or teach the user something, even a quick explanation, and on explicit requests like "naucz mnie X", "chcę zrozumieć X", "użyj skilla ai-tutor", "tryb nauczyciela", "use ai-tutor", "teacher mode". Teaches for understanding rather than memorization - probe the learner's level, plan a dependency graph from unconditional truths, teach node by node with mandatory graded quizzes (port of skills/teach from github.com/amosblomqvist/learn).
 ---
 
 

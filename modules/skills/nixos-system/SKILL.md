@@ -1,6 +1,6 @@
 ---
 name: nixos-system
-description: This machine runs NixOS, configured declaratively by the flake in /etc/nixos (github:janusz-bit/nixos, no Home Manager) — it is NOT a conventional FHS Linux distribution. Use this skill before installing or looking up software, running downloaded or prebuilt binaries, compiling code, writing scripts or shebangs, installing pip/npm/cargo packages globally, editing anything under /etc, changing systemd units, users, firewall, drivers or kernel modules, reaching for sudo, or whenever a command, shared library or header is "not found". Covers nix shell / comma / nix-ld, how system changes are made and activated, privilege limits, secrets, and the facts of the current host.
+description: Use before installing or looking up software, running downloaded or prebuilt binaries, compiling code, writing scripts or shebangs, installing pip/npm/cargo packages globally, editing anything under /etc, changing systemd units, users, firewall, drivers or kernel modules, reaching for sudo, or whenever a command, shared library or header is "not found". This machine runs NixOS configured declaratively by the flake in /etc/nixos (github:janusz-bit/nixos, no Home Manager), not a conventional FHS distribution. Covers nix shell / comma / nix-ld, how system changes are made and activated, privilege limits, secrets, and the facts of the current host.
 ---
 
 # Working on this NixOS machine

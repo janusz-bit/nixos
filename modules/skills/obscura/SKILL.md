@@ -1,6 +1,6 @@
 ---
 name: obscura
-description: Headless antidetect browser for AI agents (Rust CLI with Chromium-grade JS via V8). Use for fetching and scraping JS-rendered pages, bot-resistant fetching, bulk parallel scraping, extracting markdown/text/links/cookies, screenshots, and browser automation over CDP (playwright-core/puppeteer compatible) or its built-in MCP server. Reach for it when plain HTTP requests return JS shells or get bot-blocked.
+description: Use when plain HTTP requests return a JS-only shell or get bot-blocked, or when a task needs JS-rendered page content, markdown/text/links/cookies extraction, page screenshots, bulk parallel scraping, or browser automation over CDP (playwright-core/puppeteer) or MCP. Headless browser CLI `obscura` (V8 JavaScript, optional stealth fingerprint).
 ---
 
 # Obscura — headless browser for web scraping and automation
