@@ -43,6 +43,12 @@
       # CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. Prime Agent ich nie dostaje.
       claudeSkills = {
         nixos-system = nixosSystemSkill;
+      }
+      # Program skilla (claude-notify) zależy od hosta, więc jest w
+      # modules/hosts/raspberry-pi-4/hermes-notify.nix, nie w skillPackages —
+      # skill tylko tam, gdzie ten moduł wdrożył klucz.
+      // lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
+        hermes-notify = ./hermes-notify;
       };
 
       # nixos-system: statyczna treść + sekcja „This host” liczona z config
