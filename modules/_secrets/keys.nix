@@ -17,10 +17,17 @@
     # WYŁĄCZNIE na konto claude-remote laptopa (remote-agent.nix). NIE odbiorca
     # agenix, nigdy w authorized_keys dinosaura ani roota.
     claude-rpi = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBm08oKyzMIfuwdh0a6xb4zArEJPL6bOpej5IgY1xs/U claude@raspberry-pi-4";
+    # Prywatny w hermes-notify-key.age: na laptopie czyta go dinosaur, na RPi
+    # grupa hermes (nixos). Loguje WYŁĄCZNIE na konto hermes RPi z localhost
+    # (tunel cloudflared) z wymuszonym poleceniem hermes-notify-receive —
+    # pozwala tylko wysłać tekst do DM na Matrixie (hermes-notify.nix).
+    # NIE odbiorca agenix.
+    hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
   };
   # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts.
   # Osobno od `hosts`: RPi wpuszcza wszystkie `hosts` jako klucze logowania.
   sshHostKeys = {
     nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9RxUTc2ub3uQDGc06/ZBdCRlkOhPJBEPHB5vJihakc";
+    raspberry-pi-4 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE5Lo9UunQr/9leQHTC776Qsg0g46Zy2Ku3B19WeML5i";
   };
 }

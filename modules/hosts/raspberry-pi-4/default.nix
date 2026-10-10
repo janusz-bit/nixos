@@ -20,6 +20,7 @@
       self.modules.nixos.leds-off
       self.modules.nixos.hermes
       self.modules.nixos.matrix
+      self.modules.nixos.rpi-hermes-notify
       self.modules.nixos.open-webui
       self.modules.nixos.ttyd
       self.modules.nixos.rpi-wifi

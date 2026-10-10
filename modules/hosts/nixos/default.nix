@@ -20,6 +20,7 @@
       self.modules.nixos.nixos-gaming
       self.modules.nixos.nixos-snapper
       self.modules.nixos.nixos-remote-agent
+      self.modules.nixos.nixos-hermes-notify
       self.modules.nixos.nixos-tuning
     ];
   };
