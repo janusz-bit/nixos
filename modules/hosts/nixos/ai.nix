@@ -29,8 +29,6 @@
         inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt
         repomix
         nodejs
-        # skill: obscura — headless antidetect browser dla agentów (modules/skills/obscura)
-        obscura
         # unsloth usunięty: torch z nixpkgs jest tu bez CUDA, a unsloth bez
         # akceleratora nie importuje się („You need a GPU”). Fine-tuning
         # trzymać w projekcie uv z kołami torch+CUDA.

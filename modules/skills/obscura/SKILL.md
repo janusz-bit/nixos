@@ -59,4 +59,4 @@ tools — usable from any MCP client.
   friendlier engine (e.g. Yandex visual search works from this network).
 - nixpkgs ships 0.2.0; upstream moves fast (0.2.2+ at the time of writing).
   Compare `obscura --version` with upstream releases before assuming a feature
-  exists. Declarative install lives in `modules/hosts/nixos/ai.nix`.
+  exists. Installed together with the skill by `modules/skills/default.nix` (`skillPackages`).

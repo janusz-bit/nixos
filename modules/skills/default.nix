@@ -30,6 +30,12 @@
         obscura = ./obscura;
       };
 
+      # Programy, bez których skill nie działa — instalowane przez ten moduł
+      # razem ze skillem, żeby skill nie trafił na host bez swojego narzędzia.
+      skillPackages = {
+        obscura = [ pkgs.obscura ];
+      };
+
       # Skille Claude Code (format SKILL.md jak wyżej). Claude Code na Linuksie
       # ładuje skille zarządzane z /etc/claude-code/.claude/skills/<nazwa>
       # (`claude --debug`: „Loading skills from: managed=…”), dla każdego
@@ -110,7 +116,10 @@
       ];
 
       # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
-      environment.systemPackages = [ (lib.hiPrio primeAgentWithSkills) ];
+      environment.systemPackages = [
+        (lib.hiPrio primeAgentWithSkills)
+      ]
+      ++ lib.concatLists (lib.attrValues skillPackages);
 
       # Drop-in na skille runtime — zapisywalny tylko przez defaultUsera
       # (on i jego Prime Agent dodają skille bez sudo). Wcześniej 0775
