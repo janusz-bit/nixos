@@ -36,6 +36,24 @@
         };
       };
 
+      # Polski pakiet językowy (provides_locales: sam YAML, bez kodu Pythona)
+      # dla statycznych tekstów CLI, bramki i TUI; odpowiedzi modelu bez zmian.
+      # Commit = v0.2.0 z plugin.yaml — upstream nie otagował tej wersji.
+      # Bez `requires_hermes`: pakiet Nix Hermesa stempluje wersję 0.0.0, więc
+      # loader pominąłby plugin (temporary-fixes.md).
+      polishLanguagePack = pkgs.applyPatches {
+        name = "hermes-lang-pl";
+        src = pkgs.fetchFromGitHub {
+          owner = "teknium1";
+          repo = "hermes-lang-pl";
+          rev = "3072a5f8adb065d3322de9c95130c3e67e50288c";
+          hash = "sha256-ARb7yyXz0ILwiO6kXwx6R7dgn9nEb5ZLVBdzHFmiaIs=";
+        };
+        postPatch = ''
+          substituteInPlace plugin.yaml --replace-fail 'requires_hermes: ">=0.22"' ""
+        '';
+      };
+
       cfg = config.services.hermes-agent;
       common = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
       hermesHome = "${cfg.stateDir}/.hermes";
@@ -146,9 +164,16 @@
             # Plugin przekazuje to do CLI jako `--effort xhigh` (Opus 5.5 domyślnie
             # ma `medium`, więc ustawienie jest konieczne).
             agent.reasoning_effort = "xhigh";
+            # Z polishLanguagePack; HERMES_LANGUAGE w .env miałby pierwszeństwo.
+            display.language = "pl";
             web.backend = "ddgs";
             # Pluginy spoza kategorii (model-provider ładuje się sam) są opt-in.
-            plugins.enabled = [ "mermaid-render" ];
+            # Scalanie config.yaml zastępuje listy w całości, więc wpis
+            # `hermes plugins enable` znika przy aktywacji — dopisywać tu.
+            plugins.enabled = [
+              "mermaid-render"
+              "hermes-lang-pl"
+            ];
             auxiliary.vision = {
               provider = "ollama-cloud";
               base_url = "https://ollama.com/v1";
@@ -165,6 +190,7 @@
           extraPlugins = [
             claudeSubscriptionPlugin
             mermaidRenderPlugin
+            polishLanguagePack
           ];
 
           extraPackages = with pkgs; [

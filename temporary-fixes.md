@@ -95,6 +95,24 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status` — musi zostać
   `suspended`.
 
+### 5. hermes-agent — pakiet językowy `hermes-lang-pl` bez `requires_hermes`
+
+- **Od:** 2026-10-11.
+- **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`polishLanguagePack`:
+  `applyPatches` + `substituteInPlace --replace-fail` na `plugin.yaml`).
+- **Objaw:** `Plugin 'hermes-lang-pl' skipped: requires hermes >=0.22, running
+  0.0.0` — mimo `plugins.enabled` interfejs zostaje po angielsku.
+- **Przyczyna:** `nix/packages.nix` w NousResearch/hermes-agent nie przekazuje
+  `version` do `nix/hermes-agent.nix` (domyślnie `"0.0.0"`, a `pyproject.toml`
+  na `main` też ma `0.0.0`; prawdziwy numer jest tylko na tagach wydań, np.
+  v2026.9.24 = 0.21.5), więc stempel instalacji ma `baseVersion = "0.0.0"`
+  i loader pomija każdy plugin z `requires_hermes` (poza `model-provider`).
+  Przypięty `main` (0a374d16, po 0.21.5) ma już `provides_locales`;
+  `hermes plugins validate` przechodzi.
+- **Kiedy usunąć:** gdy pakiet Nix Hermesa stempluje prawdziwą wersję `>=0.22`
+  (zgłosić upstream). Sprawdzenie: usunąć `postPatch`, przebudować, w
+  `journalctl -u hermes-agent -b` nie może być `hermes-lang-pl' skipped`.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte
