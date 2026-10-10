@@ -15,7 +15,7 @@ The upstream skill assumes pi extensions (`quiz`, `ask_user_question`, `research
 
 - **`quiz`** → graded questions asked in chat: pose the question (options for MCQ), wait for the answer, then score it explicitly (✅ / ⚠️ partial / ❌), reveal the correct answer, and give a one-or-two-sentence explanation.
 - **`ask_user_question`** → an open question asked directly in chat. Reserved for genuine no-right-answer forks (preferences, direction, what to teach next).
-- **`researcher`** → any research/web-search tooling available in this session. If none: when unsure of a fact and unable to verify it, say you are unsure instead of guessing.
+- **`researcher`** → Prime Agent's built-in `websearch` skill (`await websearch("query")` in the `ipython` tool; needs a Serper key set up via `/login`, otherwise it returns a setup message) or any other research tooling in this session. If none works: when unsure of a fact and unable to verify it, say you are unsure instead of guessing.
 - **`md-log`** → the session log — see the "Session log" section at the bottom of this file; spec and template in [references/notebook.md](references/notebook.md).
 
 **Language:** teach in the learner's language — Polish by default (mirror whatever language they write in). Pedagogical terms (unconditional truth, edge, DAG) may stay in English.
@@ -160,7 +160,7 @@ If LaTeX can be used, it should be. Write $f(x) = x^2$, not `f(x) = x^2`.
 
 ## Session log
 
-From Phase 1 on, keep the session as a Markdown notebook, updated live with your file-editing tool (local replacement for the upstream `md-log` extension):
+From Phase 1 on, keep the session as a Markdown notebook, updated live from the `ipython` tool (append with Python file I/O; targeted fixes with the built-in `edit` skill) — local replacement for the upstream `md-log` extension:
 
 1. **Location:** `~/nauka/ai-tutor/<topic>-<YYYY-MM-DD>.md`; if that directory can't be created, `<topic>.md` in the current working directory.
 2. **Record:** the goal/context/motivation from Phase 1b; every probe and quiz question with the learner's answer and grade (✅/⚠️/❌); the edge report; the mermaid dependency map; each node's 2–3-sentence summary; the closing state.

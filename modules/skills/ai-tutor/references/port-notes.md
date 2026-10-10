@@ -27,8 +27,11 @@ replacing the earlier Polish distillation of the same methodology.
    (he/him throughout); here: the user / the learner / they.
 2. **Tool substitution** (pi runtime → this agent), see "Tools & substitutes"
    in SKILL.md: `quiz` → graded chat questions; `ask_user_question` → open chat
-   question; `researcher` → research/web-search tooling (weakened fallback
-   stated explicitly where verification is impossible).
+   question; `researcher` → Prime Agent's built-in `websearch` skill (Serper,
+   needs `/login`) or other research tooling (weakened fallback stated
+   explicitly where verification is impossible). Prime Agent 0.9.8 exposes a
+   single model tool, `ipython` (`packages/coding-agent/src/core/tools/index.ts`);
+   files are written from Python or with the built-in `edit` skill.
 3. **Language directive added** (upstream had none — it wrote in English for an
    English learner): Polish default, mirror-the-learner rule.
 4. **Session log** section + `references/notebook.md` added — a port of the

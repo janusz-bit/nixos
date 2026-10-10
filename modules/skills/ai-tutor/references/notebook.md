@@ -17,7 +17,7 @@ Here the teacher does the mirroring itself, into a plain `.md` file
 - **Phase 1b (Goal):** the brief — goal ("understand X well enough to do Y"),
   context (level, time available), motivation (shapes the examples).
 - **Phase 1a (Probe):** every diagnostic question + the learner's answer + grade
-  (✅ / ⚠️ / ❌). On completion, the edge report (table below) with the bracked
+  (✅ / ⚠️ / ❌). On completion, the edge report (table below) with the bracketed
   edge: floor found, ceiling found, edge named.
 - **Phase 2 (Plan):** the prose approach and the mermaid dependency map; note
   the learner's approval before Phase 3 starts.
