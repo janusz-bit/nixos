@@ -88,6 +88,16 @@
         (import ./_hermes-agent/nixos-module.nix {
           inputs.self = inputs.hermes-agent;
         }).flake.nixosModules.default
+        # CLI dla innych modułów hosta (hermes-notify.nix) bez powielania
+        # logiki hermesCli.
+        {
+          options.services.hermes-agent.cliWrapper = lib.mkOption {
+            type = lib.types.package;
+            readOnly = true;
+            internal = true;
+            description = "Opakowanie `hermes` (hermesCli): jako konto usługi uruchamia binarkę wprost, innym kontom przez sudo -u.";
+          };
+        }
       ];
 
       # Pliki env łączy w $HERMES_HOME/.env aktywacja modułu procesem z uid
@@ -116,6 +126,7 @@
           enable = true;
           # CLI przez opakowania hermesCli (niżej), nie globalne HERMES_HOME.
           addToSystemPackages = false;
+          cliWrapper = hermesCli "hermes";
           extraDependencyGroups = [
             "all"
             "messaging"
