@@ -43,8 +43,8 @@ def _load_token() -> None:
 _load_token()
 
 
-# URL MCP Trilium — hostowo zależny (deklaratywnie przez TRILIUM_MCP_URL,
-# np. environment.sessionVariables w modules/hosts/nixos/ai.nix):
+# URL MCP Trilium — hostowo zależny (TRILIUM_MCP_URL z customBot.triliumMcpUrl,
+# environment.sessionVariables w modules/hosts/base/prime-agent.nix):
 #   - raspberry-pi-4: trilium-server na 127.0.0.1:8081 (default poniżej),
 #   - nixos: desktopowy Trilium na 127.0.0.1:37840.
 _DEFAULT_URL = "http://127.0.0.1:8081/mcp"
