@@ -20,8 +20,9 @@ host you are on are in **This host** at the end of this file.
    and every file that is a symlink into them (most of `/etc`, every systemd
    unit) is managed by Nix. Check with `readlink -f <file>`; change the Nix
    option that produces it instead.
-3. **No FHS paths.** Only `/bin/sh` and `/usr/bin/env` exist. There is no
-   `/usr/lib`, `/usr/include`, `/usr/local`, `/bin/bash` or `/usr/bin/python3`.
+3. **No FHS paths.** Only `/bin/sh`, `/usr/bin/env` and the nix-ld loader shim
+   exist. There is no `/usr/lib`, `/usr/include`, `/usr/local`, `/bin/bash` or
+   `/usr/bin/python3`.
 4. **You cannot use sudo.** It asks for a password and your shell has no tty.
    Hand privileged commands to the user (see *Changing the system*).
 5. **Never read, print or copy secrets** (`/run/agenix/*`, `~/.ssh/id_*`,
@@ -39,7 +40,7 @@ host you are on are in **This host** at the end of this file.
 | Per-user packages from the config | `/etc/profiles/per-user/$USER/bin` |
 | User-installed tools (uv, npm, pipx) | `~/.local/bin` — on `PATH`, writable |
 | Running system | `/run/current-system` → `/nix/store/…-nixos-system-…` |
-| GPU driver libs (`libcuda`, …) | `/run/opengl-driver/lib` |
+| GPU driver libs (`libcuda`, …; laptop only) | `/run/opengl-driver/lib` |
 | Decrypted secrets | `/run/agenix/` — do not touch |
 | Mutable state | `/var/lib/<service>`, `$HOME` |
 | Config source | `/etc/nixos` (git repo; has its own `AGENTS.md`) |
@@ -84,8 +85,10 @@ binary cache — no channel download, versions match the system.
 
 ## Prebuilt / downloaded binaries
 
-- Dynamically linked binaries run through **nix-ld** (`/lib64/ld-linux-x86-64.so.2`
-  is its shim), but they find only the libraries in the nix-ld list.
+- Dynamically linked binaries run through **nix-ld** (the standard loader path
+  is its shim: `/lib64/ld-linux-x86-64.so.2` on x86_64,
+  `/lib/ld-linux-aarch64.so.1` on aarch64), but they find only the libraries
+  in the nix-ld list.
   `error while loading shared libraries: libX.so.N` → find the package with
   `nix-locate --minimal --whole-name libX.so.N`, then either run it with
   `LD_LIBRARY_PATH="$(nix build --no-link --print-out-paths nixpkgs#<pkg>.out)/lib" ./binary`
@@ -112,8 +115,9 @@ binary cache — no channel download, versions match the system.
 ## Changing the system
 
 1. Edit the flake in `/etc/nixos` — read its `AGENTS.md` first (module map,
-   verification steps, git rules). Claude Code for that repo is meant to run as
-   `claude-nixos` (dev shell with pre-commit hooks).
+   verification steps, git rules). Claude Code for that repo is meant to run
+   inside its dev shell (pre-commit hooks): `nix develop -c claude` in
+   `/etc/nixos`, alias `claude-nixos` on the laptop.
 2. The kind of change decides the option, never a manual edit:
 
    | Instead of | Use in the flake |
@@ -131,7 +135,8 @@ binary cache — no channel download, versions match the system.
    then `nixos-rebuild build --flake /etc/nixos#<target>` for package/service changes.
 4. Activation needs root — the **user** runs it in their own terminal:
    `update-local` (switch from `/etc/nixos`) or `update` (switch from GitHub
-   `master`, i.e. only after a push); `*-boot` variants apply on next boot.
+   `master`, i.e. only after a push); `update-boot` / `update-local-boot` apply
+   on next boot, `update-reboot` = `update-boot` + reboot.
    Not via Claude Code's `!` prefix (no tty for the sudo password). Afterwards
    check units with `systemctl status` / `journalctl`.
 5. Rollback: the previous generation in the boot menu, or (user, root)
