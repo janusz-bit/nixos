@@ -27,6 +27,15 @@
         hash = "sha256-kOQJWKqfGn41V21x/yjt8+i/MyQ2suctvbhf+x8djk8=";
       };
 
+      # Własny plugin: bloki ```mermaid odpowiedzi na Matrixie → PNG (mmdc).
+      # Opis w nagłówku _hermes-plugins/mermaid-render/__init__.py.
+      mermaidRenderPlugin = pkgs.linkFarm "mermaid-render" {
+        "plugin.yaml" = ./_hermes-plugins/mermaid-render/plugin.yaml;
+        "__init__.py" = pkgs.replaceVars ./_hermes-plugins/mermaid-render/__init__.py {
+          mmdc = lib.getExe pkgs.mermaid-cli;
+        };
+      };
+
       cfg = config.services.hermes-agent;
       common = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
       hermesHome = "${cfg.stateDir}/.hermes";
@@ -138,6 +147,8 @@
             # ma `medium`, więc ustawienie jest konieczne).
             agent.reasoning_effort = "xhigh";
             web.backend = "ddgs";
+            # Pluginy spoza kategorii (model-provider ładuje się sam) są opt-in.
+            plugins.enabled = [ "mermaid-render" ];
             auxiliary.vision = {
               provider = "ollama-cloud";
               base_url = "https://ollama.com/v1";
@@ -151,7 +162,10 @@
           restart = "always";
           restartSec = 5;
 
-          extraPlugins = [ claudeSubscriptionPlugin ];
+          extraPlugins = [
+            claudeSubscriptionPlugin
+            mermaidRenderPlugin
+          ];
 
           extraPackages = with pkgs; [
             # `claude` na PATH usługi — wymagany przez claudeSubscriptionPlugin.

@@ -1,0 +1,7 @@
+name: mermaid-render
+version: 1.0.0
+description: Render ```mermaid blocks of replies to PNG images on Matrix (mermaid-cli)
+author: janusz-bit
+kind: standalone
+provides_hooks:
+  - transform_llm_output
