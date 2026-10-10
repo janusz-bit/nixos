@@ -5,6 +5,15 @@ Markdown file to the session and mirrored the teaching into it automatically.
 Here the teacher does the mirroring itself, into a plain `.md` file
 (Obsidian-compatible: LaTeX and mermaid render natively).
 
+## Session log rules (moved from SKILL.md)
+
+From Phase 1 on, keep the session as a Markdown notebook, updated live from the `ipython` tool (append with Python file I/O; targeted fixes with the built-in `edit` skill) — local replacement for the upstream `md-log` extension:
+
+1. **Location:** `~/nauka/ai-tutor/<topic>-<YYYY-MM-DD>.md`; if that directory can't be created, `<topic>.md` in the current working directory.
+2. **Record:** the goal/context/motivation from Phase 1b; every probe and quiz question with the learner's answer and grade (✅/⚠️/❌); the edge report; the mermaid dependency map; each node's 2–3-sentence summary; the closing state.
+3. **Structure & template:** this file, below — headers per phase/node, numbered question lists, fenced mermaid blocks, LaTeX math.
+4. **Timing:** append immediately after each answered question/quiz — never batch it to the end of the session. When the session closes, give the learner the file's path.
+
 ## Location & timing
 
 - File: `~/nauka/ai-tutor/<topic>-<YYYY-MM-DD>.md`; fallback: `<topic>.md` in the cwd.

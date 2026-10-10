@@ -61,3 +61,18 @@ Polish version remains in git history: commits cfa7525, eb484d1.
   generated visuals. If this agent ever gains subagents, port `visualize` next.
 - The pi extensions (`quiz.ts`, `ask-user-question.ts`, `md-log.ts`,
   `visual-tools`) — behavior is inlined in SKILL.md instead.
+
+## Structure: progressive disclosure (2026-10-10)
+
+Prime Agent loads the whole SKILL.md whenever the skill triggers — on every
+explanation — so the 21 KB single file was split without dropping a rule:
+SKILL.md keeps the two principles, probe → plan → teach and the quiz rules in
+short form plus a "What to read, when" list; the upstream wording moved
+verbatim (with the de-personalization above) into `references/principles.md`
+(philosophy, Principle i, Principle ii), `references/process.md` (process
+intro, accuracy paragraph, Phases 1–3), `references/quiz-options.md` (option
+construction procedure) and `references/formatting.md` (LaTeX; plus the
+mermaid map rule quoted from Phase 2). The Session log list moved into
+`references/notebook.md`. Where the short form and the full text differ, the
+full text wins (stated in SKILL.md). Only cross-references were edited
+("the philosophy above" → principles.md).
