@@ -16,16 +16,19 @@ def ob_json(*args, **kw):
     return json.loads(ob(*args, **kw))
 ```
 
-## 2) scrape with JS eval (returns one JSON line per URL)
+## 2) scrape with JS eval (one JSON document, per-URL entries in `results`)
 
 ```python
-out = ob("scrape", "--eval",
-         "JSON.stringify({title: document.title, h1: document.querySelector('h1')?.innerText})",
-         "https://example.com", "https://news.ycombinator.com",
-         "--format", "json")
-for line in out.strip().splitlines():
-    print(json.loads(line))
+res = ob_json("scrape", "-q", "--eval",
+              "JSON.stringify({title: document.title, h1: document.querySelector('h1')?.innerText})",
+              "https://example.com", "https://news.ycombinator.com",
+              "--format", "json")
+for item in res["results"]:
+    # `eval` holds the expression's value as a string; decode it again here.
+    print(item["url"], json.loads(item["eval"]))
 ```
+
+`--format text` prints one tab-separated line per URL: `<time>ms <url> <title>`.
 
 ## 3) playwright-core over CDP (node script template)
 
@@ -46,8 +49,10 @@ const { chromium } = require("playwright-core");
 
 ## 4) MCP mode
 
-`obscura mcp` speaks MCP over stdio. Minimal Python client: spawn the process and
-exchange JSON-RPC frames (initialize, tools/list, tools/call) — no extra deps.
+`obscura mcp` speaks MCP over stdio (newline-delimited JSON-RPC; `--http` serves
+HTTP on 127.0.0.1:3000 instead). Minimal Python client: spawn the process and
+exchange frames (initialize, notifications/initialized, tools/list, tools/call)
+— no extra deps.
 
 ## 5) Politeness & safety
 
