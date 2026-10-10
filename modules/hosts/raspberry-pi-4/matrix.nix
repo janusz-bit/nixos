@@ -24,10 +24,6 @@
         # Bezpośrednio, z pominięciem tunelu.
         MATRIX_HOMESERVER = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
         MATRIX_ALLOWED_USERS = owner;
-        # Odpowiedź na każdą wiadomość ${owner}, także w pokojach z innymi
-        # osobami (domyślnie tylko na @wzmiankę; DM zawsze). Cudze wiadomości
-        # i tak odcina MATRIX_ALLOWED_USERS.
-        MATRIX_REQUIRE_MENTION = "false";
         # Cel powiadomień (cron `deliver: "matrix"`, `hermes send matrix …`):
         # DM z ${owner}. Nie przez /sethome — w trybie zarządzanym (Nix)
         # Hermes nie zapisuje config.yaml, więc wybór zginąłby po restarcie.
