@@ -88,7 +88,7 @@
         (import ./_hermes-agent/nixos-module.nix {
           inputs.self = inputs.hermes-agent;
         }).flake.nixosModules.default
-        # CLI dla innych modułów hosta (hermes-notify.nix) bez powielania
+        # CLI dla innych modułów hosta (claude-notify.nix) bez powielania
         # logiki hermesCli.
         {
           options.services.hermes-agent.cliWrapper = lib.mkOption {

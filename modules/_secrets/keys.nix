@@ -20,7 +20,7 @@
     # Prywatny w hermes-notify-key.age: na laptopie czyta go dinosaur, na RPi
     # grupa hermes (nixos). Loguje WYŁĄCZNIE na konto hermes RPi z localhost
     # (tunel cloudflared) z wymuszonym poleceniem hermes-notify-receive —
-    # pozwala tylko wysłać tekst do DM na Matrixie (hermes-notify.nix).
+    # pozwala tylko wysłać tekst do DM na Matrixie (claude-notify.nix).
     # NIE odbiorca agenix.
     hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
   };

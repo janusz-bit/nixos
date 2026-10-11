@@ -45,7 +45,7 @@
         nixos-system = nixosSystemSkill;
       }
       # Program skilla (claude-notify) zależy od hosta, więc jest w
-      # modules/hosts/raspberry-pi-4/hermes-notify.nix, nie w skillPackages —
+      # modules/hosts/raspberry-pi-4/claude-notify.nix, nie w skillPackages —
       # skill tylko tam, gdzie ten moduł wdrożył klucz.
       // lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
         hermes-notify = ./hermes-notify;
