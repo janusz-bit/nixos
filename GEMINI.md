@@ -45,6 +45,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - SSH reachable only from `customTop.lan.subnet` (iptables rule; `openFirewall = false`).
 - Account `claude-remote` (`remote-agent.nix`) for Claude Code on the RPi: own primary group, no supplementary groups, no sudo, no agenix secrets; only the RPi key `keys.users.claude-rpi` with `from=<LAN>,restrict`. For eval/builds only — activation stays with the user.
 - `claude-notify` (`nixos-hermes-notify` in `modules/hosts/raspberry-pi-4/hermes-notify.nix`): text to the Matrix DM through Hermes on the RPi (see `raspberry-pi-4`); `claude-remote` cannot read its key.
+- devenv (`devenv.nix`): `pkgs.devenv` plus `devenv.cachix.org` in the daemon's `nix.settings` on this host only (devenv's per-project `cachix.pull` is ignored for non-trusted users; `use devenv` in `.envrc` works through base direnv).
 - Zed (`packages.nix`): `zeditor` wrapped with `VK_LOADER_DRIVERS_SELECT='intel_icd*'` (only the Mesa ANV ICD is loaded; the NVIDIA ICD would wake the dGPU from D3cold at `vkCreateInstance`); processes started from Zed inherit it (temporary, `temporary-fixes.md`).
 - `tuning.nix` (CachyOS-Settings, only items with a shown effect; the header lists what was skipped and why): zram zstd at 100% RAM with zswap disabled (`zswap.enabled=0`; the CachyOS kernel enables it by default → double compression), swappiness 150/page-cluster 0, dirty bytes, THP `max_ptes_none=409`, `DefaultTimeoutStopSec=10s` (system + user), `kernel.sysrq=244`, systemd-oomd on `system.slice` and `user@.service` (80%; KWin/session bus `omit` — drop-ins for KDE units via `systemd.user.units.*.text`, because `systemd.user.services` drop-ins add `Environment=PATH=…`).
 - No ananicy-cpp: with cgroup v2 nice only competes inside one cgroup (measured 50/50 across scopes), and its rules made GameMode refuse renice.
@@ -77,7 +78,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - ttyd credentials never on a command line (nginx `auth_basic` with a hash file generated from the agenix secret); ttyd itself is reachable only through nginx (Unix socket `root:nginx 0660`); its password is its own secret, never another service's.
 
 ## Binary caches
-`customTop.cache` (→ `nix.settings`) and `nixConfig` in `flake.nix` must list the same caches: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`.
+`customTop.cache` (→ `nix.settings`) and `nixConfig` in `flake.nix` must list the same caches: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. `devenv.cachix.org` is host-level on `nixos` for devenv projects only (`modules/hosts/nixos/devenv.nix`), deliberately outside `customTop.cache`/`nixConfig`.
 
 ## Development workflow
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions). Claude Code: start it with the alias `claude-nixos` (host `nixos`, `modules/hosts/nixos/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
