@@ -60,10 +60,14 @@ let
     let
       # HostKeyAlias: ten sam wpis niezależnie od celu (tunel albo localhost).
       knownHosts = pkgs.writeText "hermes-notify-known-hosts" "${rpi} ${keys.sshHostKeys.${rpi}}\n";
+      # Limit z zapasem: wysyłka przez `hermes send` na RPi trwa 22–31 s
+      # (zmierzone 2026-10-11), a przy 20 s wiadomość dochodziła mimo kodu 124.
+      # -T: odbiornik nie dostaje pty (`restrict`), więc bez ostrzeżenia ssh.
       sshCommand = [
         "timeout"
-        "20"
+        "60"
         "ssh"
+        "-T"
         "-F"
         "/dev/null"
         "-i"
