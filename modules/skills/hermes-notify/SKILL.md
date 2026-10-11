@@ -27,8 +27,13 @@ repeat it.
 
 ## Form
 
-- Polish, at most 8 lines, concrete: what is done and its result, or exactly
+- Polish, at most ~8 lines, concrete: what is done and its result, or exactly
   what you need from the user (list the options when there is a choice).
+- Hermes renders the text as Markdown on Matrix: use **bold**, `inline code`
+  (paths, commands, names), short lists (put a blank line before the list) and
+  fenced code blocks.
+- No tables and no headings. Text in `<...>` outside code is dropped as an
+  unknown HTML tag, so put anything with `<` or `>` in backticks.
 - Never secrets, tokens, passwords or keys; no long logs or diffs, at most the
   one line of an error that matters.
 
@@ -44,6 +49,11 @@ EOF
 ```
 
 Short text as an argument, longer text on stdin. Exit status 0 means Hermes
-accepted the message. Otherwise the error says why (no access to the key from
-this account, limit of 30 messages per hour, the RPi unreachable): do not
-retry in a loop, mention the failure in your reply instead.
+accepted the message (or the same message from this session already went out
+less than 60 s ago and was skipped). Otherwise the error says why (no access to
+the key from this account, limit of 30 messages per hour, the RPi
+unreachable): do not retry in a loop, mention the failure in your reply
+instead.
+
+`claude-notify --print "..."` writes the final message (with the header) to
+stdout instead of sending it; use it only to test the formatting.
