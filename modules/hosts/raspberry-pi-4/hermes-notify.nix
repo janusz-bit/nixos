@@ -124,9 +124,27 @@ let
           input=$(cat)
           cwd=$(jq -r '.cwd // empty' <<<"$input")
           text="$pause Claude czeka ($(jq -r '.notification_type // "?"' <<<"$input")): $(jq -r '.message // ""' <<<"$input")"
-          # Kontekst z ekranu: ostatnie niepuste linie panelu tmux z sesją.
-          if [[ -n ''${TMUX_PANE-} ]] && pane=$(tmux capture-pane -p -J -t "$TMUX_PANE" | awk NF | tail -n 15); then
-            text+=$'\n\n'$pane
+          # Kontekst z ekranu: końcówka panelu tmux z sesją jako blok kodu.
+          # Hermes zamienia wiadomość z Markdownu na HTML, więc zwykły tekst
+          # TUI tracił wcięcia, `*`/`_` stawały się kursywą, a linie ─ na całą
+          # szerokość terminala zawijały się w kilka wierszy. awk (LC_ALL=C:
+          # length liczy bajty) zdejmuje końcowe spacje, pomija linie z samych
+          # ramek (U+2500–U+257F) i bierze od końca najwyżej 20 linii
+          # i 2500 bajtów: razem z nagłówkiem poniżej limitu odbiornika (3500),
+          # który inaczej uciąłby płot zamykający blok.
+          if [[ -n ''${TMUX_PANE-} ]] && pane=$(tmux capture-pane -p -J -t "$TMUX_PANE" | LC_ALL=C awk '
+            { sub(/[[:space:]]+$/, "") }
+            { rest = $0; gsub(/[[:space:]]|\xe2[\x94\x95][\x80-\xbf]/, "", rest) }
+            rest != "" { line[++n] = $0 }
+            END {
+              first = n + 1
+              while (first > 1 && n - first < 19 && bytes + length(line[first - 1]) < 2500) bytes += length(line[--first]) + 1
+              for (i = first; i <= n; i++) print line[i]
+            }') && [[ -n $pane ]]; then
+            # Płot dłuższy niż każdy ciąg backticków na ekranie.
+            fence='```'
+            while [[ $pane == *"$fence"* ]]; do fence+='`'; done
+            text+=$'\n\n'$fence$'\n'$pane$'\n'$fence
           fi
         else
           cwd=$PWD
