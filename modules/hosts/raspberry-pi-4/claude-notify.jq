@@ -59,10 +59,38 @@ def record:
         elif $t == "WebFetch" then {url: ($i.url | str | cut(500))}
         elif $t == "WebSearch" then {query: ($i.query | str | cut(300))}
         elif ($t | IN("Grep", "Glob")) then {pattern: ($i.pattern | str | cut(300)), path: ($i.path | str | cut(300))}
+        elif $t == "AskUserQuestion" then
+          {questions: [($i.questions // [])[0:4][] | {
+            header: (.header | str | oneline | cut(40)),
+            question: (.question | str | oneline | cut(300)),
+            multi: (.multiSelect == true),
+            options: [(.options // [])[0:6][] | {
+              label: (.label | str | oneline | cut(100)),
+              description: (.description | str | oneline | cut(200))
+            }]
+          }]}
+        elif $t == "ExitPlanMode" then {plan: ($i.plan | str | cut(3000)), path: ($i.planFilePath | str | cut(300))}
         else {json: ($i | tojson | cut(1000))}
         end
       )
     };
+
+# Pytania AskUserQuestion: nagłówek, pytanie, numerowane opcje (numery jak
+# w oknie Claude Code; ostatnia pozycja okna, własna odpowiedź, nie ma
+# numeru tutaj). Pusta linia przed listą: python-markdown nie przerywa
+# akapitu listą. $compact: bez opisów opcji, krótsze teksty.
+def questions($compact):
+  [.questions[]
+   | (if $compact then 150 else 300 end) as $qw
+   | (if .header != "" then "**\(.header | esc)** — " else "" end)
+     + (.question | cut($qw) | esc)
+     + (if .multi then " _(można wybrać kilka)_" else "" end)
+     + "\n\n"
+     + ([.options | to_entries[]
+         | "\(.key + 1). " + (.value.label | cut(if $compact then 60 else 100 end) | esc)
+           + if $compact or .value.description == "" then "" else " — " + (.value.description | esc) end]
+        | join("\n"))
+  ] | join("\n\n");
 
 # Jedno wywołanie narzędzia; $compact (gdy pełna wiadomość przekracza limit):
 # bez bloków, krótsze pola.
@@ -70,22 +98,29 @@ def detail($compact; $b):
   .tool as $t
   | .input as $i
   | (if $compact then 100 else 300 end) as $w
-  | "**\($t | esc)**"
-    + if $t == "Bash" then
-        (if $i.description != "" then " — " + ($i.description | cut($w) | esc) else "" end)
-        + if $i.command == "" then ""
-          elif $compact then " " + ($i.command | split("\n")[0] | cut(80) | code)
-          else "\n" + ($i.command | fit(12; 160; $b) | block("bash"))
+  | if $i | has("questions") then $i | questions($compact)
+    elif $i | has("plan") then
+      (if $compact then ($i.plan | split("\n") | map(select(test("\\S")))[0] // "" | cut(100) | esc)
+       else $i.plan | sub("\\s+$"; "") | fit(15; 160; $b) | block("markdown") end)
+      + if $i.path != "" then "\n" + ($i.path | code) else "" end
+    else
+      "**\($t | esc)**"
+        + if $t == "Bash" then
+            (if $i.description != "" then " — " + ($i.description | cut($w) | esc) else "" end)
+            + if $i.command == "" then ""
+              elif $compact then " " + ($i.command | split("\n")[0] | cut(80) | code)
+              else "\n" + ($i.command | fit(12; 160; $b) | block("bash"))
+              end
+          elif $i | has("url") then " " + ($i.url | cut($w) | code)
+          elif $i | has("query") then " " + ($i.query | cut($w) | code)
+          elif $i | has("pattern") then
+            " " + ($i.pattern | cut($w) | code)
+            + if $i.path != "" then " w " + ($i.path | cut($w) | code) else "" end
+          elif $i | has("path") then " " + ($i.path | cut($w) | code)
+          elif $compact then ""
+          else "\n" + ($i.json | fit(12; 160; $b) | block("json"))
           end
-      elif $i | has("url") then " " + ($i.url | cut($w) | code)
-      elif $i | has("query") then " " + ($i.query | cut($w) | code)
-      elif $i | has("pattern") then
-        " " + ($i.pattern | cut($w) | code)
-        + if $i.path != "" then " w " + ($i.path | cut($w) | code) else "" end
-      elif $i | has("path") then " " + ($i.path | cut($w) | code)
-      elif $compact then ""
-      else "\n" + ($i.json | fit(12; 160; $b) | block("json"))
-      end;
+    end;
 
 # Okno świeżości: permission_prompt przychodzi ~6 s po otwarciu okna zgody
 # (dłużej, gdy użytkownik coś pisze), więc 30 s obejmuje bieżącą prośbę.
@@ -149,7 +184,10 @@ def body($compact):
       fresh_records as $recs
       | ($recs[0:3]) as $shown
       | (2400 / ($shown | length) | floor) as $b
-      | "\(pause) **Claude czeka na zgodę**: "
+      | ($shown | map(.tool)) as $tools
+      | (if ($tools | all(. == "AskUserQuestion")) then "\u2753 **Claude pyta**\n\n"
+         elif ($tools | all(. == "ExitPlanMode")) then "\ud83d\udccb **Claude prosi o akceptację planu**\n"
+         else "\(pause) **Claude czeka na zgodę**: " end)
         + ([$shown[] | detail($compact; $b)] | join("\n\n"))
         + if ($recs | length) > 3 then "\n\n… i jeszcze \(($recs | length) - 3)" else "" end
     else

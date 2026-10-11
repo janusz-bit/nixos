@@ -36,6 +36,9 @@
 # PermissionRequest (`claude-notify --record`, plik sesji
 # w $XDG_RUNTIME_DIR/claude-notify, 0700); bez rekordu (np. sieć komendy
 # w sandboksie) tytuł/treść powiadomienia i okno dialogu z ekranu tmux.
+# AskUserQuestion idzie jako pytania z numerowanymi opcjami (numery jak
+# w oknie Claude Code), a ExitPlanMode jako plan w bloku markdown ze ścieżką
+# pliku planu.
 # Całość do 3300 bajtów, bo odbiornik tnie przy 3500 (urwałby płot bloku).
 # Ta sama wiadomość z tej samej sesji idzie najwyżej raz na 60 s.
 #
