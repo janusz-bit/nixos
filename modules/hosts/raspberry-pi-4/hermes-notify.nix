@@ -24,11 +24,25 @@
 # (-F /dev/null), bo base-ssh ma `Host ssh.*` → User root.
 #
 # Claude Code: skill hermes-notify (kiedy i jak pisać) oraz ustawienia
-# zarządzane z hookiem Notification i regułą allow (claudeCodeSettings niżej).
+# zarządzane z hookami Notification i PermissionRequest i regułą allow
+# (claudeCodeSettings niżej).
 # claude-notify nie trafia do skillPackages (modules/skills/default.nix): cel
 # ssh, ścieżka klucza i odbiornik zależą od hosta, więc pakiet powstaje tutaj.
 #
-# Test po wdrożeniu (RPi dopiero po merge do master i `update`, laptop po
+# Wiadomość (claude-notify.jq): Hermes zamienia Markdown na HTML Matrixa
+# i odrzuca nieznane tagi, więc wolny tekst jest escapowany, a ścieżki
+# i polecenia idą w kod. Nagłówek: host, konto, katalog roboczy, w tmux sesja
+# i okno. Prośba o zgodę: narzędzie i argumenty z rekordu, który zapisał hook
+# PermissionRequest (`claude-notify --record`, plik sesji
+# w $XDG_RUNTIME_DIR/claude-notify, 0700); bez rekordu (np. sieć komendy
+# w sandboksie) tytuł/treść powiadomienia i okno dialogu z ekranu tmux.
+# Całość do 3300 bajtów, bo odbiornik tnie przy 3500 (urwałby płot bloku).
+# Ta sama wiadomość z tej samej sesji idzie najwyżej raz na 60 s.
+#
+# Test bez wysyłki: `claude-notify --print …` wypisuje gotową wiadomość
+# (deduplikacja i rekordy działają jak przy wysyłce), np.
+# `jq -n '{session_id:"s",cwd:"/tmp",notification_type:"permission_prompt",message:"m"}' | claude-notify --print --hook`.
+# Po wdrożeniu (RPi dopiero po merge do master i `update`, laptop po
 # `update-local`): `echo test | claude-notify` na obu hostach, na RPi także
 # `sudo -u hermes claude-notify test` (ścieżka bez ssh). Odbiornik: pusty stdin
 # albo 31. wiadomość w ciągu godziny → kod 1 i komunikat na stderr. Hook: w
@@ -45,8 +59,8 @@ let
   rpi = "raspberry-pi-4";
   hermesUser = "hermes";
 
-  # claude-notify [TEKST...] — TEKST (bez argumentów: stdin) do DM.
-  # claude-notify --hook — JSON hooka Notification Claude Code na stdin.
+  # Skrypt: claude-notify.sh (tryby, stan, deduplikacja, wysyłka), format
+  # wiadomości i rekordów: claude-notify.jq.
   mkClaudeNotify =
     {
       pkgs,
@@ -94,115 +108,62 @@ let
         pkgs.coreutils
         pkgs.gawk
         pkgs.jq
+        pkgs.util-linux
         ssh
         tmux
       ];
       text = ''
-        # U+1F916 (robot) i U+23F8 U+FE0F (pauza) jako bajty UTF-8: nie zależą
-        # od locale procesu (hook, usługa), a źródło zostaje bez emoji.
-        robot=$'\xf0\x9f\xa4\x96'
-        pause=$'\xe2\x8f\xb8\xef\xb8\x8f'
         key=${lib.escapeShellArg key}
         receiver=${lib.escapeShellArg (lib.optionalString (receiver != null) (lib.getExe receiver))}
-        user=$(id -un)
-
-        hook=false
-        if [[ ''${1-} == --hook ]]; then
-          hook=true
-          # Hook nie może przeszkadzać sesji: każdy błąd (np. konto bez dostępu
-          # do klucza, jak claude-remote) kończy się po cichu kodem 0.
-          exec 2>/dev/null
-          trap 'exit 0' EXIT
-        fi
-
-        fail() {
-          printf 'claude-notify: %s\n' "$1" >&2
-          exit 1
-        }
-
-        if $hook; then
-          input=$(cat)
-          cwd=$(jq -r '.cwd // empty' <<<"$input")
-          text="$pause Claude czeka ($(jq -r '.notification_type // "?"' <<<"$input")): $(jq -r '.message // ""' <<<"$input")"
-          # Kontekst z ekranu: końcówka panelu tmux z sesją jako blok kodu.
-          # Hermes zamienia wiadomość z Markdownu na HTML, więc zwykły tekst
-          # TUI tracił wcięcia, `*`/`_` stawały się kursywą, a linie ─ na całą
-          # szerokość terminala zawijały się w kilka wierszy. awk (LC_ALL=C:
-          # length liczy bajty) zdejmuje końcowe spacje, pomija linie z samych
-          # ramek (U+2500–U+257F) i bierze od końca najwyżej 20 linii
-          # i 2500 bajtów: razem z nagłówkiem poniżej limitu odbiornika (3500),
-          # który inaczej uciąłby płot zamykający blok.
-          if [[ -n ''${TMUX_PANE-} ]] && pane=$(tmux capture-pane -p -J -t "$TMUX_PANE" | LC_ALL=C awk '
-            { sub(/[[:space:]]+$/, "") }
-            { rest = $0; gsub(/[[:space:]]|\xe2[\x94\x95][\x80-\xbf]/, "", rest) }
-            rest != "" { line[++n] = $0 }
-            END {
-              first = n + 1
-              while (first > 1 && n - first < 19 && bytes + length(line[first - 1]) < 2500) bytes += length(line[--first]) + 1
-              for (i = first; i <= n; i++) print line[i]
-            }') && [[ -n $pane ]]; then
-            # Płot dłuższy niż każdy ciąg backticków na ekranie.
-            fence='```'
-            while [[ $pane == *"$fence"* ]]; do fence+='`'; done
-            text+=$'\n\n'$fence$'\n'$pane$'\n'$fence
-          fi
-        else
-          cwd=$PWD
-          if (($#)); then
-            text=$*
-          else
-            text=$(cat)
-          fi
-          [[ -n ''${text//[[:space:]]/} ]] || fail "pusty tekst (podaj go jako argument albo na stdin)"
-        fi
-
-        header="$robot $HOSTNAME · $user"
-        if [[ -n ''${TMUX-} ]] && session=$(tmux display-message -p '#S' 2>/dev/null); then
-          header+=" · $session"
-        fi
-        header+=" · $(basename "''${cwd:-$PWD}")"
-
-        # Konto usługi (brama i jej procesy) woła odbiornik wprost; klucz
-        # hermes:hermes 0440 jest dla innych członków grupy hermes.
-        if [[ -n $receiver && $user == ${hermesUser} ]]; then
-          send=("$receiver")
-        else
-          [[ -r $key ]] || fail "brak dostępu do klucza $key (konto $user)"
-          send=(${lib.escapeShellArgs sshCommand})
-        fi
-        "''${send[@]}" <<<"$header"$'\n'"$text" || fail "wysyłka nie powiodła się (kod $?)"
-      '';
+        ssh_command=(${lib.escapeShellArgs sshCommand})
+        format=${./claude-notify.jq}
+        service_user=${hermesUser}
+      ''
+      + builtins.readFile ./claude-notify.sh;
     };
 
   # Ustawienia zarządzane Claude Code (każdy użytkownik i projekt hosta).
-  # Hook: prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
+  # Notification: prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
   # hermes-notify (modules/skills), dlatego bez Stop i idle_prompt.
+  # PermissionRequest: rusza w chwili otwarcia okna zgody i daje narzędzie
+  # z argumentami, których Notification nie ma (--record je tylko zapisuje).
+  # async: hook asynchroniczny z definicji nie wpływa na decyzję i nie
+  # opóźnia okna; zapis trwa ułamek sekundy, a Notification przychodzi ~6 s
+  # później. Hook synchroniczny bez wyjścia z kodem 0 też nie decyduje, ale
+  # okno czekałoby na start jq. Nie obejmuje sieci komend w sandboksie (wtedy
+  # Notification bez rekordu, z wycinkiem ekranu).
   # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`, więc obejmuje
   # też samo `claude-notify` z tekstem na stdin.
   # Obejmuje też `claude -p` pluginu claude-subscription-directsdk Hermesa
   # (--setting-sources "" nie wyłącza ustawień zarządzanych), ale go nie
   # zmienia: plugin daje --tools "" (bez Bash), --disable-slash-commands (bez
-  # skilli) i --permission-mode dontAsk (bez próśb o zgodę), a jego serwer MCP
-  # nie prosi o elicitation.
-  claudeCodeSettings = pkgs: claudeNotify: {
-    "claude-code/managed-settings.d/50-hermes-notify.json".source =
-      (pkgs.formats.json { }).generate "50-hermes-notify.json"
-        {
-          permissions.allow = [ "Bash(claude-notify *)" ];
-          hooks.Notification = [
-            {
-              matcher = "permission_prompt|elicitation_dialog";
-              hooks = [
+  # skilli) i --permission-mode dontAsk (bez próśb o zgodę, więc bez
+  # PermissionRequest), a jego serwer MCP nie prosi o elicitation.
+  claudeCodeSettings =
+    pkgs: claudeNotify:
+    let
+      hook = flag: {
+        type = "command";
+        command = "${lib.escapeShellArg (lib.getExe claudeNotify)} ${flag}";
+        async = true;
+      };
+    in
+    {
+      "claude-code/managed-settings.d/50-hermes-notify.json".source =
+        (pkgs.formats.json { }).generate "50-hermes-notify.json"
+          {
+            permissions.allow = [ "Bash(claude-notify *)" ];
+            hooks = {
+              Notification = [
                 {
-                  type = "command";
-                  command = "${lib.escapeShellArg (lib.getExe claudeNotify)} --hook";
-                  async = true;
+                  matcher = "permission_prompt|elicitation_dialog";
+                  hooks = [ (hook "--hook") ];
                 }
               ];
-            }
-          ];
-        };
-  };
+              PermissionRequest = [ { hooks = [ (hook "--record" // { timeout = 10; }) ]; } ];
+            };
+          };
+    };
 in
 {
   flake.modules.nixos.rpi-hermes-notify =
