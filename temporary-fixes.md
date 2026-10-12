@@ -123,12 +123,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `NVRM: Xid … 109 … CTX SWITCH TIMEOUT`.
 - **Przyczyna:** shadery DXVK z `VK_NV_raw_access_chains` przy nakładających
   się odczytach buforów. Fix w DXVK: PR 5958 (merge 081ee5c, 2026-10-10), nie
-  ma go w Proton Experimental 11.0-20261001 (DXVK v3.1.1-47-g68530156,
-  27 commitów wcześniej) ani w proton-cachyos 11.0.20260703.
+  ma go w proton-cachyos 11.0.20260703, którego używa gra (DXVK
+  v3.0.2-2-g0ff9cd3, opcja domyślnie włączona), ani w Proton Experimental
+  11.0-20261001 (DXVK v3.1.1-47-g68530156).
   https://github.com/doitsujin/dxvk/pull/5958 ,
   https://github.com/ValveSoftware/Proton/issues/8020
-- **Kiedy usunąć:** gdy Proton używany przez grę ma DXVK zawierające 081ee5c
-  (`cat ~/.local/share/Steam/steamapps/common/Proton\ -\ Experimental/files/lib/wine/dxvk/version`,
+- **Kiedy usunąć:** gdy proton-cachyos ma DXVK zawierające 081ee5c
+  (`cat "$(nix eval --raw .#nixosConfigurations.nixos.pkgs.proton-cachyos_x86_64_v3)"/files/lib/wine/dxvk/version`,
   potem `gh api repos/doitsujin/dxvk/compare/081ee5c...<hash>` musi dać
   `ahead`/`identical`). Wtedy `deadlockrun` = sam `gamemoderun`: usunąć
   moduł i w Launch Options wrócić do `gamemoderun %command%`.
