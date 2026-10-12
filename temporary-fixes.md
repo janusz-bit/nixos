@@ -113,11 +113,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (zgłosić upstream). Sprawdzenie: usunąć `postPatch`, przebudować, w
   `journalctl -u hermes-agent -b` nie może być `hermes-lang-pl' skipped`.
 
-### 6. Deadlock — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
+### 6. Deadlock, Dead by Daylight — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
 
 - **Od:** 2026-10-12.
-- **Plik:** `modules/hosts/nixos/deadlock.nix` (`deadlockrun`:
-  `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`).
+- **Pliki:** `modules/hosts/nixos/deadlock.nix` (`deadlockrun`) i
+  `modules/hosts/nixos/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
+  z `-dx11` renderuje przez DXVK; zawiasu w DBD nie zaobserwowano) —
+  `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`.
 - **Objaw:** na NVIDIA 610/615 (tu 615.71.09, RTX 5060) Deadlock w trybie DX11
   zawiesza się w walce: obraz stoi, dźwięk gra, w `journalctl -k`
   `NVRM: Xid … 109 … CTX SWITCH TIMEOUT`.
@@ -132,7 +134,8 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (`cat "$(nix eval --raw .#nixosConfigurations.nixos.pkgs.proton-cachyos_x86_64_v3)"/files/lib/wine/dxvk/version`,
   potem `gh api repos/doitsujin/dxvk/compare/081ee5c...<hash>` musi dać
   `ahead`/`identical`). Wtedy `deadlockrun` = sam `gamemoderun`: usunąć
-  moduł i w Launch Options wrócić do `gamemoderun %command%`.
+  moduł i w Launch Options wrócić do `gamemoderun %command%`; z `dbdrun`
+  usunąć tylko `DXVK_CONFIG`.
 
 ## Zamknięte
 
