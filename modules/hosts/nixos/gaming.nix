@@ -39,6 +39,17 @@ _: {
       programs = {
         steam = {
           enable = true;
+          # RTX 5060 jako urządzenie Vulkan 0 w Steamie. Warstwa Mesy
+          # device-select stawia na początku GPU od wyświetlacza (Iris Xe), a
+          # Steam prekompiluje shadery gier (fossilize_replay --device-index 0)
+          # i wybiera bucket cache dla urządzenia 0 — zmierzone 2026-10-12:
+          # ~190 tys. pipeline'ów Deadlocka trafiło do mesa_shader_cache_sf,
+          # nvidiav1 pusty, a gra renderuje na NVIDII. Bez warstwy kolejność
+          # ustala loader (dyskretne GPU pierwsze). EGL/GL (UI Steama) zostaje
+          # na iGPU; __NV_PRIME_RENDER_OFFLOAD przeniósłby EGL na dGPU, a
+          # kolejności urządzeń Vulkan nie zmienia (vulkaninfo). To samo FHS
+          # dostaje steam-run.
+          package = pkgs.steam.override { extraEnv.NODEVICE_SELECT = "1"; };
           # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
           protontricks.enable = true;
           remotePlay.openFirewall = true;
