@@ -113,6 +113,26 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (zgłosić upstream). Sprawdzenie: usunąć `postPatch`, przebudować, w
   `journalctl -u hermes-agent -b` nie może być `hermes-lang-pl' skipped`.
 
+### 6. Deadlock — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
+
+- **Od:** 2026-10-12.
+- **Plik:** `modules/hosts/nixos/deadlock.nix` (`deadlockrun`:
+  `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`).
+- **Objaw:** na NVIDIA 610/615 (tu 615.71.09, RTX 5060) Deadlock w trybie DX11
+  zawiesza się w walce: obraz stoi, dźwięk gra, w `journalctl -k`
+  `NVRM: Xid … 109 … CTX SWITCH TIMEOUT`.
+- **Przyczyna:** shadery DXVK z `VK_NV_raw_access_chains` przy nakładających
+  się odczytach buforów. Fix w DXVK: PR 5958 (merge 081ee5c, 2026-10-10), nie
+  ma go w Proton Experimental 11.0-20261001 (DXVK v3.1.1-47-g68530156,
+  27 commitów wcześniej) ani w proton-cachyos 11.0.20260703.
+  https://github.com/doitsujin/dxvk/pull/5958 ,
+  https://github.com/ValveSoftware/Proton/issues/8020
+- **Kiedy usunąć:** gdy Proton używany przez grę ma DXVK zawierające 081ee5c
+  (`cat ~/.local/share/Steam/steamapps/common/Proton\ -\ Experimental/files/lib/wine/dxvk/version`,
+  potem `gh api repos/doitsujin/dxvk/compare/081ee5c...<hash>` musi dać
+  `ahead`/`identical`). Wtedy `deadlockrun` = sam `gamemoderun`: usunąć
+  moduł i w Launch Options wrócić do `gamemoderun %command%`.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

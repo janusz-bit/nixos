@@ -18,6 +18,7 @@
       self.modules.nixos.nixos-appimage-run
       self.modules.nixos.nixos-helium
       self.modules.nixos.nixos-dbd
+      self.modules.nixos.nixos-deadlock
       self.modules.nixos.nixos-gaming
       self.modules.nixos.nixos-snapper
       self.modules.nixos.nixos-remote-agent
