@@ -23,7 +23,7 @@
 # LAN-ie. fail2ban laptopa nie ignoruje LAN-u: 5 nieudanych logowań banuje RPi.
 { customTop, ... }:
 let
-  keys = import "${customTop.secretsDir}/keys.nix";
+  inherit (customTop) keys;
   user = "claude-remote";
 in
 {

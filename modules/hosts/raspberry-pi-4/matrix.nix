@@ -88,8 +88,7 @@
         };
 
         # Brama czyta .env tylko przy starcie, a moduł nie restartuje jej po
-        # zmianie konfiguracji (ścieżka /run/agenix/… jest stała). Hash, nie
-        # ścieżka: ta leży w źródle flake'a i zmienia się z każdym commitem.
+        # zmianie konfiguracji (ścieżka /run/agenix/… jest stała).
         systemd.services.hermes-agent.restartTriggers = [
           (builtins.hashFile "sha256" secretFile)
           (builtins.toJSON hermesEnv)

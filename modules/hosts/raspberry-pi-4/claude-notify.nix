@@ -52,7 +52,7 @@
 # sesji Claude Code w tmux polecenie, które wymaga zgody (prompt uprawnień).
 { customTop, lib, ... }:
 let
-  keys = import "${customTop.secretsDir}/keys.nix";
+  inherit (customTop) keys;
 
   # Dopóki pliku nie ma w gicie (flake widzi tylko śledzone pliki), funkcja jest
   # wyłączona, a ewaluacja tylko ostrzega.

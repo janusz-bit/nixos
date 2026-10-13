@@ -7,7 +7,7 @@
       ...
     }:
     let
-      keys = import "${customTop.secretsDir}/keys.nix";
+      inherit (customTop) keys;
     in
     {
       networking.hostName = "raspberry-pi-4";

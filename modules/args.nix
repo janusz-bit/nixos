@@ -1,5 +1,4 @@
-{ self, ... }:
-{
+_: {
   _module.args.customTop = rec {
     repository = {
       name = "nixos";
@@ -44,6 +43,12 @@
         }
       ];
     };
-    secretsDir = self + "/modules/_secrets";
+    # Literał ścieżki, nie `self + "/modules/_secrets"`: string ze ścieżką do
+    # źródła flake'a niesie kontekst CAŁEGO repo, więc każdy commit (nawet
+    # komentarz) zmieniał toplevel wszystkich hostów. Ścieżka kopiuje do store
+    # tylko używany plik (`<hash>-<nazwa>.age`, adres zależny od treści).
+    secretsDir = ./_secrets;
+    # Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts).
+    keys = import ./_secrets/keys.nix;
   };
 }
