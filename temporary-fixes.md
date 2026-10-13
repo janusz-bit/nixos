@@ -71,7 +71,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 4. Zed — Vulkan tylko z ICD Intela (`VK_LOADER_DRIVERS_SELECT`)
 
 - **Od:** 2026-10-10.
-- **Plik:** `modules/hosts/nixos/packages.nix` (`zed-editor-igpu`: `symlinkJoin`
+- **Plik:** `modules/desktop/dev.nix` (`zedIntelOnly`: `symlinkJoin`
   + `wrapProgram $out/bin/zeditor --set VK_LOADER_DRIVERS_SELECT 'intel_icd*'`).
 - **Objaw:** `zeditor ~/projekt` zmienia
   `/sys/bus/pci/devices/0000:01:00.0/power/runtime_status` z `suspended` na

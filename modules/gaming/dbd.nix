@@ -7,7 +7,7 @@
 # nadal otwarte; ścieżka descriptor heap z vkd3d-proton 3.0.1 jest tylko za
 # VKD3D_CONFIG z powodu błędów NVIDII). -dx11 (wg PCGamingWiki nadal
 # wspierane) przełącza grę na DXVK, przez które dobrze działa tu Deadlock.
-# dGPU wybiera już GAMEMODERUNEXEC (configuration.nix,
+# dGPU wybiera już GAMEMODERUNEXEC (gaming/gamemode.nix,
 # __VK_LAYER_NV_optimus=NVIDIA_only); wrapper, a nie zmienne sesji, bo Steam
 # odpala go przy każdym starcie gry.
 # Sprawdzenie: Launch Options `PROTON_LOG=1 dbdrun %command%`, w

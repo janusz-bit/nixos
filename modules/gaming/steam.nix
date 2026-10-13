@@ -1,4 +1,10 @@
-_: {
+# Steam z Protonem: Proton-CachyOS (x86-64-v3, z Chaotic-Nyx) jako narzędzie
+# zgodności, protontricks, Remote Play, NTSYNC w kernelu i warstwa Vulkan
+# low-latency-layer. GameMode i zmienne uruchamiania gier: gaming/gamemode.nix.
+# Sprawdzenie: Steam → Ustawienia → Zgodność widzi „Proton-CachyOS x86-64-v3”;
+# `ls -l /dev/ntsync`.
+{ inputs, ... }:
+{
   flake.modules.nixos.gaming-steam =
     {
       config,
@@ -6,78 +12,34 @@ _: {
       pkgs,
       ...
     }:
-    let
-      # GameMode → power-profiles-daemon: na czas gry profil "performance"
-      # (platform_profile firmware Lenovo jak Fn+Q: wyższe limity mocy,
-      # głośniejsze wentylatory + EPP "performance"), po grze przywraca
-      # profil sprzed startu (np. power-saver na baterii).
-      # gamemoded (usługa użytkownika) ma PATH zawężony do pkexec, więc
-      # skrypt niesie własny PATH (runtimeInputs).
-      gamemodePowerProfile = pkgs.writeShellApplication {
-        name = "gamemode-power-profile";
-        runtimeInputs = [
-          pkgs.coreutils
-          config.services.power-profiles-daemon.package
-        ];
-        text = ''
-          state="$XDG_RUNTIME_DIR/gamemode-power-profile"
-          case "$1" in
-            start)
-              powerprofilesctl get > "$state"
-              powerprofilesctl set performance
-              ;;
-            end)
-              prev=$(cat "$state" 2>/dev/null || true)
-              rm -f "$state"
-              powerprofilesctl set "''${prev:-balanced}"
-              ;;
-          esac
-        '';
-      };
-    in
     {
-      programs = {
-        steam = {
-          enable = true;
-          # RTX 5060 jako urządzenie Vulkan 0 w Steamie. Warstwa Mesy
-          # device-select stawia na początku GPU od wyświetlacza (Iris Xe), a
-          # Steam prekompiluje shadery gier (fossilize_replay --device-index 0)
-          # i wybiera bucket cache dla urządzenia 0 — zmierzone 2026-10-12:
-          # ~190 tys. pipeline'ów Deadlocka trafiło do mesa_shader_cache_sf,
-          # nvidiav1 pusty, a gra renderuje na NVIDII. Bez warstwy kolejność
-          # ustala loader (dyskretne GPU pierwsze). EGL/GL (UI Steama) zostaje
-          # na iGPU; __NV_PRIME_RENDER_OFFLOAD przeniósłby EGL na dGPU, a
-          # kolejności urządzeń Vulkan nie zmienia (vulkaninfo). To samo FHS
-          # dostaje steam-run.
-          package = pkgs.steam.override { extraEnv.NODEVICE_SELECT = "1"; };
-          # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
-          protontricks.enable = true;
-          remotePlay.openFirewall = true;
-          extraCompatPackages = [
-            pkgs.proton-cachyos_x86_64_v3 # Proton-CachyOS zoptymalizowany pod x86-64-v3 + ThinLTO + NTSYNC
-          ];
-        };
+      # Chaotic-Nyx: overlay z bleeding-edge pakietami (proton-cachyos_x86_64_v3,
+      # proton-ge-custom, mangohud_git...). Bez binary cache nyx: pakiety
+      # z niego budują się lokalnie albo przychodzą z własnego cachix.
+      imports = [ inputs.chaotic.nixosModules.default ];
+      chaotic.nyx.cache.enable = false;
 
-        # GameMode: dynamiczne zarządzanie priorytetami CPU/GPU i profili energetycznych.
-        # Domyślnie (1.8.2) już: governor "performance", pinning gry na
-        # P-rdzenie (hybryda P+E), wyłączona mitygacja split-lock. GameMode
-        # pomija ioprio („ioprio was (0) but we expected (4)” w journalu),
-        # a scheduler NVMe `none` i tak ignoruje priorytety I/O.
-        gamemode = {
-          enable = true;
-          settings = {
-            # nice -10 dla procesów gry (gamemoded ma CAP_SYS_NICE z wrappera NixOS).
-            # Działa tylko względem procesów z tej samej cgroup (scope Steama:
-            # steamwebhelper, fossilize_replay); między aplikacjami decyduje
-            # cpu.weight. GameMode renicuje wątki tylko z nice 0 — dlatego bez
-            # ananicy-cpp (configuration.nix).
-            general.renice = 10;
-            custom = lib.mkIf config.services.power-profiles-daemon.enable {
-              start = "${lib.getExe gamemodePowerProfile} start";
-              end = "${lib.getExe gamemodePowerProfile} end";
-            };
-          };
-        };
+      programs.steam = {
+        enable = true;
+        # Hybryda iGPU + NVIDIA (PRIME offload): dGPU jako urządzenie Vulkan 0
+        # w Steamie. Warstwa Mesy device-select stawia na początku GPU od
+        # wyświetlacza (iGPU), a Steam prekompiluje shadery gier
+        # (fossilize_replay --device-index 0) i wybiera bucket cache dla
+        # urządzenia 0 — zmierzone 2026-10-12 na RTX 5060: ~190 tys.
+        # pipeline'ów Deadlocka trafiło do mesa_shader_cache_sf, nvidiav1
+        # pusty, a gra renderuje na NVIDII. Bez warstwy kolejność ustala
+        # loader (dyskretne GPU pierwsze). EGL/GL (UI Steama) zostaje na iGPU;
+        # __NV_PRIME_RENDER_OFFLOAD przeniósłby EGL na dGPU, a kolejności
+        # urządzeń Vulkan nie zmienia (vulkaninfo). To samo FHS dostaje steam-run.
+        package = lib.mkIf config.hardware.nvidia.prime.offload.enable (
+          pkgs.steam.override { extraEnv.NODEVICE_SELECT = "1"; }
+        );
+        # Naprawa prefixów Wine/Proton (biblioteki, workaroundi per-gra)
+        protontricks.enable = true;
+        remotePlay.openFirewall = true;
+        extraCompatPackages = [
+          pkgs.proton-cachyos_x86_64_v3 # Proton-CachyOS zoptymalizowany pod x86-64-v3 + ThinLTO + NTSYNC
+        ];
       };
 
       boot = {
@@ -86,7 +48,7 @@ _: {
         # ale kernel CachyOS ma CONFIG_NTSYNC=m i nic nie ładuje modułu
         # (CachyOS robi to przez modules-load.d/ntsync.conf).
         kernelModules = [ "ntsync" ];
-        # dirty_bytes i nmi_watchdog (70-cachyos-settings.conf): tuning.nix.
+        # dirty_bytes i nmi_watchdog (70-cachyos-settings.conf): desktop/tuning.nix.
       };
 
       environment.systemPackages = [

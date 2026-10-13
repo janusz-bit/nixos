@@ -87,7 +87,7 @@ in
       };
 
       networking = {
-        # mkDefault: na WSL resolv.conf generuje Windows (wsl-settings.nix).
+        # mkDefault: na WSL resolv.conf generuje Windows (modules/hosts/wsl/default.nix).
         nameservers = lib.mkDefault [
           "9.9.9.9"
           "149.112.112.112"

@@ -14,7 +14,7 @@
     # Kernel CachyOS (zamiast chaotic). Gałąź release = kernele zbudowane przez
     # Hydrę autora i obecne w jego cache (attic.xuyh0120.win/lantian, patrz
     # nixConfig niżej). Cache trafia tylko przy overlays.pinned (ten sam nixpkgs
-    # co w Hydrze) — modules/hosts/nixos/configuration.nix.
+    # co w Hydrze) — modules/desktop/kernel.nix.
     # NIE ustawiać inputs.nixpkgs.follows - musi mieć swój nixpkgs dla zgodności patchy!
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

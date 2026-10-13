@@ -1,8 +1,4 @@
-{
-  inputs,
-  self,
-  ...
-}:
+_:
 let
   # Pakiety lokalne — jedno źródło dla hostów (overlay) i dla
   # `packages.<system>` (nix build / nix-update w flake-update).
@@ -21,18 +17,6 @@ in
   perSystem =
     { pkgs, ... }:
     {
-      packages = localPackages pkgs // {
-        raspberry-pi-4-sd-image =
-          let
-            image = inputs.nixpkgs.lib.nixosSystem {
-              modules = [
-                { nixpkgs.hostPlatform = "aarch64-linux"; }
-                self.modules.nixos.raspberry-pi-4
-                self.modules.nixos.rpi-sd-image
-              ];
-            };
-          in
-          image.config.system.build.sdImage;
-      };
+      packages = localPackages pkgs;
     };
 }

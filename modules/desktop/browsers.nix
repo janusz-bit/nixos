@@ -1,3 +1,5 @@
+# Przeglądarki: Helium, ungoogled-chromium, Firefox, Tor Browser.
+#
 # Helium Browser (fork ungoogled-chromium): pakiet lokalny
 # modules/packages/_helium (overlay local-packages; tam opis, czemu nie
 # github:ominit/helium-browser-flake) i jego konfiguracja jako polityki
@@ -6,7 +8,7 @@
 # Helium nie ma brandingu Chrome, więc czyta polityki tylko z wkompilowanego
 # /etc/chromium/policies (w profilu użytkownika nie ma loadera polityk), czyli
 # tam, gdzie pisze moduł programs.chromium. Polityki managed są zablokowane w
-# helium://settings. Te same pliki czyta ungoogled-chromium z packages.nix.
+# helium://settings. Te same pliki czyta ungoogled-chromium.
 #
 # Rozszerzenia: ExtensionInstallForcelist z samymi ID. Helium kieruje
 # pobieranie z Chrome Web Store przez proxy Helium services (patch
@@ -23,7 +25,13 @@ _: {
   flake.modules.nixos.desktop-browsers =
     { pkgs, ... }:
     {
-      environment.systemPackages = [ pkgs.helium ];
+      environment.systemPackages = with pkgs; [
+        helium
+        ungoogled-chromium
+        tor-browser
+      ];
+
+      programs.firefox.enable = true;
 
       programs.chromium = {
         # Moduł plasma6 ustawia już enablePlasmaBrowserIntegration, ale

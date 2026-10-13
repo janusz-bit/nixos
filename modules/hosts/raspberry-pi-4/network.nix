@@ -1,3 +1,7 @@
+# Sieć RPi: NetworkManager z kablem i zapasowym Wi-Fi (profil home-wifi
+# z sekretu wifi.age), domena regulacyjna PL. Usługi słuchają na localhost
+# i wychodzą tylko tunelem (cloudflared.nix), więc firewall nic nie otwiera.
+# Sprawdzenie: `nmcli connection show`, `iw reg get`.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-network =
@@ -13,6 +17,8 @@
     in
     lib.mkMerge [
       {
+        networking.networkmanager.enable = true;
+
         warnings = lib.optionals (!hasSecret) [
           "rpi-network: brak modules/_secrets/wifi.age w gicie — Wi-Fi nie zostanie skonfigurowane."
         ];
