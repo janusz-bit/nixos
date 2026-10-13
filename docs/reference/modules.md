@@ -6,10 +6,10 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/
 
-- **[args.nix](../../modules/args.nix)** — *(no header comment)*
+- **[args.nix](../../modules/args.nix)** — customTop: stałe całego repo (repozytorium i jego klon, e-mail, domena, domowy LAN, cache binarne z nixConfig, własny cachix, katalog sekretów, klucze publiczne), podane jako argument każdego modułu flake-parts.
 - **[default.nix](../../modules/default.nix)** — Szkielet flake'a: systemy, moduły flake-parts (flake.modules, git-hooks, github-actions), formatter, hooki pre-commit (gitleaks, nixfmt, statix, deadnix, generatory .github/workflows i docs/reference) oraz dev shell, w którym te hooki się instalują (`nix develop`, alias claude-nixos).
 - **[docs.nix](../../modules/docs.nix)** — Dokumentacja referencyjna generowana z flake'a: docs/reference/hosts.md (hosty z rejestru, moduły każdego hosta, diagram), modules.md (katalog wszystkich modułów z opisem z nagłówka) i options.md (opcje customBot i rejestru hostów). Opis modułu to pierwszy akapit komentarza na początku pliku — dlatego każdy niebanalny moduł zaczyna się nagłówkiem.
-- **[github-actions.nix](../../modules/github-actions.nix)** — *(no header comment)*
+- **[github-actions.nix](../../modules/github-actions.nix)** — Generator workflowów GitHub Actions (github-actions-nix): build toplevelu każdego hosta z rejestru, obrazy (SD RPi, ISO instalatora), ewaluacja wszystkich hostów, lint (pre-commit) i ręczna aktualizacja kernela CachyOS.
 
 ## modules/checks/
 
@@ -31,9 +31,9 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[desktop/locale.nix](../../modules/desktop/locale.nix)** (`desktop-locale`) · hosts: `nixos` — Polski układ i język: strefa czasowa, locale, klawiatura w konsoli i w sesji graficznej (xkb czyta też KWin na Waylandzie).
 - **[desktop/obs.nix](../../modules/desktop/obs.nix)** (`desktop-obs`) · hosts: `nixos` — OBS Studio z wtyczkami (przechwytywanie Wayland/PipeWire/Vulkan, usuwanie tła). Z NVIDIĄ (hardware.nvidia.enabled) wariant z CUDA: koder NVENC i akceleracja usuwania tła. Pakiety CUDA nie są w cache.nixos.org i budują się lokalnie (cudaCapabilities ustawia moduł sprzętu), więc bez NVIDII zostaje zwykły pakiet z cache.
 - **[desktop/plasma.nix](../../modules/desktop/plasma.nix)** (`desktop-plasma`) · hosts: `nixos` — Sesja graficzna: Plasma 6 na Waylandzie z SDDM. Serwer X nie jest potrzebny — XWayland uruchamia KWin, a opcje xkb (desktop/locale.nix) działają bez services.xserver.enable. KWallet przez PAM (login, sddm, kde) konfiguruje moduł plasma6. Sprawdzenie: `loginctl show-session $XDG_SESSION_ID -p Type` → wayland.
-- **[desktop/podman.nix](../../modules/desktop/podman.nix)** (`desktop-podman`) · hosts: `nixos` — *(no header comment)*
+- **[desktop/podman.nix](../../modules/desktop/podman.nix)** (`desktop-podman`) · hosts: `nixos` — Podman do kontenerów rootless: polecenie `docker` jako alias (dockerCompat) i DNS w domyślnej sieci dla podman-compose.
 - **[desktop/printing.nix](../../modules/desktop/printing.nix)** (`desktop-printing`) · hosts: `nixos` — Drukowanie przez CUPS; splix to sterownik drukarek Samsung (SPL).
-- **[desktop/tuning.nix](../../modules/desktop/tuning.nix)** (`desktop-tuning`) · hosts: `nixos` — *(no header comment)*
+- **[desktop/tuning.nix](../../modules/desktop/tuning.nix)** (`desktop-tuning`) · hosts: `nixos` — Strojenie pamięci i systemd wzorowane na CachyOS (CachyOS-Settings e27ea45, 2026-10-04): zRAM zstd na cały RAM bez zswap, swappiness/page-cluster, limity dirty, THP max_ptes_none 409, SysRq, bez watchdoga NMI, stop jednostek 10 s, oomd.
 
 ## modules/gaming/
 
@@ -46,17 +46,17 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/hardware/
 
-- **[hardware/lenovo.nix](../../modules/hardware/lenovo.nix)** (`hardware-lenovo`) · hosts: `nixos` — *(no header comment)*
-- **[hardware/x86-64-v3.nix](../../modules/hardware/x86-64-v3.nix)** (`hardware-x86-64-v3`) · hosts: `nixos` — *(no header comment)*
+- **[hardware/lenovo.nix](../../modules/hardware/lenovo.nix)** (`hardware-lenovo`) · hosts: `nixos` — Dodatki dla laptopów Lenovo (IdeaPad/LOQ): sterownik ideapad_laptop, thermald, power-profiles-daemon (profile zasilania w Plasmie przez platform_profile), progi baterii upower i tryb ochrony baterii przy starcie.
+- **[hardware/x86-64-v3.nix](../../modules/hardware/x86-64-v3.nix)** (`hardware-x86-64-v3`) · hosts: `nixos` — Cechy systemowe gccarch-x86-64{,-v2,-v3} demona nix dla procesorów z AVX2: pozwalają budować lokalnie derywacje skompilowane pod x86-64-v3.
 
 ## modules/hardware/LOQ-15IRX10/
 
-- **[hardware/LOQ-15IRX10/default.nix](../../modules/hardware/LOQ-15IRX10/default.nix)** (`hardware-LOQ-15IRX10`) · hosts: `nixos` — *(no header comment)*
+- **[hardware/LOQ-15IRX10/default.nix](../../modules/hardware/LOQ-15IRX10/default.nix)** (`hardware-LOQ-15IRX10`) · hosts: `nixos` — Sprzęt laptopa Lenovo LOQ 15IRX10: i5-13450HX (Intel UHD Graphics) + RTX 5060 Laptop w PRIME offload (domyślnie iGPU, `nvidia-offload <cmd>` na dGPU), otwarty sterownik NVIDIA z runtime PM i Dynamic Boost, raport nixos-facter.
 
 ## modules/hardware/raspberry-pi-4/
 
 - **[hardware/raspberry-pi-4/default.nix](../../modules/hardware/raspberry-pi-4/default.nix)** (`hardware-raspberry-pi-4`) · hosts: `raspberry-pi-4` — Płytka Raspberry Pi 4B: profil nixos-hardware (kernel producenta, device tree), wyłączone diody, governor CPU. Wentylator na GPIO: fan.nix.
-- **[hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)** (`hardware-raspberry-pi-4-fan`) · hosts: `raspberry-pi-4` — *(no header comment)*
+- **[hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)** (`hardware-raspberry-pi-4-fan`) · hosts: `raspberry-pi-4` — Wentylator Waveshare PWM na GPIO 14 (BCM, fizyczny pin 8) Raspberry Pi 4: usługa pwm-fan co 5 s czyta temperaturę SoC (thermal_zone0) i ustawia wypełnienie 0% poniżej 48 °C, 50% od 48 °C i 100% od 60 °C.
 
 ## modules/hosts/
 
@@ -68,41 +68,41 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 - **[hosts/base/agenix.nix](../../modules/hosts/base/agenix.nix)** (`base-agenix`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Agenix — sekrety BEZ globalnych exportów.
 - **[hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)** (`base-configuration`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Wspólne środowisko każdego hosta: narzędzia CLI (Nix, agenty, diagnostyka), edytor micro, nix-ld dla obcych binarek (uv, pip), comma z bazą nix-index, direnv i DNS Quad9. Powłoka: shell.nix, Nix: nix.nix.
-- **[hosts/base/default.nix](../../modules/hosts/base/default.nix)** (`base`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — *(no header comment)*
+- **[hosts/base/default.nix](../../modules/hosts/base/default.nix)** (`base`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Agregat base: wspólna podstawa importowana przez każdego hosta (narzędzia CLI i DNS, powłoka, git, Nix, aliasy update/push, SSH, agenix z sekretami użytkownika, Prime Agent, opcje customBot). base-fail2ban jest poza nim: importują go tylko nixos i raspberry-pi-4.
 - **[hosts/base/fail2ban.nix](../../modules/hosts/base/fail2ban.nix)** (`base-fail2ban`) · hosts: `nixos`, `raspberry-pi-4` — fail2ban dla hostów z SSH dostępnym z sieci (nixos, raspberry-pi-4). Celowo bez całej podsieci LAN w ignoreIP: na laptopie „domowa” podsieć pokrywa się z sieciami hotelowymi/kawiarnianymi. RPi (stała sieć domowa) dopisuje customTop.lan.subnet u siebie.
 - **[hosts/base/git.nix](../../modules/hosts/base/git.nix)** (`base-git`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Git na każdym hoście: tożsamość z customTop (commity z tego repo i agentów), gałąź domyślna main, skróty gh:/github: oraz GitHub CLI.
 - **[hosts/base/nix.nix](../../modules/hosts/base/nix.nix)** (`base-nix`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Nix i nixpkgs na każdym hoście: flakes, cache binarne (te same listy co nixConfig we flake.nix), okresowe GC i deduplikacja sklepu, pakiety niewolne i overlaye repo (opencode z konfiguracją, pakiety lokalne).
-- **[hosts/base/options.nix](../../modules/hosts/base/options.nix)** (`base-options`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — *(no header comment)*
+- **[hosts/base/options.nix](../../modules/hosts/base/options.nix)** (`base-options`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Opcje customBot: ustawienia zależne od hosta z wartościami domyślnymi (cel aliasów update/push, fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium); host nadpisuje je w swoim default.nix.
 - **[hosts/base/prime-agent.nix](../../modules/hosts/base/prime-agent.nix)** (`base-prime-agent`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Deklaratywna konfiguracja Prime Agenta (providers + default model). Pliki generowane do /etc/prime-agent i symlinkowane przez tmpfiles do ~/.prime/agent/ (domyślny katalog konfiguracji prime-agenta). Klucz API ollama-cloud: "OLLAMA_API_KEY" to nazwa zmiennej środowiskowej (prime-agent resolve'uje ją przez process.env); wartość pochodzi z agenix (modules/hosts/base/agenix.nix), nigdy nie trafia do /nix/store.
 - **[hosts/base/rebuild.nix](../../modules/hosts/base/rebuild.nix)** (`base-rebuild`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Aliasy aktualizacji systemu z tego flake'a; celem jest nixosConfigurations.<customBot.flakeTarget> (ustawia rejestr hostów): update / update-boot / update-reboot   z GitHuba (--refresh) update-local / update-local-boot       z kopii w /etc/nixos push            (fish) build toplevela z GitHuba i wypchnięcie do cachix update-my-pkgs  (fish) flake-update: flake.lock i pakiety lokalne
 - **[hosts/base/secrets.nix](../../modules/hosts/base/secrets.nix)** (`base-secrets`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Sekrety użytkownika wspólne dla hostów (wrappery fish, nix access-tokens, skille). Właścicielem jest customBot.defaultUser, tryb 0400 — nie grupa `users`: na RPi do tej grupy należeli też użytkownicy usług (hermes). Moduł usługi, który potrzebuje dostępu, dopisuje go jawnie u siebie (np. trilium-etapi w modules/hosts/raspberry-pi-4/hermes.nix).
 - **[hosts/base/shell.nix](../../modules/hosts/base/shell.nix)** (`base-shell`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Powłoka na każdym hoście: bash zostaje powłoką logowania i interaktywnie przechodzi w fish (tryb ratunkowy systemd i skrypty dalej mają basha), aliasy eza/bat, powitanie fastfetch (customBot.enableFastfetch) i tmux.
-- **[hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)** (`base-ssh`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — *(no header comment)*
+- **[hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)** (`base-ssh`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — SSH na każdym hoście: sshd tylko z kluczami, root domyślnie bez logowania, agent GnuPG, ssh-askpass oraz wpis `Host ssh.*` w ssh_config, przez który `ssh ssh.<domena>` loguje się jako root na RPi przez Cloudflare Access.
 
 ## modules/hosts/nixos/
 
 - **[hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)** (`nixos-boot`) · hosts: `nixos` — Rozruch laptopa: Limine podpisany własnymi kluczami Secure Boot (sbctl) i wpis Windows z drugiego dysku NVMe. Firmware Insyde ukrywa zmienne EFI przed Linuksem (sbctl status, bootctl i efibootmgr pokazują bzdury), więc stan czyta się z logu kernela albo dziennika TPM (AGENTS.md), a klucze wpisuje `nix run /etc/nixos#post-install secure-boot`. Z tego samego powodu limine-install odtwarza swój wpis NVRAM przy każdym rebuildzie. Sprawdzenie: `journalctl -k -b | grep -i "secure boot"`.
 - **[hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)** (`nixos`) · hosts: `nixos` — Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur. Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch (boot.nix) i reguła SSH (ssh.nix). Funkcje stacji roboczej: modules/desktop/, gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
 - **[hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)** (`nixos-disko`) · hosts: `nixos` — Układ dysku laptopa (disko): ESP 6 GB, zaszyfrowany swap 36 GB pod hibernację (>= RAM) i LUKS + Btrfs z podwolumenami /, /home i /nix. install-system (modules/installer/install.nix) formatuje według niego dowolny wskazany dysk; system montuje partycje po etykietach by-partlabel/disk-main-*, więc `device` to tylko podpowiedź instalatora. Snapshoty: snapper.nix. Sprawdzenie: `lsblk -f`, `sudo btrfs subvolume list /`.
-- **[hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)** (`nixos-snapper`) · hosts: `nixos` — *(no header comment)*
+- **[hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)** (`nixos-snapper`) · hosts: `nixos` — Snapper na laptopie: godzinowe snapshoty timeline podwolumenów btrfs / i /home (układ z disko.nix), sprzątane codziennie według limitów retencji; customBot.defaultUser obsługuje je bez roota (ALLOW_USERS), też w snapper-gui.
 - **[hosts/nixos/ssh.nix](../../modules/hosts/nixos/ssh.nix)** (`nixos-ssh`) · hosts: `nixos` — SSH laptopa tylko z domowego LAN-u (customTop.lan.subnet), nie z każdej sieci, do której się podłączy. Reguła iptables, bo networking.nftables jest wyłączone; przed zgadywaniem haseł chroni base-fail2ban. Sprawdzenie: `sudo iptables -S nixos-fw | grep 'dport 22'`.
 
 ## modules/hosts/raspberry-pi-4/
 
-- **[hosts/raspberry-pi-4/cloudflared.nix](../../modules/hosts/raspberry-pi-4/cloudflared.nix)** (`rpi-cloudflared`) · hosts: `raspberry-pi-4` — *(no header comment)*
+- **[hosts/raspberry-pi-4/cloudflared.nix](../../modules/hosts/raspberry-pi-4/cloudflared.nix)** (`rpi-cloudflared`) · hosts: `raspberry-pi-4` — Cloudflare Tunnel `raspberry-pi-4`: jedyna droga z internetu do usług RPi (Nextcloud, Open WebUI, Trilium, ttyd, SSH, Gitea, Matrix), które słuchają na localhost; nieznane nazwy hostów dostają 404.
 - **[hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)** (`raspberry-pi-4`) · hosts: `raspberry-pi-4` — Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB), usługi wystawione wyłącznie przez Cloudflare Tunnel (cloudflared.nix). Tu: wpis rejestru, tożsamość (hostname, stateVersion, konto) i lista modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
-- **[hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)** (`rpi-gitea`) · hosts: `raspberry-pi-4` — *(no header comment)*
-- **[hosts/raspberry-pi-4/hermes.nix](../../modules/hosts/raspberry-pi-4/hermes.nix)** (`rpi-hermes`) · hosts: `raspberry-pi-4` — *(no header comment)*
-- **[hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)** (`rpi-matrix`) · hosts: `raspberry-pi-4` — *(no header comment)*
+- **[hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)** (`rpi-gitea`) · hosts: `raspberry-pi-4` — Gitea pod git.<domena>: SQLite (lekka baza dla RPi), HTTP tylko na 127.0.0.1:3000 przez Cloudflare Tunnel, bez rejestracji. Git po SSH obsługuje systemowy sshd (wbudowany serwer SSH Gitei wyłączony).
+- **[hosts/raspberry-pi-4/hermes.nix](../../modules/hosts/raspberry-pi-4/hermes.nix)** (`rpi-hermes`) · hosts: `raspberry-pi-4` — Hermes Agent (Nous Research) jako usługa konta `hermes`: model główny to Claude Code na subskrypcji (zapas: openai-codex, ollama-cloud), polski interfejs, MCP Trilium i mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
+- **[hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)** (`rpi-matrix`) · hosts: `raspberry-pi-4` — Prywatny serwer Matrix continuwuity jako kanał rozmów i powiadomień Hermesa: server_name = domena główna, klienci przez matrix.<domena> w tunelu, bez federacji i otwartej rejestracji; Hermes łączy się lokalnie kontem bota.
 - **[hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)** (`rpi-network`) · hosts: `raspberry-pi-4` — Sieć RPi: NetworkManager z kablem i zapasowym Wi-Fi (profil home-wifi z sekretu wifi.age), domena regulacyjna PL. Usługi słuchają na localhost i wychodzą tylko tunelem (cloudflared.nix), więc firewall nic nie otwiera. Sprawdzenie: `nmcli connection show`, `iw reg get`.
-- **[hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)** (`rpi-nextcloud`) · hosts: `raspberry-pi-4` — *(no header comment)*
-- **[hosts/raspberry-pi-4/open-webui.nix](../../modules/hosts/raspberry-pi-4/open-webui.nix)** (`rpi-open-webui`) · hosts: `raspberry-pi-4` — *(no header comment)*
+- **[hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)** (`rpi-nextcloud`) · hosts: `raspberry-pi-4` — Nextcloud 35 pod domeną główną (customTop.site.full): PostgreSQL i Redis lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny wyłącznie przez Cloudflare Tunnel (cloudflared → nginx :80).
+- **[hosts/raspberry-pi-4/open-webui.nix](../../modules/hosts/raspberry-pi-4/open-webui.nix)** (`rpi-open-webui`) · hosts: `raspberry-pi-4` — Open WebUI pod chat.<domena>: czat z modelami Hermes Agent (API zgodne z OpenAI na 127.0.0.1:8642) i LLM Gateway przez Responses API; aplikacja na 127.0.0.1:3001 za nginx 127.0.0.1:8080 (cel tunelu), który cache'uje statykę.
 - **[hosts/raspberry-pi-4/resources.nix](../../modules/hosts/raspberry-pi-4/resources.nix)** (`rpi-resources`) · hosts: `raspberry-pi-4` — Zasoby małego serwera (4 GB RAM, dysk SSD): swap w zRAM i 8 GB pliku na SSD, /tmp w RAM-ie, maksymalnie 2 równoległe buildy, częstsze GC sklepu Nix i bez dokumentacji /share/doc.
 - **[hosts/raspberry-pi-4/sd-image.nix](../../modules/hosts/raspberry-pi-4/sd-image.nix)** (`rpi-sd-image`) — Obraz karty SD/dysku z pełnym systemem raspberry-pi-4 (agregat hosta bez _hardware-configuration.nix — system plików daje moduł sd-image). Służy do pierwszej instalacji; potem host aktualizuje się zwykłym `update`. Build: nix build .#raspberry-pi-4-sd-image (na laptopie przez emulację aarch64), zapis: dd na kartę/dysk; partycja rozszerza się przy 1. starcie.
 - **[hosts/raspberry-pi-4/ssh.nix](../../modules/hosts/raspberry-pi-4/ssh.nix)** (`rpi-ssh`) · hosts: `raspberry-pi-4` — Dostęp SSH do RPi. Bazowe ustawienia (tylko klucze) daje base-ssh. Logowanie roota kluczem zostaje — to ścieżka administracyjna przez tunel Cloudflare (`ssh ssh.<domena>`, `Host ssh.*` → `User root` w base-ssh). Użytkownik wpuszcza klucze roota laptopa i RPi oraz telefonu.
 - **[hosts/raspberry-pi-4/tools.nix](../../modules/hosts/raspberry-pi-4/tools.nix)** (`rpi-tools`) · hosts: `raspberry-pi-4` — Narzędzia CLI do pracy na serwerze, głównie dla agentów (Claude Code, Antigravity) i skryptów. micro, htop i uv pochodzą z base, git z base-git.
-- **[hosts/raspberry-pi-4/trilium.nix](../../modules/hosts/raspberry-pi-4/trilium.nix)** (`rpi-trilium`) · hosts: `raspberry-pi-4` — *(no header comment)*
-- **[hosts/raspberry-pi-4/ttyd.nix](../../modules/hosts/raspberry-pi-4/ttyd.nix)** (`rpi-ttyd`) · hosts: `raspberry-pi-4` — *(no header comment)*
+- **[hosts/raspberry-pi-4/trilium.nix](../../modules/hosts/raspberry-pi-4/trilium.nix)** (`rpi-trilium`) · hosts: `raspberry-pi-4` — Serwer notatek Trilium na 127.0.0.1:8081, wystawiony tunelem jako notes.<domena>; jego MCP (/mcp, token ETAPI) czytają Hermes i prime-agent.
+- **[hosts/raspberry-pi-4/ttyd.nix](../../modules/hosts/raspberry-pi-4/ttyd.nix)** (`rpi-ttyd`) · hosts: `raspberry-pi-4` — Terminal WWW (ttyd) wystawiony wyłącznie przez Cloudflare Tunnel: ttyd.<domena> -> nginx 127.0.0.1:8083 (Basic Auth, limit żądań) -> ttyd (root, `login`) na gnieździe UNIX /run/ttyd/ttyd.sock.
 
 ## modules/hosts/wsl/
 
@@ -111,16 +111,16 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/installer/
 
 - **[installer/install.nix](../../modules/installer/install.nix)** — Instalacja hosta nixos — paczki: install-system          z live ISO: `nix run github:janusz-bit/nixos` albo `nix run .` z klonu (packages.default; na stockowym ISO: `nix --extra-experimental-features 'nix-command flakes' run …`) — potrzebuje sieci install-system-offline  ten sam skrypt wbudowany w ISO z iso.nix — bez sieci post-install            kroki po instalacji, na nowym systemie
-- **[installer/iso.nix](../../modules/installer/iso.nix)** (`installer-iso`) — nixos-iso — bootowalny instalator (USB/DVD ISO) dla hosta `nixos`, oparty na stockowym installerze NixOS (installation-cd-minimal.nix: NetworkManager + wpa_supplicant, sshd, root bez hasła na konsoli — jak każdy oficjalny ISO). Dodatki względem stocka: - flakes włączone od razu (bez --extra-experimental-features); - wbudowany `install-system` W WARIANCIE OFFLINE (install.nix) — po zalogowaniu wystarczy `install-system [--disk URZĄDZENIE]`, BEZ SIECI: toplevel hosta nixos, skrypt disko i źródła flake'a (self) są w domknięciu install-system-offline, więc przez environment.systemPackages trafiają do squashfs ISO. Koszt: ISO zawiera CAŁE domknięcie hosta nixos (kernel CachyOS LTO, KDE, gaming, NVIDIA, CUDA...) — build trwa jak build samego hosta, a ISO ma rozmiar skompresowanego systemu (patrz github-actions.nix: tags = false, tylko PR/dispatch, jak przy `nixos`). Lokalnie najtaniej na laptopie, gdzie domknięcie już jest w store.
+- **[installer/iso.nix](../../modules/installer/iso.nix)** (`installer-iso`) — nixos-iso — bootowalny instalator (USB/DVD ISO) dla hosta `nixos`, oparty na stockowym installerze NixOS (installation-cd-minimal.nix: NetworkManager + wpa_supplicant, sshd, root bez hasła na konsoli — jak każdy oficjalny ISO). Dodatki względem stocka: - flakes włączone od razu (bez --extra-experimental-features); - wbudowany `install-system` W WARIANCIE OFFLINE (install.nix) — po zalogowaniu wystarczy `install-system [--disk URZĄDZENIE]`, BEZ SIECI: toplevel hosta nixos, skrypt disko i źródła flake'a (self) są w domknięciu install-system-offline, więc przez environment.systemPackages trafiają do squashfs ISO. Koszt: ISO zawiera CAŁE domknięcie hosta nixos (kernel CachyOS LTO, KDE, gaming, NVIDIA, CUDA...) — build trwa jak build samego hosta, a ISO ma rozmiar skompresowanego systemu (patrz github-actions.nix: tags = false, tylko PR/dispatch, jak przy `nixos`). Lokalnie najtaniej na laptopie, gdzie domknięcie już jest w store: ~20 min (squashfs zstd-19), ISO ~17 GB (mieści się na pendrive 32 GB). Toplevel trafia do ISO sam: tekst skryptu offline się do niego odwołuje, więc skanowanie referencji store dokłada całe domknięcie jako zależność.
 
 ## modules/overlays/
 
-- **[overlays/opencode.nix](../../modules/overlays/opencode.nix)** — *(no header comment)*
+- **[overlays/opencode.nix](../../modules/overlays/opencode.nix)** — Overlay opencode-config: opencode z nixpkgs opakowany konfiguracją opencode.json generowaną w store (dostawcy modeli, przypięte pluginy, serwery MCP), bez autoaktualizacji, z ripgrep w PATH.
 
 ## modules/packages/
 
-- **[packages/packages.nix](../../modules/packages/packages.nix)** — *(no header comment)*
-- **[packages/scripts.nix](../../modules/packages/scripts.nix)** — *(no header comment)*
+- **[packages/packages.nix](../../modules/packages/packages.nix)** — Pakiety lokalne (modules/packages/_<nazwa>/): jedna lista eksportowana jako overlay local-packages (dla hostów, przez base-nix) i jako packages.<system> (nix build, nix-update w flake-update).
+- **[packages/scripts.nix](../../modules/packages/scripts.nix)** — Skrypty utrzymania repo (packages.<system>, `nix run .#<nazwa>`): flake-update (wejścia flake'a, pakiety lokalne, workflowy, commit), repo-sync (commit wszystkiego, rebase, push), flake-release (tag vN, push).
 
 ## modules/skills/
 
@@ -128,4 +128,4 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/templates/
 
-- **[templates/default.nix](../../modules/templates/default.nix)** — *(no header comment)*
+- **[templates/default.nix](../../modules/templates/default.nix)** — Szablon flake'a `project` (też `default`, `nix flake init -t /etc/nixos`): flake-parts + import-tree z katalogu nix/, formatter nixfmt, hook pre-commit nixfmt i dev shell.

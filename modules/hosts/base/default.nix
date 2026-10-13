@@ -1,3 +1,7 @@
+# Agregat base: wspólna podstawa importowana przez każdego hosta (narzędzia
+# CLI i DNS, powłoka, git, Nix, aliasy update/push, SSH, agenix z sekretami
+# użytkownika, Prime Agent, opcje customBot). base-fail2ban jest poza nim:
+# importują go tylko nixos i raspberry-pi-4.
 { self, ... }:
 {
   flake.modules.nixos.base = _: {

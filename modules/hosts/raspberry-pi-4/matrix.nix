@@ -1,3 +1,16 @@
+# Prywatny serwer Matrix continuwuity jako kanał rozmów i powiadomień
+# Hermesa: server_name = domena główna, klienci przez matrix.<domena> w tunelu,
+# bez federacji i otwartej rejestracji; Hermes łączy się lokalnie kontem bota.
+#
+# Hermes odpowiada tylko kontu właściciela (MATRIX_ALLOWED_USERS): w DM
+# zawsze, w pokojach z innymi osobami tylko na @wzmiankę (domyślne
+# MATRIX_REQUIRE_MENTION). TLS kończy się w Cloudflare, dlatego E2EE jest
+# wymagane. Bez hermes-matrix.age (token bota) w gicie serwer działa,
+# ewaluacja ostrzega, a Hermes się nie łączy.
+#
+# Sprawdzenie: `systemctl status continuwuity`,
+# `curl -s http://127.0.0.1:6167/_matrix/client/versions`,
+# `journalctl -u hermes-agent -b | grep -i matrix`.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-matrix =

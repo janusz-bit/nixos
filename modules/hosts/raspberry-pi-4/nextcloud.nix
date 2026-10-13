@@ -1,3 +1,13 @@
+# Nextcloud 35 pod domeną główną (customTop.site.full): PostgreSQL i Redis
+# lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny
+# wyłącznie przez Cloudflare Tunnel (cloudflared → nginx :80).
+#
+# Dostęp z LAN-u celowo odcięty: nginx słucha na :80, ale firewall nie
+# otwiera 80/443 i nie ma mDNS (avahi). Ten vhost serwuje też
+# /.well-known/matrix/client (matrix.nix).
+#
+# Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
+# `sudo nextcloud-occ config:system:get trusted_proxies`.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-nextcloud =
@@ -47,8 +57,15 @@
             "opcache.interned_strings_buffer" = "16";
           };
 
-          # Nextcloud dostępny wyłącznie przez Cloudflare Tunnel (via localhost)
-          # Odcięto całkowicie dostęp z sieci lokalnej (brak otwartych portów, brak mDNS)
+          # Za tunelem: Cloudflare kończy TLS, a cloudflared przekazuje HTTP
+          # z localhost.
+          # - overwriteprotocol: bez tego Nextcloud generuje linki http://
+          #   (psuło logowanie z aplikacji mobilnej);
+          # - overwrite.cli.url: occ, cron i maile nie mają żądania
+          #   z publicznym adresem, więc bez niego linki wskazują localhost;
+          # - trusted_proxies: cały ruch z tunelu przychodzi z pętli zwrotnej;
+          #   zaufanie jej każe brać adres klienta z X-Forwarded-For, więc logi
+          #   i ochrona przed brute force widzą prawdziwe IP, nie 127.0.0.1.
           settings = {
             maintenance_window_start = 1;
             overwriteprotocol = "https";

@@ -1,3 +1,9 @@
+# Snapper na laptopie: godzinowe snapshoty timeline podwolumenów btrfs / i
+# /home (układ z disko.nix), sprzątane codziennie według limitów retencji;
+# customBot.defaultUser obsługuje je bez roota (ALLOW_USERS), też w snapper-gui.
+#
+# Sprawdzenie: `snapper -c root list`, `snapper -c home list`,
+# `systemctl status snapper-timeline.timer snapper-cleanup.timer`.
 _: {
   flake.modules.nixos.nixos-snapper =
     { config, pkgs, ... }:

@@ -22,12 +22,13 @@
 # kluczy Secure Boot do firmware robi po instalacji post-install (z siecią —
 # ewaluuje flake z /etc/nixos):
 #   nix run /etc/nixos#post-install [ssh|secure-boot]   (bez argumentu: oba)
-# - ssh: klucz roota /root/.ssh/id_ed25519 (age.identityPaths) + wpis
-#   hosts.nixos w modules/_secrets/keys.nix. Sekrety trzeba potem przeszyfrować
-#   kluczem raspberry-pi-4 (odbiorca wszystkich sekretów) — skrypt to wypisuje.
-# - secure-boot: wpisanie kluczy sbctl do firmware procedurą z AGENTS.md
-#   (Insyde: sbctl enroll-keys nie widzi zmiennych EFI, więc eksport .auth +
-#   efi-updatevar, potem odtworzenie dbx z dbxDefault). Firmware musi być
+# - ssh: klucz roota /root/.ssh/id_ed25519 (age.identityPaths) oraz wpisy
+#   hosts.<host> (odbiorca agenix) i sshHostKeys.<host> (klucz hosta sshd,
+#   przypinany przez inne hosty) w modules/_secrets/keys.nix. Sekrety trzeba
+#   potem przeszyfrować na innym odbiorcy (raspberry-pi-4) — skrypt to wypisuje.
+# - secure-boot: wpisanie kluczy sbctl do firmware (Insyde: sbctl enroll-keys
+#   nie widzi zmiennych EFI, więc eksport .auth + efi-updatevar, potem
+#   odtworzenie dbx z dbxDefault; odczyt stanu: AGENTS.md). Firmware musi być
 #   w Setup Mode — Linux tego nie sprawdzi, skrypt pyta.
 # Do tego czasu Secure Boot w BIOS zostaje wyłączony, a sekrety agenix się
 # nie odszyfrowują.

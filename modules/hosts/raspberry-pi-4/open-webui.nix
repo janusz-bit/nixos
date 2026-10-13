@@ -1,3 +1,28 @@
+# Open WebUI pod chat.<domena>: czat z modelami Hermes Agent (API zgodne
+# z OpenAI na 127.0.0.1:8642) i LLM Gateway przez Responses API; aplikacja na
+# 127.0.0.1:3001 za nginx 127.0.0.1:8080 (cel tunelu), który cache'uje statykę.
+#
+# Usługa wystawiona do internetu: CORS tylko dla własnego adresu, ciasteczka
+# Secure + SameSite=lax, rejestracja wyłączona, nagłówki bezpieczeństwa
+# z samej aplikacji. Dostaje wyłącznie open-webui-keys.age, nigdy
+# hermes-env.age. ENABLE_PERSISTENT_CONFIG=False: zmienne środowiskowe mają
+# pierwszeństwo przed ustawieniami zapisanymi w bazie, więc konfiguracja
+# żyje tutaj, nie w UI.
+#
+# Po co nginx: open-webui (SPA SvelteKit) serwuje ~52 chunki JS, CSS i fonty
+# bez Cache-Control, więc Cloudflare niczego nie cache'uje (cf-cache-status:
+# DYNAMIC), a po zalogowaniu crossorigin="use-credentials" + ciasteczka
+# czynią każde żądanie niecache'owalnym. Każde przeładowanie to 52+ żądań
+# przez tunel do RPi z jednym workerem uvicorn i ~100 MB wolnej RAM, więc
+# strona wisiała. nginx trzyma niezmienne zasoby w lokalnym cache, dodaje
+# Cache-Control (Cloudflare też je cache'uje), zdejmuje z nich ciasteczka
+# i kompresuje odpowiedzi gzipem.
+#
+# Sprawdzenie: `systemctl status open-webui nginx`;
+# `curl -sI http://127.0.0.1:8080/static/favicon.png` ma
+# `Cache-Control: public, max-age=604800, immutable`;
+# `nix eval --raw .#nixosConfigurations.raspberry-pi-4.config.systemd.services.open-webui.environment.OPENAI_API_CONFIGS`
+# daje czysty JSON.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-open-webui =
@@ -98,23 +123,6 @@
         };
       };
 
-      # ─────────────────────────────────────────────────────────────
-      # nginx reverse proxy with static asset caching
-      #
-      # Problem: open-webui (SvelteKit SPA) serves ~52 JS chunks, CSS,
-      # and fonts without Cache-Control headers. Cloudflare sees no
-      # cache directives → cf-cache-status: DYNAMIC on everything. After
-      # login, crossorigin="use-credentials" + cookies make Cloudflare
-      # treat every request as uncacheable. Each page reload = 52+
-      # round-trips through the QUIC tunnel to the RPi4, which has one
-      # uvicorn worker and ~100 MB free RAM → page hangs.
-      #
-      # Solution: nginx sits between cloudflared and open-webui,
-      # caches immutable static assets locally, adds Cache-Control
-      # headers so Cloudflare can cache them too, compresses responses
-      # with gzip, and buffers slow backend responses.
-      # ─────────────────────────────────────────────────────────────
-
       services.nginx = {
         enable = true;
         recommendedProxySettings = true;
@@ -205,7 +213,7 @@
       };
 
       # If open-webui ever crashes it must come back on its own — the NixOS
-      # module ships Restart=no, so a single crash meant chat.janusz-bit.com
+      # module ships Restart=no, so a single crash meant chat.<domain>
       # stayed dead until the next reboot/rebuild.
       systemd.services.open-webui.serviceConfig = {
         Restart = lib.mkForce "on-failure";

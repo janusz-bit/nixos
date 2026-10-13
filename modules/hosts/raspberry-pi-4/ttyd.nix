@@ -1,3 +1,25 @@
+# Terminal WWW (ttyd) wystawiony wyłącznie przez Cloudflare Tunnel:
+# ttyd.<domena> -> nginx 127.0.0.1:8083 (Basic Auth, limit żądań) -> ttyd
+# (root, `login`) na gnieździe UNIX /run/ttyd/ttyd.sock.
+#
+# Gniazdo zamiast portu TCP na lo: do TCP mógł połączyć się każdy lokalny
+# proces (w tym agent hermes) z pominięciem Basic Auth. Gniazdo root:nginx
+# 0660 w katalogu 0750 otwiera tylko nginx.
+#
+# Basic Auth robi nginx, nie ttyd: moduł ttyd przekazuje hasło jako
+# `--credential user:hasło`, czyli w /proc/*/cmdline widocznym dla każdego
+# lokalnego procesu. nginx czyta tylko hash SHA-512-crypt z pliku 0640
+# root:nginx, a hasło jest osobnym sekretem (ttyd-password.age, asercja).
+#
+# Entrypoint jak w produkcyjnej konfiguracji OCF Berkeley (ocf/nix,
+# modules/ttyd.nix): systemowy `login` zamiast gołej powłoki. To ten sam
+# program, którego używa SSH: zakłada pełną sesję PAM, wczytuje /etc/profile
+# i środowisko NixOS, potem uruchamia powłokę logowania (fish przez
+# bazowy łańcuch bash -> exec fish).
+#
+# Sprawdzenie: `systemctl status ttyd ttyd-htpasswd`,
+# `sudo ls -l /run/ttyd/ttyd.sock` (srw-rw---- root nginx),
+# `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/` (401).
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-ttyd =
@@ -22,25 +44,6 @@
       secretFile = config.age.secrets.ttyd-password.file;
     in
     {
-      # Web terminal (ttyd) exposed ONLY through the Cloudflare Tunnel:
-      # ttyd.janusz-bit.com -> nginx 127.0.0.1:8083 (Basic Auth, limit
-      # żądań) -> ttyd na gnieździe UNIX ${socket}.
-      #
-      # Gniazdo zamiast portu TCP na lo: do TCP mógł połączyć się każdy
-      # lokalny proces (w tym agent hermes) z pominięciem Basic Auth. Gniazdo
-      # root:nginx 0660 w katalogu 0750 otwiera tylko nginx.
-      #
-      # Basic Auth robi nginx, nie ttyd: moduł ttyd przekazuje hasło jako
-      # `--credential user:hasło`, czyli w /proc/*/cmdline widocznym dla
-      # każdego lokalnego procesu. nginx czyta tylko hash SHA-512-crypt
-      # z pliku 0640 root:nginx.
-      #
-      # Entrypoint pattern taken from the OCF Berkeley production config
-      # (ocf/nix, modules/ttyd.nix): spawn the system `login` program
-      # instead of a bare shell. `login` is the SAME binary SSH uses —
-      # it sets up the full PAM session, sources /etc/profile and the
-      # NixOS environment, then starts the user's login shell (fish via
-      # the base bash->fish exec chain).
       assertions = [
         {
           assertion = builtins.pathExists secretFile;

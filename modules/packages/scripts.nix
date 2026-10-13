@@ -1,3 +1,18 @@
+# Skrypty utrzymania repo (packages.<system>, `nix run .#<nazwa>`):
+# flake-update (wejścia flake'a, pakiety lokalne, workflowy, commit),
+# repo-sync (commit wszystkiego, rebase, push), flake-release (tag vN, push).
+#
+# Każdy działa na repo bieżącego katalogu (alias fish `update-my-pkgs` =
+# flake-update). flake-update startuje tylko z czystego drzewa, więc jego
+# commit zawiera wyłącznie aktualizację. repo-sync robi `git add -A`: zabiera
+# każdy plik z drzewa, także roboczy (notatki i skrypty trzymać w $TMPDIR).
+# flake-release wydaje tylko z master, który nie jest za origin/master, i
+# wypycha gałąź z tagiem atomowo; tag v* uruchamia w CI workflowy poza
+# ciężkimi (hosty z buildOnTags = false, ISO; github-actions.nix). Push to
+# wdrożenie: `update` na hostach bierze konfigurację prosto z GitHuba.
+#
+# Sprawdzenie: `nix build --no-link .#flake-update .#repo-sync .#flake-release`
+# (flake-update przechodzi przy tym shellcheck).
 {
   perSystem =
     { pkgs, ... }:

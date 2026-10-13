@@ -1,3 +1,14 @@
+# Overlay opencode-config: opencode z nixpkgs opakowany konfiguracją
+# opencode.json generowaną w store (dostawcy modeli, przypięte pluginy,
+# serwery MCP), bez autoaktualizacji, z ripgrep w PATH.
+#
+# Nakłada go base-nix na każdym hoście; pakiet instalują desktop-ai i wsl.
+# Klucze API nie trafiają do konfiguracji (byłyby w world-readable store):
+# opencode.json ma tylko odwołania {env:...}, a wartości z agenix daje
+# procesowi funkcja fish `opencode` (modules/hosts/base/agenix.nix). Wersję
+# wyznacza nixpkgs, dlatego autoaktualizacja jest wyłączona.
+#
+# Sprawdzenie: `cat "$(dirname "$(readlink -f "$(command -v opencode)")")/../share/opencode/opencode.json"`.
 _: {
   flake.overlays.opencode-config = _final: prev: {
     opencode =

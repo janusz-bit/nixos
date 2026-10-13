@@ -1,3 +1,13 @@
+# Wentylator Waveshare PWM na GPIO 14 (BCM, fizyczny pin 8) Raspberry Pi 4:
+# usługa pwm-fan co 5 s czyta temperaturę SoC (thermal_zone0) i ustawia
+# wypełnienie 0% poniżej 48 °C, 50% od 48 °C i 100% od 60 °C.
+#
+# Biblioteka rpi-lgpio (zgodna z RPi.GPIO, działa przez /dev/gpiochip0):
+# samo RPi.GPIO pada na nowszych kernelach (brak pola Hardware w
+# /proc/cpuinfo), a usługa, która padła, zostawiała wentylator na 100%.
+#
+# Sprawdzenie: `systemctl status pwm-fan`, `journalctl -u pwm-fan -b`,
+# temperatura: `cat /sys/class/thermal/thermal_zone0/temp` (m°C).
 _: {
   flake.modules.nixos.hardware-raspberry-pi-4-fan =
     { pkgs, ... }:

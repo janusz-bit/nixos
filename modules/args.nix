@@ -1,3 +1,16 @@
+# customTop: stałe całego repo (repozytorium i jego klon, e-mail, domena,
+# domowy LAN, cache binarne z nixConfig, własny cachix, katalog sekretów,
+# klucze publiczne), podane jako argument każdego modułu flake-parts.
+#
+# To _module.args, nie opcje: wartości są te same na każdym hoście i żaden
+# host ich nie nadpisuje. Moduły NixOS biorą je z domknięcia pliku
+# (`{ customTop, ... }:` na górze), nie z `config`. Ustawienia zależne od
+# hosta (z wartościami domyślnymi, nadpisywane w default.nix hosta) to opcje
+# customBot w modules/hosts/base/options.nix. Literałów stąd (domena, LAN,
+# e-mail, adres repo) nie powiela się w modułach.
+#
+# Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.nix.settings.extra-substituters`
+# daje tę samą listę co nixConfig we flake.nix.
 { lib, ... }:
 {
   _module.args.customTop = rec {

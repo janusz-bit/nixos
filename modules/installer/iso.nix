@@ -12,7 +12,14 @@
 # gaming, NVIDIA, CUDA...) — build trwa jak build samego hosta, a ISO ma
 # rozmiar skompresowanego systemu (patrz github-actions.nix: tags = false,
 # tylko PR/dispatch, jak przy `nixos`). Lokalnie najtaniej na laptopie, gdzie
-# domknięcie już jest w store.
+# domknięcie już jest w store: ~20 min (squashfs zstd-19), ISO ~17 GB
+# (mieści się na pendrive 32 GB). Toplevel trafia do ISO sam: tekst skryptu
+# offline się do niego odwołuje, więc skanowanie referencji store dokłada
+# całe domknięcie jako zależność.
+#
+# Test (QEMU, OVMF, `-nic none`): instalacja na dysk inny niż ten z disko.nix,
+# potem Limine → LUKS → SDDM. Zainstalowany system uruchamiać z dyskiem jako
+# NVMe (`-device nvme`) — initrd z facter nie ma virtio_blk.
 #
 # Build:  nix build .#packages.x86_64-linux.nixos-iso
 # Wynik:  result/iso/*.iso — nagraj na USB (dd/ventoy) albo wypal na DVD.

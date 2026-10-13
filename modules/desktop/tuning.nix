@@ -1,26 +1,32 @@
+# Strojenie pamięci i systemd wzorowane na CachyOS (CachyOS-Settings e27ea45,
+# 2026-10-04): zRAM zstd na cały RAM bez zswap, swappiness/page-cluster, limity
+# dirty, THP max_ptes_none 409, SysRq, bez watchdoga NMI, stop jednostek 10 s, oomd.
+#
+# Są tu tylko ustawienia, których efekt pokazuje test VM z kernelem hosta
+# (checks.tuning) albo journal hosta; efekt THP 409 i zRAM = RAM na samym
+# laptopie nie był jeszcze mierzony. Reszta pakietu cachyos-settings:
+# - już domyślna: thp.conf (defrag defer+madvise = domyślne CONFIG_CACHY;
+#   kernel CachyOS ma też sam z siebie watermark_boost 0,
+#   compaction_proactiveness 0, MGLRU min_ttl 100 ms), resolved jako DNS
+#   w NetworkManagerze (włącza go moduł mullvad-vpn), ntsync (modules/gaming/steam.nix),
+#   runtime PM dGPU (modules/hardware/LOQ-15IRX10/default.nix);
+# - nie ma na czym działać: pci-latency (brak konwencjonalnej szyny PCI:
+#   PCIe i funkcje zintegrowane w CPU/PCH), reguły SATA/hdparm (brak
+#   dysków SATA), regdomain Wi-Fi (AP i tak ustawia PL);
+# - bez zysku: vfs_cache_pressure 50 i dirty_writeback_centisecs 1500
+#   (usunięte jako kosmetyka w ab57792), NOFILE (domyślne 1024:524288
+#   wystarcza, NTSYNC zamiast esync), NVreg_InitializeSystemMemoryAllocations=0
+#   (kernel i tak zeruje strony przez init_on_alloc, a przepadłby wstępnie
+#   wyczyszczony pool NVIDII), journal 50M, blacklist iTCO_wdt (w pracy
+#   nieaktywny, a systemd uzbraja go przy wyłączaniu: RebootWatchdogSec=10min);
+# - czeka na A/B na hoście: scheduler NVMe kyber (60-ioschedulers.rules),
+#   power_save snd_hda_intel na zasilaczu (20-audio-pm.rules);
+# - decyzje: DefaultTimeoutStartSec=15s pominięte (nic tu nie skraca).
+#
+# Sprawdzenie: `nix build -L .#checks.x86_64-linux.tuning` (test VM, A/B
+# każdej zmiany); na hoście `zramctl`, `sysctl vm.swappiness kernel.sysrq`,
+# `cat /sys/kernel/mm/transparent_hugepage/khugepaged/max_ptes_none` (409).
 _: {
-  # Strojenie pamięci i systemd wzorowane na CachyOS (CachyOS-Settings
-  # e27ea45, 2026-10-04). Są tu tylko ustawienia, których efekt pokazuje
-  # test VM z kernelem hosta (nix build .#checks.x86_64-linux.tuning) albo
-  # journal hosta; efekt THP 409 i zRAM = RAM na samym laptopie nie był
-  # jeszcze mierzony. Reszta pakietu cachyos-settings:
-  # - już domyślna: thp.conf (defrag defer+madvise = domyślne CONFIG_CACHY;
-  #   kernel CachyOS ma też sam z siebie watermark_boost 0,
-  #   compaction_proactiveness 0, MGLRU min_ttl 100 ms), resolved jako DNS
-  #   w NetworkManagerze (włącza go moduł mullvad-vpn), ntsync (modules/gaming/steam.nix),
-  #   runtime PM dGPU (LOQ-15IRX10.nix);
-  # - nie ma na czym działać: pci-latency (brak konwencjonalnej szyny PCI:
-  #   PCIe i funkcje zintegrowane w CPU/PCH), reguły SATA/hdparm (brak
-  #   dysków SATA), regdomain Wi-Fi (AP i tak ustawia PL);
-  # - bez zysku: vfs_cache_pressure 50 i dirty_writeback_centisecs 1500
-  #   (usunięte jako kosmetyka w ab57792), NOFILE (domyślne 1024:524288
-  #   wystarcza, NTSYNC zamiast esync), NVreg_InitializeSystemMemoryAllocations=0
-  #   (kernel i tak zeruje strony przez init_on_alloc, a przepadłby wstępnie
-  #   wyczyszczony pool NVIDII), journal 50M, blacklist iTCO_wdt (w pracy
-  #   nieaktywny, a systemd uzbraja go przy wyłączaniu: RebootWatchdogSec=10min);
-  # - czeka na A/B na hoście: scheduler NVMe kyber (60-ioschedulers.rules),
-  #   power_save snd_hda_intel na zasilaczu (20-audio-pm.rules);
-  # - decyzje: DefaultTimeoutStartSec=15s pominięte (nic tu nie skraca).
   flake.modules.nixos.desktop-tuning = _: {
     boot = {
       # Kernel CachyOS ma CONFIG_ZSWAP_DEFAULT_ON=y, a moduł boot.zswap

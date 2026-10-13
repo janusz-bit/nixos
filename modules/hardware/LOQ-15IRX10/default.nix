@@ -1,6 +1,21 @@
+# Sprzęt laptopa Lenovo LOQ 15IRX10: i5-13450HX (Intel UHD Graphics) + RTX
+# 5060 Laptop w PRIME offload (domyślnie iGPU, `nvidia-offload <cmd>` na dGPU),
+# otwarty sterownik NVIDIA z runtime PM i Dynamic Boost, raport nixos-facter.
+#
+# Fakty o GPU są tylko tutaj: moduły desktop-* i gaming-* czytają
+# hardware.nvidia.enabled i hardware.nvidia.prime.* (ollama-cuda, OBS z CUDA,
+# NODEVICE_SELECT w Steamie, zmienne PRIME w GAMEMODERUNEXEC, ICD tylko
+# Intela w Zedzie), więc stacja bez NVIDII nie dostaje buildów CUDA ani
+# ustawień PRIME. Resztę sprzętu (m.in. moduły initrd) opisuje facter.json
+# obok, wygenerowany przez nixos-facter na tej maszynie. Moduł importuje też
+# poprawki Lenovo, cechy x86-64-v3 i profile nixos-hardware.
+# Nowa maszyna dostaje własny katalog modules/hardware/<model>/ jak ten
+# (default.nix + facter.json; procedura: README.md, "Adding a host").
+#
+# Sprawdzenie: `cat /sys/bus/pci/devices/0000:01:00.0/power/{control,runtime_status}`
+# w spoczynku daje auto i suspended (dGPU w D3cold).
 { inputs, self, ... }:
 {
-  # Lenovo LOQ 15IRX10: i5-13450HX (Iris Xe) + RTX 5060 Laptop (PRIME offload).
   flake.modules.nixos.hardware-LOQ-15IRX10 =
     {
       config,

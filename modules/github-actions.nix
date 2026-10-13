@@ -1,3 +1,23 @@
+# Generator workflowów GitHub Actions (github-actions-nix): build toplevelu
+# każdego hosta z rejestru, obrazy (SD RPi, ISO instalatora), ewaluacja
+# wszystkich hostów, lint (pre-commit) i ręczna aktualizacja kernela CachyOS.
+#
+# .github/workflows/*.yml to wynik tego pliku: nigdy nie edytuje się ich
+# ręcznie. `nix run .#sync-github-actions` kopiuje wygenerowany katalog do
+# repo i usuwa workflowy, których już nie ma; hook pre-commit robi to sam po
+# zmianie tego pliku, args.nix, flake.nix/flake.lock, modules/hosts/ lub
+# samych workflowów (ręczna edycja zostaje nadpisana).
+# Workflowy buildów hostów powstają z rejestru (modules/hosts/registry.nix),
+# więc nowy host dostaje swój workflow bez zmian tutaj.
+#
+# Akcje są przypięte do SHA commitów, nie tagów: tag można przesunąć na inny
+# kod, a akcje widzą CACHIX_AUTH_TOKEN, w cachyos-kernel-update także
+# `contents: write` (push flake.lock). Ciężkie buildy (host z
+# buildOnTags = false i ISO z całym closure hosta nixos, 3-5 h) nie ruszają
+# przy tagach v*, tylko przy PR i ręcznie.
+#
+# Sprawdzenie: `nix run .#sync-github-actions && git status --short .github/workflows`
+# (pusto = workflowy w repo zgodne z generatorem).
 {
   config,
   customTop,
@@ -12,16 +32,14 @@ in
   perSystem =
     { config, pkgs, ... }:
     let
-      # Akcje przypięte do commitów (tag można przesunąć — a akcje widzą
-      # CACHIX_AUTH_TOKEN i w cachyos-kernel-update mają contents: write).
-      # Bump: `git ls-remote https://github.com/<repo> 'refs/tags/<tag>^{}' 'refs/tags/<tag>'`.
+      # Bump SHA: `git ls-remote https://github.com/<repo> 'refs/tags/<tag>^{}' 'refs/tags/<tag>'`.
       actions = {
         checkout = "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"; # v5
         installNix = "cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24"; # v31
         cachix = "cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be"; # v14
       };
 
-      # Wspolne kroki dla wszystkich workflowow budujacych
+      # Wspólne kroki dla wszystkich workflowów budujących
       mkBaseSteps = [
         {
           name = "Checkout repository";
@@ -50,7 +68,7 @@ in
         }
       ];
 
-      # Workflow aktualizujacy i budujacy CachyOS kernel
+      # Workflow aktualizujący i budujący kernel CachyOS
       mkCachyOSKernelUpdateWorkflow =
         { name, runsOn }:
         {
@@ -58,7 +76,7 @@ in
           runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
           on.workflowDispatch = { };
           permissions.contents = "write";
-          # Recznie odpalany workflow — bez sensu dwa rownolegle buildy kernela
+          # Ręcznie odpalany workflow — bez sensu dwa równoległe buildy kernela
           concurrency = {
             group = "cachyos-kernel-update";
             cancelInProgress = false;
@@ -88,7 +106,7 @@ in
           };
         };
 
-      # Fabryka workflowow
+      # Fabryka workflowów
       mkBuildWorkflow =
         {
           name,
@@ -96,21 +114,21 @@ in
           buildTarget ? "nixosConfigurations.${name}.config.system.build.toplevel",
           runName ? "Build ${name} by @\${{ github.actor }}",
           command ? null,
-          # `tags = false` dla ciezkich buildow. Build toplevela `nixos` trwa
-          # 3-5 h i w wiekszosci pada na infrastrukturze CI (cache.nixos.org,
-          # limity api.github.com), wiec nie odpalamy go przy kazdym tagu —
-          # zostaje PR + reczny workflow_dispatch.
+          # `tags = false` dla ciężkich buildów. Build toplevela `nixos` trwa
+          # 3-5 h i w większości pada na infrastrukturze CI (cache.nixos.org,
+          # limity api.github.com), więc nie odpalamy go przy każdym tagu —
+          # zostaje PR + ręczny workflow_dispatch.
           tags ? true,
-          # Tanie sprawdzenia (lint, ewaluacja) odpalaja sie tez na kazdy
-          # push do master — commity trafiaja tam bezposrednio.
+          # Tanie sprawdzenia (lint, ewaluacja) odpalają się też na każdy
+          # push do master — commity trafiają tam bezpośrednio.
           onMaster ? false,
         }:
         {
           inherit name runName;
-          # Least privilege: buildy tylko czytaja repo.
+          # Least privilege: buildy tylko czytają repo.
           permissions.contents = "read";
-          # Ten sam workflow dla tego samego refa nie odpala sie dwa razy.
-          # cancelInProgress = false — nie zabijamy buildow w trakcie.
+          # Ten sam workflow dla tego samego refa nie odpala się dwa razy.
+          # cancelInProgress = false — nie zabijamy buildów w trakcie.
           concurrency = {
             group = "build-${name}-\${{ github.ref }}";
             cancelInProgress = false;

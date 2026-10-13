@@ -1,3 +1,14 @@
+# Opcje customBot: ustawienia zależne od hosta z wartościami domyślnymi
+# (cel aliasów update/push, fastfetch w powitaniu fish, główny użytkownik,
+# endpoint MCP Trilium); host nadpisuje je w swoim default.nix.
+#
+# To opcje NixOS (`config.customBot.*`), bo różnią się między hostami;
+# stałe wspólne dla całego repo są w customTop (modules/args.nix).
+# flakeTarget (bez domyślnej) ustawia rejestr hostów; raspberry-pi-4 powtarza
+# go u siebie tylko dla obrazu SD, składanego poza rejestrem. Opisy opcji
+# trafiają do generowanego docs/reference/options.md.
+#
+# Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
 _: {
   flake.modules.nixos.base-options =
     { lib, ... }:

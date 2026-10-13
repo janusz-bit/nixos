@@ -1,3 +1,14 @@
+# SSH na każdym hoście: sshd tylko z kluczami, root domyślnie bez logowania,
+# agent GnuPG, ssh-askpass oraz wpis `Host ssh.*` w ssh_config, przez który
+# `ssh ssh.<domena>` loguje się jako root na RPi przez Cloudflare Access.
+#
+# Wartości z mkDefault nadpisuje raspberry-pi-4: dopuszcza roota kluczem
+# ("prohibit-password", to jego ścieżka administracyjna przez tunel) i
+# wyłącza ssh-askpass (headless, x11-ssh-askpass ciągnie zależności X11).
+# Laptop dodatkowo zawęża port 22 do domowego LAN-u (modules/hosts/nixos/ssh.nix).
+#
+# Sprawdzenie: `sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'`;
+# `ssh -G ssh.<domena> | grep -E '^(user|proxycommand) '`.
 _: {
   flake.modules.nixos.base-ssh =
     { lib, pkgs, ... }:
@@ -8,18 +19,14 @@ _: {
       services.openssh = {
         enable = true;
         settings = {
-          # require public key authentication for better security
           PasswordAuthentication = false;
           KbdInteractiveAuthentication = false;
-          # raspberry-pi-4 nadpisuje na "prohibit-password" (logowanie roota
-          # kluczem przez tunel Cloudflare to tam ścieżka administracyjna).
           PermitRootLogin = lib.mkDefault "no";
         };
       };
 
       programs = {
         ssh = {
-          # Headless RPi wyłącza (x11-ssh-askpass ciągnie zależności X11).
           enableAskPassword = lib.mkDefault true;
           extraConfig = ''
             Host ssh.*
