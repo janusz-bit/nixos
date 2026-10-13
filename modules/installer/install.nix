@@ -36,7 +36,9 @@
   perSystem =
     { pkgs, lib, ... }:
     let
-      inherit (self.nixosConfigurations.nixos) config;
+      # Host instalowany przez install-system, ISO (iso.nix) i post-install.
+      installHost = "nixos";
+      inherit (self.nixosConfigurations.${installHost}) config;
       inherit (config.networking) hostName;
       inherit (customTop.repository) place url;
       inherit (config.disko) rootMountPoint;
@@ -51,7 +53,7 @@
       # sam: fileSystems i LUKS wskazują /dev/disk/by-partlabel/disk-main-*.
       diskLink = "/run/install-system/disk";
       disko =
-        (self.nixosConfigurations.nixos.extendModules {
+        (self.nixosConfigurations.${installHost}.extendModules {
           modules = [ { disko.devices.disk.main.device = lib.mkForce diskLink; } ];
         }).config.system.build.destroyFormatMount;
       rev = self.rev or self.dirtyRev or "bez rewizji";
@@ -106,7 +108,7 @@
               # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
               # bez nich kernel LTO kompiluje się lokalnie.
               ''
-                nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#nixos"} \
+                nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#${installHost}"} \
                   --no-root-passwd --option accept-flake-config true
               '';
           repoNote = lib.optionalString offline ''
@@ -309,10 +311,27 @@
               [[ "$answer" == [tT] ]]
             }
 
+            keys_nix="$place/modules/_secrets/keys.nix"
+
+            # set_key ATTR KLUCZ — wpisuje KLUCZ do keys.nix pod ATTR, gdy się
+            # różni (porównanie bez komentarza). Kod 0: plik zmieniony albo
+            # brak wpisu (wypisuje linię do dopisania), 1: wpis aktualny.
+            set_key() {
+              local attr=$1 new=$2 old content
+              if ! old="$(nix --extra-experimental-features nix-command eval --raw --file "$keys_nix" "$attr" 2>/dev/null)"; then
+                echo "Brak wpisu $attr w $keys_nix — dopisz w sekcji ''${attr%%.*}:"
+                echo "  ''${attr#*.} = \"$new\";"
+                return 0
+              fi
+              [[ "$(cut -d' ' -f1-2 <<<"$old")" != "$(cut -d' ' -f1-2 <<<"$new")" ]] || return 1
+              content="$(<"$keys_nix")"
+              [[ "$content" == *"$old"* ]] || die "nie znalazłem klucza $attr w $keys_nix"
+              printf '%s\n' "''${content/"$old"/"$new"}" >"$keys_nix"
+              echo "Wpisano nowy klucz do $keys_nix ($attr)."
+            }
+
             ssh_key() {
               local key=/root/.ssh/id_ed25519
-              local keys_nix="$place/modules/_secrets/keys.nix"
-              local old new content
               [[ -f "$keys_nix" ]] || die "brak $keys_nix"
 
               if [[ -f "$key" ]]; then
@@ -322,20 +341,21 @@
                 ssh-keygen -q -t ed25519 -N "" -C "root@${hostName}" -f "$key"
                 echo "Wygenerowano $key."
               fi
-              new="$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@${hostName}"
-              old="$(nix --extra-experimental-features nix-command eval --raw --file "$keys_nix" hosts.nixos)"
 
-              if [[ "$(cut -d' ' -f1-2 <<<"$old")" == "$(cut -d' ' -f1-2 <<<"$new")" ]]; then
-                echo "Klucz jest już odbiorcą sekretów (hosts.nixos) — agenix odszyfruje je przy update-local."
+              # Klucz hosta sshd przypinają known_hosts innych hostów (laptop-run,
+              # claude-notify); po reinstalacji jest nowy.
+              if set_key sshHostKeys.${hostName} "$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"; then
+                echo "Klucz hosta sshd zmieniony: po commicie i pushu zrób update na hostach,"
+                echo "które łączą się z tym (raspberry-pi-4: laptop-run)."
+              fi
+
+              if ! set_key hosts.${hostName} "$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@${hostName}"; then
+                echo "Klucz roota jest już odbiorcą sekretów (hosts.${hostName}) — agenix odszyfruje je przy update-local."
                 return
               fi
-              content="$(<"$keys_nix")"
-              [[ "$content" == *"$old"* ]] || die "nie znalazłem klucza hosts.nixos w $keys_nix"
-              printf '%s\n' "''${content/"$old"/"$new"}" >"$keys_nix"
-
-              echo "Wpisano nowy klucz do $keys_nix (hosts.nixos). Sekrety są zaszyfrowane"
-              echo "dla starego klucza — przeszyfruj je kluczem raspberry-pi-4:"
-              echo "  1. tutaj:  git -C $place commit -am 'secrets: new nixos host key' && git -C $place push"
+              echo "Sekrety są zaszyfrowane dla starego klucza — przeszyfruj je na innym"
+              echo "hoście, który jest ich odbiorcą (raspberry-pi-4):"
+              echo "  1. tutaj:  git -C $place commit -am 'secrets: new ${hostName} host key' && git -C $place push"
               echo "  2. na RPi: w klonie repo git pull, potem w modules/_secrets:"
               echo "             sudo agenix -r -i /root/.ssh/id_ed25519, commit i push"
               echo "  3. tutaj:  git -C $place pull && update-local"
