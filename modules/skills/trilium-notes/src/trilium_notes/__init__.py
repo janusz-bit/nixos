@@ -23,7 +23,7 @@ __all__ = ["TriliumMcp", "trilium"]
 
 
 _TOKEN_ENV = "TRILIUM_ETAPI_TOKEN"
-# agenix secret: owner customBot.defaultUser, mode 0400 (modules/agenix/agenix.nix).
+# agenix secret: owner customBot.defaultUser, mode 0400 (modules/hosts/base/secrets.nix).
 _TOKEN_FILE = "/run/agenix/trilium-etapi"
 
 

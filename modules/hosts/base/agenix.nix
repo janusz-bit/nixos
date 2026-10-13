@@ -51,7 +51,7 @@
       fishWrappers = [
         {
           name = "prime-agent";
-          description = "prime-agent z kluczami OLLAMA/OPENROUTER z agenix";
+          description = "prime-agent z kluczami OLLAMA/OPENROUTER i tokenem Trilium z agenix";
           vars = [
             {
               var = "OLLAMA_API_KEY";
