@@ -29,15 +29,15 @@
       self.modules.nixos.rpi-specific
       self.modules.nixos.rpi-configuration
       inputs.nixos-hardware.nixosModules.raspberry-pi-4
-      (_: {
-        customBot.flakeTarget = "raspberry-pi-4";
-      })
+      # Ustawia to też rejestr hostów; tutaj dla obrazu SD
+      # (raspberry-pi-4-sd-image), który składa ten moduł poza rejestrem.
+      { customBot.flakeTarget = "raspberry-pi-4"; }
     ];
   };
 
-  flake.nixosConfigurations.raspberry-pi-4 = inputs.nixpkgs.lib.nixosSystem {
+  hosts.raspberry-pi-4 = {
+    system = "aarch64-linux";
     modules = [
-      { nixpkgs.hostPlatform = "aarch64-linux"; }
       self.modules.nixos.raspberry-pi-4
       self.modules.nixos.rpi-hardware-configuration
     ];

@@ -3,10 +3,11 @@ _: {
     { lib, ... }:
     {
       options.customBot = {
+        # Bez wartości domyślnej: dawne "default" (= laptop) dawało hostowi,
+        # który zapomniał tej opcji, aliasy wdrażające system laptopa.
         flakeTarget = lib.mkOption {
           type = lib.types.str;
-          default = "default";
-          description = "Nazwa nixosConfigurations używana przez aliasy update/push.";
+          description = "Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr hostów (modules/hosts/registry.nix).";
         };
         enableFastfetch = lib.mkOption {
           type = lib.types.bool;

@@ -1,4 +1,13 @@
-{ customTop, ... }:
+{
+  config,
+  customTop,
+  lib,
+  ...
+}:
+let
+  # Rejestr hostów (modules/hosts/registry.nix); perSystem ma własne `config`.
+  inherit (config) hosts;
+in
 {
   perSystem =
     { config, pkgs, ... }:
@@ -83,8 +92,8 @@
       mkBuildWorkflow =
         {
           name,
-          buildTarget,
           runsOn,
+          buildTarget ? "nixosConfigurations.${name}.config.system.build.toplevel",
           runName ? "Build ${name} by @\${{ github.actor }}",
           command ? null,
           # `tags = false` dla ciezkich buildow. Build toplevela `nixos` trwa
@@ -109,8 +118,8 @@
           on = {
             push =
               if tags || onMaster then
-                (if tags then { tags = [ "v*" ]; } else { })
-                // (if onMaster then { branches = [ "master" ]; } else { })
+                lib.optionalAttrs tags { tags = [ "v*" ]; }
+                // lib.optionalAttrs onMaster { branches = [ "master" ]; }
               else
                 null;
             pullRequest.branches = [ "master" ];
@@ -137,14 +146,6 @@
         "aarch64-linux" = "ubuntu-24.04-arm";
       };
 
-      # Ewaluacja wszystkich hostów NixOS (sekundy zamiast godzin buildu) —
-      # łapie błędy ewaluacji przy każdym pushu do master.
-      evalHosts = [
-        "nixos"
-        "raspberry-pi-4"
-        "wsl"
-      ];
-
     in
     {
       packages.github-actions = config.githubActions.workflowsDir;
@@ -167,63 +168,55 @@
 
       githubActions = {
         enable = true;
-        # Automatycznie generujemy workflowy dla wszystkich wpisow w 'configs'
+        # Build toplevela każdego hosta z rejestru, obrazy i tanie sprawdzenia.
         workflows =
-          builtins.mapAttrs
+          lib.mapAttrs
             (
               name: cfg:
-              mkBuildWorkflow {
-                inherit name;
-                runsOn = archToRunner."${cfg.arch}";
-                buildTarget =
-                  cfg.buildTarget or "nixosConfigurations.${name}.config.system.build.${cfg.target or "toplevel"}";
-                command = cfg.command or null;
-                runName = cfg.runName or "Build ${name} by @\${{ github.actor }}";
-                tags = cfg.tags or true;
-                onMaster = cfg.onMaster or false;
-              }
+              mkBuildWorkflow (
+                {
+                  inherit name;
+                  runsOn = archToRunner.${cfg.arch};
+                }
+                // removeAttrs cfg [ "arch" ]
+              )
             )
-            {
-              nixos = {
-                arch = "x86_64-linux";
-                # Ciezki build (~400 pakietow, 3-5 h) — tylko PR i dispatch.
-                tags = false;
-              };
-              raspberry-pi-4 = {
-                arch = "aarch64-linux";
-              };
-              raspberry-pi-4-sd-image = {
-                arch = "aarch64-linux";
-                buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
-              };
-              nixos-iso = {
-                arch = "x86_64-linux";
-                buildTarget = "packages.x86_64-linux.nixos-iso";
-                # ISO w pełni offline (modules/installer) zawiera
-                # cały closure hosta nixos — ten sam koszt (3-5 h) co build
-                # `nixos` ponizej, więc nie na każdy tag.
-                tags = false;
-              };
-              wsl = {
-                arch = "x86_64-linux";
-              };
-              eval = {
-                arch = "x86_64-linux";
-                runName = "Evaluate hosts by @\${{ github.actor }}";
-                onMaster = true;
-                command = builtins.concatStringsSep "\n" (
-                  map (
+            (
+              lib.mapAttrs (_: host: {
+                arch = host.system;
+                tags = host.buildOnTags;
+              }) hosts
+              // {
+                raspberry-pi-4-sd-image = {
+                  arch = "aarch64-linux";
+                  buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
+                };
+                nixos-iso = {
+                  arch = "x86_64-linux";
+                  buildTarget = "packages.x86_64-linux.nixos-iso";
+                  # ISO w pełni offline (modules/installer) zawiera cały
+                  # closure hosta nixos — ten sam koszt (3-5 h) co build
+                  # hosta, więc nie na każdy tag.
+                  tags = false;
+                };
+                # Ewaluacja wszystkich hostów (sekundy zamiast godzin buildu)
+                # łapie błędy ewaluacji przy każdym pushu do master.
+                eval = {
+                  arch = "x86_64-linux";
+                  runName = "Evaluate hosts by @\${{ github.actor }}";
+                  onMaster = true;
+                  command = lib.concatMapStringsSep "\n" (
                     host:
                     "nix eval --raw .#nixosConfigurations.${host}.config.system.build.toplevel.drvPath --show-trace --accept-flake-config"
-                  ) evalHosts
-                );
-              };
-              lint = {
-                arch = "x86_64-linux";
-                buildTarget = "checks.x86_64-linux.pre-commit";
-                onMaster = true;
-              };
-            }
+                  ) (lib.attrNames hosts);
+                };
+                lint = {
+                  arch = "x86_64-linux";
+                  buildTarget = "checks.x86_64-linux.pre-commit";
+                  onMaster = true;
+                };
+              }
+            )
           // {
             cachyos-kernel-update = mkCachyOSKernelUpdateWorkflow {
               name = "cachyos-kernel-update";

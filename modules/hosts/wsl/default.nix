@@ -18,17 +18,12 @@
       ];
     };
 
-  flake.nixosConfigurations.wsl = inputs.nixpkgs.lib.nixosSystem {
+  hosts.wsl = {
     system = "x86_64-linux";
     modules = [
       self.modules.nixos.base
       self.modules.nixos.wsl
-      (_: {
-        customBot = {
-          enableFastfetch = false;
-          flakeTarget = "wsl";
-        };
-      })
+      { customBot.enableFastfetch = false; }
     ];
   };
 }
