@@ -9,7 +9,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `flake.nix` — inputs + `nixConfig` caches; outputs = `flake-parts` + `import-tree ./modules` (every `.nix` under `modules/` is a flake-parts module; paths containing a `_`-prefixed segment are ignored, e.g. `_secrets/`, `raspberry-pi-4/_hardware-configuration.nix`, `packages/_waywallen/`). No Home Manager.
 - `modules/args.nix` — `customTop` (repo, e-mail, domain `janusz-bit.com`, LAN `192.168.100.0/24`, `nixConfig` from `flake.nix`, own cachix, `secretsDir`, `keys`).
 - `modules/hosts/registry.nix` — host registry: `hosts.<name> = { system; modules; buildOnTags; }` generates `nixosConfigurations.<name>`, sets `customBot.flakeTarget = <name>` and feeds the CI workflows.
-- `modules/hosts/base/` — shared NixOS base (aggregate `base`, imported by every host): `options.nix` (`customBot.{flakeTarget, enableFastfetch, defaultUser, triliumMcpUrl}`), `nix.nix`, `secrets.nix` (user secrets), `agenix.nix` (per-process secret wrappers), shell, git, ssh, Prime Agent; plus opt-in `fail2ban.nix` (`base-fail2ban`, imported by `nixos` and `raspberry-pi-4` only).
+- `modules/hosts/base/` — shared NixOS base (aggregate `base`, imported by every host): `options.nix` (`customBot.{flakeTarget, enableFastfetch, defaultUser, triliumMcpUrl}`), `nix.nix` (nix settings, caches, GC, nixpkgs overlays), `rebuild.nix` (`update*`, `push`, `update-my-pkgs`), `configuration.nix` (CLI tools, nix-ld, comma, direnv, DNS), `secrets.nix` (user secrets), `agenix.nix` (per-process secret wrappers), shell, git, ssh, Prime Agent; plus opt-in `fail2ban.nix` (`base-fail2ban`, imported by `nixos` and `raspberry-pi-4` only).
 - `modules/hosts/{nixos,raspberry-pi-4,wsl}/` — hosts: registry entry, identity and host-only modules. Features linking two hosts live directly in `modules/hosts/` (`remote-agent.nix`, `claude-notify.nix` + `_claude-notify/`) and export one module per host.
 - `modules/desktop/` — reusable workstation features (`desktop-*`: Plasma, browsers, apps, dev tools, AI, CachyOS tuning…); `modules/gaming/` — Steam, GameMode, per-game wrappers (`gaming-*`).
 - `modules/hardware/` — per machine/board: `LOQ-15IRX10/` (+ its `facter.json`), `raspberry-pi-4/` (board + `fan.nix`), Lenovo tweaks, x86-64-v3 system features. `M27Q.icm` is referenced by KWin (`~/.config/kwinoutputconfig.json` → `/etc/nixos/modules/hardware/M27Q.icm`) — do not move it.
@@ -233,6 +233,7 @@ sudo nixos-rebuild switch --flake .#nixos          # or .#raspberry-pi-4 / .#wsl
 update / update-boot / update-reboot               # remote flake (github:janusz-bit/nixos), --refresh; update-reboot = boot + reboot on success
 update-local / update-local-boot                   # /etc/nixos
 push                                               # fish: build toplevel and push closure to cachix
+update-my-pkgs                                     # fish: nix run /etc/nixos#flake-update
 nix run github:janusz-bit/nixos -- [--disk DEV]    # install-system (live ISO), see below
 nix run /etc/nixos#post-install [ssh|secure-boot]  # after install: agenix root key, Secure Boot enrollment
 nix build .#raspberry-pi-4-sd-image

@@ -1,7 +1,10 @@
 _: {
   flake.modules.nixos.base-ssh =
-    { lib, ... }:
+    { lib, pkgs, ... }:
     {
+      # `ssh ssh.<domena>`: ProxyCommand niżej przez Cloudflare Access.
+      environment.systemPackages = [ pkgs.cloudflared ];
+
       services.openssh = {
         enable = true;
         settings = {
