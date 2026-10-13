@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.modules.nixos.disko = _: {
+  flake.modules.nixos.nixos-disko = _: {
     imports = [ inputs.disko.nixosModules.default ];
     disko.devices = {
       disk = {

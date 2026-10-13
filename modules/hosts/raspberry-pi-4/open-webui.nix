@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.open-webui =
+  flake.modules.nixos.rpi-open-webui =
     {
       config,
       lib,

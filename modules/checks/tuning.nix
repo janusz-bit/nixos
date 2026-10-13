@@ -1,4 +1,4 @@
-# Test VM strojenia z modules/hosts/nixos/tuning.nix na tym samym kernelu
+# Test VM strojenia z modules/desktop/tuning.nix na tym samym kernelu
 # CachyOS co host nixos. Sprawdza, czy ustawienia zostały zastosowane
 # (wartości oczekiwane bierze z konfiguracji hosta, więc rozjazd host ↔
 # moduł też oblewa test), a dla zmian przejętych z CachyOS mierzy efekt:
@@ -107,7 +107,7 @@
       checks.tuning = pkgs.testers.runNixOSTest {
         name = "tuning";
         nodes.machine = {
-          imports = [ self.modules.nixos.nixos-tuning ];
+          imports = [ self.modules.nixos.desktop-tuning ];
           # Ten sam kernel co host (z cache lantian, bez kompilacji).
           boot.kernelPackages = hostCfg.boot.kernelPackages;
           virtualisation = {

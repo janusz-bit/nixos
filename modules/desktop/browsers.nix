@@ -20,7 +20,7 @@
 # Sprawdzenie: helium://policy (polityki ze statusem OK), helium://extensions
 # (rozszerzenia zainstalowane przez administratora, bez przycisku usuwania).
 _: {
-  flake.modules.nixos.nixos-helium =
+  flake.modules.nixos.desktop-browsers =
     { pkgs, ... }:
     {
       environment.systemPackages = [ pkgs.helium ];

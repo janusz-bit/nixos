@@ -28,7 +28,7 @@ in
               modules = [
                 { nixpkgs.hostPlatform = "aarch64-linux"; }
                 self.modules.nixos.raspberry-pi-4
-                self.modules.nixos.rpi-sdImage
+                self.modules.nixos.rpi-sd-image
               ];
             };
           in

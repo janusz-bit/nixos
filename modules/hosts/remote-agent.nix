@@ -53,7 +53,7 @@ in
       systemd.tmpfiles.rules = [ "d ${home} ${homeMode} ${user} ${user} - -" ];
     };
 
-  flake.modules.nixos.rpi-laptop-remote =
+  flake.modules.nixos.rpi-remote-agent =
     { config, pkgs, ... }:
     let
       # laptop-run [CMD...] — uruchamia CMD na laptopie w migawce bieżącego

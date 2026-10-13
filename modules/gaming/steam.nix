@@ -1,5 +1,5 @@
 _: {
-  flake.modules.nixos.nixos-gaming =
+  flake.modules.nixos.gaming-steam =
     {
       config,
       lib,

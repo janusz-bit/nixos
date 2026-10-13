@@ -2,7 +2,7 @@
 # W Launch Options Steama wpisz:  deadlockrun %command%
 # Proton: Właściwości gry -> Zgodność -> wymuś "Proton-CachyOS x86-64-v3".
 # Valve mapuje Deadlocka na Proton Experimental z priorytetem 100, wyżej niż
-# domyślne narzędzie (75), więc domyślny proton-cachyos z gaming.nix tu nie
+# domyślne narzędzie (75), więc domyślny proton-cachyos ze steam.nix tu nie
 # działa; wygrywa tylko wybór dla gry (250), który Steam trzyma w
 # config/config.vdf (CompatToolMapping) i nadpisuje przy wyjściu — nie da się
 # go ustawić z flake'a. 2026-10-12: na experimental-11.0-20261001 gra działała
@@ -11,7 +11,7 @@
 # "dxvk.enableNvRawAccessChains = False" i "shaderRawAccessChains : 0",
 # a `journalctl -k | grep Xid` po meczu jest pusty.
 {
-  flake.modules.nixos.nixos-deadlock =
+  flake.modules.nixos.gaming-deadlock =
     { lib, pkgs, ... }:
     let
       # See temporary-fixes.md: na sterownikach NVIDIA 610/615 (tu 615.71.09)

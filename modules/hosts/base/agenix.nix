@@ -26,7 +26,7 @@
 #
 # Granica ochrony: wrappery chronią przed PRZYPADKOWYM wyciekiem przez env
 # (logi, procesy potomne, cała sesja KDE). Pliki sekretów należą do
-# customBot.defaultUser (0400, modules/agenix/agenix.nix), więc proces
+# customBot.defaultUser (0400, modules/hosts/base/secrets.nix), więc proces
 # działający jako ten użytkownik nadal może je przeczytać wprost.
 { self, ... }:
 {
@@ -43,7 +43,7 @@
       secretPath =
         name:
         (config.age.secrets.${name}
-          or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — zdefiniuj go w modules/agenix/agenix.nix")
+          or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — zdefiniuj go w modules/hosts/base/secrets.nix")
         ).path;
 
       # Funkcje-wrappery: `name` = nazwa wykonywanego programu; `vars` =
@@ -166,7 +166,7 @@
 
     in
     {
-      imports = [ self.modules.nixos.agenix ];
+      imports = [ self.modules.nixos.base-secrets ];
 
       # === per-procesowe wrappery (funkcje fish przez vendor_functions.d) ===
       # vendor.functions to warunek działania tego modułu — fish dodaje

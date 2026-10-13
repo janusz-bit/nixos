@@ -5,7 +5,7 @@
 # (np. trilium-etapi w modules/hosts/raspberry-pi-4/hermes.nix).
 { inputs, customTop, ... }:
 {
-  flake.modules.nixos.agenix =
+  flake.modules.nixos.base-secrets =
     { config, lib, ... }:
     let
       userSecret = file: {

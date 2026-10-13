@@ -15,7 +15,7 @@
 # i "dxvk.enableNvRawAccessChains = False"; po meczu
 # `journalctl -k | grep Xid` jest puste. A/B z DX12: `gamemoderun %command%`.
 {
-  flake.modules.nixos.nixos-dbd =
+  flake.modules.nixos.gaming-dbd =
     { lib, pkgs, ... }:
     let
       # See temporary-fixes.md: w DX11 grę renderuje DXVK, więc grozi jej ten

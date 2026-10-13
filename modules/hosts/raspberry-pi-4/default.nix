@@ -11,20 +11,20 @@
   flake.modules.nixos.raspberry-pi-4 = _: {
     imports = [
       self.modules.nixos.base
-      self.modules.nixos.fail2ban
-      self.modules.nixos.nextcloud
-      self.modules.nixos.trilium
-      self.modules.nixos.gitea
-      self.modules.nixos.cloudflared
-      self.modules.nixos.pwm-fan
-      self.modules.nixos.leds-off
-      self.modules.nixos.hermes
-      self.modules.nixos.matrix
+      self.modules.nixos.base-fail2ban
+      self.modules.nixos.rpi-nextcloud
+      self.modules.nixos.rpi-trilium
+      self.modules.nixos.rpi-gitea
+      self.modules.nixos.rpi-cloudflared
+      self.modules.nixos.hardware-raspberry-pi-4-fan
+      self.modules.nixos.hardware-raspberry-pi-4
+      self.modules.nixos.rpi-hermes
+      self.modules.nixos.rpi-matrix
       self.modules.nixos.rpi-claude-notify
-      self.modules.nixos.open-webui
-      self.modules.nixos.ttyd
-      self.modules.nixos.rpi-wifi
-      self.modules.nixos.rpi-laptop-remote
+      self.modules.nixos.rpi-open-webui
+      self.modules.nixos.rpi-ttyd
+      self.modules.nixos.rpi-network
+      self.modules.nixos.rpi-remote-agent
       self.modules.nixos.ai-skills
       self.modules.nixos.rpi-specific
       self.modules.nixos.rpi-configuration
@@ -39,7 +39,7 @@
     system = "aarch64-linux";
     modules = [
       self.modules.nixos.raspberry-pi-4
-      self.modules.nixos.rpi-hardware-configuration
+      ./_hardware-configuration.nix
     ];
   };
 }

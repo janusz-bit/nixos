@@ -7,7 +7,7 @@ _: {
   # - już domyślna: thp.conf (defrag defer+madvise = domyślne CONFIG_CACHY;
   #   kernel CachyOS ma też sam z siebie watermark_boost 0,
   #   compaction_proactiveness 0, MGLRU min_ttl 100 ms), resolved jako DNS
-  #   w NetworkManagerze (włącza go moduł mullvad-vpn), ntsync (gaming.nix),
+  #   w NetworkManagerze (włącza go moduł mullvad-vpn), ntsync (modules/gaming/steam.nix),
   #   runtime PM dGPU (LOQ-15IRX10.nix);
   # - nie ma na czym działać: pci-latency (brak konwencjonalnej szyny PCI:
   #   PCIe i funkcje zintegrowane w CPU/PCH), reguły SATA/hdparm (brak
@@ -21,7 +21,7 @@ _: {
   # - czeka na A/B na hoście: scheduler NVMe kyber (60-ioschedulers.rules),
   #   power_save snd_hda_intel na zasilaczu (20-audio-pm.rules);
   # - decyzje: DefaultTimeoutStartSec=15s pominięte (nic tu nie skraca).
-  flake.modules.nixos.nixos-tuning = _: {
+  flake.modules.nixos.desktop-tuning = _: {
     boot = {
       # Kernel CachyOS ma CONFIG_ZSWAP_DEFAULT_ON=y, a moduł boot.zswap
       # przy enable = false nic nie wyłącza: zswap kompresowałby strony

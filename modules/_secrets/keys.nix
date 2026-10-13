@@ -1,6 +1,6 @@
 # Publiczne klucze SSH — jedno źródło prawdy dla odbiorców agenix
 # (secrets.nix), authorized_keys (modules/hosts/raspberry-pi-4/configuration.nix,
-# modules/hosts/nixos/remote-agent.nix) i known_hosts.
+# modules/hosts/remote-agent.nix) i known_hosts.
 {
   hosts = {
     # /root/.ssh/id_ed25519 hostów (age.identityPaths)

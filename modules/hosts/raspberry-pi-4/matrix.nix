@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.matrix =
+  flake.modules.nixos.rpi-matrix =
     { config, lib, ... }:
     let
       domain = customTop.site.full;

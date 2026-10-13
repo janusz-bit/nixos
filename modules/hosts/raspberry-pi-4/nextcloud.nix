@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.nextcloud =
+  flake.modules.nixos.rpi-nextcloud =
     { config, pkgs, ... }:
     {
       # nextcloud-setup czyta plik przez LoadCredential.

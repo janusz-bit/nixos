@@ -19,7 +19,7 @@
 #         ISO nie jest podpisane: Secure Boot w BIOS musi być wyłączony.
 { self, inputs, ... }:
 {
-  flake.modules.nixos.nixos-iso =
+  flake.modules.nixos.installer-iso =
     { lib, ... }:
     {
       imports = [ "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix" ];
@@ -57,7 +57,7 @@
         image = inputs.nixpkgs.lib.nixosSystem {
           modules = [
             { nixpkgs.hostPlatform = "x86_64-linux"; }
-            self.modules.nixos.nixos-iso
+            self.modules.nixos.installer-iso
           ];
         };
       in

@@ -14,7 +14,7 @@
 # Weryfikacja: `nix config show extra-substituters` zawiera devenv.cachix.org;
 # `devenv shell` w nowym projekcie pobiera zależności zamiast je budować.
 _: {
-  flake.modules.nixos.nixos-devenv =
+  flake.modules.nixos.desktop-devenv =
     { pkgs, ... }:
     {
       environment.systemPackages = [ pkgs.devenv ];

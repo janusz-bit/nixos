@@ -25,7 +25,7 @@
         # Working hibernation (resumeDevice sam dodaje parametr resume=)
         resumeDevice = "/dev/mapper/swap";
 
-        # zswap, zRAM, sysctl i THP: modules/hosts/nixos/tuning.nix.
+        # zswap, zRAM, sysctl i THP: modules/desktop/tuning.nix.
       };
 
       services = {

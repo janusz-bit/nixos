@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.rpi-wifi =
+  flake.modules.nixos.rpi-network =
     { config, lib, ... }:
     let
       # SSID i hasło: modules/_secrets/wifi.age (agenix -e), plik env:
@@ -14,7 +14,7 @@
     lib.mkMerge [
       {
         warnings = lib.optionals (!hasSecret) [
-          "rpi-wifi: brak modules/_secrets/wifi.age w gicie — Wi-Fi nie zostanie skonfigurowane."
+          "rpi-network: brak modules/_secrets/wifi.age w gicie — Wi-Fi nie zostanie skonfigurowane."
         ];
 
         # Domena regulacyjna PL (jak raspi-config w Raspberry Pi OS). Bez niej

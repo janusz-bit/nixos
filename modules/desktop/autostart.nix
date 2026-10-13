@@ -7,7 +7,7 @@
 # z sesją graficzną na tym hoście.
 # Sprawdzenie po zalogowaniu: systemctl --user list-units 'app-*@autostart.service'
 _: {
-  flake.modules.nixos.nixos-autostart =
+  flake.modules.nixos.desktop-autostart =
     { pkgs, ... }:
     {
       environment.systemPackages = [

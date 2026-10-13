@@ -1,6 +1,6 @@
 { inputs, customTop, ... }:
 {
-  flake.modules.nixos.nixos-ai =
+  flake.modules.nixos.desktop-ai =
     { pkgs, ... }:
     {
       # Claude Code dla tego repo: zawsze w devShellu (nixfmt/deadnix/jq dla

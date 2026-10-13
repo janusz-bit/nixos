@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.ttyd =
+  flake.modules.nixos.rpi-ttyd =
     {
       config,
       lib,

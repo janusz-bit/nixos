@@ -1,5 +1,5 @@
 _: {
-  flake.modules.nixos.options =
+  flake.modules.nixos.base-options =
     { lib, ... }:
     {
       options.customBot = {

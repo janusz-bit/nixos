@@ -17,7 +17,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 1. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
 
 - **Od:** 2026-09-29.
-- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`services.udev.extraRules`).
+- **Plik:** `modules/hardware/LOQ-15IRX10/default.nix` (`services.udev.extraRules`).
 - **Objaw:** `/sys/bus/pci/devices/0000:01:00.0/power/control` = `on`
   (domyślna wartość PCI), `runtime_status` stale `active` — RTX 5060 nigdy
   nie przechodzi w D3cold mimo `powerManagement.finegrained = true`.
@@ -116,8 +116,8 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 6. Deadlock, Dead by Daylight — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
 
 - **Od:** 2026-10-12.
-- **Pliki:** `modules/hosts/nixos/deadlock.nix` (`deadlockrun`) i
-  `modules/hosts/nixos/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
+- **Pliki:** `modules/gaming/deadlock.nix` (`deadlockrun`) i
+  `modules/gaming/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
   z `-dx11` renderuje przez DXVK; zawiasu w DBD nie zaobserwowano) —
   `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`.
 - **Objaw:** na NVIDIA 610/615 (tu 615.71.09, RTX 5060) Deadlock w trybie DX11

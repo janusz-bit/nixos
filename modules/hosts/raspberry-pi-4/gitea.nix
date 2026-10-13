@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.gitea = _: {
+  flake.modules.nixos.rpi-gitea = _: {
     services.gitea = {
       enable = true;
       database.type = "sqlite3";

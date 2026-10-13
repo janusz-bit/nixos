@@ -1,5 +1,5 @@
 _: {
-  flake.modules.nixos.pwm-fan =
+  flake.modules.nixos.hardware-raspberry-pi-4-fan =
     { pkgs, ... }:
     {
       systemd.services.pwm-fan = {

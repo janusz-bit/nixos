@@ -1,5 +1,5 @@
 _: {
-  flake.modules.nixos.leds-off = _: {
+  flake.modules.nixos.hardware-raspberry-pi-4 = _: {
     # Disable all LEDs on Raspberry Pi 4.
     # ACT, PWR, and Ethernet LEDs are controlled via device tree overlays
     # using the nixos-hardware raspberry-pi/4/leds.nix module.

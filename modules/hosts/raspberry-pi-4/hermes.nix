@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake.modules.nixos.hermes =
+  flake.modules.nixos.rpi-hermes =
     {
       config,
       pkgs,
@@ -114,7 +114,7 @@
           mode = "0400";
         };
         # Token ETAPI Trilium współdzielony z prime-agentem użytkownika nixos
-        # (właściciel z modules/agenix/agenix.nix) — odczyt dla grupy hermes.
+        # (właściciel z modules/hosts/base/secrets.nix) — odczyt dla grupy hermes.
         trilium-etapi = {
           group = "hermes";
           mode = "0440";

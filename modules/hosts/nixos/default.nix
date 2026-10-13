@@ -9,22 +9,22 @@
       self.modules.nixos.nixos-specific
       self.modules.nixos.nixos-configuration
       self.modules.nixos.nixos-packages
-      self.modules.nixos.nixos-devenv
-      self.modules.nixos.nixos-podman
-      self.modules.nixos.disko
-      self.modules.nixos.fail2ban
-      self.modules.nixos.nixos-ai
+      self.modules.nixos.desktop-devenv
+      self.modules.nixos.desktop-podman
+      self.modules.nixos.nixos-disko
+      self.modules.nixos.base-fail2ban
+      self.modules.nixos.desktop-ai
       self.modules.nixos.ai-skills
       self.modules.nixos.nixos-appimage-run
-      self.modules.nixos.nixos-autostart
-      self.modules.nixos.nixos-helium
-      self.modules.nixos.nixos-dbd
-      self.modules.nixos.nixos-deadlock
-      self.modules.nixos.nixos-gaming
+      self.modules.nixos.desktop-autostart
+      self.modules.nixos.desktop-browsers
+      self.modules.nixos.gaming-dbd
+      self.modules.nixos.gaming-deadlock
+      self.modules.nixos.gaming-steam
       self.modules.nixos.nixos-snapper
       self.modules.nixos.nixos-remote-agent
       self.modules.nixos.nixos-claude-notify
-      self.modules.nixos.nixos-tuning
+      self.modules.nixos.desktop-tuning
     ];
   };
 

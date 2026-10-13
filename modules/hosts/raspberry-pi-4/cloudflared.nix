@@ -1,6 +1,6 @@
 { customTop, ... }:
 {
-  flake.modules.nixos.cloudflared =
+  flake.modules.nixos.rpi-cloudflared =
     { config, ... }:
     {
       # Moduł cloudflared czyta plik przez LoadCredential (DynamicUser),
