@@ -1,6 +1,7 @@
 # Sieć RPi: NetworkManager z kablem i zapasowym Wi-Fi (profil home-wifi
-# z sekretu wifi.age), domena regulacyjna PL. Usługi słuchają na localhost
-# i wychodzą tylko tunelem (cloudflared.nix), więc firewall nic nie otwiera.
+# z sekretu wifi.age), domena regulacyjna PL. Usługi WWW słuchają na
+# localhost i wychodzą tylko tunelem (cloudflared.nix); firewall otwiera
+# jedynie port 22 (sshd z base-ssh, domyślne openFirewall).
 # Sprawdzenie: `nmcli connection show`, `iw reg get`.
 { customTop, ... }:
 {

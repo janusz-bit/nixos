@@ -1,7 +1,8 @@
 # Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.<nazwa>,
 # workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji)
-# i strona docs/hosts.md. Nazwa hosta = nazwa konfiguracji = cel aliasów
-# update/push (customBot.flakeTarget ustawia rejestr, nie host).
+# i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa
+# konfiguracji = cel aliasów update/push (customBot.flakeTarget ustawia
+# rejestr; host ustawia je sam tylko dla obrazu składanego poza rejestrem).
 #
 # Host deklaruje się w modules/hosts/<nazwa>/default.nix:
 #   hosts.<nazwa> = { system = "x86_64-linux"; modules = [ … ]; };

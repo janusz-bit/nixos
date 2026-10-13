@@ -18,7 +18,7 @@
 # Ryzyko resztkowe: zwykłe konto lokalne widzi usługi na localhost (ollama
 # :11434 bez autoryzacji) i może obciążyć CPU/dysk.
 #
-# RPi (rpi-laptop-remote): `Host laptop` w ssh_config z przypiętym kluczem hosta
+# RPi (rpi-remote-agent): `Host laptop` w ssh_config z przypiętym kluczem hosta
 # i skrypt `laptop-run`. Działa tylko, gdy laptop jest włączony i w domowym
 # LAN-ie. fail2ban laptopa nie ignoruje LAN-u: 5 nieudanych logowań banuje RPi.
 { customTop, ... }:

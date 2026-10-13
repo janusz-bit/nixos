@@ -24,6 +24,9 @@
 #   z commitem i hashem; dla pluginu z katalogu pluginów hermes-agent commit
 #   to `sha` z plugin-catalog/<nazwa>.yaml, nie `main`. Serwery MCP z nixpkgs,
 #   nie przez uvx.
+# - Pluginy spoza kategorii model-provider (mermaid-render, hermes-lang-pl)
+#   włącza wyłącznie plugins.enabled niżej: aktywacja zastępuje tą listą
+#   wpis w config.yaml, więc `hermes plugins enable` znika po rebuildzie.
 #
 # Logowanie Claude jednorazowo, na koncie usługi:
 # `sudo -u hermes -H claude auth login`.
