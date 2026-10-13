@@ -10,7 +10,7 @@
     {
       nixpkgs.overlays = [
         # pinned = ten sam nixpkgs, którym Hydra autora buduje kernele, więc
-        # kernel przychodzi z cache attic.xuyh0120.win/lantian (customTop.cache)
+        # kernel przychodzi z cache attic.xuyh0120.win/lantian (nixConfig we flake.nix)
         # zamiast kompilować się lokalnie po każdym bumpie naszego nixpkgs.
         inputs.nix-cachyos-kernel.overlays.pinned
       ];

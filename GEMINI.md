@@ -7,7 +7,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 
 ## Repository map
 - `flake.nix` — inputs + `nixConfig` caches; outputs = `flake-parts` + `import-tree ./modules` (every `.nix` under `modules/` is a flake-parts module; paths containing a `_`-prefixed segment are ignored, e.g. `_secrets/`, `_hardware-configuration/`, `packages/_waywallen/`). No Home Manager.
-- `modules/args.nix` — `customTop` (repo, e-mail, domain `janusz-bit.com`, LAN `192.168.100.0/24`, binary caches, `secretsDir`).
+- `modules/args.nix` — `customTop` (repo, e-mail, domain `janusz-bit.com`, LAN `192.168.100.0/24`, `nixConfig` from `flake.nix`, own cachix, `secretsDir`, `keys`).
 - `modules/options.nix` — `customBot.{flakeTarget, enableFastfetch, defaultUser, triliumMcpUrl}`.
 - `modules/hosts/base/` — shared NixOS base (`self.modules.nixos.base`), plus `fail2ban.nix` (imported by `nixos` and `raspberry-pi-4` only).
 - `modules/hosts/{nixos,raspberry-pi-4,wsl}/` — hosts.
@@ -32,7 +32,7 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 | `wsl` | x86_64 | `nixos` | NixOS-WSL, stateVersion 25.05 |
 
 ### Base (all NixOS hosts)
-bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `nix-index-database` + comma, direnv, Quad9 DNS (`mkDefault`; WSL clears it), firewall on, openssh key-only with `PermitRootLogin = "no"` by default, git config, agenix, Prime Agent config (`/etc/prime-agent/*.json` symlinked into `~/.prime/agent/`), nix: flakes, weekly GC (`mkDefault`), `nix.optimise.automatic`, caches from `customTop.cache`.
+bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `nix-index-database` + comma, direnv, Quad9 DNS (`mkDefault`; WSL clears it), firewall on, openssh key-only with `PermitRootLogin = "no"` by default, git config, agenix, Prime Agent config (`/etc/prime-agent/*.json` symlinked into `~/.prime/agent/`), nix: flakes, weekly GC (`mkDefault`), `nix.optimise.automatic`, caches from `nixConfig` in `flake.nix` (`customTop.nixConfig`).
 
 ### `nixos` (laptop)
 - Kernel: `pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3` via `nix-cachyos-kernel.overlays.pinned` (cache hit only with `pinned`; NVIDIA driver version therefore follows that input's nixpkgs). Never set `inputs.nixpkgs.follows` on `nix-cachyos-kernel`.
@@ -79,7 +79,7 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 - ttyd credentials never on a command line (nginx `auth_basic` with a hash file generated from the agenix secret); ttyd itself is reachable only through nginx (Unix socket `root:nginx 0660`); its password is its own secret, never another service's.
 
 ## Binary caches
-`customTop.cache` (→ `nix.settings`) and `nixConfig` in `flake.nix` must list the same caches: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. `devenv.cachix.org` is host-level on `nixos` for devenv projects only (`modules/hosts/nixos/devenv.nix`), deliberately outside `customTop.cache`/`nixConfig`.
+`nixConfig` in `flake.nix` is the only cache list: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Hosts get the same lists in `nix.settings` through `customTop.nixConfig` (`modules/args.nix` imports `flake.nix`); `customTop.cache.cachix` (own cache: `push`, CI) finds its key there. Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. `devenv.cachix.org` is host-level on `nixos` for devenv projects only (`modules/hosts/nixos/devenv.nix`), deliberately outside `nixConfig`.
 
 ## Development workflow
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions). Claude Code: start it with the alias `claude-nixos` (host `nixos`, `modules/hosts/nixos/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
@@ -158,7 +158,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 ### Flake inputs and dependencies
 
 - New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless their binary cache only matches their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`); then say so in a comment next to the input.
-- An input with its own binary cache: add the cache to both `nixConfig` in `flake.nix` and `customTop.cache` (see **Binary caches**).
+- An input with its own binary cache: add the cache to `nixConfig` in `flake.nix` (see **Binary caches**).
 - Adding or removing an input: `nix flake lock` (does not bump other inputs). Updating one input: `nix flake update <input>`. Full updates only through `flake-update`.
 - Every fetcher has a real hash. **NEVER** commit `lib.fakeHash`.
 - Flakes see only git-tracked files: `git add` new files before `nix eval`/`nix build`, otherwise they are silently missing.

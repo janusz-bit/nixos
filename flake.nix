@@ -45,13 +45,16 @@
     # v0.3.3 waywallen-display — naprawa "plasma empty displays on login").
   };
 
-  # nixConfig inputów NIE jest dziedziczony — cache inputów trzeba wymienić
-  # tutaj (CI, pierwszy rebuild z --accept-flake-config) i w nix.settings
-  # (modules/hosts/base/configuration.nix, źródło: customTop.cache).
+  # Jedyna lista cache flake'a: CI i pierwszy rebuild z --accept-flake-config
+  # czytają ją stąd, a hosty dostają te same listy w nix.settings
+  # (customTop.nixConfig, modules/args.nix). nixConfig inputów NIE jest
+  # dziedziczony — cache inputów trzeba wymienić tutaj.
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
+      # nix-cachyos-kernel (Hydra autora) — trafia przy overlays.pinned
       "https://attic.xuyh0120.win/lantian"
+      # llm-agents.nix (prime-agent, dsh, chatgpt)
       "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [

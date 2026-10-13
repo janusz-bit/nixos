@@ -6,7 +6,7 @@
 # invariants). Bez cache w konfiguracji demona devenv po cichu buduje lokalnie
 # wszystko z `devenv-nixpkgs/rolling`, dlatego devenv.cachix.org jest dodane
 # tutaj, na poziomie hosta. To cache dla projektów devenv, nie dla tego
-# flake'a: celowo nie ma go w `customTop.cache` ani w `nixConfig` w flake.nix.
+# flake'a: celowo nie ma go w `nixConfig` we flake.nix.
 #
 # direnv jest włączony w base (`programs.direnv`), więc `devenv init` + `.envrc`
 # z `use devenv` działa bez dodatkowej konfiguracji.

@@ -62,14 +62,7 @@ let
       "nix-command"
       "flakes"
     ];
-    extra-substituters = [
-      customTop.cache.cachix.url
-    ]
-    ++ map (c: c.url) customTop.cache.inputs;
-    extra-trusted-public-keys = [
-      customTop.cache.cachix.pubKey
-    ]
-    ++ map (c: c.pubKey) customTop.cache.inputs;
+    inherit (customTop.nixConfig) extra-substituters extra-trusted-public-keys;
   };
 in
 {
