@@ -42,9 +42,7 @@
             if git diff --cached --quiet; then
               echo "Everything is already up to date."
             else
-              # The dev shell's workflow hook may still point at the old lock.
-              # The fresh generator has already run above.
-              SKIP=sync-github-actions git commit -m "flake-update: update inputs and packages"
+              git commit -m "flake-update: update inputs and packages"
             fi
             echo "All packages updated!"
           '';

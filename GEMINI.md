@@ -18,12 +18,15 @@ You are an advanced DevOps engineer and an expert in **NixOS** and **Nix Flakes*
 - `modules/packages/` — overlay `local-packages` (`helium`, `waywallen`, `waywallen-kde-plugin`, `bootdev-cli`; also exposed as `packages.<system>.*` for `nix-update`), scripts (`flake-update`, `flake-release`, `repo-sync`), RPi SD image (`raspberry-pi-4-sd-image`, module `hosts/raspberry-pi-4/sd-image.nix`).
 - `modules/installer/` — everything for installing host `nixos`: `install.nix` (packages `install-system`, `install-system-offline`, `post-install`), `iso.nix` (module `installer-iso`, package `nixos-iso`, fully offline bootable installer ISO).
 - `modules/skills/` — declarative skills: Prime Agent (`skills`) and Claude Code (`claudeSkills`; `nixos-system` = NixOS specifics + a host section generated from `config`; `hermes-notify` = when and how to message the user with `claude-notify`, only on hosts where `claude-notify.nix` deployed the key).
-- `modules/github-actions.nix` — generates `.github/workflows/*.yml`.
+- `modules/default.nix` — flake skeleton: systems, flake-parts modules, formatter, pre-commit hooks, dev shell.
+- `modules/github-actions.nix` — generates `.github/workflows/*.yml` (per-host builds from the registry).
+- `modules/docs.nix` — generates `docs/reference/` (`hosts.md`: hosts, their modules, diagrams; `modules.md`: catalog with each module's header summary; `options.md`: `customBot` and registry options). Read these for "what is where" before grepping.
+- `README.md` — human overview: hosts, install, update, adding a host.
 - `modules/hosts/raspberry-pi-4/_hermes-agent/` — vendored copy of upstream `nix/nixosModules.nix` (MIT) whose activation runs as the service user; the header lists the changes and the sync procedure (`temporary-fixes.md`).
 - `modules/checks/hermes-activation.nix` — NixOS VM test: the vendored Hermes activation never writes as root through agent-owned paths (symlink-attack matrix). Run: `nix build .#checks.<system>.hermes-activation` (needs kvm; ~3 min on the RPi).
 - `modules/checks/tuning.nix` — NixOS VM test (x86_64 only, the host's own CachyOS kernel): `desktop-tuning` is applied with the host's values and each CachyOS-derived change has an effect (A/B THP 409 vs 511, zram 100% vs 50%, sysrq 244 vs 16, stop timeout, oomd kill/omit). Run: `nix build -L .#checks.x86_64-linux.tuning` (needs kvm; ~2.5 min).
 - `temporary-fixes.md` — tracker of upstream workarounds (active / closed).
-- `.claude/` — Claude Code project config: `settings.json` (permissions: read-only nix/git commands allowed, `git push` and `sudo` ask for confirmation, secrets and Secure Boot/disk writes denied) and `hooks/post-edit.sh` (nixfmt after every `.nix` edit; after `modules/github-actions.nix` also pre-commit refresh + workflow sync).
+- `.claude/` — Claude Code project config: `settings.json` (permissions: nix eval/build, `nixos-rebuild build` and read-only git commands allowed, `git push` and `sudo` ask for confirmation, secrets and Secure Boot/disk writes denied) and `hooks/post-edit.sh` (nixfmt after every `.nix` edit).
 
 ## Hosts
 | Host | Arch | User | Notes |
@@ -84,8 +87,8 @@ bash as login shell that `exec`s fish; fish aliases (eza/bat), tmux, `nix-ld`, `
 `nixConfig` in `flake.nix` is the only cache list: `janusz-bit.cachix.org`, `attic.xuyh0120.win/lantian` (CachyOS kernel), `cache.numtide.com` (llm-agents). Hosts get the same lists in `nix.settings` through `customTop.nixConfig` (`modules/args.nix` imports `flake.nix`); `customTop.cache.cachix` (own cache: `push`, CI) finds its key there. Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. `devenv.cachix.org` is host-level on `nixos` for devenv projects only (`modules/desktop/devenv.nix`), deliberately outside `nixConfig`.
 
 ## Development workflow
-- Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions). Claude Code: start it with the alias `claude-nixos` (`modules/desktop/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
-- **Stale hook pitfall:** the `sync-github-actions` hook points at the store path built when the shell was entered. After editing `modules/github-actions.nix`, re-enter `nix develop`, or run `nix run .#sync-github-actions` and commit with `SKIP=sync-github-actions`. Claude Code's `.claude/hooks/post-edit.sh` does this automatically.
+- Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions, sync-docs). Claude Code: start it with the alias `claude-nixos` (`modules/desktop/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
+- **Generated files:** `.github/workflows/*.yml` (`sync-github-actions`, from `modules/github-actions.nix` + host registry) and `docs/reference/*.md` (`sync-docs`, from `modules/docs.nix`). The pre-commit hooks run `nix run .#<generator>` on the working tree (no stale store path from shell entry); if a hook modifies files, `git add` them and commit again. Never edit generated files by hand.
 - CI workflows (generated): `nixos` (PR + manual only, 3–5 h), `nixos-iso` (PR + manual only, same cost as `nixos` since the ISO now bundles its whole closure), `raspberry-pi-4`, `raspberry-pi-4-sd-image`, `wsl` (tags `v*`, PR), `eval` and `lint` (also on every push to `master`), `cachyos-kernel-update` (manual).
 - `flake-update` updates `flake.lock` and local packages (`helium` and `waywallen` in two arch passes, `bootdev-cli`) and commits; `flake-release` tags `vN` and pushes; `repo-sync` commits everything, rebases and pushes.
 - **Git (mandatory):** commit every change; style: short lowercase summary prefixed with the area (`nixos: …`, `rpi: …`, `docs: …`). Push to `origin` only after verification (below) — `update` on every host deploys straight from GitHub, so a push is a deployment: host `nixos` after a successful `update-local`; `raspberry-pi-4`/`wsl` (no local switch) after verification steps 1–2. Experimental or large features (new services, wrappers, overlays): a branch + PR (CI `eval` and `lint` run on PRs), merged after testing on the target host.
@@ -152,10 +155,10 @@ If a change is not minimal, declarative and verified before handing off to the u
 - **MUST** avoid redundant comments which are tautological or restate the attribute name.
 - **MUST** avoid comments which leak what this file contains, or leak the user's prompt.
 - Match the language of the surrounding comments (most modules are commented in Polish). AGENTS.md, `SKILL.md` files and commit messages are in English.
-- Every non-trivial module starts with a header comment: what it does, why it exists, how to verify or test it (patterns: `modules/desktop/tuning.nix`, `modules/hosts/remote-agent.nix`, `modules/checks/hermes-activation.nix`).
+- Every non-trivial module starts with a header comment at the top of the file: what it does, why it exists, how to verify or test it. Its first paragraph is the module's description in `docs/reference/modules.md`, so make it a self-contained summary (patterns: `modules/desktop/tuning.nix`, `modules/hosts/remote-agent.nix`, `modules/checks/hermes-activation.nix`).
 - Every temporary upstream workaround gets an entry in `temporary-fixes.md` (removal condition + upstream link) and a code comment pointing to it.
-- **MUST** update AGENTS.md in the same commit when a change adds, removes or renames a module, host, service, secret, CI workflow, command or alias. AGENTS.md is a symlink to `GEMINI.md`: edit `GEMINI.md`. It stays a map; details belong in module headers.
-- Non-trivial architecture: write the design down in `docs/` (Markdown with mermaid diagrams) before implementing. Once it is implemented, delete the document or move the lasting facts into the module header; plans and checklists are not kept in the repo.
+- **MUST** update AGENTS.md in the same commit when a change adds, removes or renames a host, service, secret, CI workflow, command or alias, or changes a rule, invariant or pitfall. The per-module catalog is generated (`docs/reference/`), so a new or renamed module needs a good header, not an AGENTS.md entry. AGENTS.md is a symlink to `GEMINI.md`: edit `GEMINI.md`. It stays a map; details belong in module headers.
+- Non-trivial architecture: write the design down in `docs/design/` (Markdown with mermaid diagrams) before implementing. Once it is implemented, delete the document or move the lasting facts into the module header; plans and checklists are not kept in the repo. `docs/reference/` is generated (see Development workflow).
 
 ### Flake inputs and dependencies
 
@@ -221,7 +224,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 - [ ] Generated values are rendered and inspected (step 2)
 - [ ] `nixos-rebuild build` + `nix store diff-closures` for host `nixos` when packages, overlays, the kernel or services changed (step 3)
 - [ ] VM tests covering the touched modules pass
-- [ ] Workflows regenerated if `modules/github-actions.nix` changed
+- [ ] Generated files (`.github/workflows`, `docs/reference`) refreshed by the hooks and staged
 - [ ] AGENTS.md (`GEMINI.md`) and `temporary-fixes.md` updated
 - [ ] No secrets, no commented-out code, no debug traces
 
