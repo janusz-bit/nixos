@@ -24,8 +24,8 @@
     # NIE odbiorca agenix.
     hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
   };
-  # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts.
-  # Osobno od `hosts`: RPi wpuszcza wszystkie `hosts` jako klucze logowania.
+  # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts;
+  # po reinstalacji aktualizuje je `post-install ssh`.
   sshHostKeys = {
     nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9RxUTc2ub3uQDGc06/ZBdCRlkOhPJBEPHB5vJihakc";
     raspberry-pi-4 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE5Lo9UunQr/9leQHTC776Qsg0g46Zy2Ku3B19WeML5i";
