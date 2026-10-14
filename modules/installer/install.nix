@@ -22,12 +22,16 @@
 # kluczy Secure Boot do firmware robi po instalacji post-install (z siecią —
 # ewaluuje flake z /etc/nixos):
 #   nix run /etc/nixos#post-install [ssh|secure-boot]   (bez argumentu: oba)
-# - ssh: klucz roota /root/.ssh/id_ed25519 (age.identityPaths) + wpis
-#   hosts.nixos w modules/_secrets/keys.nix. Sekrety trzeba potem przeszyfrować
-#   kluczem raspberry-pi-4 (odbiorca wszystkich sekretów) — skrypt to wypisuje.
-# - secure-boot: wpisanie kluczy sbctl do firmware procedurą z AGENTS.md
-#   (Insyde: sbctl enroll-keys nie widzi zmiennych EFI, więc eksport .auth +
-#   efi-updatevar, potem odtworzenie dbx z dbxDefault). Firmware musi być
+# - ssh: klucz roota /root/.ssh/id_ed25519 (age.identityPaths) oraz wpisy
+#   hosts.<host> (odbiorca agenix) i sshHostKeys.<host> (klucz hosta sshd,
+#   przypinany przez inne hosty) w modules/_secrets/keys.nix; <host> to nazwa
+#   działającego systemu, więc krok działa na każdym hoście (brak wpisu:
+#   wypisuje linię do dopisania). Sekrety trzeba potem przeszyfrować na innym
+#   odbiorcy — skrypt to wypisuje.
+#   secure-boot dotyczy tylko laptopa (firmware Insyde).
+# - secure-boot: wpisanie kluczy sbctl do firmware (Insyde: sbctl enroll-keys
+#   nie widzi zmiennych EFI, więc eksport .auth + efi-updatevar, potem
+#   odtworzenie dbx z dbxDefault; odczyt stanu: AGENTS.md). Firmware musi być
 #   w Setup Mode — Linux tego nie sprawdzi, skrypt pyta.
 # Do tego czasu Secure Boot w BIOS zostaje wyłączony, a sekrety agenix się
 # nie odszyfrowują.
@@ -36,8 +40,9 @@
   perSystem =
     { pkgs, lib, ... }:
     let
-      inherit (self.nixosConfigurations.nixos) config;
-      inherit (config.networking) hostName;
+      # Host instalowany przez install-system, ISO (iso.nix) i post-install.
+      installHost = "nixos";
+      inherit (self.nixosConfigurations.${installHost}) config;
       inherit (customTop.repository) place url;
       inherit (config.disko) rootMountPoint;
       user = config.customBot.defaultUser;
@@ -51,7 +56,7 @@
       # sam: fileSystems i LUKS wskazują /dev/disk/by-partlabel/disk-main-*.
       diskLink = "/run/install-system/disk";
       disko =
-        (self.nixosConfigurations.nixos.extendModules {
+        (self.nixosConfigurations.${installHost}.extendModules {
           modules = [ { disko.devices.disk.main.device = lib.mkForce diskLink; } ];
         }).config.system.build.destroyFormatMount;
       rev = self.rev or self.dirtyRev or "bez rewizji";
@@ -106,7 +111,7 @@
               # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
               # bez nich kernel LTO kompiluje się lokalnie.
               ''
-                nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#nixos"} \
+                nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#${installHost}"} \
                   --no-root-passwd --option accept-flake-config true
               '';
           repoNote = lib.optionalString offline ''
@@ -291,6 +296,7 @@
         post-install = pkgs.writeShellApplication {
           name = "post-install";
           runtimeInputs = with pkgs; [
+            coreutils
             efitools
             openssh
             sbctl
@@ -309,34 +315,70 @@
               [[ "$answer" == [tT] ]]
             }
 
+            keys_nix="$place/modules/_secrets/keys.nix"
+
+            # set_key ATTR KLUCZ — wpisuje KLUCZ do keys.nix pod ATTR, gdy się
+            # różni (porównanie bez komentarza), po potwierdzeniu. Kod 0: plik
+            # zmieniony albo brak wpisu (wypisuje linię do dopisania), 1: wpis
+            # aktualny. Wołane w `if`, więc errexit wewnątrz nie działa —
+            # stąd jawna kontrola formatu klucza.
+            set_key() {
+              local attr=$1 new=$2 old content
+              local key_re='^ssh-ed25519 [A-Za-z0-9+/]+=*( .*)?$'
+              [[ $new =~ $key_re ]] || die "nieprawidłowy klucz dla $attr: '$new'"
+              if ! old="$(nix --extra-experimental-features nix-command eval --raw --file "$keys_nix" "$attr" 2>/dev/null)"; then
+                echo "Brak wpisu $attr w $keys_nix — dopisz w sekcji ''${attr%%.*}:"
+                echo "  ''${attr#*.} = \"$new\";"
+                return 0
+              fi
+              [[ "$(cut -d' ' -f1-2 <<<"$old")" != "$(cut -d' ' -f1-2 <<<"$new")" ]] || return 1
+              content="$(<"$keys_nix")"
+              [[ "$content" == *"$old"* ]] || die "nie znalazłem klucza $attr w $keys_nix"
+              echo "$attr w $keys_nix:"
+              echo "  stary: $old"
+              echo "  nowy:  $new"
+              confirm "Zastąpić?" || die "przerwano: $attr bez zmian"
+              printf '%s\n' "''${content/"$old"/"$new"}" >"$keys_nix"
+              echo "Wpisano nowy klucz do $keys_nix ($attr)."
+            }
+
             ssh_key() {
               local key=/root/.ssh/id_ed25519
-              local keys_nix="$place/modules/_secrets/keys.nix"
-              local old new content
+              # Nazwa z działającego systemu, nie z flake'a: post-install może
+              # ruszyć na dowolnym hoście, a wpisy keys.nix są per host.
+              local host host_key root_key
+              host="$(uname -n)"
               [[ -f "$keys_nix" ]] || die "brak $keys_nix"
 
               if [[ -f "$key" ]]; then
                 echo "$key już istnieje — nie nadpisuję."
               else
                 install -d -m 0700 /root/.ssh
-                ssh-keygen -q -t ed25519 -N "" -C "root@${hostName}" -f "$key"
+                ssh-keygen -q -t ed25519 -N "" -C "root@$host" -f "$key"
                 echo "Wygenerowano $key."
               fi
-              new="$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@${hostName}"
-              old="$(nix --extra-experimental-features nix-command eval --raw --file "$keys_nix" hosts.nixos)"
 
-              if [[ "$(cut -d' ' -f1-2 <<<"$old")" == "$(cut -d' ' -f1-2 <<<"$new")" ]]; then
-                echo "Klucz jest już odbiorcą sekretów (hosts.nixos) — agenix odszyfruje je przy update-local."
+              # Poza `if`: błąd odczytu klucza przerywa skrypt (errexit, pipefail).
+              host_key="$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"
+              root_key="$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2)"
+
+              # Klucz hosta sshd przypinają known_hosts innych hostów; po
+              # reinstalacji jest nowy.
+              if set_key "sshHostKeys.$host" "$host_key"; then
+                echo "Klucz hosta sshd nowy albo zmieniony: po wpisaniu, commicie i pushu zrób"
+                echo "update na hostach, które go przypinają (nixos przypina raspberry-pi-4:"
+                echo "claude-notify; raspberry-pi-4 przypina nixos: laptop-run)."
+              fi
+
+              if ! set_key "hosts.$host" "$root_key root@$host"; then
+                echo "Klucz roota jest już odbiorcą sekretów (hosts.$host) — agenix odszyfruje je przy update-local."
                 return
               fi
-              content="$(<"$keys_nix")"
-              [[ "$content" == *"$old"* ]] || die "nie znalazłem klucza hosts.nixos w $keys_nix"
-              printf '%s\n' "''${content/"$old"/"$new"}" >"$keys_nix"
-
-              echo "Wpisano nowy klucz do $keys_nix (hosts.nixos). Sekrety są zaszyfrowane"
-              echo "dla starego klucza — przeszyfruj je kluczem raspberry-pi-4:"
-              echo "  1. tutaj:  git -C $place commit -am 'secrets: new nixos host key' && git -C $place push"
-              echo "  2. na RPi: w klonie repo git pull, potem w modules/_secrets:"
+              echo "Sekrety nie są zaszyfrowane dla tego klucza — przeszyfruj je na hoście,"
+              echo "który już je odszyfrowuje (laptop nixos albo raspberry-pi-4); nowy host"
+              echo "dopisz najpierw do odbiorców w modules/_secrets/secrets.nix:"
+              echo "  1. tutaj:  git -C $place commit -am 'secrets: new $host host key' && git -C $place push"
+              echo "  2. tam:    w klonie repo git pull, potem w modules/_secrets:"
               echo "             sudo agenix -r -i /root/.ssh/id_ed25519, commit i push"
               echo "  3. tutaj:  git -C $place pull && update-local"
             }

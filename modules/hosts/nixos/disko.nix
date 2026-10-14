@@ -1,7 +1,23 @@
+# Układ dysku laptopa (disko): ESP 6 GB, zaszyfrowany swap 36 GB pod
+# hibernację (>= RAM) i LUKS + Btrfs z podwolumenami /, /home i /nix.
+# install-system (modules/installer/install.nix) formatuje według niego
+# dowolny wskazany dysk; system montuje partycje po etykietach
+# by-partlabel/disk-main-*, więc `device` to tylko podpowiedź instalatora.
+# Snapshoty: snapper.nix.
+# Sprawdzenie: `lsblk -f`, `sudo btrfs subvolume list /`.
 { inputs, ... }:
 {
-  flake.modules.nixos.disko = _: {
+  flake.modules.nixos.nixos-disko = _: {
     imports = [ inputs.disko.nixosModules.default ];
+
+    boot = {
+      supportedFilesystems = [ "btrfs" ];
+      # Hibernacja na zaszyfrowany swap z układu niżej (resumeDevice sam
+      # dodaje parametr resume=).
+      resumeDevice = "/dev/mapper/swap";
+    };
+    services.btrfs.autoScrub.enable = true;
+
     disko.devices = {
       disk = {
         main = {

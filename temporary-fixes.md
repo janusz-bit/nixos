@@ -17,7 +17,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 1. Runtime PM dGPU NVIDIA — reguła udev także na coldplug
 
 - **Od:** 2026-09-29.
-- **Plik:** `modules/hardware/LOQ-15IRX10.nix` (`services.udev.extraRules`).
+- **Plik:** `modules/hardware/LOQ-15IRX10/default.nix` (`services.udev.extraRules`).
 - **Objaw:** `/sys/bus/pci/devices/0000:01:00.0/power/control` = `on`
   (domyślna wartość PCI), `runtime_status` stale `active` — RTX 5060 nigdy
   nie przechodzi w D3cold mimo `powerManagement.finegrained = true`.
@@ -71,7 +71,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 4. Zed — Vulkan tylko z ICD Intela (`VK_LOADER_DRIVERS_SELECT`)
 
 - **Od:** 2026-10-10.
-- **Plik:** `modules/hosts/nixos/packages.nix` (`zed-editor-igpu`: `symlinkJoin`
+- **Plik:** `modules/desktop/dev.nix` (`zedIntelOnly`: `symlinkJoin`
   + `wrapProgram $out/bin/zeditor --set VK_LOADER_DRIVERS_SELECT 'intel_icd*'`).
 - **Objaw:** `zeditor ~/projekt` zmienia
   `/sys/bus/pci/devices/0000:01:00.0/power/runtime_status` z `suspended` na
@@ -116,8 +116,8 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 ### 6. Deadlock, Dead by Daylight — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
 
 - **Od:** 2026-10-12.
-- **Pliki:** `modules/hosts/nixos/deadlock.nix` (`deadlockrun`) i
-  `modules/hosts/nixos/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
+- **Pliki:** `modules/gaming/deadlock.nix` (`deadlockrun`) i
+  `modules/gaming/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
   z `-dx11` renderuje przez DXVK; zawiasu w DBD nie zaobserwowano) —
   `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`.
 - **Objaw:** na NVIDIA 610/615 (tu 615.71.09, RTX 5060) Deadlock w trybie DX11
@@ -136,6 +136,22 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `ahead`/`identical`). Wtedy `deadlockrun` = sam `gamemoderun`: usunąć
   moduł i w Launch Options wrócić do `gamemoderun %command%`; z `dbdrun`
   usunąć tylko `DXVK_CONFIG`.
+
+### 7. Wentylator RPi — `RPI_LGPIO_REVISION` podane ręcznie
+
+- **Od:** przed 2026-10 (przeniesione do tego rejestru 2026-10-14).
+- **Plik:** `modules/hardware/raspberry-pi-4/fan.nix`
+  (`environment.RPI_LGPIO_REVISION = "0xc03114"`, RPi 4B Rev 1.4).
+- **Objaw:** bez zmiennej rpi-lgpio nie ustala modelu płytki i
+  `GPIO.setup` pada, więc usługa `pwm-fan` nie startuje.
+- **Przyczyna:** rpi-lgpio czyta rewizję z
+  `/proc/device-tree/system/linux,revision` albo z pola `Revision`
+  w `/proc/cpuinfo`; na kernelu 6.18 z nixos-hardware nie ma ani węzła
+  `system/` w device tree, ani tego pola.
+- **Kiedy usunąć:** gdy na RPi
+  `ls /proc/device-tree/system/linux,revision` albo
+  `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
+  i sprawdzić `systemctl status pwm-fan`.
 
 ## Zamknięte
 

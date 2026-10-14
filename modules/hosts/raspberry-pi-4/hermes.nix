@@ -1,10 +1,46 @@
+# Hermes Agent (Nous Research) jako usługa konta `hermes`: model główny to
+# Claude Code na subskrypcji (zapas: openai-codex, ollama-cloud), polski
+# interfejs, MCP Trilium i mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
+#
+# Granica zaufania: agent czyta treści z sieci, notatek i komunikatorów
+# (Matrix, Open WebUI pod chat.<domena>), więc prompt injection nie może dawać
+# roota. Konto hermes nie ma sudo, wheel, disk, keys ani trusted-users; pliki
+# z użytkownikiem nixos dzieli przez upstreamowe katalogi stanu 2770 (setgid
+# hermes) + UMask 0007 + chmod g+rw przy aktywacji.
+# - Aktywacja pisze w /var/lib/hermes wyłącznie jako hermes (setpriv), nigdy
+#   jako root: moduł to kopia upstreamu z _hermes-agent/ (zmiany w jej
+#   nagłówku, temporary-fixes.md). Wpisy HERMES_HOME należące do innych kont
+#   (po dawnym CLI roota/nixos) przejmuje kopią; oryginalne katalogi zostają
+#   jako .foreign-<nazwa> do usunięcia przez administratora:
+#   `sudo rm -r /var/lib/hermes/.hermes/.foreign-*`.
+# - CLI (hermes, hermes-acp, hermes-agent) to opakowania hermesCli: innym
+#   kontom uruchamiają binarkę przez `sudo -u hermes` na HERMES_HOME usługi,
+#   konto hermes wprost. Nigdy nie uruchamiać binarki pakietu jako root ani
+#   nixos: HERMES_HOME (pluginy, .env, config.yaml, polecenia serwerów MCP)
+#   jest zapisywalny przez agenta, więc wykonałaby jego kod z cudzymi
+#   uprawnieniami. Inne moduły (claude-notify.nix) biorą to samo opakowanie
+#   z services.hermes-agent.cliWrapper.
+# - Kod pobierany z sieci jest przypięty: pluginy przez extraPlugins
+#   z commitem i hashem; dla pluginu z katalogu pluginów hermes-agent commit
+#   to `sha` z plugin-catalog/<nazwa>.yaml, nie `main`. Serwery MCP z nixpkgs,
+#   nie przez uvx.
+# - Pluginy spoza kategorii model-provider (mermaid-render, hermes-lang-pl)
+#   włącza wyłącznie plugins.enabled niżej: aktywacja zastępuje tą listą
+#   wpis w config.yaml, więc `hermes plugins enable` znika po rebuildzie.
+#
+# Logowanie Claude jednorazowo, na koncie usługi:
+# `sudo -u hermes -H claude auth login`.
+#
+# Sprawdzenie: `systemctl status hermes-agent`, `journalctl -u hermes-agent -b`,
+# `hermes plugins list`; aktywacja:
+# `nix build -L .#checks.aarch64-linux.hermes-activation` (kvm).
 {
   inputs,
   customTop,
   ...
 }:
 {
-  flake.modules.nixos.hermes =
+  flake.modules.nixos.rpi-hermes =
     {
       config,
       pkgs,
@@ -58,14 +94,12 @@
       common = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
       hermesHome = "${cfg.stateDir}/.hermes";
 
-      # CLI hosta zawsze jako konto usługi. HERMES_HOME (pluginy, .env,
-      # config.yaml, mcp_servers.*.command) jest zapisywalny przez agenta, więc
-      # `hermes` uruchomiony jako root albo nixos wykonałby kod podłożony przez
-      # agenta z wyższymi uprawnieniami. Zamiast addToSystemPackages (globalne
-      # HERMES_HOME + CLI wywołującego) — opakowania przez sudo -u hermes.
-      # Sam agent (powłoki narzędzia terminala, `sudo -u hermes -i`) ma to
-      # opakowanie w PATH logowania: jako hermes uruchamia ono binarkę wprost —
-      # hermes nie ma reguł sudo (i NoNewPrivileges) i nie potrzebuje.
+      # CLI hosta zawsze jako konto usługi (powód w nagłówku). Zamiast
+      # addToSystemPackages (globalne HERMES_HOME + CLI wywołującego) —
+      # opakowania przez sudo -u hermes. Sam agent (powłoki narzędzia
+      # terminala, `sudo -u hermes -i`) ma to opakowanie w PATH logowania:
+      # jako hermes uruchamia ono binarkę wprost — hermes nie ma reguł sudo
+      # (i NoNewPrivileges) i nie potrzebuje.
       hermesCli =
         name:
         pkgs.writeShellScriptBin name ''
@@ -80,6 +114,21 @@
             }:/etc/profiles/per-user/${cfg.user}/bin:/run/current-system/sw/bin \
             ${common.effectivePackage cfg}/bin/${name} "$@"
         '';
+
+      # Ollama dostaje z sekretów tylko OLLAMA_API_KEY (modele `:cloud` przez
+      # lokalną Ollamę bez klucza zwracają 401), nie cały hermes-env.age z
+      # kluczami Hermesa: pobiera i parsuje modele z sieci, więc ma widzieć
+      # jak najmniej. ollama-api-key.age to surowa wartość (bez KEY=), której
+      # EnvironmentFile nie czyta — podaje ją LoadCredential, a to opakowanie
+      # eksportuje przed `ollama serve`.
+      ollamaServe = pkgs.writeShellApplication {
+        name = "ollama-serve";
+        text = ''
+          OLLAMA_API_KEY="$(<"$CREDENTIALS_DIRECTORY/ollama-api-key")"
+          export OLLAMA_API_KEY
+          exec ${lib.getExe config.services.ollama.package} serve
+        '';
+      };
     in
     {
       imports = [
@@ -114,7 +163,7 @@
           mode = "0400";
         };
         # Token ETAPI Trilium współdzielony z prime-agentem użytkownika nixos
-        # (właściciel z modules/agenix/agenix.nix) — odczyt dla grupy hermes.
+        # (właściciel z modules/hosts/base/secrets.nix) — odczyt dla grupy hermes.
         trilium-etapi = {
           group = "hermes";
           mode = "0440";
@@ -134,15 +183,13 @@
           ];
           settings = {
             execution = {
-              # Agent nie ma sudo ani grup uprzywilejowanych (patrz users niżej),
-              # więc skutki prompt injection ogranicza konto `hermes`.
+              # Agent nie ma sudo ani grup uprzywilejowanych (nagłówek), więc
+              # skutki prompt injection ogranicza konto `hermes`.
               require_approval = false;
             };
             # „Mózg": Claude Code na subskrypcji (claudeSubscriptionPlugin).
-            # Logowanie jednorazowo na RPi, na koncie usługi:
-            #   sudo -u hermes -H claude auth login
-            # (dane w /var/lib/hermes/.claude, 0600 hermes). Plugin odmawia
-            # startu, gdy w środowisku usługi są ANTHROPIC_API_KEY,
+            # Logowanie w nagłówku; dane w /var/lib/hermes/.claude (0600
+            # hermes). Plugin odmawia startu, gdy w środowisku usługi są ANTHROPIC_API_KEY,
             # ANTHROPIC_AUTH_TOKEN lub ANTHROPIC_BASE_URL — nie dodawać ich
             # do hermes-env.age.
             model = {
@@ -239,11 +286,8 @@
         ollama.enable = true;
       };
 
-      # Bez sudo, wheel, disk, keys i trusted-users: agent czyta treści z sieci,
-      # notatek i komunikatorów, a jest wystawiony przez chat.janusz-bit.com —
-      # prompt injection nie może dawać roota. Współdzielenie plików z
-      # użytkownikiem nixos zapewnia upstream: katalogi stanu 2770 (setgid
-      # hermes) + UMask 0007 + chmod g+rw przy aktywacji.
+      # hermes bez sudo, wheel, disk i keys (nagłówek); nixos w grupie hermes
+      # dzieli pliki agenta przez katalogi stanu 2770.
       users.users = {
         nixos.extraGroups = [ "hermes" ];
         hermes.extraGroups = [ "systemd-journal" ];
@@ -256,7 +300,13 @@
       ];
 
       systemd.services = {
-        ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
+        # Klucz dla modeli `:cloud`: ollamaServe wyżej.
+        ollama.serviceConfig = {
+          LoadCredential = [ "ollama-api-key:${config.age.secrets.ollama-api-key.path}" ];
+          # mkForce: zastępuje ExecStart modułu nixpkgs (`ollama serve`) tym
+          # samym poleceniem w opakowaniu ustawiającym klucz.
+          ExecStart = lib.mkForce (lib.getExe ollamaServe);
+        };
 
         hermes-agent.serviceConfig = {
           # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie

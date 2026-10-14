@@ -1,45 +1,64 @@
-# IMPORTANT: changes have to be written to config.txt directly
-# sudo mount /dev/disk/by-label/FIRMWARE /mnt
-# sudo micro /mnt/config.txt # <-- make changes here
-# dtparam=audio=on
+# Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB),
+# usługi wystawione wyłącznie przez Cloudflare Tunnel (cloudflared.nix).
+# Tu: wpis rejestru, tożsamość (hostname, stateVersion, konto) i lista
+# modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/.
+# Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza
+# rejestrem hostów.
+{ self, ... }:
 {
-  inputs,
-  self,
-  ...
-}:
-{
-  flake.modules.nixos.raspberry-pi-4 = _: {
-    imports = [
-      self.modules.nixos.base
-      self.modules.nixos.fail2ban
-      self.modules.nixos.nextcloud
-      self.modules.nixos.trilium
-      self.modules.nixos.gitea
-      self.modules.nixos.cloudflared
-      self.modules.nixos.pwm-fan
-      self.modules.nixos.leds-off
-      self.modules.nixos.hermes
-      self.modules.nixos.matrix
-      self.modules.nixos.rpi-claude-notify
-      self.modules.nixos.open-webui
-      self.modules.nixos.ttyd
-      self.modules.nixos.rpi-wifi
-      self.modules.nixos.rpi-laptop-remote
-      self.modules.nixos.ai-skills
-      self.modules.nixos.rpi-specific
-      self.modules.nixos.rpi-configuration
-      inputs.nixos-hardware.nixosModules.raspberry-pi-4
-      (_: {
-        customBot.flakeTarget = "raspberry-pi-4";
-      })
+  hosts.raspberry-pi-4 = {
+    system = "aarch64-linux";
+    modules = [
+      self.modules.nixos.raspberry-pi-4
+      ./_hardware-configuration.nix
     ];
   };
 
-  flake.nixosConfigurations.raspberry-pi-4 = inputs.nixpkgs.lib.nixosSystem {
-    modules = [
-      { nixpkgs.hostPlatform = "aarch64-linux"; }
-      self.modules.nixos.raspberry-pi-4
-      self.modules.nixos.rpi-hardware-configuration
-    ];
-  };
+  flake.modules.nixos.raspberry-pi-4 =
+    { config, ... }:
+    let
+      user = config.customBot.defaultUser;
+    in
+    {
+      imports = [
+        self.modules.nixos.base
+        self.modules.nixos.base-agenix
+        self.modules.nixos.base-fail2ban
+        self.modules.nixos.base-ssh-lan
+        self.modules.nixos.hardware-raspberry-pi-4
+        self.modules.nixos.hardware-raspberry-pi-4-fan
+        self.modules.nixos.rpi-resources
+        self.modules.nixos.rpi-network
+        self.modules.nixos.rpi-ssh
+        self.modules.nixos.rpi-tools
+        self.modules.nixos.rpi-cloudflared
+        self.modules.nixos.rpi-nextcloud
+        self.modules.nixos.rpi-trilium
+        self.modules.nixos.rpi-gitea
+        self.modules.nixos.rpi-hermes
+        self.modules.nixos.rpi-matrix
+        self.modules.nixos.rpi-open-webui
+        self.modules.nixos.rpi-ttyd
+        self.modules.nixos.rpi-claude-notify
+        self.modules.nixos.rpi-remote-agent
+        self.modules.nixos.ai-skills
+      ];
+
+      networking.hostName = "raspberry-pi-4";
+      system.stateVersion = "26.05";
+      time.timeZone = "Europe/Warsaw";
+      # Ustawia to też rejestr hostów; tutaj dla obrazu SD, który składa ten
+      # moduł poza rejestrem.
+      customBot.flakeTarget = "raspberry-pi-4";
+
+      users.users.${user} = {
+        initialPassword = user;
+        isNormalUser = true;
+        description = user;
+        extraGroups = [
+          "networkmanager"
+          "wheel"
+        ];
+      };
+    };
 }

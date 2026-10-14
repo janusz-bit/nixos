@@ -1,0 +1,33 @@
+# Obraz karty SD/dysku z pełnym systemem raspberry-pi-4 (agregat hosta bez
+# _hardware-configuration.nix — system plików daje moduł sd-image). Służy do
+# pierwszej instalacji; potem host aktualizuje się zwykłym `update`.
+# Build: nix build .#raspberry-pi-4-sd-image (na laptopie przez emulację
+# aarch64), zapis: dd na kartę/dysk; partycja rozszerza się przy 1. starcie.
+{ inputs, self, ... }:
+{
+  flake.modules.nixos.rpi-sd-image = {
+    imports = [
+      "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+      {
+        sdImage = {
+          expandOnBoot = true;
+          compressImage = false;
+        };
+      }
+    ];
+  };
+
+  perSystem = _: {
+    packages.raspberry-pi-4-sd-image =
+      let
+        image = inputs.nixpkgs.lib.nixosSystem {
+          modules = [
+            { nixpkgs.hostPlatform = "aarch64-linux"; }
+            self.modules.nixos.raspberry-pi-4
+            self.modules.nixos.rpi-sd-image
+          ];
+        };
+      in
+      image.config.system.build.sdImage;
+  };
+}

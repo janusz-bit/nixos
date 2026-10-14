@@ -37,12 +37,12 @@ in
   "openrouter-api-key.age" = mkSecret allHosts;
   # Hasło Basic Auth ttyd (nginx) — osobne, NIE hasło admina Nextcloud.
   "ttyd-password.age" = mkSecret allHosts;
-  # Wi-Fi RPi (modules/hosts/raspberry-pi-4/wifi.nix): WIFI_SSID=…, WIFI_PSK=…
+  # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = mkSecret allHosts;
   # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
   # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
   "hermes-matrix.age" = mkSecret allHosts;
-  # Prywatny klucz SSH claude-notify (modules/hosts/raspberry-pi-4/claude-notify.nix):
+  # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify.nix):
   # loguje tylko na konto hermes RPi z wymuszonym poleceniem (wysyłka do DM).
   "hermes-notify-key.age" = mkSecret allHosts;
 }

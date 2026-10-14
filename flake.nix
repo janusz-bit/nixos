@@ -14,7 +14,7 @@
     # Kernel CachyOS (zamiast chaotic). Gałąź release = kernele zbudowane przez
     # Hydrę autora i obecne w jego cache (attic.xuyh0120.win/lantian, patrz
     # nixConfig niżej). Cache trafia tylko przy overlays.pinned (ten sam nixpkgs
-    # co w Hydrze) — modules/hosts/nixos/configuration.nix.
+    # co w Hydrze) — modules/desktop/kernel.nix.
     # NIE ustawiać inputs.nixpkgs.follows - musi mieć swój nixpkgs dla zgodności patchy!
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -45,13 +45,16 @@
     # v0.3.3 waywallen-display — naprawa "plasma empty displays on login").
   };
 
-  # nixConfig inputów NIE jest dziedziczony — cache inputów trzeba wymienić
-  # tutaj (CI, pierwszy rebuild z --accept-flake-config) i w nix.settings
-  # (modules/hosts/base/configuration.nix, źródło: customTop.cache).
+  # Jedyna lista cache flake'a: CI i pierwszy rebuild z --accept-flake-config
+  # czytają ją stąd, a hosty dostają te same listy w nix.settings
+  # (customTop.nixConfig, modules/args.nix). nixConfig inputów NIE jest
+  # dziedziczony — cache inputów trzeba wymienić tutaj.
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
+      # nix-cachyos-kernel (Hydra autora) — trafia przy overlays.pinned
       "https://attic.xuyh0120.win/lantian"
+      # llm-agents.nix (prime-agent, dsh, chatgpt)
       "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [

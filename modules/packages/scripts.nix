@@ -1,3 +1,18 @@
+# Skrypty utrzymania repo (packages.<system>, `nix run .#<nazwa>`):
+# flake-update (wejścia flake'a, pakiety lokalne, workflowy, commit),
+# repo-sync (commit wszystkiego, rebase, push), flake-release (tag vN, push).
+#
+# Każdy działa na repo bieżącego katalogu (alias fish `update-my-pkgs` =
+# flake-update). flake-update startuje tylko z czystego drzewa, więc jego
+# commit zawiera wyłącznie aktualizację. repo-sync robi `git add -A`: zabiera
+# każdy plik z drzewa, także roboczy (notatki i skrypty trzymać w $TMPDIR).
+# flake-release wydaje tylko z master, który nie jest za origin/master, i
+# wypycha gałąź z tagiem atomowo; tag v* uruchamia w CI workflowy poza
+# ciężkimi (hosty z buildOnTags = false, ISO; github-actions.nix). Push to
+# wdrożenie: `update` na hostach bierze konfigurację prosto z GitHuba.
+#
+# Sprawdzenie: `nix build --no-link .#flake-update .#repo-sync .#flake-release`
+# (flake-update przechodzi przy tym shellcheck).
 {
   perSystem =
     { pkgs, ... }:
@@ -32,19 +47,18 @@
             nix-update --system x86_64-linux -F waywallen
             nix-update --system aarch64-linux -F waywallen --version skip
 
-            echo "Syncing GitHub Actions workflows from the updated flake..."
+            echo "Syncing GitHub Actions workflows and docs from the updated flake..."
             nix run .#sync-github-actions
+            nix run .#sync-docs
 
-            git add -A -- flake.lock .github/workflows \
+            git add -A -- flake.lock .github/workflows docs/reference \
               modules/packages/_bootdev-cli/default.nix \
               modules/packages/_helium/default.nix \
               modules/packages/_waywallen/default.nix
             if git diff --cached --quiet; then
               echo "Everything is already up to date."
             else
-              # The dev shell's workflow hook may still point at the old lock.
-              # The fresh generator has already run above.
-              SKIP=sync-github-actions git commit -m "flake-update: update inputs and packages"
+              git commit -m "flake-update: update inputs and packages"
             fi
             echo "All packages updated!"
           '';

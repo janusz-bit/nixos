@@ -45,7 +45,7 @@
         nixos-system = nixosSystemSkill;
       }
       # Program skilla (claude-notify) zależy od hosta, więc jest w
-      # modules/hosts/raspberry-pi-4/claude-notify.nix, nie w skillPackages —
+      # modules/hosts/claude-notify.nix, nie w skillPackages —
       # skill tylko tam, gdzie ten moduł wdrożył klucz.
       // lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
         hermes-notify = ./hermes-notify;
@@ -77,11 +77,11 @@
         +
           fact (config.services.hermes-agent.enable or false)
             "Hermes Agent runs as the unprivileged account `hermes` (no sudo, no `wheel`); its state `${config.services.hermes-agent.stateDir}` is shared with `${user}` through the `hermes` group. Run its CLI only through the `hermes` wrapper — never the package binary as root or `${user}` (`modules/hosts/raspberry-pi-4/hermes.nix`)."
-        + fact config.services.cloudflared.enable "Server: services bind to localhost and are published only through the Cloudflare Tunnel (`services.cloudflared`)."
+        + fact config.services.cloudflared.enable "Server: web services listen on localhost and are published only through the Cloudflare Tunnel (`services.cloudflared`); sshd also listens on the LAN."
         + fact pkgs.stdenv.hostPlatform.isAarch64 "Low-power ARM board (`nix.settings.max-jobs = ${toString config.nix.settings.max-jobs}`): avoid local builds and heavy evaluations here."
         +
           fact (config.programs.ssh.knownHosts ? laptop)
-            "Laptop (host `nixos`, x86_64) is reachable when it is on and at home, from the account that holds `~/.ssh/id_ed25519_laptop` (`${user}`): `laptop-run <cmd>` runs `<cmd>` there as unprivileged `claude-remote` (no sudo) in a snapshot of the current git repo (tracked files with uncommitted changes), e.g. `laptop-run nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`, `laptop-run nixos-rebuild build --flake .#nixos` then `laptop-run nix store diff-closures /run/current-system ./result`. Prefer it to evaluating or building x86_64 hosts here. `ssh laptop <cmd>` for read-only state (`systemctl status`). Every failed login counts towards the laptop's fail2ban (5 → this host is banned). Activation stays with the user (`update-local`) — `modules/hosts/nixos/remote-agent.nix`.";
+            "Laptop (host `nixos`, x86_64) is reachable when it is on and at home, from the account that holds `~/.ssh/id_ed25519_laptop` (`${user}`): `laptop-run <cmd>` runs `<cmd>` there as unprivileged `claude-remote` (no sudo) in a snapshot of the current git repo (tracked files with uncommitted changes), e.g. `laptop-run nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`, `laptop-run nixos-rebuild build --flake .#nixos` then `laptop-run nix store diff-closures /run/current-system ./result`. Prefer it to evaluating or building x86_64 hosts here. `ssh laptop <cmd>` for read-only state (`systemctl status`). Every failed login counts towards the laptop's fail2ban (5 → this host is banned). Activation stays with the user (`update-local`) — `modules/hosts/remote-agent.nix`.";
 
       # Skille pythonowe (src/ + pyproject.toml). Kernel Prime Agenta działa na
       # PRIME_AGENT_KERNEL_PYTHON (read-only env z flake llm-agents), więc

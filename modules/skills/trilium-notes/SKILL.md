@@ -8,7 +8,7 @@ description: Use for anything about the user's Trilium notes (daily notes, tasks
 Trilium's built-in HTTP MCP server (Trilium 0.106; the server must have the
 *MCP server* option enabled in Options -> AI/LLM), Bearer auth with an ETAPI
 token. Server URL comes from `TRILIUM_MCP_URL`, set for every session from
-`customBot.triliumMcpUrl` (`modules/options.nix`, exported in
+`customBot.triliumMcpUrl` (`modules/hosts/base/options.nix`, exported in
 `modules/hosts/base/prime-agent.nix`):
 
 - raspberry-pi-4: `http://127.0.0.1:8081/mcp` (option default; also the
@@ -83,7 +83,7 @@ returns text notes as Markdown. Use native structures only — no inline
   (`modules/hosts/raspberry-pi-4/trilium.nix`), port 8081, data dir
   `/var/lib/trilium`.
 - Server (nixos): desktop app `trilium-desktop`
-  (`modules/hosts/nixos/packages.nix`), started manually — MCP works only
+  (`modules/desktop/apps.nix`), started manually — MCP works only
   while it runs; port 37840, data dir `~/trilium-data` if it exists, otherwise
   `~/.local/share/trilium-data`.
 - The Python package is NOT installed by the kernel bootstrap

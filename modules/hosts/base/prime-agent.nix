@@ -4,9 +4,10 @@
 # Klucz API ollama-cloud: "OLLAMA_API_KEY" to nazwa zmiennej środowiskowej
 # (prime-agent resolve'uje ją przez process.env); wartość pochodzi z agenix
 # (modules/hosts/base/agenix.nix), nigdy nie trafia do /nix/store.
+{ inputs, ... }:
 {
   flake.modules.nixos.base-prime-agent =
-    { config, ... }:
+    { config, pkgs, ... }:
     let
       user = config.customBot.defaultUser;
       agentDir = "${config.users.users.${user}.home}/.prime/agent";
@@ -136,19 +137,27 @@
       };
     in
     {
-      environment.sessionVariables = {
-        # Zmienne środowiskowe jako druga warstwa (docs telemetry):
-        # PRIME_AGENT_TELEMETRY=0 nadpisuje settings, DO_NOT_TRACK=1 to
-        # standard respektowany też przez inne narzędzia.
-        PRIME_AGENT_TELEMETRY = "0";
-        DO_NOT_TRACK = "1";
-        # Skill trilium-notes (modules/skills/trilium-notes) — ten sam endpoint.
-        TRILIUM_MCP_URL = config.customBot.triliumMcpUrl;
-      };
+      environment = {
+        # Hosty z ai-skills dokładają wariant z PYTHONPATH skilli (hiPrio,
+        # modules/skills/default.nix).
+        systemPackages = [
+          inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent # self-improving agent AI (RLM)
+        ];
 
-      environment.etc = {
-        "prime-agent/models.json".text = modelsJson + "\n";
-        "prime-agent/settings.json".text = settingsJson + "\n";
+        sessionVariables = {
+          # Zmienne środowiskowe jako druga warstwa (docs telemetry):
+          # PRIME_AGENT_TELEMETRY=0 nadpisuje settings, DO_NOT_TRACK=1 to
+          # standard respektowany też przez inne narzędzia.
+          PRIME_AGENT_TELEMETRY = "0";
+          DO_NOT_TRACK = "1";
+          # Skill trilium-notes (modules/skills/trilium-notes) — ten sam endpoint.
+          TRILIUM_MCP_URL = config.customBot.triliumMcpUrl;
+        };
+
+        etc = {
+          "prime-agent/models.json".text = modelsJson + "\n";
+          "prime-agent/settings.json".text = settingsJson + "\n";
+        };
       };
 
       systemd.tmpfiles.rules = [

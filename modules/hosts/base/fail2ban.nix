@@ -3,7 +3,7 @@
 # pokrywa się z sieciami hotelowymi/kawiarnianymi. RPi (stała sieć domowa)
 # dopisuje customTop.lan.subnet u siebie.
 _: {
-  flake.modules.nixos.fail2ban = _: {
+  flake.modules.nixos.base-fail2ban = _: {
     services.fail2ban = {
       enable = true;
       maxretry = 5;
