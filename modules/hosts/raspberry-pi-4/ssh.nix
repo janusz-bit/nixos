@@ -2,6 +2,9 @@
 # Logowanie roota kluczem zostaje — to ścieżka administracyjna przez tunel
 # Cloudflare (`ssh ssh.<domena>`, `Host ssh.*` → `User root` w base-ssh).
 # Użytkownik wpuszcza klucze roota laptopa i RPi oraz telefonu.
+#
+# Sprawdzenie: `nix eval --json .#nixosConfigurations.raspberry-pi-4.config.users.users.nixos.openssh.authorizedKeys.keys`
+# (i `…users.users.root…`) — tylko klucze wymienione niżej.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-ssh =

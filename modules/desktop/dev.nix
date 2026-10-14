@@ -1,6 +1,10 @@
 # Narzędzia programistyczne: edytory, kompilatory (C/C++, cross do Windows
 # z Wine do testów), Jupyter, klient Gitei (tea) oraz emulacja aarch64
-# (binfmt) do budowania systemu RPi na tym komputerze.
+# (binfmt) do budowania systemu RPi na tym komputerze. Zed na hybrydzie
+# Intel + NVIDIA widzi tylko Vulkan Intela (tymczasowe, niżej).
+#
+# Sprawdzenie Zeda: temporary-fixes.md, punkt 4 (runtime_status dGPU przy
+# starcie `zeditor` zostaje `suspended`).
 _: {
   flake.modules.nixos.desktop-dev =
     {

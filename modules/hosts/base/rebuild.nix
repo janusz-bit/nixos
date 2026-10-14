@@ -4,6 +4,8 @@
 #   update-local / update-local-boot       z kopii w /etc/nixos
 #   push            (fish) build toplevela z GitHuba i wypchnięcie do cachix
 #   update-my-pkgs  (fish) flake-update: flake.lock i pakiety lokalne
+#
+# Sprawdzenie: `nix eval --raw .#nixosConfigurations.<host>.config.environment.shellAliases.update-reboot`.
 { customTop, lib, ... }:
 {
   flake.modules.nixos.base-rebuild =

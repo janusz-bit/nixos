@@ -66,8 +66,10 @@ files, add them and commit again. CI evaluates every host on each push to
   `nix run /etc/nixos#post-install` (root SSH key for agenix, then Secure Boot
   enrollment). Details: `modules/installer/install.nix`.
 - **Raspberry Pi**: `nix build .#raspberry-pi-4-sd-image`, write the image
-  to the SSD/SD card, boot, then register its keys as in step 4 of
-  "Adding a host".
+  to the SSD/SD card and boot. Clone this repository to `/etc/nixos` (owned
+  by the default user), register the keys as in step 4 of "Adding a host",
+  and afterwards run `update` on the laptop as well: its `claude-notify`
+  pins the RPi's SSH host key.
 - **WSL**: install the NixOS-WSL distribution, clone this repository to
   `/etc/nixos` and run `sudo nixos-rebuild switch --flake /etc/nixos#wsl`.
 
@@ -93,6 +95,7 @@ automatically.
    {
      hosts.<name> = {
        system = "x86_64-linux";
+       buildOnTags = false; # desktop + gaming: multi-hour build, CI only on PRs and by hand
        modules = [
          self.modules.nixos.base
          self.modules.nixos.<name>
@@ -108,8 +111,11 @@ automatically.
          self.modules.nixos.<name>-boot
          self.modules.nixos.desktop
          self.modules.nixos.gaming
+         # SSH is key-only but open on every network; a laptop that roams
+         # should also copy hosts/nixos/ssh.nix (LAN only).
+         self.modules.nixos.base-fail2ban
        ];
-       networking.hostName = "<name>";
+       # networking.hostName comes from the registry (= <name>).
        system.stateVersion = "26.11"; # the release it is installed with; never change it later
        customBot.defaultUser = "<user>";
        users.users.${config.customBot.defaultUser} = {
@@ -122,24 +128,32 @@ automatically.
 
    `git add` the new files, then `nix eval --raw .#nixosConfigurations.<name>.config.system.build.toplevel.drvPath`.
    CI workflows and `docs/reference` pick the host up from the registry.
-3. **Install** from a live ISO: run the host's disko script
-   (`nix run .#nixosConfigurations.<name>.config.system.build.destroyFormatMount`)
-   and `nixos-install --flake .#<name>`, then set the user's password with
-   `nixos-enter --root /mnt -- passwd <user>`. (`install-system` and the
-   ISO automate this for the host named by `installHost` in
-   `modules/installer/install.nix`.)
+3. **Install** from a live ISO, in a clone of this repository with the new
+   host committed (`git clone https://github.com/janusz-bit/nixos.git && cd nixos`):
+
+   ```sh
+   sudo nix --extra-experimental-features 'nix-command flakes' \
+     run .#nixosConfigurations.<name>.config.system.build.destroyFormatMount   # wipes the disk
+   sudo nixos-install --flake .#<name> --option accept-flake-config true      # binary caches from nixConfig
+   sudo cp -a . /mnt/etc/nixos && sudo nixos-enter --root /mnt -- chown -R <user>: /etc/nixos
+   sudo nixos-enter --root /mnt -- passwd <user>
+   ```
+
+   `install-system` and the ISO automate exactly this for the host named by
+   `installHost` in `modules/installer/install.nix`.
 4. **Secrets.** After the first boot, `nix run /etc/nixos#post-install ssh`
    creates the root key and prints the `hosts.<name>` / `sshHostKeys.<name>`
-   lines for `modules/_secrets/keys.nix`. Add the host to the recipients in
+   lines for `modules/_secrets/keys.nix` (an existing, different entry is
+   replaced only after you confirm). Add the host to the recipients in
    `modules/_secrets/secrets.nix`, re-encrypt on a host that can already
    decrypt (`cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519`),
    commit, push and run `update` on the new host.
 
-**Replacing the laptop** keeps the host name `nixos`: add the new
-`hardware-<machine>` module and import it in `hosts.nixos`, set the new disk
+**Replacing the laptop** keeps the host name `nixos`: in `hosts.nixos`,
+replace `hardware-LOQ-15IRX10` with the new `hardware-<machine>`, set the new disk
 in `modules/hosts/nixos/disko.nix` (or choose it when `install-system` asks),
 drop the Windows entry from `boot.nix` if there is none, install, then run
-`post-install`. It updates both the root key and the SSH host key in
-`keys.nix`; re-encrypt the secrets on the RPi and run `update` there so
-`laptop-run` trusts the new host key. Change `customTop.lan.laptop` in
+`post-install`. It replaces both the root key and the SSH host key in
+`keys.nix` (after confirmation); re-encrypt the secrets on the RPi and run
+`update` there so `laptop-run` trusts the new host key. Change `customTop.lan.laptop` in
 `modules/args.nix` if the LAN address changes.

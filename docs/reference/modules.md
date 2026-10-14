@@ -25,7 +25,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[desktop/browsers.nix](../../modules/desktop/browsers.nix)** (`desktop-browsers`) · hosts: `nixos` — Przeglądarki: Helium, ungoogled-chromium, Firefox, Tor Browser.
 - **[desktop/connectivity.nix](../../modules/desktop/connectivity.nix)** (`desktop-connectivity`) · hosts: `nixos` — Łączność stacji roboczej: NetworkManager (Wi-Fi bez oszczędzania energii, stały MAC), mDNS przez avahi, Bluetooth i firmware urządzeń (Wi-Fi, BT).
 - **[desktop/default.nix](../../modules/desktop/default.nix)** (`desktop`) · hosts: `nixos` — Stacja robocza: wszystkie moduły desktop-* naraz (sesja Plasma 6, dźwięk, łączność, polski układ, druk, kernel CachyOS ze strojeniem, aplikacje, przeglądarki, narzędzia programistyczne i AI). Moduły zależne od GPU (OBS, Ollama, Zed) dopasowują się do hardware.nvidia z modułu sprzętu. Host bez części z nich importuje pojedyncze desktop-* zamiast agregatu.
-- **[desktop/dev.nix](../../modules/desktop/dev.nix)** (`desktop-dev`) · hosts: `nixos` — Narzędzia programistyczne: edytory, kompilatory (C/C++, cross do Windows z Wine do testów), Jupyter, klient Gitei (tea) oraz emulacja aarch64 (binfmt) do budowania systemu RPi na tym komputerze.
+- **[desktop/dev.nix](../../modules/desktop/dev.nix)** (`desktop-dev`) · hosts: `nixos` — Narzędzia programistyczne: edytory, kompilatory (C/C++, cross do Windows z Wine do testów), Jupyter, klient Gitei (tea) oraz emulacja aarch64 (binfmt) do budowania systemu RPi na tym komputerze. Zed na hybrydzie Intel + NVIDIA widzi tylko Vulkan Intela (tymczasowe, niżej).
 - **[desktop/devenv.nix](../../modules/desktop/devenv.nix)** (`desktop-devenv`) · hosts: `nixos` — devenv (https://devenv.sh): deklaratywne środowiska deweloperskie projektów.
 - **[desktop/kernel.nix](../../modules/desktop/kernel.nix)** (`desktop-kernel`) · hosts: `nixos` — Kernel CachyOS (https://github.com/xddxdd/nix-cachyos-kernel, gałąź release): BORE + LTO, wariant x86-64-v3 — wymaga procesora z AVX2 (Haswell lub nowszy; i5-13450HX laptopa wspiera v3, nie avx512). overlays.pinned = ten sam nixpkgs, którym Hydra autora buduje kernele, więc kernel przychodzi z cache attic.xuyh0120.win/lantian (nixConfig we flake.nix) zamiast kompilować się lokalnie po każdym bumpie naszego nixpkgs. Strojenie pod ten kernel: desktop/tuning.nix. Sprawdzenie: `uname -r` kończy się na -cachyos.
 - **[desktop/locale.nix](../../modules/desktop/locale.nix)** (`desktop-locale`) · hosts: `nixos` — Polski układ i język: strefa czasowa, locale, klawiatura w konsoli i w sesji graficznej (xkb czyta też KWin na Waylandzie).
@@ -106,7 +106,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/hosts/wsl/
 
-- **[hosts/wsl/default.nix](../../modules/hosts/wsl/default.nix)** (`wsl`) · hosts: `wsl` — Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. Bez sekretów: WSL nie jest odbiorcą agenix.
+- **[hosts/wsl/default.nix](../../modules/hosts/wsl/default.nix)** (`wsl`) · hosts: `wsl` — Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. WSL nie jest odbiorcą agenix: sekrety użytkownika z base-secrets są zadeklarowane, ale się tu nie odszyfrowują.
 
 ## modules/installer/
 

@@ -1,6 +1,7 @@
 # Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty
 # aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base
-# są tu czyszczone. Bez sekretów: WSL nie jest odbiorcą agenix.
+# są tu czyszczone. WSL nie jest odbiorcą agenix: sekrety użytkownika z
+# base-secrets są zadeklarowane, ale się tu nie odszyfrowują.
 { inputs, self, ... }:
 {
   hosts.wsl = {
