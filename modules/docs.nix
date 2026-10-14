@@ -217,7 +217,7 @@ in
           text = ''
             # docs/reference zawiera wyłącznie pliki generowane.
             mkdir -p docs/reference
-            find docs/reference -name '*.md' -delete
+            rm -f docs/reference/*.md
             cp -fL ${config.packages.docs}/*.md docs/reference/
             chmod u+w docs/reference/*.md
           '';

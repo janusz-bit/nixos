@@ -2,6 +2,9 @@
 # github-actions), formatter, hooki pre-commit (gitleaks, nixfmt, statix,
 # deadnix, generatory .github/workflows i docs/reference) oraz dev shell,
 # w którym te hooki się instalują (`nix develop`, alias claude-nixos).
+# Sprawdzenie: `nix develop -c pre-commit run --all-files`; to samo w CI:
+# `nix build .#checks.x86_64-linux.pre-commit` (oblewa nieaktualne pliki
+# generowane).
 { inputs, ... }:
 {
   systems = [
@@ -38,7 +41,7 @@
             name = "${name}-hook";
             text = ''
               if command -v nix >/dev/null; then
-                exec nix run ".#${name}"
+                exec nix run ${lib.escapeShellArg ".#${name}"}
               fi
               exec ${lib.getExe config.packages.${name}}
             '';
@@ -70,15 +73,17 @@
           enable = true;
           name = "sync-github-actions";
           entry = freshGenerator "sync-github-actions";
-          # Workflowy zależą od rejestru hostów, args.nix i nixConfig.
-          files = "^(flake\\.(nix|lock)|modules/(args|github-actions)\\.nix|modules/hosts/.*|\\.github/workflows/.*)$";
+          # Przy każdym commicie: filtr plików pomijałby commity z samymi
+          # usunięciami (pre-commit nie przekazuje usuniętych plików), a wynik
+          # zależy też od flake.lock. Generator nie ewaluuje hostów (~7 s na RPi).
+          always_run = true;
           pass_filenames = false;
         };
         sync-docs = {
           enable = true;
           name = "sync-docs";
           entry = freshGenerator "sync-docs";
-          files = "^(modules/.*\\.nix|docs/reference/.*)$";
+          always_run = true;
           pass_filenames = false;
         };
       };

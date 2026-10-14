@@ -47,10 +47,11 @@
             nix-update --system x86_64-linux -F waywallen
             nix-update --system aarch64-linux -F waywallen --version skip
 
-            echo "Syncing GitHub Actions workflows from the updated flake..."
+            echo "Syncing GitHub Actions workflows and docs from the updated flake..."
             nix run .#sync-github-actions
+            nix run .#sync-docs
 
-            git add -A -- flake.lock .github/workflows \
+            git add -A -- flake.lock .github/workflows docs/reference \
               modules/packages/_bootdev-cli/default.nix \
               modules/packages/_helium/default.nix \
               modules/packages/_waywallen/default.nix

@@ -4,9 +4,8 @@
 #
 # .github/workflows/*.yml to wynik tego pliku: nigdy nie edytuje się ich
 # ręcznie. `nix run .#sync-github-actions` kopiuje wygenerowany katalog do
-# repo i usuwa workflowy, których już nie ma; hook pre-commit robi to sam po
-# zmianie tego pliku, args.nix, flake.nix/flake.lock, modules/hosts/ lub
-# samych workflowów (ręczna edycja zostaje nadpisana).
+# repo i usuwa workflowy, których już nie ma; hook pre-commit robi to sam
+# przy każdym commicie (ręczna edycja zostaje nadpisana).
 # Workflowy buildów hostów powstają z rejestru (modules/hosts/registry.nix),
 # więc nowy host dostaje swój workflow bez zmian tutaj.
 #
