@@ -318,10 +318,14 @@
             keys_nix="$place/modules/_secrets/keys.nix"
 
             # set_key ATTR KLUCZ — wpisuje KLUCZ do keys.nix pod ATTR, gdy się
-            # różni (porównanie bez komentarza). Kod 0: plik zmieniony albo
-            # brak wpisu (wypisuje linię do dopisania), 1: wpis aktualny.
+            # różni (porównanie bez komentarza), po potwierdzeniu. Kod 0: plik
+            # zmieniony albo brak wpisu (wypisuje linię do dopisania), 1: wpis
+            # aktualny. Wołane w `if`, więc errexit wewnątrz nie działa —
+            # stąd jawna kontrola formatu klucza.
             set_key() {
               local attr=$1 new=$2 old content
+              local key_re='^ssh-ed25519 [A-Za-z0-9+/]+=*( .*)?$'
+              [[ $new =~ $key_re ]] || die "nieprawidłowy klucz dla $attr: '$new'"
               if ! old="$(nix --extra-experimental-features nix-command eval --raw --file "$keys_nix" "$attr" 2>/dev/null)"; then
                 echo "Brak wpisu $attr w $keys_nix — dopisz w sekcji ''${attr%%.*}:"
                 echo "  ''${attr#*.} = \"$new\";"
@@ -330,6 +334,10 @@
               [[ "$(cut -d' ' -f1-2 <<<"$old")" != "$(cut -d' ' -f1-2 <<<"$new")" ]] || return 1
               content="$(<"$keys_nix")"
               [[ "$content" == *"$old"* ]] || die "nie znalazłem klucza $attr w $keys_nix"
+              echo "$attr w $keys_nix:"
+              echo "  stary: $old"
+              echo "  nowy:  $new"
+              confirm "Zastąpić?" || die "przerwano: $attr bez zmian"
               printf '%s\n' "''${content/"$old"/"$new"}" >"$keys_nix"
               echo "Wpisano nowy klucz do $keys_nix ($attr)."
             }
@@ -338,7 +346,7 @@
               local key=/root/.ssh/id_ed25519
               # Nazwa z działającego systemu, nie z flake'a: post-install może
               # ruszyć na dowolnym hoście, a wpisy keys.nix są per host.
-              local host
+              local host host_key root_key
               host="$(uname -n)"
               [[ -f "$keys_nix" ]] || die "brak $keys_nix"
 
@@ -350,14 +358,19 @@
                 echo "Wygenerowano $key."
               fi
 
-              # Klucz hosta sshd przypinają known_hosts innych hostów (laptop-run,
-              # claude-notify); po reinstalacji jest nowy.
-              if set_key "sshHostKeys.$host" "$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"; then
-                echo "Klucz hosta sshd zmieniony: po commicie i pushu zrób update na hostach,"
-                echo "które łączą się z tym (raspberry-pi-4: laptop-run)."
+              # Poza `if`: błąd odczytu klucza przerywa skrypt (errexit, pipefail).
+              host_key="$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"
+              root_key="$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2)"
+
+              # Klucz hosta sshd przypinają known_hosts innych hostów; po
+              # reinstalacji jest nowy.
+              if set_key "sshHostKeys.$host" "$host_key"; then
+                echo "Klucz hosta sshd nowy albo zmieniony: po wpisaniu, commicie i pushu zrób"
+                echo "update na hostach, które go przypinają (nixos przypina raspberry-pi-4:"
+                echo "claude-notify; raspberry-pi-4 przypina nixos: laptop-run)."
               fi
 
-              if ! set_key "hosts.$host" "$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@$host"; then
+              if ! set_key "hosts.$host" "$root_key root@$host"; then
                 echo "Klucz roota jest już odbiorcą sekretów (hosts.$host) — agenix odszyfruje je przy update-local."
                 return
               fi
