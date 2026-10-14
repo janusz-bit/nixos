@@ -2,8 +2,8 @@
 # lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny
 # wyłącznie przez Cloudflare Tunnel (cloudflared → nginx :80).
 #
-# Dostęp z LAN-u celowo odcięty: nginx słucha na :80, ale firewall nie
-# otwiera 80/443 i nie ma mDNS (avahi). Ten vhost serwuje też
+# Dostęp z LAN-u celowo odcięty: nginx słucha na :80 tylko na localhost
+# (defaultListenAddresses w network.nix) i nie ma mDNS (avahi). Ten vhost serwuje też
 # /.well-known/matrix/client (matrix.nix).
 #
 # Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
