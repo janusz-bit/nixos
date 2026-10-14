@@ -61,7 +61,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/hosts/
 
 - **[hosts/claude-notify.nix](../../modules/hosts/claude-notify.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
-- **[hosts/registry.nix](../../modules/hosts/registry.nix)** — Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.<nazwa>, workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji) i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa konfiguracji = cel aliasów update/push (customBot.flakeTarget ustawia rejestr; host ustawia je sam tylko dla obrazu składanego poza rejestrem).
+- **[hosts/registry.nix](../../modules/hosts/registry.nix)** — Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.<nazwa>, workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji) i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa konfiguracji = networking.hostName = cel aliasów update/push (customBot.flakeTarget). Ustawia je rejestr; host może je powtórzyć (obraz SD składa moduł hosta poza rejestrem), ale inna wartość to błąd ewaluacji. Na nazwie hosta opiera się m.in. post-install (wpisy keys.nix) i nixos-rebuild bez `#<host>`.
 - **[hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)** (`nixos-remote-agent`, `rpi-remote-agent`) · hosts: `nixos`, `raspberry-pi-4` — Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos).
 
 ## modules/hosts/base/

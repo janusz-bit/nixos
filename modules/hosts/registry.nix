@@ -1,8 +1,11 @@
 # Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.<nazwa>,
 # workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji)
 # i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa
-# konfiguracji = cel aliasów update/push (customBot.flakeTarget ustawia
-# rejestr; host ustawia je sam tylko dla obrazu składanego poza rejestrem).
+# konfiguracji = networking.hostName = cel aliasów update/push
+# (customBot.flakeTarget). Ustawia je rejestr; host może je powtórzyć
+# (obraz SD składa moduł hosta poza rejestrem), ale inna wartość to błąd
+# ewaluacji. Na nazwie hosta opiera się m.in. post-install (wpisy keys.nix)
+# i nixos-rebuild bez `#<host>`.
 #
 # Host deklaruje się w modules/hosts/<nazwa>/default.nix:
 #   hosts.<nazwa> = { system = "x86_64-linux"; modules = [ … ]; };
@@ -58,6 +61,7 @@
       modules = host.modules ++ [
         {
           nixpkgs.hostPlatform = host.system;
+          networking.hostName = name;
           customBot.flakeTarget = name;
         }
       ];
