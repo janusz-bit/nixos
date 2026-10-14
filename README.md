@@ -111,8 +111,8 @@ automatically.
          self.modules.nixos.<name>-boot
          self.modules.nixos.desktop
          self.modules.nixos.gaming
-         # SSH is key-only but open on every network; a laptop that roams
-         # should also copy hosts/nixos/ssh.nix (LAN only).
+         # SSH only from the home LAN, with fail2ban
+         self.modules.nixos.base-ssh-lan
          self.modules.nixos.base-fail2ban
        ];
        # networking.hostName comes from the registry (= <name>).

@@ -23,6 +23,7 @@
       imports = [
         self.modules.nixos.base
         self.modules.nixos.base-fail2ban
+        self.modules.nixos.base-ssh-lan
         self.modules.nixos.hardware-raspberry-pi-4
         self.modules.nixos.hardware-raspberry-pi-4-fan
         self.modules.nixos.rpi-resources

@@ -2,7 +2,7 @@
 # offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur.
 # Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość
 # (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch
-# (boot.nix) i reguła SSH (ssh.nix). Funkcje stacji roboczej: modules/desktop/,
+# (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/,
 # gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
 { self, ... }:
 {
@@ -27,7 +27,7 @@
         self.modules.nixos.nixos-boot
         self.modules.nixos.nixos-disko
         self.modules.nixos.nixos-snapper
-        self.modules.nixos.nixos-ssh
+        self.modules.nixos.base-ssh-lan
         self.modules.nixos.desktop
         self.modules.nixos.gaming
         self.modules.nixos.base-fail2ban

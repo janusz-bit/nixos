@@ -5,7 +5,7 @@
 # Wartości z mkDefault nadpisuje raspberry-pi-4: dopuszcza roota kluczem
 # ("prohibit-password", to jego ścieżka administracyjna przez tunel) i
 # wyłącza ssh-askpass (headless, x11-ssh-askpass ciągnie zależności X11).
-# Laptop dodatkowo zawęża port 22 do domowego LAN-u (modules/hosts/nixos/ssh.nix).
+# Laptop i RPi zawężają dodatkowo port 22 do domowego LAN-u (base-ssh-lan).
 #
 # Sprawdzenie: `sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'`;
 # `ssh -G ssh.<domena> | grep -E '^(user|proxycommand) '`.

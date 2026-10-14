@@ -7,12 +7,12 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 45 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 30 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 31 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 12 |
 
 ## nixos
 
-Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur. Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch (boot.nix) i reguła SSH (ssh.nix). Funkcje stacji roboczej: modules/desktop/, gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
+Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur. Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/, gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
 
 ```mermaid
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
   host_nixos --> nixos_boot[nixos-boot]
   host_nixos --> nixos_disko[nixos-disko]
   host_nixos --> nixos_snapper[nixos-snapper]
-  host_nixos --> nixos_ssh[nixos-ssh]
+  host_nixos --> base_ssh_lan[base-ssh-lan]
   host_nixos --> desktop[desktop]
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
@@ -76,6 +76,7 @@ flowchart LR
 - `base-secrets` — [hosts/base/secrets.nix](../../modules/hosts/base/secrets.nix)
 - `base-shell` — [hosts/base/shell.nix](../../modules/hosts/base/shell.nix)
 - `base-ssh` — [hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)
+- `base-ssh-lan` — [hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)
 - `desktop` — [desktop/default.nix](../../modules/desktop/default.nix)
 - `desktop-ai` — [desktop/ai.nix](../../modules/desktop/ai.nix)
 - `desktop-apps` — [desktop/apps.nix](../../modules/desktop/apps.nix)
@@ -107,7 +108,6 @@ flowchart LR
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
 - `nixos-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
-- `nixos-ssh` — [hosts/nixos/ssh.nix](../../modules/hosts/nixos/ssh.nix)
 
 ## raspberry-pi-4
 
@@ -118,6 +118,7 @@ flowchart LR
   host_raspberry_pi_4([raspberry-pi-4])
   host_raspberry_pi_4 --> base[base]
   host_raspberry_pi_4 --> base_fail2ban[base-fail2ban]
+  host_raspberry_pi_4 --> base_ssh_lan[base-ssh-lan]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4[hardware-raspberry-pi-4]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4_fan[hardware-raspberry-pi-4-fan]
   host_raspberry_pi_4 --> rpi_resources[rpi-resources]
@@ -160,6 +161,7 @@ flowchart LR
 - `base-secrets` — [hosts/base/secrets.nix](../../modules/hosts/base/secrets.nix)
 - `base-shell` — [hosts/base/shell.nix](../../modules/hosts/base/shell.nix)
 - `base-ssh` — [hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)
+- `base-ssh-lan` — [hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)
 - `hardware-raspberry-pi-4` — [hardware/raspberry-pi-4/default.nix](../../modules/hardware/raspberry-pi-4/default.nix)
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
