@@ -114,6 +114,21 @@
             }:/etc/profiles/per-user/${cfg.user}/bin:/run/current-system/sw/bin \
             ${common.effectivePackage cfg}/bin/${name} "$@"
         '';
+
+      # Ollama dostaje z sekretów tylko OLLAMA_API_KEY (modele `:cloud` przez
+      # lokalną Ollamę bez klucza zwracają 401), nie cały hermes-env.age z
+      # kluczami Hermesa: pobiera i parsuje modele z sieci, więc ma widzieć
+      # jak najmniej. ollama-api-key.age to surowa wartość (bez KEY=), której
+      # EnvironmentFile nie czyta — podaje ją LoadCredential, a to opakowanie
+      # eksportuje przed `ollama serve`.
+      ollamaServe = pkgs.writeShellApplication {
+        name = "ollama-serve";
+        text = ''
+          OLLAMA_API_KEY="$(<"$CREDENTIALS_DIRECTORY/ollama-api-key")"
+          export OLLAMA_API_KEY
+          exec ${lib.getExe config.services.ollama.package} serve
+        '';
+      };
     in
     {
       imports = [
@@ -285,9 +300,13 @@
       ];
 
       systemd.services = {
-        # OLLAMA_API_KEY z hermes-env.age: modele `:cloud` przez lokalną
-        # Ollamę (127.0.0.1:11434, niewystawioną) bez klucza zwracają 401.
-        ollama.serviceConfig.EnvironmentFile = config.age.secrets.hermes-env.path;
+        # Klucz dla modeli `:cloud`: ollamaServe wyżej.
+        ollama.serviceConfig = {
+          LoadCredential = [ "ollama-api-key:${config.age.secrets.ollama-api-key.path}" ];
+          # mkForce: zastępuje ExecStart modułu nixpkgs (`ollama serve`) tym
+          # samym poleceniem w opakowaniu ustawiającym klucz.
+          ExecStart = lib.mkForce (lib.getExe ollamaServe);
+        };
 
         hermes-agent.serviceConfig = {
           # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie
