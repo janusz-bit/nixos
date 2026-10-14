@@ -137,6 +137,22 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   moduł i w Launch Options wrócić do `gamemoderun %command%`; z `dbdrun`
   usunąć tylko `DXVK_CONFIG`.
 
+### 7. Wentylator RPi — `RPI_LGPIO_REVISION` podane ręcznie
+
+- **Od:** przed 2026-10 (przeniesione do tego rejestru 2026-10-14).
+- **Plik:** `modules/hardware/raspberry-pi-4/fan.nix`
+  (`environment.RPI_LGPIO_REVISION = "0xc03114"`, RPi 4B Rev 1.4).
+- **Objaw:** bez zmiennej rpi-lgpio nie ustala modelu płytki i
+  `GPIO.setup` pada, więc usługa `pwm-fan` nie startuje.
+- **Przyczyna:** rpi-lgpio czyta rewizję z
+  `/proc/device-tree/system/linux,revision` albo z pola `Revision`
+  w `/proc/cpuinfo`; na kernelu 6.18 z nixos-hardware nie ma ani węzła
+  `system/` w device tree, ani tego pola.
+- **Kiedy usunąć:** gdy na RPi
+  `ls /proc/device-tree/system/linux,revision` albo
+  `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
+  i sprawdzić `systemctl status pwm-fan`.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

@@ -56,7 +56,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/hardware/raspberry-pi-4/
 
 - **[hardware/raspberry-pi-4/default.nix](../../modules/hardware/raspberry-pi-4/default.nix)** (`hardware-raspberry-pi-4`) · hosts: `raspberry-pi-4` — Płytka Raspberry Pi 4B: profil nixos-hardware (kernel producenta, device tree), wyłączone diody, governor CPU. Wentylator na GPIO: fan.nix.
-- **[hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)** (`hardware-raspberry-pi-4-fan`) · hosts: `raspberry-pi-4` — Wentylator Waveshare PWM na GPIO 14 (BCM, fizyczny pin 8) Raspberry Pi 4: usługa pwm-fan co 5 s czyta temperaturę SoC (thermal_zone0) i ustawia wypełnienie 0% poniżej 48 °C, 50% od 48 °C i 100% od 60 °C.
+- **[hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)** (`hardware-raspberry-pi-4-fan`) · hosts: `raspberry-pi-4` — Wentylator Waveshare PWM na GPIO 14 (BCM, fizyczny pin 8) Raspberry Pi 4: usługa pwm-fan co 5 s czyta temperaturę SoC (thermal_zone0) i ustawia wypełnienie 0% poniżej 48 °C, 50% od 48 °C i 100% od 60 °C; bez odczytu temperatury 100% (program: _fan/pwm_fan.py).
 
 ## modules/hosts/
 
