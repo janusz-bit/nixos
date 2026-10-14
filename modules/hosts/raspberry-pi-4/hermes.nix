@@ -315,9 +315,17 @@
           # właściciela pliku. Dawny krok roota naprawiający właściciela
           # auth.json (chown przez ścieżki agenta = symlink TOCTOU do roota)
           # usunięty — CLI działa już tylko jako hermes (hermesCli).
-          ExecStartPre = lib.mkBefore [
-            "${pkgs.coreutils}/bin/rm -f ${hermesHome}/gateway.lock ${hermesHome}/gateway.pid ${hermesHome}/gateway_state.json"
-          ];
+          # Rekord hosta (gateway-locks w $XDG_STATE_HOME = $HOME/.local/state)
+          # przeżywa restart systemu: po twardym resecie jego PID z czasem startu
+          # liczonym od rozruchu trafia na inny proces, a bramka czeka na niego
+          # bez końca.
+          ExecStartPre =
+            let
+              hostLocks = "${cfg.stateDir}/.local/state/hermes/gateway-locks";
+            in
+            lib.mkBefore [
+              "${pkgs.coreutils}/bin/rm -f ${hermesHome}/gateway.lock ${hermesHome}/gateway.pid ${hermesHome}/gateway_state.json ${hostLocks}/host-gateway.json ${hostLocks}/host-gateway.token"
+            ];
         };
       };
     };

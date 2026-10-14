@@ -65,8 +65,17 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   użytkownik usługi).
 - **Przyczyna:** pliki blokady/stanu pozostałe po przerwanym procesie albo
   utworzone przez sesję interaktywną blokowały start bramki (PermissionError).
-- **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje)
-  — sprawdzić: usunąć `ExecStartPre`, `kill -9` bramki, Restart musi wstać.
+  Od 2026-10-14 także rekord hosta
+  `/var/lib/hermes/.local/state/hermes/gateway-locks/host-gateway.{json,token}`:
+  po twardym resecie RPi zapisany PID (1501) z czasem startu w taktach od
+  rozruchu (tolerancja 2 s) trafił na cloudflared o tym samym PID i czasie,
+  więc `host_attach` uznawał go za żywą bramkę i usługa restartowała się
+  bez końca (exit 75, „has not published its served set yet”). Rekord nie
+  zawiera `boot_id`.
+- **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje,
+  rekord z innego rozruchu) — sprawdzić: usunąć `ExecStartPre`, `kill -9`
+  bramki, Restart musi wstać; rekord hosta z PID i `start_time` procesu
+  z bieżącego rozruchu nie może blokować startu.
 
 ### 4. Zed — Vulkan tylko z ICD Intela (`VK_LOADER_DRIVERS_SELECT`)
 
