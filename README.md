@@ -24,7 +24,8 @@ no Home Manager, secrets with [agenix](https://github.com/ryantm/agenix)).
 flake.nix                 inputs, binary caches (nixConfig), outputs = import-tree ./modules
 modules/
   hosts/registry.nix      host registry: hosts.<name> -> nixosConfigurations, CI
-  hosts/base/             what every host gets (nix, shell, ssh, git, secrets, update aliases)
+  hosts/base/             what every host gets (nix, shell, ssh, git, update aliases),
+                          plus opt-in user secrets, fail2ban and LAN-only SSH
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
   hosts/*.nix             features linking two hosts (laptop-run, claude-notify)
   desktop/  gaming/       workstation features any desktop host can import
@@ -111,6 +112,8 @@ automatically.
          self.modules.nixos.<name>-boot
          self.modules.nixos.desktop
          self.modules.nixos.gaming
+         # user secrets and their wrappers (decrypt once step 4 is done)
+         self.modules.nixos.base-agenix
          # SSH only from the home LAN, with fail2ban
          self.modules.nixos.base-ssh-lan
          self.modules.nixos.base-fail2ban

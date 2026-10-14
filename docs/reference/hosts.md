@@ -8,7 +8,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 45 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 31 |
-| [`wsl`](#wsl) | `x86_64-linux` | yes | 12 |
+| [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
 
 ## nixos
 
@@ -22,6 +22,7 @@ flowchart LR
   host_nixos --> nixos_boot[nixos-boot]
   host_nixos --> nixos_disko[nixos-disko]
   host_nixos --> nixos_snapper[nixos-snapper]
+  host_nixos --> base_agenix[base-agenix]
   host_nixos --> base_ssh_lan[base-ssh-lan]
   host_nixos --> desktop[desktop]
   host_nixos --> gaming[gaming]
@@ -35,7 +36,6 @@ flowchart LR
   base --> base_nix[base-nix]
   base --> base_rebuild[base-rebuild]
   base --> base_ssh[base-ssh]
-  base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
   base_agenix --> base_secrets[base-secrets]
@@ -117,6 +117,7 @@ Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB), usługi 
 flowchart LR
   host_raspberry_pi_4([raspberry-pi-4])
   host_raspberry_pi_4 --> base[base]
+  host_raspberry_pi_4 --> base_agenix[base-agenix]
   host_raspberry_pi_4 --> base_fail2ban[base-fail2ban]
   host_raspberry_pi_4 --> base_ssh_lan[base-ssh-lan]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4[hardware-raspberry-pi-4]
@@ -142,7 +143,6 @@ flowchart LR
   base --> base_nix[base-nix]
   base --> base_rebuild[base-rebuild]
   base --> base_ssh[base-ssh]
-  base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
   base_agenix --> base_secrets[base-secrets]
@@ -182,7 +182,7 @@ flowchart LR
 
 ## wsl
 
-Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. WSL nie jest odbiorcą agenix: sekrety użytkownika z base-secrets są zadeklarowane, ale się tu nie odszyfrowują.
+Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. WSL nie jest odbiorcą agenix, więc nie importuje base-agenix (sekrety użytkownika, wrappery fish, alias push).
 
 ```mermaid
 flowchart LR
@@ -194,21 +194,17 @@ flowchart LR
   base --> base_nix[base-nix]
   base --> base_rebuild[base-rebuild]
   base --> base_ssh[base-ssh]
-  base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
-  base_agenix --> base_secrets[base-secrets]
 ```
 
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
-- `base-agenix` — [hosts/base/agenix.nix](../../modules/hosts/base/agenix.nix)
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
 - `base-nix` — [hosts/base/nix.nix](../../modules/hosts/base/nix.nix)
 - `base-options` — [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 - `base-prime-agent` — [hosts/base/prime-agent.nix](../../modules/hosts/base/prime-agent.nix)
 - `base-rebuild` — [hosts/base/rebuild.nix](../../modules/hosts/base/rebuild.nix)
-- `base-secrets` — [hosts/base/secrets.nix](../../modules/hosts/base/secrets.nix)
 - `base-shell` — [hosts/base/shell.nix](../../modules/hosts/base/shell.nix)
 - `base-ssh` — [hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)
 - `wsl` — [hosts/wsl/default.nix](../../modules/hosts/wsl/default.nix)

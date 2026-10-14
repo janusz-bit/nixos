@@ -1,4 +1,6 @@
-# Agenix — sekrety BEZ globalnych exportów.
+# Agenix — sekrety użytkownika (base-secrets) BEZ globalnych exportów,
+# wstrzykiwane per proces, plus alias push. Opcjonalny: importują go nixos
+# i raspberry-pi-4; WSL nie jest odbiorcą agenix.
 #
 # Dawny environment.shellInit eksportował wszystkie klucze w każdym shellu,
 # a przez import-environment trafiały one do całej sesji KDE — każda
@@ -28,7 +30,7 @@
 # (logi, procesy potomne, cała sesja KDE). Pliki sekretów należą do
 # customBot.defaultUser (0400, modules/hosts/base/secrets.nix), więc proces
 # działający jako ten użytkownik nadal może je przeczytać wprost.
-{ self, ... }:
+{ self, customTop, ... }:
 {
   flake.modules.nixos.base-agenix =
     {
@@ -171,7 +173,12 @@
       # === per-procesowe wrappery (funkcje fish przez vendor_functions.d) ===
       # vendor.functions to warunek działania tego modułu — fish dodaje
       # <profil>/share/fish/vendor_functions.d do fish_function_path.
-      programs.fish.vendor.functions.enable = true;
+      programs.fish = {
+        vendor.functions.enable = true;
+        # push: build toplevela z GitHuba i wypchnięcie do cachix przez
+        # cachix-push (token tylko dla tego procesu).
+        shellAliases.push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
+      };
       environment.systemPackages = [ fishWrappersPkg ];
 
       # === nix: access-tokens z agenix w pliku 0600 (zamiast NIX_CONFIG w profilu) ===

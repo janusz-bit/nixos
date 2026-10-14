@@ -1,8 +1,8 @@
-# Aliasy aktualizacji systemu z tego flake'a; celem jest
+# Aliasy aktualizacji systemu z tego flake'a (push do cachix: base-agenix,
+# bo potrzebuje tokenu); celem jest
 # nixosConfigurations.<customBot.flakeTarget> (ustawia rejestr hostów):
 #   update / update-boot / update-reboot   z GitHuba (--refresh)
 #   update-local / update-local-boot       z kopii w /etc/nixos
-#   push            (fish) build toplevela z GitHuba i wypchnięcie do cachix
 #   update-my-pkgs  (fish) flake-update: flake.lock i pakiety lokalne
 #
 # Sprawdzenie: `nix eval --raw .#nixosConfigurations.<host>.config.environment.shellAliases.update-reboot`.
@@ -32,11 +32,6 @@
         update-local-boot = update_alias "boot" false;
       };
 
-      programs.fish.shellAliases = {
-        # Tylko w fish: token cachix wstrzykuje funkcja `cachix-push`
-        # (base/agenix.nix), niewidoczna dla innych procesów.
-        push = "nix build ${linkFlake}#nixosConfigurations.${flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
-        update-my-pkgs = "nix run ${place}#flake-update";
-      };
+      programs.fish.shellAliases.update-my-pkgs = "nix run ${place}#flake-update";
     };
 }

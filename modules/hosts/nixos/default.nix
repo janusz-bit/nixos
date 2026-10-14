@@ -27,6 +27,7 @@
         self.modules.nixos.nixos-boot
         self.modules.nixos.nixos-disko
         self.modules.nixos.nixos-snapper
+        self.modules.nixos.base-agenix
         self.modules.nixos.base-ssh-lan
         self.modules.nixos.desktop
         self.modules.nixos.gaming
