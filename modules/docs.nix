@@ -96,7 +96,15 @@ let
   code = text: "`${text}`";
   # Link z docs/reference/ do pliku w repo.
   link = path: "[${lib.removePrefix "modules/" path}](../../${path})";
-  describe = text: if text == "" then "*(no header comment)*" else text;
+  # `<nazwa>` poza kodem GitHub bierze za znacznik HTML i go usuwa.
+  escapeTags =
+    text:
+    lib.concatStringsSep "`" (
+      lib.imap0 (i: part: if lib.mod i 2 == 0 then lib.replaceStrings [ "<" ] [ "\\<" ] part else part) (
+        lib.splitString "`" text
+      )
+    );
+  describe = text: if text == "" then "*(no header comment)*" else escapeTags text;
   # Katalog modułu względem modules/: grupa w spisie.
   group = path: lib.concatStringsSep "/" (lib.init (lib.tail (lib.splitString "/" path)));
   nodeId = lib.replaceStrings [ "-" ] [ "_" ];
@@ -122,7 +130,9 @@ let
       let
         source = hostSource name;
         direct = source.refs;
-        aggregates = lib.filter (ref: (module ref).refs != [ ] && ref != name) direct;
+        # Krawędzie każdego modułu hosta, który importuje inne (agregaty,
+        # moduł sprzętu, base-agenix → base-secrets).
+        nested = lib.filter (ref: ref != name && (module ref).refs != [ ]) (closure name);
       in
       lib.concatStrings (
         [
@@ -132,9 +142,11 @@ let
           "  host_${nodeId name}([${name}])\n"
         ]
         ++ map (ref: "  host_${nodeId name} --> ${nodeId ref}[${ref}]\n") (lib.remove name direct)
-        ++ lib.concatMap (
-          aggregate: map (ref: "  ${nodeId aggregate} --> ${nodeId ref}[${ref}]\n") (module aggregate).refs
-        ) aggregates
+        ++ lib.unique (
+          lib.concatMap (
+            importer: map (ref: "  ${nodeId importer} --> ${nodeId ref}[${ref}]\n") (module importer).refs
+          ) nested
+        )
         ++ [ "```\n\n" ]
         ++ map (ref: "- ${code ref} — ${link (module ref).path}\n") (closure name)
       )
@@ -174,7 +186,7 @@ let
     );
   renderOption =
     opt:
-    "### ${code opt.name}\n\n${lib.trim opt.description}\n\n- Type: ${opt.type}\n"
+    "### ${code opt.name}\n\n${escapeTags (lib.trim opt.description)}\n\n- Type: ${opt.type}\n"
     + lib.optionalString (opt ? default) "- Default: ${code opt.default.text}\n"
     # flake-parts dopisuje do pliku deklaracji ", via option flake.modules…".
     + "- Declared in: ${

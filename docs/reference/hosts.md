@@ -38,8 +38,7 @@ flowchart LR
   base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
-  hardware_LOQ_15IRX10 --> hardware_lenovo[hardware-lenovo]
-  hardware_LOQ_15IRX10 --> hardware_x86_64_v3[hardware-x86-64-v3]
+  base_agenix --> base_secrets[base-secrets]
   desktop --> desktop_plasma[desktop-plasma]
   desktop --> desktop_audio[desktop-audio]
   desktop --> desktop_connectivity[desktop-connectivity]
@@ -60,6 +59,8 @@ flowchart LR
   gaming --> gaming_launchers[gaming-launchers]
   gaming --> gaming_dbd[gaming-dbd]
   gaming --> gaming_deadlock[gaming-deadlock]
+  hardware_LOQ_15IRX10 --> hardware_lenovo[hardware-lenovo]
+  hardware_LOQ_15IRX10 --> hardware_x86_64_v3[hardware-x86-64-v3]
 ```
 
 - `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
@@ -143,6 +144,7 @@ flowchart LR
   base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
+  base_agenix --> base_secrets[base-secrets]
 ```
 
 - `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
@@ -193,6 +195,7 @@ flowchart LR
   base --> base_agenix[base-agenix]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
+  base_agenix --> base_secrets[base-secrets]
 ```
 
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
