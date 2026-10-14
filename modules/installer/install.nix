@@ -24,8 +24,11 @@
 #   nix run /etc/nixos#post-install [ssh|secure-boot]   (bez argumentu: oba)
 # - ssh: klucz roota /root/.ssh/id_ed25519 (age.identityPaths) oraz wpisy
 #   hosts.<host> (odbiorca agenix) i sshHostKeys.<host> (klucz hosta sshd,
-#   przypinany przez inne hosty) w modules/_secrets/keys.nix. Sekrety trzeba
-#   potem przeszyfrować na innym odbiorcy (raspberry-pi-4) — skrypt to wypisuje.
+#   przypinany przez inne hosty) w modules/_secrets/keys.nix; <host> to nazwa
+#   działającego systemu, więc krok działa na każdym hoście (brak wpisu:
+#   wypisuje linię do dopisania). Sekrety trzeba potem przeszyfrować na innym
+#   odbiorcy — skrypt to wypisuje.
+#   secure-boot dotyczy tylko laptopa (firmware Insyde).
 # - secure-boot: wpisanie kluczy sbctl do firmware (Insyde: sbctl enroll-keys
 #   nie widzi zmiennych EFI, więc eksport .auth + efi-updatevar, potem
 #   odtworzenie dbx z dbxDefault; odczyt stanu: AGENTS.md). Firmware musi być
@@ -40,7 +43,6 @@
       # Host instalowany przez install-system, ISO (iso.nix) i post-install.
       installHost = "nixos";
       inherit (self.nixosConfigurations.${installHost}) config;
-      inherit (config.networking) hostName;
       inherit (customTop.repository) place url;
       inherit (config.disko) rootMountPoint;
       user = config.customBot.defaultUser;
@@ -294,6 +296,7 @@
         post-install = pkgs.writeShellApplication {
           name = "post-install";
           runtimeInputs = with pkgs; [
+            coreutils
             efitools
             openssh
             sbctl
@@ -333,31 +336,36 @@
 
             ssh_key() {
               local key=/root/.ssh/id_ed25519
+              # Nazwa z działającego systemu, nie z flake'a: post-install może
+              # ruszyć na dowolnym hoście, a wpisy keys.nix są per host.
+              local host
+              host="$(uname -n)"
               [[ -f "$keys_nix" ]] || die "brak $keys_nix"
 
               if [[ -f "$key" ]]; then
                 echo "$key już istnieje — nie nadpisuję."
               else
                 install -d -m 0700 /root/.ssh
-                ssh-keygen -q -t ed25519 -N "" -C "root@${hostName}" -f "$key"
+                ssh-keygen -q -t ed25519 -N "" -C "root@$host" -f "$key"
                 echo "Wygenerowano $key."
               fi
 
               # Klucz hosta sshd przypinają known_hosts innych hostów (laptop-run,
               # claude-notify); po reinstalacji jest nowy.
-              if set_key sshHostKeys.${hostName} "$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"; then
+              if set_key "sshHostKeys.$host" "$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"; then
                 echo "Klucz hosta sshd zmieniony: po commicie i pushu zrób update na hostach,"
                 echo "które łączą się z tym (raspberry-pi-4: laptop-run)."
               fi
 
-              if ! set_key hosts.${hostName} "$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@${hostName}"; then
-                echo "Klucz roota jest już odbiorcą sekretów (hosts.${hostName}) — agenix odszyfruje je przy update-local."
+              if ! set_key "hosts.$host" "$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2) root@$host"; then
+                echo "Klucz roota jest już odbiorcą sekretów (hosts.$host) — agenix odszyfruje je przy update-local."
                 return
               fi
-              echo "Sekrety są zaszyfrowane dla starego klucza — przeszyfruj je na innym"
-              echo "hoście, który jest ich odbiorcą (raspberry-pi-4):"
-              echo "  1. tutaj:  git -C $place commit -am 'secrets: new ${hostName} host key' && git -C $place push"
-              echo "  2. na RPi: w klonie repo git pull, potem w modules/_secrets:"
+              echo "Sekrety nie są zaszyfrowane dla tego klucza — przeszyfruj je na hoście,"
+              echo "który już je odszyfrowuje (laptop nixos albo raspberry-pi-4); nowy host"
+              echo "dopisz najpierw do odbiorców w modules/_secrets/secrets.nix:"
+              echo "  1. tutaj:  git -C $place commit -am 'secrets: new $host host key' && git -C $place push"
+              echo "  2. tam:    w klonie repo git pull, potem w modules/_secrets:"
               echo "             sudo agenix -r -i /root/.ssh/id_ed25519, commit i push"
               echo "  3. tutaj:  git -C $place pull && update-local"
             }
