@@ -45,4 +45,10 @@ in
   # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify.nix):
   # loguje tylko na konto hermes RPi z wymuszonym poleceniem (wysyłka do DM).
   "hermes-notify-key.age" = mkSecret allHosts;
+  # Kopia zapasowa klucza podpisywania APK Brulionu (github:janusz-bit/brulion):
+  # format env z nazwami sekretów CI tego repo — QT_ANDROID_KEYSTORE_BASE64 (plik
+  # .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS, QT_ANDROID_KEYSTORE_KEY_PASS,
+  # QT_ANDROID_KEYSTORE_ALIAS. Nie trafia na żaden host: służy tylko do odtworzenia
+  # klucza (bez niego nie da się wydać aktualizacji zainstalowanej aplikacji).
+  "brulion-android-keystore.age" = mkSecret allHosts;
 }

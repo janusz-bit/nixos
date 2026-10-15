@@ -51,6 +51,7 @@ Base (every host): bash exec'ing fish, tmux, nix-ld, comma, direnv, Quad9 DNS (`
 - User secrets (`modules/hosts/base/secrets.nix`, through `base-agenix`; laptop and RPi only): owner `customBot.defaultUser`, mode `0400`. Service secrets: owned by the service user, or root `0400` when the service reads them via `LoadCredential`/`EnvironmentFile`. Never `group = "users"`.
 - Never export secrets globally (shell init, `sessionVariables`). Inject per process: fish wrapper functions in `modules/hosts/base/agenix.nix` (`prime-agent`, `opencode`, `gemini`, `cachix-push`); nix `access-tokens` are rendered into `~/.config/nix/nix.conf` by the user unit `nix-access-tokens`.
 - Never write secret values into `.nix` files (they end up in the world-readable store).
+- `brulion-android-keystore.age` is a backup only (the release signing key of the Brulion Android app, env format with the CI secret names of `github:janusz-bit/brulion`), declared in no host. Restore: `sudo agenix -d brulion-android-keystore.age -i /root/.ssh/id_ed25519` in `modules/_secrets/`.
 
 ## Security invariants — do not regress
 - `nix.settings.trusted-users` stays default (root only).
