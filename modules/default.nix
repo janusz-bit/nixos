@@ -53,16 +53,7 @@
       packages.default = self'.packages.install-system;
 
       pre-commit.settings.hooks = {
-        # git-hooks-nix nie definiuje hooka gitleaks (nigdy nie istniał
-        # upstreamowo) — custom hook z jawnym entry, jak w oficjalnej
-        # integracji pre-commit gitleaks (skan staged diff; pliki sekretów
-        # *.age są zaszyfrowane i nie dają się sensownie skanować).
-        gitleaks = {
-          enable = true;
-          name = "gitleaks";
-          entry = "${lib.getExe pkgs.gitleaks} git --pre-commit --redact --verbose";
-          pass_filenames = false;
-        };
+        gitleaks.enable = true;
         nixfmt.enable = true;
         statix.enable = true;
         deadnix = {
