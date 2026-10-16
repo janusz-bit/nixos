@@ -38,7 +38,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 - **Od:** 2026-10-07.
 - **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
-  (kopia `nix/nixosModules.nix` z NousResearch/hermes-agent @ 0a374d16, MIT),
+  (kopia `nix/nixosModules.nix` z NousResearch/hermes-agent @ 848fc0ad, MIT),
   import w `modules/hosts/raspberry-pi-4/hermes.nix`, test
   `checks.<system>.hermes-activation`.
 - **Przyczyna:** aktywacja upstreamu (przy każdym switch i boot) robi jako root

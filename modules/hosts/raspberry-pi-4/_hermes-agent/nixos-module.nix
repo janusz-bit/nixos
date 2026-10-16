@@ -30,7 +30,7 @@
 #   };
 #
 # ── Kopia w tym repo (janusz-bit/nixos) ─────────────────────────────────────
-# Plik = nix/nixosModules.nix z NousResearch/hermes-agent @ 0a374d16 (MIT,
+# Plik = nix/nixosModules.nix z NousResearch/hermes-agent @ 848fc0ad (MIT,
 # ./LICENSE), importowany przez modules/hosts/raspberry-pi-4/hermes.nix zamiast
 # inputs.hermes-agent.nixosModules.default. moduleCommon.nix i pakiet nadal
 # pochodzą z inputu. Zmiany względem upstreamu (oznaczone „janusz-bit:”):
