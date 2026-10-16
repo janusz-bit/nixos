@@ -14,7 +14,6 @@
 
       settings = {
         server = {
-          DOMAIN = "git.${customTop.site.full}";
           ROOT_URL = "https://git.${customTop.site.full}/";
           HTTP_ADDR = "127.0.0.1";
           HTTP_PORT = 3000;
