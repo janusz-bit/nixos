@@ -11,10 +11,9 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    # Kernel CachyOS (zamiast chaotic). Gałąź release = kernele zbudowane przez
-    # Hydrę autora i obecne w jego cache (attic.xuyh0120.win/lantian, patrz
-    # nixConfig niżej). Cache trafia tylko przy overlays.pinned (ten sam nixpkgs
-    # co w Hydrze) — modules/desktop/kernel.nix.
+    # Kernel CachyOS (zamiast chaotic). Gałąź release = wersje zbudowane przez
+    # Hydrę autora; jego cache nie jest używany (kernel kompiluje się lokalnie
+    # albo w CI cachyos-kernel-update) — modules/desktop/kernel.nix.
     # NIE ustawiać inputs.nixpkgs.follows - musi mieć swój nixpkgs dla zgodności patchy!
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -60,14 +59,11 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
-      # nix-cachyos-kernel (Hydra autora) — trafia przy overlays.pinned
-      "https://attic.xuyh0120.win/lantian"
       # llm-agents.nix (prime-agent, dsh, chatgpt)
       "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
-      "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
   };

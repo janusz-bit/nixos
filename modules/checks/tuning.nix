@@ -108,7 +108,7 @@
         name = "tuning";
         nodes.machine = {
           imports = [ self.modules.nixos.desktop-tuning ];
-          # Ten sam kernel co host (z cache lantian, bez kompilacji).
+          # Ten sam kernel co host (ta sama ścieżka w store, bez osobnej kompilacji).
           boot.kernelPackages = hostCfg.boot.kernelPackages;
           virtualisation = {
             memorySize = 2048;

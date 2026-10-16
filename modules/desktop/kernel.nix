@@ -1,10 +1,11 @@
 # Kernel CachyOS (https://github.com/xddxdd/nix-cachyos-kernel, gałąź
 # release): BORE + LTO, wariant x86-64-v3 — wymaga procesora z AVX2
 # (Haswell lub nowszy; i5-13450HX laptopa wspiera v3, nie avx512).
-# overlays.pinned = ten sam nixpkgs, którym Hydra autora buduje kernele, więc
-# kernel przychodzi z cache attic.xuyh0120.win/lantian (nixConfig we
-# flake.nix) zamiast kompilować się lokalnie po każdym bumpie naszego
-# nixpkgs. Strojenie pod ten kernel: desktop/tuning.nix.
+# overlays.pinned buduje kernel nixpkgs-em inputu, więc przebudowuje się
+# tylko po bumpie nix-cachyos-kernel, a nie po każdym bumpie naszego nixpkgs.
+# Żaden cache go nie ma: nowy kernel kompiluje się lokalnie (długo) albo
+# w CI cachyos-kernel-update, które wypycha go do własnego cachix.
+# Strojenie pod ten kernel: desktop/tuning.nix.
 # Sprawdzenie: `uname -r` kończy się na -cachyos.
 { inputs, ... }:
 {
