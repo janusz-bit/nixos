@@ -20,6 +20,26 @@
         "type": "github"
       }
     },
+    "brulion": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792117151,
+        "narHash": "sha256-LGZELycQZrQRef3qSmfUTuukZnZtu8e+UpazTgPLNOI=",
+        "owner": "janusz-bit",
+        "repo": "brulion",
+        "rev": "f61a2a4deb8c5b70c3fb96d44d15765b491bcb4f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "janusz-bit",
+        "repo": "brulion",
+        "type": "github"
+      }
+    },
     "bun2nix": {
       "inputs": {
         "flake-parts": [
@@ -688,6 +708,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "brulion": "brulion",
         "chaotic": "chaotic",
         "disko": "disko",
         "flake-parts": "flake-parts",

@@ -18,6 +18,7 @@
       self.modules.nixos.desktop-obs
       self.modules.nixos.desktop-browsers
       self.modules.nixos.desktop-autostart
+      self.modules.nixos.desktop-brulion
       self.modules.nixos.desktop-dev
       self.modules.nixos.desktop-devenv
       self.modules.nixos.desktop-podman

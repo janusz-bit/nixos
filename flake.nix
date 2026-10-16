@@ -38,6 +38,14 @@
     hermes-agent.url = "github:NousResearch/hermes-agent";
     # Własny nixpkgs celowo — pakiety są w cache.numtide.com tylko dla niego.
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Brulion — notatki w Markdownie (własna aplikacja, nie ma jej w nixpkgs);
+    # flake daje pakiet i moduł programs.brulion (modules/desktop/brulion.nix).
+    # follows: brak własnego cache, a ten sam nixpkgs = to samo Qt co w Plasmie
+    # (wtyczki motywów Qt pasują).
+    brulion = {
+      url = "github:janusz-bit/brulion";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine).
     # Dawniej flake nix-waywallen; teraz pakiet lokalny z oficjalnego AppImage
     # + prebuildu open-wallpaper-engine (modules/packages/_waywallen).
