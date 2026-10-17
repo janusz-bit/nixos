@@ -16,6 +16,17 @@ _: {
       desktopManager.plasma6.enable = true;
     };
 
+    # plasma6 włącza programs.kde-pim (mkDefault), a od nixpkgs 55bfb4d
+    # kmail/kontact/merkuro domyślnie idą za kde-pim.enable i dociągają cały
+    # pakiet PIM (KMail, KOrganizer, Akregator, KAddressBook, Merkuro;
+    # ~110 MiB). Zostaje tylko baza modułu (akonadi, kdepim-runtime,
+    # akonadi-import-wizard).
+    programs.kde-pim = {
+      kmail = false;
+      kontact = false;
+      merkuro = false;
+    };
+
     # Num Lock włączony w sesji Plasmy (0 = włącz). KDE czyta domyślne
     # konfiguracje z XDG_CONFIG_DIRS, czyli /etc/xdg — nie z /etc.
     environment.etc."xdg/kcminputrc".text = ''
