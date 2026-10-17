@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 46 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 47 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 31 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
 
@@ -28,6 +28,7 @@ flowchart LR
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
   host_nixos --> ai_skills[ai-skills]
+  host_nixos --> ai_skills_external[ai-skills-external]
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_claude_notify[nixos-claude-notify]
   base --> base_configuration[base-configuration]
@@ -65,6 +66,7 @@ flowchart LR
 ```
 
 - `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
+- `ai-skills-external` — [skills/external.nix](../../modules/skills/external.nix)
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
 - `base-agenix` — [hosts/base/agenix.nix](../../modules/hosts/base/agenix.nix)
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)

@@ -45,6 +45,14 @@
       url = "github:janusz-bit/brulion";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Paczki skilli agentów (modules/skills/external.nix): wejście, nie pakiet
+    # lokalny, bo nazwy skilli czyta builtins.readDir przy ewaluacji, a na
+    # wyniku fetchFromGitHub byłoby to IFD. Aktualizuje je `nix flake update`
+    # w flake-update.
+    qt-agent-skills = {
+      url = "github:TheQtCompanyRnD/agent-skills";
+      flake = false;
+    };
     # Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine).
     # Dawniej flake nix-waywallen; teraz pakiet lokalny z oficjalnego AppImage
     # + prebuildu open-wallpaper-engine (modules/packages/_waywallen).

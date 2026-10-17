@@ -12,6 +12,9 @@
 # Claude Code: osobna lista `claudeSkills` → /etc/claude-code/.claude/skills,
 # katalog skilli zarządzanych (policy) czytany przez każdego użytkownika hosta
 # w każdym katalogu roboczym — bez Home Managera i bez ~/.claude/skills.
+#
+# Skille z cudzych repozytoriów (wejścia flake'a, aktualizowane przez
+# flake-update, także dla Codexa i opencode): external.nix.
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills =
