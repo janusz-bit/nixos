@@ -45,6 +45,7 @@
             # OweVersion (plugin open-wallpaper-engine) bumpuje się RĘCZNIE w
             # modules/packages/_waywallen/default.nix + `nix hash file`.
             nix-update --system x86_64-linux -F waywallen
+            nix-update --system x86_64-linux -F waywallen-kde-plugin
             nix-update --system aarch64-linux -F waywallen --version skip
 
             echo "Syncing GitHub Actions workflows and docs from the updated flake..."
@@ -55,6 +56,7 @@
               modules/packages/_bootdev-cli/default.nix \
               modules/packages/_helium/default.nix \
               modules/packages/_waywallen/default.nix
+              modules/packages/_waywallen-kde-plugin/default.nix
             if git diff --cached --quiet; then
               echo "Everything is already up to date."
             else
