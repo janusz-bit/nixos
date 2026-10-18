@@ -23,7 +23,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "waywallen-kde-plugin";
-  version = "0.3.3";
+  version = "0.4.2";
 
   src =
     let
@@ -40,7 +40,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       hash =
         {
           aarch64 = "sha256-nccbfL/bByW/zvks0fZBQEkYdCZ8ZBP/YUwPM40iXPw=";
-          x86_64 = "sha256-0SGuTy/KLSZkts1qb1x3GticUwOI3CQVWyRNhzOuBZ4=";
+          x86_64 = "sha256-atexRwiyYG8Xo5mfTpbGNiuAigCwZX98z1X4E2cpgFA=";
         }
         .${zipArch};
     };
