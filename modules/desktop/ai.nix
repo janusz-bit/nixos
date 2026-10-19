@@ -49,11 +49,12 @@
         # trzymać w projekcie uv z kołami torch+CUDA.
         (python3.withPackages (python-pkgs: [ python-pkgs.pip ]))
         # opencode z konfiguracją z overlaya (modules/overlays/opencode.nix)
-        opencode
+        # opencode
         antigravity-ide-fhs
         antigravity-cli
         # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
         inputs.hermes-agent.packages.${system}.desktop
+        inputs.llm-agents.packages.${system}.opencode2
         llama-cpp-cuda
         unsloth-desktop
       ];

@@ -17,7 +17,7 @@
       nixpkgs = {
         config.allowUnfree = true;
         overlays = [
-          self.overlays.opencode-config
+          # self.overlays.opencode-config
           self.overlays.local-packages
         ];
       };
