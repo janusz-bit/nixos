@@ -4,7 +4,9 @@
 #
 # Nowy pakiet: wpis w localPackages (i w flake-update, scripts.nix, jeśli ma
 # się podbijać sam). bootdev-cli nadpisuje wersję z nixpkgs: lokalna jest
-# aktualizowana przez flake-update i bywa nowsza.
+# aktualizowana przez flake-update i bywa nowsza. Kopię pakietu z nixpkgs
+# robi `package-import <atrybut>` (scripts.nix); dopisuje wpis alfabetycznie
+# po wcięciach bloku localPackages, więc jego układ ma zostać taki jak teraz.
 #
 # Sprawdzenie: `nix eval --raw .#packages.x86_64-linux.helium.version`.
 _:

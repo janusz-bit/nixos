@@ -90,6 +90,7 @@
           pkgs.jq
           config.packages.flake-update
           config.packages.flake-release
+          config.packages.package-import
           config.packages.repo-sync
         ];
       };
