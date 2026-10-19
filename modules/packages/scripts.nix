@@ -55,7 +55,7 @@
             git add -A -- flake.lock .github/workflows docs/reference \
               modules/packages/_bootdev-cli/default.nix \
               modules/packages/_helium/default.nix \
-              modules/packages/_waywallen/default.nix
+              modules/packages/_waywallen/default.nix \
               modules/packages/_waywallen-kde-plugin/default.nix
             if git diff --cached --quiet; then
               echo "Everything is already up to date."
