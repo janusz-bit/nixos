@@ -54,6 +54,7 @@
         antigravity-cli
         # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
         inputs.hermes-agent.packages.${system}.desktop
+        llama-cpp
       ];
     };
 }
