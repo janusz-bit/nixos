@@ -32,7 +32,6 @@ in
   "google-api-key.age" = mkSecret allHosts;
   "hermes-env.age" = mkSecret allHosts;
   "opencode.age" = mkSecret allHosts;
-  "open-webui-keys.age" = mkSecret allHosts;
   "llmgateway-api-key.age" = mkSecret allHosts;
   "openrouter-api-key.age" = mkSecret allHosts;
   # Hasło Basic Auth ttyd (nginx) — osobne, NIE hasło admina Nextcloud.

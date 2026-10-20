@@ -3,7 +3,7 @@
 # interfejs, MCP Trilium i mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
 #
 # Granica zaufania: agent czyta treści z sieci, notatek i komunikatorów
-# (Matrix, Open WebUI pod chat.<domena>), więc prompt injection nie może dawać
+# (Matrix), więc prompt injection nie może dawać
 # roota. Konto hermes nie ma sudo, wheel, disk, keys ani trusted-users; pliki
 # z użytkownikiem nixos dzieli przez upstreamowe katalogi stanu 2770 (setgid
 # hermes) + UMask 0007 + chmod g+rw przy aktywacji.
