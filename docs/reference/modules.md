@@ -126,7 +126,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/skills/
 
 - **[skills/default.nix](../../modules/skills/default.nix)** (`ai-skills`) · hosts: `nixos`, `raspberry-pi-4` — Skille agentów AI (format SKILL.md) — zarządzane deklaratywnie. Źródła: modules/skills/\<nazwa-skill>/ → instalowane do /etc/ai-skills. Prime Agent czyta je bez importera: `skills` w settings.json (modules/hosts/base/prime-agent.nix) wymienia /etc/ai-skills i /etc/ai.
-- **[skills/external.nix](../../modules/skills/external.nix)** (`ai-skills-external`) · hosts: `nixos` — Zewnętrzne paczki skilli (format SKILL.md) z wejść flake'a dla agentów kodujących stacji roboczej: Claude Code, Codex, opencode i Prime Agent. Obecnie Qt Development Skills od The Qt Company (wejście qt-agent-skills): pisanie i przegląd kodu Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie QML, dokumentacja, design tokeny z Figmy.
+- **[skills/external.nix](../../modules/skills/external.nix)** (`ai-skills-external`) · hosts: `nixos` — Zewnętrzne paczki skilli (format SKILL.md) z wejść flake'a dla agentów kodujących stacji roboczej: Claude Code, Codex, opencode i Prime Agent, oraz zarządzany /etc/opencode/opencode.json z lokalnym providerem llama.cpp (model Bonsai 2 27B PTQ1_0). Obecnie Qt Development Skills od The Qt Company (wejście qt-agent-skills): pisanie i przegląd kodu Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie QML, dokumentacja, design tokeny z Figmy.
 
 ## modules/templates/
 
