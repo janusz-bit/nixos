@@ -23,10 +23,16 @@
         # Vhosty nginx bez własnego `listen` (Nextcloud z /.well-known Matrixa)
         # słuchają tylko na localhost, skąd bierze je tunel (cloudflared →
         # localhost:80); wcześniej 0.0.0.0:80 chronił jedynie firewall.
-        services.nginx.defaultListenAddresses = [
-          "127.0.0.1"
-          "[::1]"
-        ];
+        services.nginx = {
+          defaultListenAddresses = [
+            "127.0.0.1"
+            "[::1]"
+          ];
+          # Globalne ustawienia nginx dla wszystkich vhostów (wcześniej
+          # włączał je moduł Open WebUI).
+          recommendedProxySettings = true;
+          recommendedGzipSettings = true;
+        };
 
         warnings = lib.optionals (!hasSecret) [
           "rpi-network: brak modules/_secrets/wifi.age w gicie — Wi-Fi nie zostanie skonfigurowane."

@@ -5,7 +5,7 @@
 # niewykonalne (krok 3 weryfikacji z AGENTS.md).
 #
 # Granica zaufania: laptop ma roota na RPi, a RPi jest wystawione do internetu
-# (tunel: Nextcloud, Open WebUI, ttyd, Hermes). Klucz z RPi NIE loguje więc na
+# (tunel: Nextcloud, ttyd, Hermes). Klucz z RPi NIE loguje więc na
 # dinosaura (sekrety agenix, ~/.ssh z kluczem roota RPi, wheel → podsłuch hasła
 # sudo), tylko na osobne konto claude-remote:
 # - własna grupa główna (nie `users`), żadnych grup dodatkowych (wheel, kvm,

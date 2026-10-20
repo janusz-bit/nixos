@@ -7,7 +7,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 47 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 31 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 30 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
 
 ## nixos
@@ -136,7 +136,6 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_gitea[rpi-gitea]
   host_raspberry_pi_4 --> rpi_hermes[rpi-hermes]
   host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
-  host_raspberry_pi_4 --> rpi_open_webui[rpi-open-webui]
   host_raspberry_pi_4 --> rpi_ttyd[rpi-ttyd]
   host_raspberry_pi_4 --> rpi_claude_notify[rpi-claude-notify]
   host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
@@ -176,7 +175,6 @@ flowchart LR
 - `rpi-matrix` — [hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)
 - `rpi-network` — [hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)
 - `rpi-nextcloud` — [hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)
-- `rpi-open-webui` — [hosts/raspberry-pi-4/open-webui.nix](../../modules/hosts/raspberry-pi-4/open-webui.nix)
 - `rpi-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `rpi-resources` — [hosts/raspberry-pi-4/resources.nix](../../modules/hosts/raspberry-pi-4/resources.nix)
 - `rpi-ssh` — [hosts/raspberry-pi-4/ssh.nix](../../modules/hosts/raspberry-pi-4/ssh.nix)

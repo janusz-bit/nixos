@@ -1,9 +1,8 @@
 # Cloudflare Tunnel `raspberry-pi-4`: jedyna droga z internetu do usług RPi
-# (Nextcloud, Open WebUI, Trilium, ttyd, SSH, Gitea, Matrix); nieznane nazwy
-# hostów dostają 404. Mapa (ingress niżej): <domena> → nginx :80 (Nextcloud),
-# chat. → nginx :8080 (Open WebUI :3001), notes. → :8081 (Trilium),
-# ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22, git. → :3000
-# (Gitea), matrix. → :6167 (continuwuity).
+# (Nextcloud, Trilium, ttyd, SSH, Gitea, Matrix); nieznane nazwy hostów
+# dostają 404. Mapa (ingress niżej): <domena> → nginx :80 (Nextcloud),
+# notes. → :8081 (Trilium), ttyd. → nginx :8083 (Basic Auth przed ttyd),
+# ssh. → :22, git. → :3000 (Gitea), matrix. → :6167 (continuwuity).
 #
 # Usługi WWW nie mają portów otwartych w firewallu, a TLS kończy się
 # w Cloudflare. Ruch z tunelu dochodzi do usług z 127.0.0.1/::1, więc adres
@@ -45,14 +44,6 @@
               # large files even under memory pressure.
               "${customTop.site.full}" = {
                 service = "http://localhost:80";
-                originRequest = {
-                  connectTimeout = "300s";
-                  keepAliveConnections = 10;
-                  keepAliveTimeout = "2m";
-                };
-              };
-              "chat.${customTop.site.full}" = {
-                service = "http://localhost:8080";
                 originRequest = {
                   connectTimeout = "300s";
                   keepAliveConnections = 10;
