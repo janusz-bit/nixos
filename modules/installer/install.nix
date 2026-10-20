@@ -108,8 +108,8 @@
                   --no-root-passwd --no-channel-copy --option substituters ""
               ''
             else
-              # accept-flake-config: cache z nixConfig (kernel CachyOS, llm-agents) —
-              # bez nich kernel LTO kompiluje się lokalnie.
+              # accept-flake-config: dodatkowy cache z nixConfig (własny cachix).
+              # Kernel CachyOS i tak kompiluje się lokalnie — żaden cache go nie ma.
               ''
                 nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#${installHost}"} \
                   --no-root-passwd --option accept-flake-config true

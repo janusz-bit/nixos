@@ -64,7 +64,7 @@ Base (every host): bash exec'ing fish, tmux, nix-ld, comma, direnv, Quad9 DNS (`
 - ttyd credentials never on a command line (nginx `auth_basic` with a hash file generated from the agenix secret); ttyd itself is reachable only through nginx (Unix socket `root:nginx 0660`); its password is its own secret, never another service's.
 
 ## Binary caches
-`nixConfig` in `flake.nix` is the only cache list: `janusz-bit.cachix.org`, `cache.numtide.com` (llm-agents). Hosts get the same lists in `nix.settings` through `customTop.nixConfig` (`modules/args.nix` imports `flake.nix`); `customTop.cache.cachix` (own cache: `push`, CI) finds its key there. Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. `devenv.cachix.org` comes from `desktop-devenv` (`modules/desktop/devenv.nix`, part of the `desktop` aggregate) for devenv projects only, deliberately outside `nixConfig`.
+`nixConfig` in `flake.nix` is the only cache list: `janusz-bit.cachix.org`. Hosts get the same lists in `nix.settings` through `customTop.nixConfig` (`modules/args.nix` imports `flake.nix`); `customTop.cache.cachix` (own cache: `push`, CI) finds its key there. Input `nixConfig` is not inherited. When adding a cache, run the first rebuild with `--accept-flake-config`. Packages from `llm-agents` (prime-agent, opencode2, chatgpt) have no cache and build locally. `devenv.cachix.org` comes from `desktop-devenv` (`modules/desktop/devenv.nix`, part of the `desktop` aggregate) for devenv projects only, deliberately outside `nixConfig`.
 
 ## Development workflow
 - Always work inside `nix develop` (installs pre-commit hooks: gitleaks, nixfmt, statix, deadnix, sync-github-actions, sync-docs). Claude Code: start it with the alias `claude-nixos` (`modules/desktop/ai.nix`) = `nix develop -c claude` in `/etc/nixos`; outside the dev shell the `.claude/` hooks silently do nothing.
@@ -142,7 +142,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 
 ### Flake inputs and dependencies
 
-- New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless their binary cache only matches their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`); then say so in a comment next to the input.
+- New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless they are built against their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`); then say so in a comment next to the input.
 - An input with its own binary cache: add the cache to `nixConfig` in `flake.nix` (see **Binary caches**).
 - Adding or removing an input: `nix flake lock` (does not bump other inputs). Updating one input: `nix flake update <input>`. Full updates only through `flake-update`.
 - Every fetcher has a real hash. **NEVER** commit `lib.fakeHash`.

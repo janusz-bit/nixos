@@ -35,7 +35,9 @@
     # because topup.ts introduced a broken @hermes/shared/charge-settlement
     # import in nix/tui.nix; upstream moved on and the pin was lifted.
     hermes-agent.url = "github:NousResearch/hermes-agent";
-    # Własny nixpkgs celowo — pakiety są w cache.numtide.com tylko dla niego.
+    # Własny nixpkgs celowo — pakiety llm-agents są budowane pod niego.
+    # Cache.numtide.com nie jest już używany, więc nowe wersje kompilują się
+    # lokalnie.
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Brulion — notatki w Markdownie (własna aplikacja, nie ma jej w nixpkgs);
     # flake daje pakiet i moduł programs.brulion (modules/desktop/brulion.nix).
@@ -67,12 +69,9 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
-      # llm-agents.nix (prime-agent, dsh, chatgpt)
-      "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
-      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
   };
 
