@@ -162,6 +162,31 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
   i sprawdzić `systemctl status pwm-fan`.
 
+### 8. llama.cpp (fork PrismML) — testy niezgodne z flagami nixpkgs
+
+- **Od:** 2026-10-20.
+- **Plik:** `modules/packages/_llama-cpp-prism/default.nix` (`postPatch` — dwa
+  `substituteInPlace --replace-fail`, `disabledTests`).
+- **Objaw:** przy `GGML_BACKEND_DL=ON` i `BUILD_SHARED_LIBS` (flagi z nixpkgs)
+  `test-dfly-fusion` nie linkuje (`undefined reference to ggml_graph_compute`),
+  `test-kv-mean-center` pada z `no backends are loaded`, `test-llama-archs` na
+  asercie `ggml_is_padded_1d` w grafie qwen35, a `test-generate-models` na
+  `key not found in model: dspark.dspark.block_size`; `test-save-load-state`
+  i testy rollback wymagają fixture'ów pobierających modele z sieci.
+- **Przyczyna:** `test-dfly-fusion` i `test-kv-mean-center` to testy forka:
+  pierwszy używa wewnętrznego `ggml_graph_compute` (mainline bramkuje tak
+  `test-barrier` przez `if (NOT GGML_BACKEND_DL)`), drugi nie woła
+  `llama_backend_init()` — ta sama klasa błędu, którą upstream naprawił
+  w `test-llama-archs` (ggml-org/llama.cpp#30034). Asercja qwen35 i brak
+  metadanych dspark to błędy forka w kodzie grafu/testów. `test-save-load-state`
+  dodano po wersji nixpkgs, dla której pisano `disabledTests`.
+- **Obejście:** `test-dfly-fusion` pod `if (NOT GGML_BACKEND_DL)` (jak
+  mainline), `llama_backend_init()` w `test-kv-mean-center`, reszta w
+  `disabledTests`.
+- **Kiedy usunąć:** gdy fork naprawi te testy — `--replace-fail` padnie wtedy
+  na zmienionym kontekście; sprawdzenie: `nix build .#llama-cpp` z `doCheck`
+  i bez `postPatch`/wyłączeń musi przejść.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

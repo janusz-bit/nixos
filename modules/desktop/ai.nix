@@ -55,7 +55,10 @@
         # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
         inputs.hermes-agent.packages.${system}.desktop
         inputs.llm-agents.packages.${system}.opencode2
-        llama-cpp-cuda
+        # Fork PrismML (formaty Bonsai); stockowy llama-cpp zostaje w drzewie
+        # jako zależność whisper-cpp (kdenlive -> ffmpeg-full). Komentarz
+        # i procedura aktualizacji: modules/packages/_llama-cpp-prism.
+        (llama-cpp-prism.override { cudaSupport = true; })
         unsloth-desktop
       ];
     };

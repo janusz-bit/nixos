@@ -14,6 +14,8 @@ let
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
+    # Fork PrismML (Bonsai) obok stockowego llama-cpp — _llama-cpp-prism/default.nix.
+    llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
     waywallen = pkgs.callPackage ./_waywallen { };
     waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };
   };
