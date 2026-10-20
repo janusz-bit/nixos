@@ -44,7 +44,8 @@
     # follows: brak własnego cache, a ten sam nixpkgs = to samo Qt co w Plasmie
     # (wtyczki motywów Qt pasują).
     brulion = {
-      url = "github:janusz-bit/brulion";
+      # Z gałęzi release, nie z domyślnej — stabilne wydania zamiast rozwoju.
+      url = "github:janusz-bit/brulion?ref=release";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Paczki skilli agentów (modules/skills/external.nix): wejście, nie pakiet
