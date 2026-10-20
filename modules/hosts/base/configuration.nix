@@ -30,7 +30,6 @@
           statix
           cachix
           inputs.agenix.packages.${system}.default
-          inputs.llm-agents.packages.${system}.dsh # DeepSeek agent harness
           nix-update
           tlrc
           fzf
