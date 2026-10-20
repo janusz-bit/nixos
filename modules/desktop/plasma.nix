@@ -27,6 +27,18 @@ _: {
       merkuro = false;
     };
 
+    # baloo_file_extractor jest QGuiApplication, więc abortuje przy starcie bez
+    # działającego WAYLAND_DISPLAY/DISPLAY. kde-baloo.service startuje, zanim
+    # startplasma zaimportuje te zmienne do systemd --user, a baloo_file
+    # przekazuje potomkom własne środowisko (KDE bug 524392). Indeksowanie jest
+    # bezgłowe, więc offscreen usuwa zależność od sesji; KIdleTime nie widzi
+    # wtedy aktywności i Baloo indeksuje wolniej. Usunąć po naprawie upstreamu
+    # (baloo MR 331) — temporary-fixes.md.
+    systemd.user.services.kde-baloo = {
+      overrideStrategy = "asDropin";
+      environment.QT_QPA_PLATFORM = "offscreen";
+    };
+
     # Num Lock włączony w sesji Plasmy (0 = włącz). KDE czyta domyślne
     # konfiguracje z XDG_CONFIG_DIRS, czyli /etc/xdg — nie z /etc.
     environment.etc."xdg/kcminputrc".text = ''

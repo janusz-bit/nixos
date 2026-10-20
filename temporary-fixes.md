@@ -162,7 +162,32 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
   i sprawdzić `systemctl status pwm-fan`.
 
-### 8. llama.cpp (fork PrismML) — testy niezgodne z flagami nixpkgs
+### 8. Baloo — `QT_QPA_PLATFORM=offscreen` dla `kde-baloo.service`
+
+- **Od:** 2026-10-20.
+- **Plik:** `modules/desktop/plasma.nix` (`systemd.user.services.kde-baloo`).
+- **Objaw:** po zalogowaniu `baloo_file_extractor` abortuje (SIGABRT,
+  coredump) z `Failed to create wl_display (No such file or directory)` i
+  `could not connect to display`; `baloo_file` loguje `Extractor crashed`.
+- **Przyczyna:** `kde-baloo.service` startuje z `plasma-workspace.target`,
+  zanim startplasma zaimportuje `WAYLAND_DISPLAY`/`DISPLAY` do
+  `systemd --user`. `baloo_file` ma w `/proc/<pid>/environ` tylko
+  `XDG_SESSION_TYPE=wayland` (bez obu zmiennych), a jego dzieci dziedziczą to
+  środowisko. Qt bierze domyślny socket `wayland-0`, podczas gdy KWin tworzy
+  `wayland-1`; fallback xcb nie ma `DISPLAY`. KDE bug 524392,
+  https://invent.kde.org/frameworks/baloo/-/merge_requests/331 opóźnia start,
+  ale na razie wpada w cykl kolejności jednostek.
+- **Obejście:** drop-in `QT_QPA_PLATFORM=offscreen` — ekstraktor nie potrzebuje
+  okna. Skutek uboczny: `KIdleTime` nie znajduje pollera, więc Baloo uznaje
+  system za zajęty i indeksuje treść wolniej.
+- **Kiedy usunąć:** gdy upstream opóźni start `kde-baloo.service` do czasu
+  importu środowiska (baloo MR 331). Sprawdzenie: usunąć wpis, przebudować,
+  po zalogowaniu `tr '\0' '\n' < /proc/$(pgrep -x baloo_file)/environ` musi
+  zawierać `WAYLAND_DISPLAY` i `DISPLAY`, a
+  `journalctl --user -u kde-baloo.service -b` nie może mieć `Extractor
+  crashed`.
+
+### 9. llama.cpp (fork PrismML) — testy niezgodne z flagami nixpkgs
 
 - **Od:** 2026-10-20.
 - **Plik:** `modules/packages/_llama-cpp-prism/default.nix` (`postPatch` — dwa
