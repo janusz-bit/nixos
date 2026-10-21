@@ -65,8 +65,7 @@
                 reasoning = true;
                 # Czytanie zdjęć: schemat prime-agenta dopuszcza wyłącznie
                 # input ["text","image"] — modalności "video" nie ma w walidatorze
-                # (docs: packages/coding-agent/docs/models.md). Filmy deklaruje
-                # się tylko w opencode (modules/overlays/opencode.nix).
+                # (docs: packages/coding-agent/docs/models.md).
                 input = [
                   "text"
                   "image"

@@ -1,6 +1,6 @@
 # Nix i nixpkgs na każdym hoście: flakes, cache binarne (te same listy co
 # nixConfig we flake.nix), okresowe GC i deduplikacja sklepu, pakiety
-# niewolne i overlaye repo (opencode z konfiguracją, pakiety lokalne).
+# niewolne i overlay repo (pakiety lokalne).
 #
 # nix.settings.trusted-users celowo zostaje domyślne (tylko root) — bez
 # @wheel. Trusted user nixa może importować niepodpisane ścieżki i zmieniać
@@ -17,7 +17,6 @@
       nixpkgs = {
         config.allowUnfree = true;
         overlays = [
-          # self.overlays.opencode-config
           self.overlays.local-packages
         ];
       };

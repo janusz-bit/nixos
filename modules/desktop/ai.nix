@@ -48,8 +48,6 @@
         # akceleratora nie importuje się („You need a GPU”). Fine-tuning
         # trzymać w projekcie uv z kołami torch+CUDA.
         (python3.withPackages (python-pkgs: [ python-pkgs.pip ]))
-        # opencode z konfiguracją z overlaya (modules/overlays/opencode.nix)
-        # opencode
         antigravity-ide-fhs
         antigravity-cli
         # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
