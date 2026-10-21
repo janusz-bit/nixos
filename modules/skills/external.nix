@@ -91,7 +91,7 @@
               };
             };
             limit = {
-              context = 65536;
+              context = 131072;
               output = 16384;
             };
           };
