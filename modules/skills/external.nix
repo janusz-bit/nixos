@@ -1,8 +1,8 @@
 # Zewnętrzne paczki skilli (format SKILL.md) z wejść flake'a dla agentów
 # kodujących stacji roboczej: Claude Code, Codex, opencode i Prime Agent,
 # oraz zarządzany /etc/opencode/opencode.json z lokalnym providerem llama.cpp
-# (model Bonsai 2 27B PTQ1_0) i alias bonsai-serve, który uruchamia jego
-# serwer.
+# (model Bonsai 2 27B PTQ1_0), ten sam provider dla Prime Agenta i alias
+# bonsai-serve, który uruchamia jego serwer.
 # Obecnie Qt Development Skills od The Qt Company (wejście qt-agent-skills):
 # pisanie i przegląd kodu Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie
 # QML, dokumentacja, design tokeny z Figmy.
@@ -26,7 +26,9 @@
 # skilli wpisuje też lokalny model Ternary Bonsai 2 27B: serwer `llama serve`
 # z forka PrismML (modules/packages/_llama-cpp-prism) na 127.0.0.1:8080
 # uruchamia alias `bonsai-serve` w katalogu z plikami .gguf (RTX 5060
-# Laptop, 8 GB VRAM). Flagi aliasu i limity modelu w opencode biorą się
+# Laptop, 8 GB VRAM). Prime Agent dostaje ten sam model przez
+# customBot.primeAgentProviders (models.json składa base/prime-agent.nix).
+# Flagi aliasu i limity modelu w opencode i w Prime Agencie biorą się
 # z jednego zestawu wartości (`bonsai` niżej); pomiary, które uzasadniają
 # flagi, są przy aliasie.
 #
@@ -66,11 +68,12 @@
 
       skills = lib.concatMap skillsIn skillPacks;
 
-      # Wspólne dla aliasu bonsai-serve i providera opencode2, więc -c/-n
-      # serwera nie rozjadą się z limit.context/limit.output. Port jawnie:
+      # Wspólne dla aliasu bonsai-serve i providerów opencode2 i Prime Agenta,
+      # więc -c/-n serwera nie rozjadą się z limitami modelu. Port jawnie:
       # fork zapowiada zmianę domyślnego 8080 na 9931.
       bonsai = {
         model = "Ternary-Bonsai-2-27B-PTQ1_0.gguf";
+        name = "Ternary Bonsai 2 27B PTQ1_0 (local)";
         mmproj = "Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf";
         port = 8080;
         context = 81920;
@@ -93,7 +96,7 @@
           settings.baseURL = "http://127.0.0.1:${toString bonsai.port}/v1";
           models."ternary-bonsai-2-27b" = {
             modelID = bonsai.model;
-            name = "Ternary Bonsai 2 27B PTQ1_0 (local)";
+            inherit (bonsai) name;
             compatibility.reasoningField = "reasoning_content";
             capabilities = {
               tools = true;
@@ -124,6 +127,40 @@
       ];
     in
     {
+      # Ten sam serwer dla Prime Agenta. Poziomy myślenia Prime mapują się na
+      # off/medium/xhigh jak effort w opencode wyżej; "none" wyłącza myślenie
+      # (tools/server/server-common.cpp forka), a null wyłącza poziom (Prime
+      # dobiera najbliższy). Domyślne compat wystarcza: llama.cpp zamienia
+      # rolę developer na system i przyjmuje max_completion_tokens.
+      customBot.primeAgentProviders.llamacpp = {
+        baseUrl = "http://127.0.0.1:${toString bonsai.port}/v1";
+        api = "openai-completions";
+        # Schemat Prime wymaga klucza; serwer bez --api-key go ignoruje.
+        apiKey = "llamacpp";
+        models = [
+          {
+            id = bonsai.model;
+            inherit (bonsai) name;
+            reasoning = true;
+            thinkingLevelMap = {
+              off = "none";
+              minimal = null;
+              low = null;
+              medium = "medium";
+              high = null;
+              xhigh = "xhigh";
+              max = null;
+            };
+            input = [
+              "text"
+              "image"
+            ];
+            contextWindow = bonsai.context;
+            maxTokens = bonsai.output;
+          }
+        ];
+      };
+
       # bonsai-serve uruchamiać w katalogu z plikami .gguf; argumenty z linii
       # poleceń trafiają na koniec. `llama` instaluje desktop-ai. Pomiary na
       # tym laptopie (2026-10-21, b10787, llama serve):

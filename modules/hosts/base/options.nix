@@ -40,6 +40,16 @@ _: {
             trilium-server na 8081, laptop desktopowy Trilium na 37840.
           '';
         };
+        primeAgentProviders = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+          default = { };
+          description = ''
+            Dodatkowi providerzy prime-agenta (providers.<nazwa> w models.json,
+            schemat jak w modules/hosts/base/prime-agent.nix), np. lokalny
+            serwer, który działa tylko na tym hoście. Nazwa zajęta przez
+            providera z prime-agent.nix kończy ewaluację błędem.
+          '';
+        };
       };
     };
 }

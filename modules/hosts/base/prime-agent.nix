@@ -4,16 +4,25 @@
 # Klucz API ollama-cloud: "OLLAMA_API_KEY" to nazwa zmiennej środowiskowej
 # (prime-agent resolve'uje ją przez process.env); wartość pochodzi z agenix
 # (modules/hosts/base/agenix.nix), nigdy nie trafia do /nix/store.
+# Providerzy tylko jednego hosta (np. lokalny llama.cpp na laptopie) przychodzą
+# z customBot.primeAgentProviders.
 { inputs, ... }:
 {
   flake.modules.nixos.base-prime-agent =
-    { config, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       user = config.customBot.defaultUser;
       agentDir = "${config.users.users.${user}.home}/.prime/agent";
 
       modelsJson = builtins.toJSON {
-        providers = {
+        # unionOfDisjoint zamiast `//`: provider hosta o nazwie wspólnej z tymi
+        # niżej kończy ewaluację, zamiast po cichu zastąpić wspólnego.
+        providers = lib.attrsets.unionOfDisjoint config.customBot.primeAgentProviders {
           ollama = {
             baseUrl = "http://localhost:11434/v1";
             api = "openai-completions";

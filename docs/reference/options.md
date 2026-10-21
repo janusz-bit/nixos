@@ -52,6 +52,17 @@ Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr
 - Type: string
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
+### `customBot.primeAgentProviders`
+
+Dodatkowi providerzy prime-agenta (providers.\<nazwa> w models.json,
+schemat jak w modules/hosts/base/prime-agent.nix), np. lokalny
+serwer, który działa tylko na tym hoście. Nazwa zajęta przez
+providera z prime-agent.nix kończy ewaluację błędem.
+
+- Type: attribute set of attribute set of anything
+- Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
 ### `customBot.triliumMcpUrl`
 
 Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
