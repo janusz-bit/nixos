@@ -75,8 +75,8 @@
           package = "@opencode/ai/providers/openai-compatible";
           settings.baseURL = "http://127.0.0.1:8080/v1";
           models."ternary-bonsai-2-27b" = {
-            modelID = "Ternary-Bonsai-2-27B-PQ2_0.gguf";
-            name = "Ternary Bonsai 2 27B PQ2_0 (local)";
+            modelID = "Ternary-Bonsai-2-27B-PTQ1_0.gguf";
+            name = "Ternary Bonsai 2 27B PTQ1_0 (local)";
             compatibility.reasoningField = "reasoning_content";
             capabilities = {
               tools = true;
@@ -91,7 +91,7 @@
               };
             };
             limit = {
-              context = 65536;
+              context = 200000;
               output = 16384;
             };
           };
