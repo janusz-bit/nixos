@@ -26,20 +26,29 @@
 # (modules/packages/_llama-cpp-prism) na 127.0.0.1:8080, uruchamiany ręcznie
 # w katalogu z plikami .gguf (RTX 5060 Laptop, 8 GB VRAM):
 #   llama serve -m Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -c 65536 -np 1 \
-#     -n 16384 -ctk q4_0 -ctv q4_0 \
+#     -n 16384 -ctk q4_0 -ctv q4_0 -ub 256 \
 #     --mmproj Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf --no-mmproj-offload \
 #     --reasoning-effort-allow xhigh,medium,low --cors-origins localhost
-# -c i -n to limit.context i limit.output niżej. K i V w jednym typie: build
-# ma kernele FlashAttention tylko dla par jednakowych, para q8_0/q4_0
-# konwertuje cały KV do f16 przy każdym tokenie (w logu „converting K and V
-# to f16”). Bez GGML_CUDA_ENABLE_UNIFIED_MEMORY: brak VRAM ma wywrócić
-# ładowanie, a nie po cichu stronicować przez PCIe. Projektor wizyjny
-# (600 MiB) liczy na CPU, bo wagi i KV 64K prawie wypełniają VRAM; największe
-# -c, które się mieści, wypisuje `llama-fit-params -m … -ngl 99 -np 1 -ctk
-# q4_0 -ctv q4_0` (bez -c; projektora nie liczy). Szablon czatu przyjmuje
-# tylko effort xhigh/medium/low (inny daje HTTP 500), a domyślne CORS `*`
-# z credentials wpuszcza każdą stronę otwartą w przeglądarce. Sampling
-# (temp 1.0, top-k 20, top-p 0.95) pochodzi z GGUF, --jinja jest domyślne.
+# -c i -n to limit.context i limit.output niżej. Pomiary na tym laptopie
+# (2026-10-21, b10787, llama serve):
+# - Natywne kernele FlashAttention mają tylko pary q4_0/q4_0, q8_0/q8_0
+#   i f16; inne typy KV (także q8_0/q4_0, q4_1, q5_x) konwertują KV do f16
+#   i przy 32K kontekstu generują o 40-48% wolniej. q4_0/q4_0 mieści do 84K
+#   kontekstu, q8_0/q8_0 (prawie bezstratne, KLD ok. 0,0002) do 45K.
+# - GGML_CUDA_ENABLE_UNIFIED_MEMORY ukrywa brak VRAM: nadmiar stronicuje się
+#   przez PCIe (przy 40K 21 zamiast 37 t/s). Bez niej brak VRAM wywraca
+#   serwer, także cuBLAS przy pierwszym żądaniu (ok. 120 MiB ponad start).
+# - -ub 256 daje ten sam prefill co 512 i ok. 100 MiB VRAM mniej.
+# - Projektor na CPU: obraz 1024x1024 w 13,5 s zamiast 0,6 s, ale na GPU
+#   zajmuje ok. 830 MiB, ponad połowę kontekstu.
+# - Największe -c: `llama serve` z tymi flagami bez -c i z -fitt 256 (log
+#   „n_ctx_slot”); samodzielne llama-fit-params rezerwuje logity całego
+#   ubatcha (ok. 485 MiB) i zaniża wynik. -c 81920 sprawdzone (szczyt 7372
+#   MiB przy 64K zajętego kontekstu); wtedy zmienić też limit.context.
+# Szablon czatu przyjmuje tylko effort xhigh/medium/low (inny daje HTTP 500),
+# a domyślne CORS `*` z credentials wpuszcza każdą stronę otwartą
+# w przeglądarce. Sampling (temp 1.0, top-k 20, top-p 0.95) pochodzi z GGUF,
+# --jinja jest domyślne.
 #
 # Tylko laptop (import w hosts/nixos): na RPi `claude` jest też modelem
 # Hermesa (claudeSubscriptionPlugin), a skille zarządzane dostaje każde konto.
