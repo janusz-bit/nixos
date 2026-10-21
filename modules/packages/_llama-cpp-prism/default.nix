@@ -3,9 +3,10 @@
 # Pakiet lokalny, bo w nixpkgs go nie ma, a README forka zabrania mieszania
 # jego bibliotek ggml-* z buildem stockowego llama.cpp. Świadomie nie
 # podmienia atrybutu llama-cpp: whisper-cpp (przez kdenlive i ffmpeg-full)
-# buduje się na nagłówkach llama w wersji 0.6.0, a fork raportuje 0.2.0 —
-# stockowy llama-cpp zostaje jako jego zależność, a host nixos instaluje
-# fork osobno (llama-cpp-prism w modules/desktop/ai.nix).
+# buduje się na nagłówkach llama w wersji 0.6.0, a fork raportuje 0.2.0.
+# Stockowy llama-cpp jest w PATH (desktop/ai.nix), a fork, z tymi samymi
+# nazwami binarek, tylko pod aliasami llama-prism i bonsai-serve
+# (modules/skills/external.nix).
 #
 # Treść to kopia pkgs/by-name/ll/llama-cpp/package.nix z przypiętego nixpkgs
 # (rev fe13242281a67641c0102cdb1087f0ebe586c7df) z podmienionym źródłem:
@@ -15,8 +16,9 @@
 # package.nix z nixpkgs.
 #
 # Sprawdzenie: `nix build .#llama-cpp-prism` (CPU) i `./result/bin/llama-cli
-# --version`; wariant CUDA buduje host nixos (desktop/ai.nix, cudaSupport
-# z hardware.nvidia.enabled), a `llama serve --list-devices` pokazuje CUDA0.
+# --version`; wariant CUDA buduje host nixos (skills/external.nix, cudaSupport
+# z hardware.nvidia.enabled), a `llama-prism serve --list-devices` pokazuje
+# CUDA0.
 # nvidia-offload jest zbędne: CUDA widzi dGPU bez zmiennych PRIME offload.
 {
   lib,

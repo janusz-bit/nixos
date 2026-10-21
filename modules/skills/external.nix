@@ -1,8 +1,9 @@
 # Zewnętrzne paczki skilli (format SKILL.md) z wejść flake'a dla agentów
 # kodujących stacji roboczej: Claude Code, Codex, opencode i Prime Agent,
 # oraz zarządzany /etc/opencode/opencode.json z lokalnym providerem llama.cpp
-# (model Bonsai 2 27B PTQ1_0), ten sam provider dla Prime Agenta i alias
-# bonsai-serve, który uruchamia jego serwer.
+# (model Bonsai 2 27B PTQ1_0), ten sam provider dla Prime Agenta oraz aliasy
+# llama-prism (fork llama.cpp od PrismML) i bonsai-serve, który uruchamia
+# serwer modelu.
 # Obecnie Qt Development Skills od The Qt Company (wejście qt-agent-skills):
 # pisanie i przegląd kodu Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie
 # QML, dokumentacja, design tokeny z Figmy.
@@ -47,8 +48,18 @@
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills-external =
-    { lib, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
+      # Fork PrismML: formaty Bonsai (PTQ1_0), których stockowy llama.cpp
+      # z desktop-ai nie wczytuje. Te same nazwy binarek co stockowy, więc
+      # tylko przez alias llama-prism i bonsai-serve, nie w PATH.
+      llamaCppPrism = pkgs.llama-cpp-prism.override { cudaSupport = config.hardware.nvidia.enabled; };
+
       skillPacks = [
         "${inputs.qt-agent-skills}/skills"
       ];
@@ -161,9 +172,11 @@
         ];
       };
 
+      # llama-prism <polecenie>: wielofunkcyjny `llama` forka (serve, cli,
+      # bench, fit-params, quantize, perplexity); `llama` w PATH to stockowy.
       # bonsai-serve uruchamiać w katalogu z plikami .gguf; argumenty z linii
-      # poleceń trafiają na koniec. `llama` instaluje desktop-ai. Pomiary na
-      # tym laptopie (2026-10-21, b10787, llama serve):
+      # poleceń trafiają na koniec. Pomiary na tym laptopie (2026-10-21,
+      # b10787, llama serve):
       # - Natywne kernele FlashAttention mają tylko pary q4_0/q4_0, q8_0/q8_0
       #   i f16; inne typy KV (także q8_0/q4_0, q4_1, q5_x) konwertują KV do
       #   f16 i przy 32K kontekstu generują o 40-48% wolniej. q4_0/q4_0 mieści
@@ -183,35 +196,38 @@
       # 500), a domyślne CORS `*` z credentials wpuszcza każdą stronę otwartą
       # w przeglądarce. Sampling (temp 1.0, top-k 20, top-p 0.95) pochodzi
       # z GGUF, --jinja jest domyślne.
-      environment.shellAliases.bonsai-serve = lib.escapeShellArgs [
-        "llama"
-        "serve"
-        "-m"
-        bonsai.model
-        "--mmproj"
-        bonsai.mmproj
-        "--no-mmproj-offload"
-        "--port"
-        (toString bonsai.port)
-        "-c"
-        (toString bonsai.context)
-        "-n"
-        (toString bonsai.output)
-        "-np"
-        "1"
-        "-ngl"
-        "99"
-        "-ctk"
-        "q4_0"
-        "-ctv"
-        "q4_0"
-        "-ub"
-        "256"
-        "--reasoning-effort-allow"
-        "xhigh,medium,low"
-        "--cors-origins"
-        "localhost"
-      ];
+      environment.shellAliases = {
+        llama-prism = lib.getExe llamaCppPrism;
+        bonsai-serve = lib.escapeShellArgs [
+          (lib.getExe llamaCppPrism)
+          "serve"
+          "-m"
+          bonsai.model
+          "--mmproj"
+          bonsai.mmproj
+          "--no-mmproj-offload"
+          "--port"
+          (toString bonsai.port)
+          "-c"
+          (toString bonsai.context)
+          "-n"
+          (toString bonsai.output)
+          "-np"
+          "1"
+          "-ngl"
+          "99"
+          "-ctk"
+          "q4_0"
+          "-ctv"
+          "q4_0"
+          "-ub"
+          "256"
+          "--reasoning-effort-allow"
+          "xhigh,medium,low"
+          "--cors-origins"
+          "localhost"
+        ];
+      };
 
       # mkMerge zamiast `//`: ta sama nazwa to dwie definicje jednej opcji,
       # więc kolizja jest błędem, a nie cichym nadpisaniem.

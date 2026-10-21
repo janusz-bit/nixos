@@ -53,10 +53,10 @@
         # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
         inputs.hermes-agent.packages.${system}.desktop
         inputs.llm-agents.packages.${system}.opencode2
-        # Fork PrismML (formaty Bonsai); stockowy llama-cpp zostaje w drzewie
-        # jako zależność whisper-cpp (kdenlive -> ffmpeg-full). Komentarz
-        # i procedura aktualizacji: modules/packages/_llama-cpp-prism.
-        (llama-cpp-prism.override { cudaSupport = config.hardware.nvidia.enabled; })
+        # llama.cpp z nixpkgs (llama, llama-server, ...). Fork PrismML dla
+        # modeli Bonsai ma te same nazwy binarek i bibliotek, więc nie trafia
+        # do PATH, tylko pod alias llama-prism (skills/external.nix).
+        (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
         unsloth-desktop
       ];
     };
