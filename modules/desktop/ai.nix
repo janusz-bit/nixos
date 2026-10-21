@@ -56,7 +56,7 @@
         # Fork PrismML (formaty Bonsai); stockowy llama-cpp zostaje w drzewie
         # jako zależność whisper-cpp (kdenlive -> ffmpeg-full). Komentarz
         # i procedura aktualizacji: modules/packages/_llama-cpp-prism.
-        (llama-cpp-prism.override { cudaSupport = true; })
+        (llama-cpp-prism.override { cudaSupport = config.hardware.nvidia.enabled; })
         unsloth-desktop
       ];
     };

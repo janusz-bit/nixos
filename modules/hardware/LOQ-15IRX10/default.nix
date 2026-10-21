@@ -4,7 +4,7 @@
 #
 # Fakty o GPU są tylko tutaj: moduły desktop-* i gaming-* czytają
 # hardware.nvidia.enabled i hardware.nvidia.prime.* (ollama-cuda, OBS z CUDA,
-# NODEVICE_SELECT w Steamie, zmienne PRIME w GAMEMODERUNEXEC, ICD tylko
+# llama-cpp-prism z CUDA, NODEVICE_SELECT w Steamie, zmienne PRIME w GAMEMODERUNEXEC, ICD tylko
 # Intela w Zedzie), więc stacja bez NVIDII nie dostaje buildów CUDA ani
 # ustawień PRIME. Resztę sprzętu (m.in. moduły initrd) opisuje facter.json
 # obok, wygenerowany przez nixos-facter na tej maszynie. Moduł importuje też
@@ -23,9 +23,9 @@
       ...
     }:
     {
-      # Pakiety CUDA (ollama-cuda, OBS z cudaSupport) nie są w cache.nixos.org
-      # i kompilują się lokalnie — tylko dla tej karty (Blackwell, sm_120)
-      # zamiast dla całej listy architektur.
+      # Pakiety CUDA (ollama-cuda, OBS i llama-cpp-prism z cudaSupport) nie są
+      # w cache.nixos.org i kompilują się lokalnie — tylko dla tej karty
+      # (Blackwell, sm_120) zamiast dla całej listy architektur.
       nixpkgs.config.cudaCapabilities = [ "12.0" ];
 
       # Włącza sterownik NVIDIA także bez serwera X (Wayland).
