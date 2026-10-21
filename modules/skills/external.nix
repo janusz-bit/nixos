@@ -23,8 +23,23 @@
 #
 # Ten moduł jest jedynym właścicielem /etc/opencode/opencode.json, więc obok
 # skilli wpisuje też lokalny model: serwer `llama serve` z forka PrismML
-# (modules/packages/_llama-cpp-prism) na 127.0.0.1:8080, plik
-# Ternary-Bonsai-2-27B-PTQ1_0.gguf, --jinja, --ctx-size 131072 i -n 16384.
+# (modules/packages/_llama-cpp-prism) na 127.0.0.1:8080, uruchamiany ręcznie
+# w katalogu z plikami .gguf (RTX 5060 Laptop, 8 GB VRAM):
+#   llama serve -m Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -c 65536 -np 1 \
+#     -n 16384 -ctk q4_0 -ctv q4_0 \
+#     --mmproj Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf --no-mmproj-offload \
+#     --reasoning-effort-allow xhigh,medium,low --cors-origins localhost
+# -c i -n to limit.context i limit.output niżej. K i V w jednym typie: build
+# ma kernele FlashAttention tylko dla par jednakowych, para q8_0/q4_0
+# konwertuje cały KV do f16 przy każdym tokenie (w logu „converting K and V
+# to f16”). Bez GGML_CUDA_ENABLE_UNIFIED_MEMORY: brak VRAM ma wywrócić
+# ładowanie, a nie po cichu stronicować przez PCIe. Projektor wizyjny
+# (600 MiB) liczy na CPU, bo wagi i KV 64K prawie wypełniają VRAM; największe
+# -c, które się mieści, wypisuje `llama-fit-params -m … -ngl 99 -np 1 -ctk
+# q4_0 -ctv q4_0` (bez -c; projektora nie liczy). Szablon czatu przyjmuje
+# tylko effort xhigh/medium/low (inny daje HTTP 500), a domyślne CORS `*`
+# z credentials wpuszcza każdą stronę otwartą w przeglądarce. Sampling
+# (temp 1.0, top-k 20, top-p 0.95) pochodzi z GGUF, --jinja jest domyślne.
 #
 # Tylko laptop (import w hosts/nixos): na RPi `claude` jest też modelem
 # Hermesa (claudeSubscriptionPlugin), a skille zarządzane dostaje każde konto.
