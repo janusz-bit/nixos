@@ -64,8 +64,10 @@
 
       # Model lokalny dla opencode2. Serwer uruchamia się ręcznie (llama
       # serve w katalogu z plikiem .gguf); opencode2 pokazuje modele z tej
-      # listy także wtedy, gdy serwer nie działa. reasoningField: llama-server
-      # oddaje tok myślenia w reasoning_content. Domyślny effort modelu to xhigh
+      # listy także wtedy, gdy serwer nie działa. Serwer startuje z --mmproj
+      # (projekcja wizyjna), więc model rozumie obrazy: input [text, image].
+      # reasoningField: llama-server oddaje tok myślenia w
+      # reasoning_content. Domyślny effort modelu to xhigh
       # (szablon czatu), medium jest jedynym sensownym skrótem — low wg karty
       # modelu zachowuje się prawie jak xhigh, więc go nie oferujemy.
       opencodeConfig = {
@@ -80,7 +82,10 @@
             compatibility.reasoningField = "reasoning_content";
             capabilities = {
               tools = true;
-              input = [ "text" ];
+              input = [
+                "text"
+                "image"
+              ];
               output = [ "text" ];
               reasoning = {
                 supported = true;
