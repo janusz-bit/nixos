@@ -24,7 +24,7 @@
 # Ten moduł jest jedynym właścicielem /etc/opencode/opencode.json, więc obok
 # skilli wpisuje też lokalny model: serwer `llama serve` z forka PrismML
 # (modules/packages/_llama-cpp-prism) na 127.0.0.1:8080, plik
-# Ternary-Bonsai-2-27B-PTQ1_0.gguf, --jinja, --ctx-size 200000 i -n 16384.
+# Ternary-Bonsai-2-27B-PTQ1_0.gguf, --jinja, --ctx-size 131072 i -n 16384.
 #
 # Tylko laptop (import w hosts/nixos): na RPi `claude` jest też modelem
 # Hermesa (claudeSubscriptionPlugin), a skille zarządzane dostaje każde konto.
@@ -91,7 +91,7 @@
               };
             };
             limit = {
-              context = 200000;
+              context = 131072;
               output = 16384;
             };
           };
