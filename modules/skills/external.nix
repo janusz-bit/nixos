@@ -73,7 +73,7 @@
         model = "Ternary-Bonsai-2-27B-PTQ1_0.gguf";
         mmproj = "Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf";
         port = 8080;
-        context = 65536;
+        context = 81920;
         output = 16384;
       };
 
@@ -140,8 +140,8 @@
       #   zajmuje ok. 830 MiB, ponad połowę kontekstu.
       # - Największe -c: `llama serve` z tymi flagami bez -c i z -fitt 256 (log
       #   „n_ctx_slot”); samodzielne llama-fit-params rezerwuje logity całego
-      #   ubatcha (ok. 485 MiB) i zaniża wynik. Sprawdzone także 81920 (szczyt
-      #   7372 MiB przy 64K zajętego kontekstu).
+      #   ubatcha (ok. 485 MiB) i zaniża wynik. -c 81920 z tymi flagami
+      #   sprawdzone: szczyt 7372 MiB z 8151 przy 64K zajętego kontekstu.
       # Szablon czatu przyjmuje tylko effort xhigh/medium/low (inny daje HTTP
       # 500), a domyślne CORS `*` z credentials wpuszcza każdą stronę otwartą
       # w przeglądarce. Sampling (temp 1.0, top-k 20, top-p 0.95) pochodzi
