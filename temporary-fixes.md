@@ -209,7 +209,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   mainline), `llama_backend_init()` w `test-kv-mean-center`, reszta w
   `disabledTests`.
 - **Kiedy usunąć:** gdy fork naprawi te testy — `--replace-fail` padnie wtedy
-  na zmienionym kontekście; sprawdzenie: `nix build .#llama-cpp` z `doCheck`
+  na zmienionym kontekście; sprawdzenie: `nix build .#llama-cpp-prism` z `doCheck`
   i bez `postPatch`/wyłączeń musi przejść.
 
 ## Zamknięte

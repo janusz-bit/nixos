@@ -15,8 +15,9 @@
 # package.nix z nixpkgs.
 #
 # Sprawdzenie: `nix build .#llama-cpp-prism` (CPU) i `./result/bin/llama-cli
-# --version`; wariant CUDA buduje host nixos (llama-cpp-prism w
-# environment.systemPackages, nvidia-offload llama-server).
+# --version`; wariant CUDA buduje host nixos (desktop/ai.nix, cudaSupport
+# z hardware.nvidia.enabled), a `llama serve --list-devices` pokazuje CUDA0.
+# nvidia-offload jest zbędne: CUDA widzi dGPU bez zmiennych PRIME offload.
 {
   lib,
   buildPackages,
@@ -131,7 +132,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
   # przez `if (NOT GGML_BACKEND_DL)`), a test-kv-mean-center tworzy model bez
   # załadowania backendów (ta sama klasa błędu, którą upstream naprawił w
   # test-llama-archs: ggml-org/llama.cpp#30034). Oba do usunięcia razem z
-  # --replace-fail, gdy fork je naprawi (temporary-fixes.md, wpis 8).
+  # --replace-fail, gdy fork je naprawi (temporary-fixes.md, wpis 9).
   postPatch = ''
     substituteInPlace tests/CMakeLists.txt \
       --replace-fail ${lib.escapeShellArg "    llama_build_and_test(test-dfly-fusion.cpp)\n"} \
