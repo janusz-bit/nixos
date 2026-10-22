@@ -43,10 +43,16 @@
 #      daje mu co najwyżej jego własne uprawnienia,
 #   2. tryb kontenerowy jest wyłączony asercją — jego aktywacji (dowiązania
 #      w katalogach domowych hostUsers jako root) nikt tu nie przeglądał,
-#   3. moduleCommon.nix z inputu (ścieżka absolutna zamiast ./).
+#   3. moduleCommon.nix z inputu (ścieżka absolutna zamiast ./),
+#   4. HERMES_HOME (stateDir/.hermes) ma tryb 2750 zamiast 2770 (tmpfiles
+#      i aktywacja). Bramka upstreamu (hermes_cli/gateway_runtime_discovery.py,
+#      home_mode_unsafe) odrzuca HERMES_HOME zapisywalny dla grupy, która ma
+#      innych członków (u nas nixos), i zadania cron w trybie agenta padają
+#      z unsafe_control_permissions. stateDir, workingDirectory i podkatalogi
+#      stateSubdirs zostają 2770.
 # Synchronizacja po `nix flake update hermes-agent`: diff upstreamowego
 # nix/nixosModules.nix między starym a nowym commitem nałożyć na ten plik,
-# zachowując zmiany 1–3 (porównywać z upstreamem przepuszczonym przez nixfmt
+# zachowując zmiany 1–4 (porównywać z upstreamem przepuszczonym przez nixfmt
 # z devShella — inna wersja nixfmt zmienia wcięcia), potem podbić commit
 # w pierwszym zdaniu powyżej. Test: checks.<system>.hermes-activation.
 # Usunąć kopię, gdy upstream przestanie pisać jako root w stateDir
@@ -459,7 +465,8 @@
           {
             systemd.tmpfiles.rules = [
               "d ${cfg.stateDir}                2770 ${cfg.user} ${cfg.group} - -"
-              "d ${hermesHome}                  2770 ${cfg.user} ${cfg.group} - -"
+              # janusz-bit: (4) 2750 zamiast 2770 (powód w nagłówku)
+              "d ${hermesHome}                  2750 ${cfg.user} ${cfg.group} - -"
               "d ${cfg.stateDir}/home           0750 ${cfg.user} ${cfg.group} - -"
               "d ${cfg.workingDirectory}        2770 ${cfg.user} ${cfg.group} - -"
             ]
@@ -503,7 +510,9 @@
                   for _dir in ${hermesHome} ${cfg.stateDir}/home ${cfg.workingDirectory}; do
                     own_dir "$_dir"
                   done
-                  chmod 2770 ${hermesHome} ${cfg.workingDirectory}
+                  # janusz-bit: (4) HERMES_HOME bez zapisu grupy
+                  chmod 2750 ${hermesHome}
+                  chmod 2770 ${cfg.workingDirectory}
                   chmod 0750 ${cfg.stateDir}/home
 
                   # Wpisy HERMES_HOME innych właścicieli (dawne uruchomienia CLI

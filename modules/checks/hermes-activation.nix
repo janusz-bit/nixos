@@ -73,6 +73,7 @@
               machine.succeed(f"grep -qx TEST_SECRET=s3cret {home}/.env")
               machine.succeed(f"test -L {home}/plugins/nix-managed-stub-plugin")
               assert owner_mode("/var/lib/hermes") == "hermes:hermes 2770"
+              assert owner_mode(home) == "hermes:hermes 2750", owner_mode(home)
 
           with subtest("foreign-owned entries are taken over without root"):
               assert owner_mode(f"{home}/.hermes_history").startswith("hermes:hermes"), owner_mode(f"{home}/.hermes_history")

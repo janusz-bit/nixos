@@ -6,6 +6,9 @@
 # injection nie może dawać roota. Konto hermes nie ma sudo, wheel, disk, keys
 # ani trusted-users; pliki z użytkownikiem nixos dzieli przez upstreamowe
 # katalogi stanu 2770 (setgid hermes) + UMask 0007 + chmod g+rw przy aktywacji.
+# Sam HERMES_HOME ma 2750: nixos czyta go i pisze w jego podkatalogach, ale nie
+# zakłada w nim wpisów (bramka odrzuca HERMES_HOME zapisywalny dla grupy
+# z innymi członkami).
 # - Aktywacja pisze w /var/lib/hermes wyłącznie jako hermes (setpriv), nigdy
 #   jako root: moduł to kopia upstreamu z _hermes-agent/ (zmiany w jej
 #   nagłówku, temporary-fixes.md nr 2). Wpisy HERMES_HOME innych kont przejmuje
@@ -241,7 +244,8 @@
         ollama.enable = true;
       };
 
-      # Użytkownik w grupie hermes dzieli pliki agenta (katalogi stanu 2770).
+      # Użytkownik w grupie hermes dzieli pliki agenta (katalogi stanu 2770,
+      # HERMES_HOME 2750).
       users.users = {
         ${config.customBot.defaultUser}.extraGroups = [ cfg.group ];
         ${cfg.user}.extraGroups = [ "systemd-journal" ];

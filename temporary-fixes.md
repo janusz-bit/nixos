@@ -235,6 +235,26 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   ≥ 1791856909 (2026-10-13), potem usunąć overlay i `nix build` toplevelu
   `nixos` musi przejść.
 
+### 11. hermes-agent — HERMES_HOME 2750 zamiast 2770
+
+- **Od:** 2026-10-22.
+- **Plik:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
+  (zmiana 4 w nagłówku: reguła tmpfiles i `chmod` w aktywacji), test
+  `checks.<system>.hermes-activation`.
+- **Objaw:** od 2026-10-21 zadania cron w trybie agenta kończą się
+  `GatewayUnavailableError: Gateway inaccessible: unsafe_control_permissions
+  (/var/lib/hermes/.hermes has mode 2770, writable by another user …)`.
+- **Przyczyna:** upstreamowy moduł NixOS (`nix/nixosModules.nix`) ustawia
+  HERMES_HOME na 2770, a upstreamowa bramka
+  (`hermes_cli/gateway_runtime_discovery.py`, `home_mode_unsafe`) odrzuca
+  HERMES_HOME zapisywalny dla grupy, gdy grupa nie jest prywatną grupą
+  właściciela. Grupa `hermes` ma członka `nixos`.
+- **Obejście:** HERMES_HOME 2750 (setgid zostaje); `stateDir`,
+  `workingDirectory` i podkatalogi `stateSubdirs` nadal 2770.
+- **Kiedy usunąć:** gdy upstream poprawi moduł (HERMES_HOME bez zapisu grupy)
+  albo test `home_mode_unsafe` (zaakceptuje grupę współdzieloną); wtedy usunąć
+  zmianę 4 z kopii modułu.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte
