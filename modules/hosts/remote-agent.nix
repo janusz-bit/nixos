@@ -1,15 +1,14 @@
-# Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos).
-#
-# Po co: ewaluacja i buildy x86_64 na laptopie. Na RPi ewaluacja hosta nixos
-# trwa minuty, a `nixos-rebuild build .#nixos` + diff-closures są tam
-# niewykonalne (krok 3 weryfikacji z AGENTS.md).
+# Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos): konto
+# claude-remote na laptopie, a na RPi `ssh laptop` i `laptop-run` do ewaluacji
+# i buildów x86_64 (krok 3 weryfikacji z AGENTS.md), które na RPi trwają
+# minuty albo są niewykonalne.
 #
 # Granica zaufania: laptop ma roota na RPi, a RPi jest wystawione do internetu
-# (tunel: Nextcloud, ttyd, Hermes). Klucz z RPi NIE loguje więc na
-# dinosaura (sekrety agenix, ~/.ssh z kluczem roota RPi, wheel → podsłuch hasła
-# sudo), tylko na osobne konto claude-remote:
+# (tunel: Nextcloud, ttyd, Hermes). Klucz z RPi NIE loguje więc na konto
+# główne laptopa (sekrety agenix, ~/.ssh z kluczem roota RPi, wheel → podsłuch
+# hasła sudo), tylko na osobne konto claude-remote:
 # - własna grupa główna (nie `users`), żadnych grup dodatkowych (wheel, kvm,
-#   systemd-journal), brak sekretów agenix; home 0700 (dinosaura też 0700);
+#   systemd-journal), brak sekretów agenix; home 0700, jak konta głównego;
 # - authorized_keys z `from=<LAN>` i `restrict` (bez przekierowań portów,
 #   agenta, X11 i pty) — laptop nie staje się przyczółkiem do dalszej sieci;
 # - trusted-users bez zmian, dlatego nie nix.buildMachines (zdalny builder
@@ -18,9 +17,8 @@
 # Ryzyko resztkowe: zwykłe konto lokalne widzi usługi na localhost (ollama
 # :11434 bez autoryzacji) i może obciążyć CPU/dysk.
 #
-# RPi (rpi-remote-agent): `Host laptop` w ssh_config z przypiętym kluczem hosta
-# i skrypt `laptop-run`. Działa tylko, gdy laptop jest włączony i w domowym
-# LAN-ie. fail2ban laptopa nie ignoruje LAN-u: 5 nieudanych logowań banuje RPi.
+# Działa tylko przy włączonym laptopie w domowym LAN-ie; fail2ban laptopa nie
+# ignoruje LAN-u (base/fail2ban.nix), więc 5 nieudanych logowań banuje RPi.
 { customTop, ... }:
 let
   inherit (customTop) keys;
@@ -45,25 +43,22 @@ in
         groups.${user} = { };
       };
 
-      # createHome zakłada katalog w aktywacji, a aktywacja przy starcie
-      # (`update-local-boot` + reboot) biegnie przed zamontowaniem podwolumenu
-      # /home — katalog ląduje wtedy pod punktem montowania i znika z widoku.
-      # tmpfiles działa po local-fs.target. Bezpieczne: /home to root:root 0755,
-      # więc claude-remote nie podmieni tej ścieżki na symlink.
+      # createHome działa w aktywacji, a ta przy starcie (`update-local-boot`
+      # + reboot) biegnie przed zamontowaniem /home, więc katalog ląduje pod
+      # punktem montowania; tmpfiles działa po local-fs.target. /home to
+      # root:root 0755: claude-remote nie podmieni tej ścieżki na symlink.
       systemd.tmpfiles.rules = [ "d ${home} ${homeMode} ${user} ${user} - -" ];
     };
 
   flake.modules.nixos.rpi-remote-agent =
     { config, pkgs, ... }:
     let
-      # laptop-run [CMD...] — uruchamia CMD na laptopie w migawce bieżącego
-      # repo (~/work/<repo> konta claude-remote); bez CMD tylko synchronizuje.
-      # Migawka = to, co widzi lokalny flake: pliki śledzone z niezacommitowanymi
-      # zmianami + nowe pliki dodane do indeksu (nieśledzonych brak). Powstaje
-      # jako drzewo na tymczasowym indeksie (HEAD i indeks repo bez zmian) i
-      # jedzie jako `git archive` przez ssh; na laptopie `git add -A`, więc
-      # tamtejszy flake (repo bez commitów) widzi dokładnie te same pliki.
-      # Bez `git push` — żadnego przepisywania refów.
+      # laptop-run [CMD...]: CMD na laptopie w migawce bieżącego repo
+      # (~/work/<repo>); bez CMD tylko synchronizacja. Migawka = to, co widzi
+      # lokalny flake (śledzone pliki ze zmianami i nowe dodane do indeksu),
+      # zbudowana na tymczasowym indeksie, więc HEAD i indeks repo zostają bez
+      # zmian; na laptopie `git add -A`, żeby tamtejszy flake widział te same
+      # pliki. Bez `git push`: żadnego przepisywania refów.
       laptop-run = pkgs.writeShellApplication {
         name = "laptop-run";
         # SC2029: komendy dla ssh są celowo składane lokalnie (argumenty przez %q).

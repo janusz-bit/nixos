@@ -2,10 +2,6 @@
 # thermald, power-profiles-daemon (profile zasilania w Plasmie przez
 # platform_profile), progi baterii upower i tryb ochrony baterii przy starcie.
 #
-# Tryb ochrony baterii (conservation_mode sterownika ideapad_acpi, ładowanie
-# do 80%) domyślnie włącza reguła tmpfiles przy starcie systemu; `-` w `w-`:
-# nieudany zapis nie kończy systemd-tmpfiles błędem.
-#
 # Sprawdzenie: `cat /sys/bus/platform/drivers/ideapad_acpi/*/conservation_mode`
 # (1), `powerprofilesctl list`, `upower -d`.
 _: {
@@ -23,6 +19,8 @@ _: {
       };
     };
 
+    # Tryb ochrony baterii (ładowanie do 80%); `w-`: nieudany zapis nie kończy
+    # systemd-tmpfiles błędem.
     systemd.tmpfiles.rules = [
       "w- /sys/bus/platform/drivers/ideapad_acpi/*/conservation_mode - - - - 1"
     ];

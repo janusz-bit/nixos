@@ -2,7 +2,7 @@
 # (hosty z rejestru, moduły każdego hosta, diagram), modules.md (katalog
 # wszystkich modułów z opisem z nagłówka) i options.md (opcje customBot
 # i rejestru hostów). Opis modułu to pierwszy akapit komentarza na początku
-# pliku — dlatego każdy niebanalny moduł zaczyna się nagłówkiem.
+# pliku.
 #
 # Generator czyta tylko źródła modułów (readFile + wyrażenia regularne na
 # flake.modules.nixos.<nazwa> i self.modules.nixos.<nazwa>), dane rejestru
@@ -10,8 +10,8 @@
 # RPi i działa w hooku pre-commit. Asercja pilnuje, żeby znalezione eksporty
 # były dokładnie flake.modules.nixos (nic nie ginie po cichu).
 #
-# Odświeżanie: hook pre-commit sync-docs (modules/default.nix); nieaktualne
-# docs/reference oblewa CI lint. Ręcznie: nix run .#sync-docs
+# Odświeżanie: hook sync-docs albo `nix run .#sync-docs` (nieaktualne
+# docs/reference oblewa CI lint).
 {
   config,
   lib,
@@ -23,18 +23,12 @@ let
   rel = file: "modules" + lib.removePrefix (toString root) (toString file);
 
   # Te same pliki co import-tree we flake.nix: każdy .nix bez segmentu `_`.
-  files = lib.filter (
-    file:
-    lib.hasSuffix ".nix" (toString file)
-    && !lib.hasInfix "/_" (lib.removePrefix (toString root) (toString file))
-  ) (lib.filesystem.listFilesRecursive root);
+  files = lib.filter (file: lib.hasSuffix ".nix" (toString file) && !lib.hasInfix "/_" (rel file)) (
+    lib.filesystem.listFilesRecursive root
+  );
 
   takeWhile =
-    pred: list:
-    if list == [ ] || !pred (lib.head list) then
-      [ ]
-    else
-      [ (lib.head list) ] ++ takeWhile pred (lib.tail list);
+    pred: list: lib.take (lib.lists.findFirstIndex (x: !pred x) (lib.length list) list) list;
   matches =
     regex: text: map builtins.head (builtins.filter builtins.isList (builtins.split regex text));
 
@@ -168,12 +162,14 @@ let
           let
             hosts = lib.unique (lib.concatMap hostsOf source.exports);
           in
-          "- **${link source.path}**"
-          +
-            lib.optionalString (source.exports != [ ])
+          lib.concatStrings [
+            "- **${link source.path}**"
+            (lib.optionalString (source.exports != [ ])
               " (${lib.concatMapStringsSep ", " code source.exports})"
-          + lib.optionalString (hosts != [ ]) " · hosts: ${lib.concatMapStringsSep ", " code hosts}"
-          + " — ${describe source.summary}\n"
+            )
+            (lib.optionalString (hosts != [ ]) " · hosts: ${lib.concatMapStringsSep ", " code hosts}")
+            " — ${describe source.summary}\n"
+          ]
         ) grouped
       )
     ) (lib.groupBy (source: group source.path) checkedSources)

@@ -6,7 +6,6 @@
   flake.modules.nixos.base-configuration =
     { lib, pkgs, ... }:
     let
-      inherit (pkgs.stdenv.hostPlatform) system;
       editor = "micro";
     in
     {
@@ -29,7 +28,7 @@
           uv
           statix
           cachix
-          inputs.agenix.packages.${system}.default
+          inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
           nix-update
           tlrc
           fzf
@@ -53,9 +52,9 @@
         direnv.enable = true;
       };
 
-      # The ZFS module is pulled in by default by nixpkgs even when ZFS
-      # is not in use. Explicitly disable forceImportRoot to silence the
-      # 26.11 evaluation warning and reduce the risk of data loss.
+      # Moduł ZFS jest w nixpkgs importowany zawsze, a przy stateVersion < 26.11
+      # domyślne true daje ostrzeżenie ewaluacji (wymuszony import puli omija
+      # zabezpieczenia ZFS).
       boot.zfs.forceImportRoot = false;
     };
 }

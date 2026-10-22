@@ -1,24 +1,21 @@
-# Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.<nazwa>,
-# workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji)
-# i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa
-# konfiguracji = networking.hostName = cel aliasów update/push
-# (customBot.flakeTarget). Ustawia je rejestr; host może je powtórzyć
-# (obraz SD składa moduł hosta poza rejestrem), ale inna wartość to błąd
-# ewaluacji. Na nazwie hosta opiera się m.in. post-install (wpisy keys.nix)
-# i nixos-rebuild bez `#<host>`.
+# Rejestr hostów: z niego powstają nixosConfigurations.<nazwa>, workflowy CI
+# (github-actions.nix) i strony docs/reference/ (docs.nix). Host deklaruje
+# się w modules/hosts/<nazwa>/default.nix; procedura nowego hosta: README.md.
 #
-# Host deklaruje się w modules/hosts/<nazwa>/default.nix:
-#   hosts.<nazwa> = { system = "x86_64-linux"; modules = [ … ]; };
-# Procedura nowego hosta (sprzęt, dysk, klucze, sekrety): README.md.
+# Rejestr ustawia: nazwa hosta = nazwa konfiguracji = networking.hostName =
+# customBot.flakeTarget (cel aliasów update/push); host, który ustawi inną
+# wartość, kończy ewaluację błędem (conflicting definition values). Polegają
+# na tym post-install (wpisy keys.nix) i nixos-rebuild bez `#<host>`. Obraz
+# SD (sd-image.nix) składa moduł hosta poza rejestrem, więc ustawia te
+# wartości sam.
 #
 # Pułapki ewaluacji:
-# - `modules` to lista surowych wartości (types.raw), nie deferredModule.
-#   deferredModule opakowuje każdą definicję w dodatkowe poziomy importów,
-#   a system modułów scala listy (systemPackages, overlays, reguły udev)
-#   według głębokości importu — zmieniłaby się kolejność, a z nią toplevel.
-# - Nazwy atrybutów (hosty, workflowy) zależą wyłącznie od danych rejestru,
-#   nigdy od ewaluacji konfiguracji NixOS: `nix flake show` i generowanie CI
-#   nie ewaluują hostów.
+# - `modules` to types.raw, nie deferredModule: ten opakowuje każdą definicję
+#   w dodatkowe poziomy importów, a system modułów scala listy (systemPackages,
+#   overlays, reguły udev) według głębokości importu — zmieniłaby się
+#   kolejność, a z nią toplevel.
+# - Nazwy atrybutów (hosty, workflowy) zależą tylko od danych rejestru, nie od
+#   ewaluacji NixOS: `nix flake show` i generowanie CI nie ewaluują hostów.
 # - self.modules.nixos.* wolno używać w `modules` (leniwie, dopiero w
 #   nixosSystem), ale nie w `imports` modułu flake-parts — tam to
 #   nieskończona rekurencja.

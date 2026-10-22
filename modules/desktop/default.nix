@@ -1,11 +1,9 @@
-# Stacja robocza: wszystkie moduły desktop-* naraz (sesja Plasma 6, dźwięk,
-# łączność, polski układ, druk, kernel CachyOS ze strojeniem, aplikacje,
-# przeglądarki, narzędzia programistyczne i AI). Moduły zależne od GPU
-# (OBS, Ollama, Zed) dopasowują się do hardware.nvidia z modułu sprzętu.
-# Host bez części z nich importuje pojedyncze desktop-* zamiast agregatu.
+# Stacja robocza: wszystkie moduły desktop-* naraz. Moduły zależne od GPU (OBS,
+# Ollama, llama.cpp, Zed) idą za hardware.nvidia z modułu sprzętu; host bez
+# części funkcji importuje pojedyncze desktop-* zamiast agregatu.
 { self, ... }:
 {
-  flake.modules.nixos.desktop = {
+  flake.modules.nixos.desktop = _: {
     imports = [
       self.modules.nixos.desktop-plasma
       self.modules.nixos.desktop-audio

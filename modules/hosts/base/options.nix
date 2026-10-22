@@ -1,21 +1,19 @@
-# Opcje customBot: ustawienia zależne od hosta z wartościami domyślnymi
-# (cel aliasów update/push, fastfetch w powitaniu fish, główny użytkownik,
-# endpoint MCP Trilium); host nadpisuje je w swoim default.nix.
-#
-# To opcje NixOS (`config.customBot.*`), bo różnią się między hostami;
-# stałe wspólne dla całego repo są w customTop (modules/args.nix).
-# flakeTarget (bez domyślnej) ustawia rejestr hostów; raspberry-pi-4 powtarza
-# go u siebie tylko dla obrazu SD, składanego poza rejestrem. Opisy opcji
-# trafiają do generowanego docs/reference/options.md.
+# Opcje customBot: ustawienia zależne od hosta (cel aliasów update/push,
+# fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium,
+# dodatkowi providerzy Prime Agenta, skille agentów kodujących). flakeTarget
+# (bez wartości domyślnej) ustawia rejestr hostów i sd-image.nix,
+# primeAgentProviders i agentSkills moduły skilli (modules/skills/), a resztę
+# host nadpisuje w swoim default.nix.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
-_: {
+{ customTop, ... }:
+{
   flake.modules.nixos.base-options =
     { lib, ... }:
     {
       options.customBot = {
-        # Bez wartości domyślnej: dawne "default" (= laptop) dawało hostowi,
-        # który zapomniał tej opcji, aliasy wdrażające system laptopa.
+        # Bez domyślnej: konfiguracja spoza rejestru, która jej nie ustawi,
+        # kończy ewaluację błędem zamiast dostać aliasy wdrażające inny host.
         flakeTarget = lib.mkOption {
           type = lib.types.str;
           description = "Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr hostów (modules/hosts/registry.nix).";
@@ -27,7 +25,7 @@ _: {
         };
         defaultUser = lib.mkOption {
           type = lib.types.str;
-          default = "nixos";
+          default = customTop.users.default;
           description = "Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).";
         };
         triliumMcpUrl = lib.mkOption {

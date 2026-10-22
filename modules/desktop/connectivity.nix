@@ -16,10 +16,8 @@ _: {
     hardware = {
       bluetooth.enable = true;
       enableAllFirmware = true;
-      wirelessRegulatoryDatabase = true;
-      # facter domyślnie ustawia useDHCP na wykrytych interfejsach, co włącza
-      # dhcpcd obok NetworkManagera (dwa klienty DHCP na enp8s0: zdublowane
-      # trasy domyślne, konflikt DHCPv6). Adresy daje wyłącznie NetworkManager.
+      # facter włącza useDHCP na wykrytych interfejsach, czyli dhcpcd obok
+      # NetworkManagera (zdublowane trasy domyślne, konflikt DHCPv6).
       facter.detected.dhcp.enable = false;
     };
   };

@@ -1,7 +1,6 @@
 # Wentylator Waveshare PWM na GPIO 14 (BCM, fizyczny pin 8) Raspberry Pi 4:
-# usługa pwm-fan co 5 s czyta temperaturę SoC (thermal_zone0) i ustawia
-# wypełnienie 0% poniżej 48 °C, 50% od 48 °C i 100% od 60 °C; bez odczytu
-# temperatury 100% (program: _fan/pwm_fan.py).
+# usługa pwm-fan steruje nim według temperatury SoC, a bez jej odczytu
+# daje 100% (progi: _fan/pwm_fan.py).
 #
 # Biblioteka rpi-lgpio (zgodna z RPi.GPIO, działa przez /dev/gpiochip0):
 # samo RPi.GPIO pada na nowszych kernelach (brak pola Hardware w
@@ -21,11 +20,9 @@ _: {
       systemd.services.pwm-fan = {
         description = "Waveshare PWM Fan Control";
         wantedBy = [ "multi-user.target" ];
-        environment = {
-          # rpi-lgpio nie wykrywa rewizji płytki: w device tree tego kernela
-          # brakuje węzła system/ (temporary-fixes.md).
-          RPI_LGPIO_REVISION = "0xc03114"; # RPi4B Rev 1.4
-        };
+        # rpi-lgpio nie wykrywa rewizji płytki: w device tree tego kernela
+        # brakuje węzła system/ (temporary-fixes.md nr 7).
+        environment.RPI_LGPIO_REVISION = "0xc03114"; # RPi4B Rev 1.4
         serviceConfig = {
           ExecStart = "${python.interpreter} ${./_fan/pwm_fan.py}";
           Restart = "always";

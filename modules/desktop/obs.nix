@@ -1,8 +1,7 @@
 # OBS Studio z wtyczkami (przechwytywanie Wayland/PipeWire/Vulkan, usuwanie
-# tła). Z NVIDIĄ (hardware.nvidia.enabled) wariant z CUDA: koder NVENC i
-# akceleracja usuwania tła. Pakiety CUDA nie są w cache.nixos.org i budują
-# się lokalnie (cudaCapabilities ustawia moduł sprzętu), więc bez NVIDII
-# zostaje zwykły pakiet z cache.
+# tła). Z NVIDIĄ wariant CUDA (koder NVENC, akceleracja usuwania tła); bez niej
+# zwykły pakiet, bo pakietów CUDA nie ma w cache.nixos.org i budują się lokalnie
+# (cudaCapabilities ustawia moduł sprzętu).
 _: {
   flake.modules.nixos.desktop-obs =
     {

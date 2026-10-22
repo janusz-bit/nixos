@@ -1,19 +1,11 @@
 # Plugin tapety Waywallen dla KDE Plasma 6 — oficjalny wariant "embed"
-# z release waywallen-display.
+# z release waywallen-display: moduł QML (WaywallenDisplayEmbed/*.so) jest
+# wbudowany w kpackage, więc nie wymaga Waywallen.Display w systemie.
 #
-# "-embed" = moduł QML (WaywallenDisplayEmbed/*.so) skompilowany i
-# wbudowany w kpackage, więc jest samowystarczalny: nie wymaga
-# Waywallen.Display instalowanego systemowo.
-#
-# Dlaczego nie waywallen-kde z flake'a nix-waywallen: ich pakiet kopiuje
-# surowe drzewo źródłowe, w którym contents/ui/Plugin/qmldir deklaruje
-# QML, których tam nie ma (siedzą w Wrapper/) — plasmashell rzuca
-# "Type P.PluginDisplay unavailable", a daemon widzi 0 pulpitów
-# ("No displays registered").
-#
-# Podpisane hashem binarki z oficjalnego releasu
-# (fetchurl), nie budują się ze źródeł. Fix reconnect backoffu
-# ("plasma empty displays on login") jest dopiero od v0.3.3.
+# Nie waywallen-kde z flake'a nix-waywallen: ich pakiet kopiuje surowe drzewo
+# źródłowe, w którym contents/ui/Plugin/qmldir deklaruje QML z Wrapper/ —
+# plasmashell rzuca "Type P.PluginDisplay unavailable", a daemon widzi
+# 0 pulpitów ("No displays registered").
 {
   lib,
   stdenvNoCC,
@@ -27,22 +19,16 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src =
     let
-      zipArch =
-        {
-          aarch64-linux = "aarch64";
-          x86_64-linux = "x86_64";
-        }
-        .${stdenvNoCC.hostPlatform.system}
-          or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
+      arch = stdenvNoCC.hostPlatform.parsed.cpu.name;
     in
     fetchurl {
-      url = "https://github.com/waywallen/waywallen-display/releases/download/v${finalAttrs.version}/waywallen-kde-${finalAttrs.version}-${zipArch}-embed.zip";
+      url = "https://github.com/waywallen/waywallen-display/releases/download/v${finalAttrs.version}/waywallen-kde-${finalAttrs.version}-${arch}-embed.zip";
       hash =
         {
           aarch64 = "sha256-nccbfL/bByW/zvks0fZBQEkYdCZ8ZBP/YUwPM40iXPw=";
           x86_64 = "sha256-3Vu5k04sD7Dq0UlgVxzT+4S2bb3jJmzvgeSrfqjlHts=";
         }
-        .${zipArch};
+        .${arch};
     };
 
   dontConfigure = true;

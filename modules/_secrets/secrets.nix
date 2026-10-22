@@ -1,9 +1,5 @@
 # Reguły agenix CLI (agenix -e / -r). Plik może zawierać WYŁĄCZNIE wpisy
 # "<plik>.age" — klucze publiczne są w keys.nix.
-#
-# Odbiorca droid-android (stara maszyna AVF, root@debian) został usunięty.
-# Pliki .age zaszyfrowane jeszcze dla niego trzeba przeszyfrować:
-#   cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519
 let
   keys = import ./keys.nix;
   inherit (keys.hosts) nixos raspberry-pi-4;
@@ -42,13 +38,11 @@ in
   # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
   # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
   "hermes-matrix.age" = mkSecret allHosts;
-  # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify.nix):
-  # loguje tylko na konto hermes RPi z wymuszonym poleceniem (wysyłka do DM).
+  # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify.nix).
   "hermes-notify-key.age" = mkSecret allHosts;
-  # Kopia zapasowa klucza podpisywania APK Brulionu (github:janusz-bit/brulion):
-  # format env z nazwami sekretów CI tego repo — QT_ANDROID_KEYSTORE_BASE64 (plik
-  # .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS, QT_ANDROID_KEYSTORE_KEY_PASS,
-  # QT_ANDROID_KEYSTORE_ALIAS. Nie trafia na żaden host: służy tylko do odtworzenia
-  # klucza (bez niego nie da się wydać aktualizacji zainstalowanej aplikacji).
+  # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
+  # Format env z nazwami sekretów CI github:janusz-bit/brulion:
+  # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,
+  # QT_ANDROID_KEYSTORE_KEY_PASS, QT_ANDROID_KEYSTORE_ALIAS.
   "brulion-android-keystore.age" = mkSecret allHosts;
 }

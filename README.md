@@ -31,7 +31,7 @@ modules/
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, offline installer ISO, post-install
-  packages/ overlays/     local packages and overlays
+  packages/               local packages (overlay local-packages), maintenance scripts (_scripts/)
   skills/                 AI agent skills (Prime Agent, Claude Code, Codex, opencode)
   checks/                 NixOS VM tests
   _secrets/               agenix secrets and public keys
@@ -92,7 +92,7 @@ automatically.
 2. **Host.** Create `modules/hosts/<name>/default.nix`:
 
    ```nix
-   { self, ... }:
+   { self, customTop, ... }:
    {
      hosts.<name> = {
        system = "x86_64-linux";
@@ -120,7 +120,8 @@ automatically.
        ];
        # networking.hostName comes from the registry (= <name>).
        system.stateVersion = "26.11"; # the release it is installed with; never change it later
-       customBot.defaultUser = "<user>";
+       # add users.<name> to modules/args.nix, or omit the line to keep customTop.users.default
+       customBot.defaultUser = customTop.users.<name>;
        users.users.${config.customBot.defaultUser} = {
          isNormalUser = true;
          extraGroups = [ "networkmanager" "wheel" ];

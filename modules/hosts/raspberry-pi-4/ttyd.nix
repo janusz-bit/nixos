@@ -11,11 +11,9 @@
 # lokalnego procesu. nginx czyta tylko hash SHA-512-crypt z pliku 0640
 # root:nginx, a hasło jest osobnym sekretem (ttyd-password.age, asercja).
 #
-# Entrypoint jak w produkcyjnej konfiguracji OCF Berkeley (ocf/nix,
-# modules/ttyd.nix): systemowy `login` zamiast gołej powłoki. To ten sam
-# program, którego używa SSH: zakłada pełną sesję PAM, wczytuje /etc/profile
-# i środowisko NixOS, potem uruchamia powłokę logowania (fish przez
-# bazowy łańcuch bash -> exec fish).
+# Entrypoint jak w OCF Berkeley (ocf/nix, modules/ttyd.nix): systemowy
+# `login` zamiast gołej powłoki, czyli pełna sesja PAM, /etc/profile
+# i powłoka logowania jak przez SSH.
 #
 # Sprawdzenie: `systemctl status ttyd ttyd-htpasswd`,
 # `sudo ls -l /run/ttyd/ttyd.sock` (srw-rw---- root nginx),
@@ -30,17 +28,14 @@
       ...
     }:
     let
-      # cloudflared ingress target (modules/hosts/raspberry-pi-4/cloudflared.nix)
+      # Cel ingress w cloudflared.nix.
       proxyPort = 8083;
       socketDir = "/run/ttyd";
       socket = "${socketDir}/ttyd.sock";
-      htpasswd = "/run/ttyd-auth/htpasswd";
+      authDir = "/run/ttyd-auth";
+      htpasswd = "${authDir}/htpasswd";
 
-      # Dedykowane hasło Basic Auth: modules/_secrets/ttyd-password.age
-      # (agenix -e, plik śledzony w gicie). Celowo bez wartości zastępczej —
-      # wcześniej brak pliku oznaczał po cichu hasło admina Nextcloud.
-      # Asercja i restartTriggers biorą ścieżkę z config (nie z
-      # customTop.secretsDir), więc można ją podmienić bez zmian w tym module.
+      # Własne hasło Basic Auth, celowo bez wartości zastępczej (asercja).
       secretFile = config.age.secrets.ttyd-password.file;
     in
     {
@@ -67,14 +62,13 @@
         # w przeglądarce danymi Basic Auth (cross-site WebSocket hijacking).
         checkOrigin = true;
         writeable = true;
-        # `login` must run as root to be able to set up user sessions.
+        # `login` zakłada sesje użytkowników, więc musi działać jako root.
         user = "root";
         entrypoint = [
           (lib.getExe' pkgs.shadow "login")
         ];
-        # Obrazki w terminalu: xterm.js ładuje image addon (Sixel + iTerm2
-        # IIP). tmux przepuszcza Sixel dzięki terminal-features w
-        # modules/hosts/base/shell.nix (ttyd zgłasza się jako xterm-256color).
+        # Obrazki (Sixel, iTerm2 IIP) w xterm.js; tmux przepuszcza Sixel
+        # (terminal-features w base/shell.nix).
         clientOptions.enableSixel = "true";
       };
 
@@ -101,7 +95,7 @@
             Type = "oneshot";
             RemainAfterExit = true;
             Group = config.services.nginx.group;
-            RuntimeDirectory = "ttyd-auth";
+            RuntimeDirectory = baseNameOf authDir;
             RuntimeDirectoryMode = "0750";
             # Zatrzymanie jednostki (switch) nie kasuje htpasswd — inaczej
             # nginx odrzucał logowania ttyd do jej ponownego startu.
@@ -126,7 +120,7 @@
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr$http_cf_connecting_ip zone=ttyd:1m rate=10r/m;
         '';
-        virtualHosts."ttyd.${customTop.site.full}" = {
+        virtualHosts."ttyd.${customTop.domain}" = {
           listen = [
             {
               addr = "127.0.0.1";

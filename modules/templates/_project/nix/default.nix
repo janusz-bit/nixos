@@ -5,16 +5,10 @@
     "aarch64-linux"
   ];
 
-  imports = [
-    inputs.git-hooks-nix.flakeModule
-  ];
+  imports = [ inputs.git-hooks-nix.flakeModule ];
 
   perSystem =
-    {
-      config,
-      pkgs,
-      ...
-    }:
+    { config, pkgs, ... }:
     {
       formatter = pkgs.nixfmt-tree;
 

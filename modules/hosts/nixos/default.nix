@@ -1,10 +1,8 @@
 # Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME
-# offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur.
-# Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość
-# (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch
-# (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/,
-# gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
-{ self, ... }:
+# offload) — stacja robocza z Plasmą 6 i grami. Tu tylko wpis rejestru,
+# tożsamość (stateVersion, konto) i lista modułów hosta; dysk i rozruch:
+# disko.nix, snapper.nix, boot.nix obok.
+{ self, customTop, ... }:
 {
   hosts.nixos = {
     system = "x86_64-linux";
@@ -38,11 +36,10 @@
         self.modules.nixos.nixos-claude-notify
       ];
 
-      networking.hostName = "nixos";
       system.stateVersion = "25.11";
 
       customBot = {
-        defaultUser = "dinosaur";
+        defaultUser = customTop.users.laptop;
         # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840).
         triliumMcpUrl = "http://127.0.0.1:37840/mcp";
       };

@@ -5,21 +5,16 @@
 # Wallpaper Engine), wstrzykniętego do katalogu pluginów daemona — dokładnie
 # tak jak robi to flatpak upstreamu.
 #
-# Dlaczego nie build ze źródeł (jak w wywalonym flake'u nix-waywallen):
-# build wymaga llvmPackages_latest z clang-scan-deps (moduły C++20),
-# Corrosion + rustc w CMake iFetchContent i ~10 fetchowanych sub-depów
-# z deps.json. AppImage jest samowystarczalny (daemon potrzebuje tylko
-# glibc), a weweb (CEF) z release-zipu dostaje dokładnie ten sam fixup,
-# co przy buildzie ze źródeł: podmiana libvulkan/swiftshader + rpath na
-# libcef.so. Brakujące biblioteki systemowe dostarcza wrapper przez
-# LD_LIBRARY_PATH (odpowiednik env z AppRun).
+# Nie ze źródeł: build wymaga llvmPackages_latest z clang-scan-deps (moduły
+# C++20), Corrosion + rustc w CMake i FetchContent oraz ~10 sub-depów
+# z deps.json. AppImage jest samowystarczalny (daemon potrzebuje tylko glibc),
+# a weweb (CEF) z release-zipu dostaje ten sam fixup co przy buildzie ze
+# źródeł (libvulkan/swiftshader, rpath libcef.so); brakujące biblioteki
+# systemowe daje wrapper przez LD_LIBRARY_PATH (jak env z AppRun).
 #
-# Uwaga do wersji: `version` = waywallen (bumpuje nix-update w
-# flake-update), `oweVersion` = open-wallpaper-engine — bump RĘCZNY
-# (upstream wypuszcza osobne release'y; hashe dopisane w attrsetach,
-# `nix hash file <plik> --sri`). Plugin KDE Plasma jest osobno w
-# modules/packages/_waywallen-kde-plugin (waywallen-display, osobne
-# wersjonowanie).
+# `version` bumpuje flake-update; `oweVersion` (open-wallpaper-engine, osobne
+# wydania) RĘCZNIE: hashe w attrsetach, `nix hash file <plik> --sri`.
+# Plugin Plasmy: _waywallen-kde-plugin.
 {
   lib,
   stdenvNoCC,
@@ -27,12 +22,10 @@
   makeWrapper,
   patchelf,
   bintools, # readelf — offset payloadu squashfs w AppImage
-  squashfsTools, # unsquashfs
+  squashfsTools,
   unzip,
 
-  # biblioteki, których binarki szukają w systemie (DT_NEEDED bez rpath /
-  # dlopen): AppRun AppImage eksportował LD_LIBRARY_PATH z usr/lib, wrapper
-  # odtwarza to zachowanie i dokłada biblioteki z nixpkgs
+  # biblioteki, których binarki szukają w systemie (DT_NEEDED bez rpath, dlopen)
   cairo, # libcairo.so.2 — weweb-renderer ma je w DT_NEEDED
   libglvnd, # libGL/libEGL (UI, renderery, CEF)
   vulkan-loader, # podmienia bundlowany libvulkan.so.1
@@ -74,29 +67,10 @@
 }:
 
 let
-  pname = "waywallen";
-  version = "0.5.0";
   oweVersion = "0.2.9";
+  arch = stdenvNoCC.hostPlatform.parsed.cpu.name;
 
-  arch =
-    {
-      aarch64-linux = "aarch64";
-      x86_64-linux = "x86_64";
-    }
-    .${stdenvNoCC.hostPlatform.system}
-      or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
-
-  owe = fetchurl {
-    url = "https://github.com/waywallen/open-wallpaper-engine/releases/download/v${oweVersion}/org.waywallen.open-wallpaper-engine-${oweVersion}-linux-${arch}.zip";
-    hash =
-      {
-        aarch64 = "sha256-wW81CmUsM8W3NPPiHm71XzETlPxQ7+gpzTLwHFSviCc=";
-        x86_64 = "sha256-MM/uWgQzIOD7GUtEfMegfexd+KsjgSHy82LI97aCAng=";
-      }
-      .${arch};
-  };
-
-  # biblioteki runtime + sterowniki GPU (libGL/EGL z /run/opengl-driver)
+  # LD_LIBRARY_PATH wrappera (sterowniki GPU z /run/opengl-driver dokłada installPhase)
   deps = [
     alsa-lib
     at-spi2-atk
@@ -136,9 +110,18 @@ let
   ];
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
-  inherit pname version;
+  pname = "waywallen";
+  version = "0.5.0";
 
-  oweSrc = owe;
+  oweSrc = fetchurl {
+    url = "https://github.com/waywallen/open-wallpaper-engine/releases/download/v${oweVersion}/org.waywallen.open-wallpaper-engine-${oweVersion}-linux-${arch}.zip";
+    hash =
+      {
+        aarch64 = "sha256-wW81CmUsM8W3NPPiHm71XzETlPxQ7+gpzTLwHFSviCc=";
+        x86_64 = "sha256-MM/uWgQzIOD7GUtEfMegfexd+KsjgSHy82LI97aCAng=";
+      }
+      .${arch};
+  };
 
   src = fetchurl {
     url = "https://github.com/waywallen/waywallen/releases/download/v${finalAttrs.version}/waywallen-${finalAttrs.version}-${arch}.AppImage";
@@ -229,13 +212,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Wayland wallpaper app: daemon, Qt/QML UI, renderer plugins and Wallpaper Engine support";
-    longDescription = ''
-      Waywallen — dynamiczne tapety na Waylandzie (zamiennik Wallpaper Engine
-      Plugin). Zbudowany z oficjalnego AppImage (daemon + UI + pluginy
-      image/video/wallhaven + layer-shell) oraz release-zipu pluginu
-      open-wallpaper-engine (tapety .pkg/web z Wallpaper Engine).
-      Tapety na Plasma 6: modules/packages/_waywallen-kde-plugin.
-    '';
     homepage = "https://github.com/waywallen/waywallen";
     license = with lib.licenses; [
       mit # waywallen (AppImage)

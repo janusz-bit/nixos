@@ -12,10 +12,10 @@
 # - RPi (rpi-claude-notify) jako nixos: to samo przez ssh na localhost;
 # - RPi jako hermes (brama i jej procesy, np. `claude -p`): odbiornik wprost.
 #
-# Granica zaufania: klucz z hermes-notify-key.age (laptop: dinosaur 0400; RPi:
-# hermes:hermes 0440, nixos czyta przez grupę) loguje tylko na konto hermes,
-# tylko z 127.0.0.1/::1 (tunel i localhost, nie z LAN-u), z `restrict` (bez pty,
-# przekierowań i agenta) i z wymuszonym poleceniem. Odbiornik ignoruje
+# Granica zaufania: klucz z hermes-notify-key.age (laptop: konto główne 0400;
+# RPi: hermes:hermes 0440, nixos czyta przez grupę) loguje tylko na konto
+# hermes, tylko z 127.0.0.1/::1 (tunel i localhost, nie z LAN-u), z `restrict`
+# (bez pty, przekierowań i agenta) i z wymuszonym poleceniem. Odbiornik ignoruje
 # SSH_ORIGINAL_COMMAND i argumenty: bierze wyłącznie tekst ze stdin (do 3500
 # bajtów, najwyżej 30 wiadomości na godzinę) i wysyła go do jednego, stałego
 # DM. Wyciek klucza pozwala więc najwyżej zaspamować ten DM w granicach limitu.
@@ -23,33 +23,23 @@
 # Klient przypina klucz hosta RPi (keys.sshHostKeys) i pomija ssh_config
 # (-F /dev/null), bo base-ssh ma `Host ssh.*` → User root.
 #
-# Claude Code: skill hermes-notify (kiedy i jak pisać) oraz ustawienia
-# zarządzane z hookami Notification i PermissionRequest i regułą allow
-# (claudeCodeSettings niżej).
 # claude-notify nie trafia do skillPackages (modules/skills/default.nix): cel
 # ssh, ścieżka klucza i odbiornik zależą od hosta, więc pakiet powstaje tutaj.
 #
-# Wiadomość (_claude-notify/claude-notify.jq): Hermes zamienia Markdown na HTML Matrixa
-# i odrzuca nieznane tagi, więc wolny tekst jest escapowany, a ścieżki
-# i polecenia idą w kod. Nagłówek: host, konto, katalog roboczy, w tmux sesja
-# i okno. Prośba o zgodę: narzędzie i argumenty z rekordu, który zapisał hook
-# PermissionRequest (`claude-notify --record`, plik sesji
-# w $XDG_RUNTIME_DIR/claude-notify, 0700); bez rekordu (np. sieć komendy
-# w sandboksie) tytuł/treść powiadomienia i okno dialogu z ekranu tmux.
-# AskUserQuestion idzie jako pytania z numerowanymi opcjami (numery jak
-# w oknie Claude Code), a ExitPlanMode jako plan w bloku markdown ze ścieżką
-# pliku planu.
-# Całość do 3300 bajtów, bo odbiornik tnie przy 3500 (urwałby płot bloku).
-# Ta sama wiadomość z tej samej sesji idzie najwyżej raz na 60 s.
+# Wiadomość (_claude-notify/claude-notify.jq): Markdown z nagłówkiem (host,
+# konto, katalog, sesja i okno tmux). Prośba o zgodę: narzędzie i argumenty
+# z rekordu hooka PermissionRequest (`--record`, $XDG_RUNTIME_DIR/claude-notify,
+# 0700), bez rekordu (np. sieć komend w sandboksie) treść powiadomienia i okno
+# dialogu z ekranu tmux; AskUserQuestion jako numerowane opcje (jak w Claude
+# Code), ExitPlanMode jako blok planu ze ścieżką pliku. Do 3300 bajtów, bo
+# odbiornik tnie przy 3500 (urwałby płot bloku); ta sama wiadomość z sesji
+# najwyżej raz na 60 s.
 #
-# Test bez wysyłki: `claude-notify --print …` wypisuje gotową wiadomość
-# (deduplikacja i rekordy działają jak przy wysyłce), np.
+# Test bez wysyłki (deduplikacja i rekordy jak przy wysyłce):
 # `jq -n '{session_id:"s",cwd:"/tmp",notification_type:"permission_prompt",message:"m"}' | claude-notify --print --hook`.
-# Po wdrożeniu (RPi dopiero po merge do master i `update`, laptop po
-# `update-local`): `echo test | claude-notify` na obu hostach, na RPi także
-# `sudo -u hermes claude-notify test` (ścieżka bez ssh). Odbiornik: pusty stdin
-# albo 31. wiadomość w ciągu godziny → kod 1 i komunikat na stderr. Hook: w
-# sesji Claude Code w tmux polecenie, które wymaga zgody (prompt uprawnień).
+# Po wdrożeniu: `echo test | claude-notify` na obu hostach, na RPi też
+# `sudo -u hermes claude-notify test` (bez ssh); pusty stdin albo 31. wiadomość
+# w godzinie → kod 1. Hook: polecenie wymagające zgody w sesji Claude Code w tmux.
 { customTop, lib, ... }:
 let
   inherit (customTop) keys;
@@ -62,19 +52,16 @@ let
   rpi = "raspberry-pi-4";
   hermesUser = "hermes";
 
-  # Skrypt: _claude-notify/claude-notify.sh (tryby, stan, deduplikacja,
-  # wysyłka), format wiadomości i rekordów: _claude-notify/claude-notify.jq.
   mkClaudeNotify =
     {
+      config,
       pkgs,
-      ssh,
-      tmux,
-      key,
       target,
       sshOptions ? [ ],
       receiver ? null,
     }:
     let
+      key = config.age.secrets.hermes-notify-key.path;
       # HostKeyAlias: ten sam wpis niezależnie od celu (tunel albo localhost).
       knownHosts = pkgs.writeText "hermes-notify-known-hosts" "${rpi} ${keys.sshHostKeys.${rpi}}\n";
       # Limit z zapasem: wysyłka przez `hermes send` na RPi trwa 22–31 s
@@ -112,57 +99,59 @@ let
         pkgs.gawk
         pkgs.jq
         pkgs.util-linux
-        ssh
-        tmux
+        config.programs.ssh.package
+        config.programs.tmux.package
       ];
       text = ''
         key=${lib.escapeShellArg key}
         receiver=${lib.escapeShellArg (lib.optionalString (receiver != null) (lib.getExe receiver))}
         ssh_command=(${lib.escapeShellArgs sshCommand})
         format=${./_claude-notify/claude-notify.jq}
-        service_user=${hermesUser}
+        service_user=${lib.escapeShellArg hermesUser}
       ''
       + builtins.readFile ./_claude-notify/claude-notify.sh;
     };
 
-  # Ustawienia zarządzane Claude Code (każdy użytkownik i projekt hosta).
-  # Notification: prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
-  # hermes-notify (modules/skills), dlatego bez Stop i idle_prompt.
-  # PermissionRequest: rusza w chwili otwarcia okna zgody i daje narzędzie
-  # z argumentami, których Notification nie ma (--record je tylko zapisuje).
-  # async: hook asynchroniczny z definicji nie wpływa na decyzję i nie
-  # opóźnia okna; zapis trwa ułamek sekundy, a Notification przychodzi ~6 s
-  # później. Hook synchroniczny bez wyjścia z kodem 0 też nie decyduje, ale
-  # okno czekałoby na start jq. Nie obejmuje sieci komend w sandboksie (wtedy
-  # Notification bez rekordu, z wycinkiem ekranu).
-  # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`, więc obejmuje
-  # też samo `claude-notify` z tekstem na stdin.
-  # Obejmuje też `claude -p` pluginu claude-subscription-directsdk Hermesa
-  # (--setting-sources "" nie wyłącza ustawień zarządzanych), ale go nie
-  # zmienia: plugin daje --tools "" (bez Bash), --disable-slash-commands (bez
-  # skilli) i --permission-mode dontAsk (bez próśb o zgodę, więc bez
-  # PermissionRequest), a jego serwer MCP nie prosi o elicitation.
-  claudeCodeSettings =
-    pkgs: claudeNotify:
+  # Wartość `environment` hosta-klienta: claude-notify i ustawienia zarządzane
+  # Claude Code (każdy użytkownik i projekt). Argumenty jak mkClaudeNotify:
+  # config, pkgs, target, sshOptions, receiver.
+  clientEnvironment =
+    { pkgs, ... }@notifyArgs:
     let
+      claudeNotify = mkClaudeNotify notifyArgs;
       hook = flag: {
         type = "command";
         command = "${lib.escapeShellArg (lib.getExe claudeNotify)} ${flag}";
+        # Hook nie decyduje i nie opóźnia okna zgody (synchroniczny czekałby na
+        # start jq); zapis rekordu kończy się na długo przed Notification (~6 s
+        # później).
         async = true;
       };
     in
     {
-      "claude-code/managed-settings.d/50-hermes-notify.json".source =
+      systemPackages = [ claudeNotify ];
+      # `claude -p` pluginu claude-subscription-directsdk Hermesa też dostaje te
+      # ustawienia (--setting-sources "" nie wyłącza zarządzanych), ale bez
+      # skutku: --tools "" (bez Bash), --disable-slash-commands (bez skilli)
+      # i --permission-mode dontAsk (bez próśb o zgodę), a jego MCP nie prosi
+      # o elicitation.
+      etc."claude-code/managed-settings.d/50-hermes-notify.json".source =
         (pkgs.formats.json { }).generate "50-hermes-notify.json"
           {
+            # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`:
+            # obejmuje też samo `claude-notify` z tekstem na stdin.
             permissions.allow = [ "Bash(claude-notify *)" ];
             hooks = {
+              # Prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
+              # hermes-notify, więc bez Stop i idle_prompt.
               Notification = [
                 {
                   matcher = "permission_prompt|elicitation_dialog";
                   hooks = [ (hook "--hook") ];
                 }
               ];
+              # Daje narzędzie z argumentami, których Notification nie ma
+              # (--record tylko zapisuje rekord dla --hook).
               PermissionRequest = [ { hooks = [ (hook "--record" // { timeout = 10; }) ]; } ];
             };
           };
@@ -219,14 +208,6 @@ in
           exec ${lib.getExe cfg.cliWrapper} send --to ${lib.escapeShellArg "matrix:${room}"} -q -f - <<<"$text" 2>/dev/null
         '';
       };
-
-      claudeNotify = mkClaudeNotify {
-        inherit pkgs receiver;
-        ssh = config.programs.ssh.package;
-        tmux = config.programs.tmux.package;
-        key = config.age.secrets.hermes-notify-key.path;
-        target = "localhost";
-      };
     in
     lib.mkMerge [
       {
@@ -252,28 +233,15 @@ in
           ''from="127.0.0.1,::1",restrict,command="${lib.getExe receiver}" ${keys.users.hermes-notify}''
         ];
 
-        environment = {
-          systemPackages = [ claudeNotify ];
-          etc = claudeCodeSettings pkgs claudeNotify;
+        environment = clientEnvironment {
+          inherit config pkgs receiver;
+          target = "localhost";
         };
       })
     ];
 
   flake.modules.nixos.nixos-claude-notify =
     { config, pkgs, ... }:
-    let
-      claudeNotify = mkClaudeNotify {
-        inherit pkgs;
-        ssh = config.programs.ssh.package;
-        tmux = config.programs.tmux.package;
-        key = config.age.secrets.hermes-notify-key.path;
-        target = "ssh.${customTop.site.full}";
-        sshOptions = [
-          "-o"
-          "ProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h"
-        ];
-      };
-    in
     lib.mkMerge [
       {
         warnings = lib.optionals (!hasSecret) [
@@ -287,9 +255,13 @@ in
           mode = "0400";
         };
 
-        environment = {
-          systemPackages = [ claudeNotify ];
-          etc = claudeCodeSettings pkgs claudeNotify;
+        environment = clientEnvironment {
+          inherit config pkgs;
+          target = "ssh.${customTop.domain}";
+          sshOptions = [
+            "-o"
+            "ProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h"
+          ];
         };
       })
     ];

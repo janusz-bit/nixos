@@ -1,9 +1,8 @@
-# Narzędzia AI stacji roboczej: lokalna Ollama, agenty kodujące w terminalu
-# (Codex, Claude Code, opencode, Antigravity), aplikacje desktopowe (ChatGPT,
-# Hermes Desktop) i alias claude-nixos dla tego repo. Skille agentów:
-# modules/skills/, klucze API wstrzykują wrappery fish (base/agenix.nix).
-# Sprawdzenie: `systemctl status ollama`, `ollama ps` (kolumna PROCESSOR:
-# GPU przy NVIDII).
+# Narzędzia AI stacji roboczej: lokalna Ollama i llama.cpp, agenty kodujące
+# (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz
+# alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
+#
+# Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII).
 { inputs, customTop, ... }:
 {
   flake.modules.nixos.desktop-ai =
@@ -17,45 +16,37 @@
       inherit (pkgs.stdenv.hostPlatform) system;
     in
     {
-      # Claude Code dla tego repo: zawsze w devShellu (nixfmt/deadnix/jq dla
-      # hooków z .claude/, świeży hook pre-commit sync-github-actions).
+      # Zawsze w devShellu: hooki z .claude/ i pre-commit potrzebują jego narzędzi.
       # `env -C` nie zmienia katalogu bieżącej powłoki; argumenty przechodzą
       # dalej (`claude-nixos --continue`).
-      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.place} nix develop -c claude";
+      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.path} nix develop -c claude";
 
-      services = {
-        ollama = {
-          enable = true;
-          # Z NVIDIĄ wariant CUDA: wrapuje binarkę z LD_LIBRARY_PATH (runpath
-          # OpenGL), więc ollama znajduje libcuda.so.1 sterownika i widzi dGPU.
-          # Bez tego wykrywanie kończy się cicho na CPU (id=cpu w logu).
-          package = lib.mkIf config.hardware.nvidia.enabled pkgs.ollama-cuda;
-        };
+      services.ollama = {
+        enable = true;
+        # Wariant CUDA dodaje katalog sterownika (runpath OpenGL) do LD_LIBRARY_PATH,
+        # więc ollama znajduje libcuda.so.1; bez niego wykrywanie GPU kończy się
+        # cicho na CPU (id=cpu w logu).
+        package = lib.mkIf config.hardware.nvidia.enabled pkgs.ollama-cuda;
       };
 
+      # Bez uv: jest w base (hosts/base/configuration.nix).
       environment.systemPackages = with pkgs; [
-        # uv pochodzi z base - nie duplikowac
-        # OpenAI Codex CLI — agent kodujący w terminalu (nixpkgs)
         codex
-        # Claude Code — agent kodujący w terminalu (nixpkgs)
         claude-code
-        # ChatGPT — desktopowa aplikacja OpenAI (llm-agents.nix, deb x86_64;
-        # chatgpt z nixpkgs jest tylko dla aarch64-darwin)
+        # chatgpt z nixpkgs jest tylko na aarch64-darwin; llm-agents ma deb x86_64.
         inputs.llm-agents.packages.${system}.chatgpt
         repomix
         nodejs
-        # unsloth usunięty: torch z nixpkgs jest tu bez CUDA, a unsloth bez
-        # akceleratora nie importuje się („You need a GPU”). Fine-tuning
-        # trzymać w projekcie uv z kołami torch+CUDA.
+        # Python bez biblioteki unsloth (unsloth-desktop niżej to osobna
+        # aplikacja): torch z nixpkgs nie ma tu CUDA, a unsloth bez GPU się nie
+        # importuje. Fine-tuning w projekcie uv z kołami torch+CUDA.
         (python3.withPackages (python-pkgs: [ python-pkgs.pip ]))
         antigravity-ide-fhs
         antigravity-cli
-        # Hermes Desktop (Electron) z flake hermes-agent; stan w ~/.hermes
         inputs.hermes-agent.packages.${system}.desktop
         inputs.llm-agents.packages.${system}.opencode2
-        # llama.cpp z nixpkgs (llama, llama-server, ...). Fork PrismML dla
-        # modeli Bonsai ma te same nazwy binarek i bibliotek, więc nie trafia
-        # do PATH, tylko pod alias llama-prism (skills/external.nix).
+        # Fork PrismML (Bonsai) ma te same nazwy binarek, więc nie jest w PATH,
+        # tylko pod aliasem llama-prism (skills/external.nix).
         (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
         unsloth-desktop
       ];

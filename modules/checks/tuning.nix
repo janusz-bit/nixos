@@ -1,7 +1,9 @@
 # Test VM strojenia z modules/desktop/tuning.nix na tym samym kernelu
-# CachyOS co host nixos. Sprawdza, czy ustawienia zostały zastosowane
+# CachyOS co host nixos: sprawdza, czy ustawienia zostały zastosowane
 # (wartości oczekiwane bierze z konfiguracji hosta, więc rozjazd host ↔
-# moduł też oblewa test), a dla zmian przejętych z CachyOS mierzy efekt:
+# moduł też oblewa test), a dla zmian przejętych z CachyOS mierzy efekt.
+#
+# Podtesty:
 # - THP max_ptes_none 409 vs 511 (A/B): rzadkie THP pod presją pamięci,
 # - zRAM 100% vs 50% RAM (A/B): czy nadmiar trafia na swap dyskowy,
 # - DefaultTimeoutStopSec: czas stopu jednostki ignorującej SIGTERM,

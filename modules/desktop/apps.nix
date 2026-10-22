@@ -1,7 +1,6 @@
 # Aplikacje graficzne stacji roboczej (biuro, multimedia, komunikatory,
-# grafika, notatki) oraz usługi użytkownika: Mullvad VPN i Syncthing.
-# Narzędzia programistyczne: desktop/dev.nix, przeglądarki:
-# desktop/browsers.nix, agenty AI: desktop/ai.nix, gry: modules/gaming/.
+# grafika, notatki), Flatpak, AppImage, Mullvad VPN, Syncthing i reguły udev
+# klawiatury Wooting.
 _: {
   flake.modules.nixos.desktop-apps =
     { config, pkgs, ... }:
@@ -18,24 +17,15 @@ _: {
         alacritty
         libreoffice-qt
         kdePackages.qrca
-        # Waywallen — dynamiczne tapety (zamiennik Wallpaper Engine Plugin).
-        # Nie wymaga Steama/Protonu; tapety Wallpaper Engine przez wbudowany
-        # plugin open-wallpaper-engine. Ustawianie tapet: aplikacja waywallen.
-        # Pakiety lokalne z overlaya local-packages (modules/packages/packages.nix).
+        # Dynamiczne tapety (także Wallpaper Engine); pakiety lokalne (local-packages).
         waywallen
         waywallen-kde-plugin
         signal-desktop
         element-desktop
         kdePackages.kcalc
-        # Kleopatra — GUI do kluczy OpenPGP/S/MIME. gpg-agent (z pinentry-qt
-        # od plasma6) włącza już base-ssh (programs.gnupg.agent).
+        # gpg-agent dla Kleopatry włącza base-ssh (programs.gnupg.agent).
         kdePackages.kleopatra
-        # KRecorder — dyktafon (nagrywanie dźwięku z mikrofonu, lista nagrań,
-        # odtwarzacz; aplikacja KDE na Kirigami).
         kdePackages.krecorder
-        # Narzędzia do rysowania (odpowiednik Windows Paint):
-        # KolourPaint — prosty paint z KDE; Pinta — jak Paint.NET
-        # (warstwy, historia zmian, efekty).
         kdePackages.kolourpaint
         pinta
         nextcloud-client
@@ -52,8 +42,7 @@ _: {
       services = {
         flatpak.enable = true;
 
-        # Mullvad split upstream: pkgs.mullvad = daemon (module default),
-        # pkgs.mullvad-vpn = GUI only, enabled via gui.enable.
+        # Moduł daje demona (pkgs.mullvad); GUI (pkgs.mullvad-vpn) tylko z gui.enable.
         mullvad-vpn = {
           enable = true;
           gui.enable = true;
@@ -68,13 +57,11 @@ _: {
         };
       };
 
-      # AppImage uruchamiane wprost (binfmt) przez appimage-run.
       programs.appimage = {
         enable = true;
         binfmt = true;
       };
 
-      # Klawiatura Wooting: reguły udev dla Wootility.
       hardware.wooting.enable = true;
     };
 }

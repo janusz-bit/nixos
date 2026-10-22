@@ -2,7 +2,7 @@
 # per gra. Proton-CachyOS jest w wariancie x86-64-v3 (procesor z AVX2).
 { self, ... }:
 {
-  flake.modules.nixos.gaming = {
+  flake.modules.nixos.gaming = _: {
     imports = [
       self.modules.nixos.gaming-steam
       self.modules.nixos.gaming-gamemode

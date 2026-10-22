@@ -1,13 +1,10 @@
 # Podman do kontenerów rootless: polecenie `docker` jako alias (dockerCompat)
 # i DNS w domyślnej sieci dla podman-compose.
 #
-# Celowo BEZ grupy `podman`: daje ona dostęp do rootowego
-# /run/podman/podman.sock, czyli roota bez hasła dla każdego procesu
-# użytkownika. Rootless podman (`podman run` jako zwykły użytkownik)
-# działa bez niej; rootful tylko przez sudo.
-#
-# Sprawdzenie: `podman info --format '{{.Host.Security.Rootless}}'` daje
-# true; `id` nie pokazuje grupy podman.
+# Celowo bez grupy `podman`: rootowy /run/podman/podman.sock to root bez hasła
+# dla każdego procesu użytkownika; rootless działa bez niej, rootful przez sudo.
+# Sprawdzenie: `podman info --format '{{.Host.Security.Rootless}}'` → true;
+# `id` nie pokazuje grupy podman.
 _: {
   flake.modules.nixos.desktop-podman = _: {
     virtualisation = {
@@ -15,7 +12,7 @@ _: {
       podman = {
         enable = true;
         dockerCompat = true;
-        defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
+        defaultNetwork.settings.dns_enabled = true;
       };
     };
   };
