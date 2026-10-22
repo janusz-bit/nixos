@@ -247,6 +247,10 @@
         ${cfg.user}.extraGroups = [ "systemd-journal" ];
       };
 
+      # Agent sam łączy się z internetem (API modeli, narzędzia WWW), więc
+      # lockdown (base-lockdown) zatrzymuje go razem z Matrixem.
+      customBot.lockdownServices = [ "hermes-agent" ];
+
       environment.systemPackages = map hermesCli [
         "hermes"
         "hermes-acp"

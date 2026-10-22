@@ -1,9 +1,10 @@
 # Opcje customBot: ustawienia zależne od hosta (cel aliasów update/push,
 # fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium,
-# dodatkowi providerzy Prime Agenta, skille agentów kodujących). flakeTarget
-# (bez wartości domyślnej) ustawia rejestr hostów i sd-image.nix,
-# primeAgentProviders i agentSkills moduły skilli (modules/skills/), a resztę
-# host nadpisuje w swoim default.nix.
+# dodatkowi providerzy Prime Agenta, usługi zatrzymywane przez lockdown,
+# skille agentów kodujących). flakeTarget (bez wartości domyślnej) ustawia
+# rejestr hostów i sd-image.nix, primeAgentProviders i agentSkills moduły
+# skilli (modules/skills/), lockdownServices moduły usług, a resztę host
+# nadpisuje w swoim default.nix.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
 { customTop, ... }:
@@ -46,6 +47,18 @@
             schemat jak w modules/hosts/base/prime-agent.nix), np. lokalny
             serwer, który działa tylko na tym hoście. Nazwa zajęta przez
             providera z prime-agent.nix kończy ewaluację błędem.
+          '';
+        };
+        lockdownServices = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = ''
+            Usługi systemd (nazwy bez .service), które `lockdown on`
+            zatrzymuje i blokuje do `lockdown off` (base-lockdown): te, do
+            których sieć dochodzi inaczej niż przez port otwarty w firewallu
+            (tunel, własne połączenia wychodzące, radio). Porty z
+            networking.firewall lockdown zamyka sam. Dopisuje je moduł usługi;
+            na hoście bez base-lockdown lista nic nie robi.
           '';
         };
         agentSkills = lib.mkOption {

@@ -13,6 +13,10 @@ _: {
       nssmdns4 = true;
     };
 
+    # BlueZ przyjmuje połączenia przez radio, poza firewallem, więc lockdown
+    # (base-lockdown) go zatrzymuje; avahi odcina samo zamknięcie portu 5353.
+    customBot.lockdownServices = [ "bluetooth" ];
+
     hardware = {
       bluetooth.enable = true;
       enableAllFirmware = true;

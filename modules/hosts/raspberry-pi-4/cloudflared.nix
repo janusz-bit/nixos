@@ -33,6 +33,15 @@
       # i systemd porzucał tunel na stałe; co 5 s w 10 s mieszczą się najwyżej 3.
       systemd.services."cloudflared-tunnel-${tunnelName}".serviceConfig.RestartSec = 5;
 
+      # lockdown (base-lockdown) zostawia tunel, bo niesie ssh.<domena>
+      # (zatrzymany odciąłby też sesję, z której go włączono), i zatrzymuje
+      # jego backendy HTTP: nginx (Nextcloud, ttyd), Gitea i continuwuity.
+      customBot.lockdownServices = [
+        "nginx"
+        "gitea"
+        "continuwuity"
+      ];
+
       services.cloudflared = {
         enable = true;
         tunnels.${tunnelName} = {

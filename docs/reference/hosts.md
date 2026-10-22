@@ -6,8 +6,8 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 47 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 29 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 48 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 30 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
 
 ## nixos
@@ -27,6 +27,7 @@ flowchart LR
   host_nixos --> desktop[desktop]
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
+  host_nixos --> base_lockdown[base-lockdown]
   host_nixos --> ai_skills[ai-skills]
   host_nixos --> ai_skills_external[ai-skills-external]
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
@@ -72,6 +73,7 @@ flowchart LR
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-fail2ban` — [hosts/base/fail2ban.nix](../../modules/hosts/base/fail2ban.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
+- `base-lockdown` — [hosts/base/lockdown.nix](../../modules/hosts/base/lockdown.nix)
 - `base-nix` — [hosts/base/nix.nix](../../modules/hosts/base/nix.nix)
 - `base-options` — [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 - `base-prime-agent` — [hosts/base/prime-agent.nix](../../modules/hosts/base/prime-agent.nix)
@@ -124,6 +126,7 @@ flowchart LR
   host_raspberry_pi_4 --> base_agenix[base-agenix]
   host_raspberry_pi_4 --> base_fail2ban[base-fail2ban]
   host_raspberry_pi_4 --> base_ssh_lan[base-ssh-lan]
+  host_raspberry_pi_4 --> base_lockdown[base-lockdown]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4[hardware-raspberry-pi-4]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4_fan[hardware-raspberry-pi-4-fan]
   host_raspberry_pi_4 --> rpi_resources[rpi-resources]
@@ -156,6 +159,7 @@ flowchart LR
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-fail2ban` — [hosts/base/fail2ban.nix](../../modules/hosts/base/fail2ban.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
+- `base-lockdown` — [hosts/base/lockdown.nix](../../modules/hosts/base/lockdown.nix)
 - `base-nix` — [hosts/base/nix.nix](../../modules/hosts/base/nix.nix)
 - `base-options` — [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 - `base-prime-agent` — [hosts/base/prime-agent.nix](../../modules/hosts/base/prime-agent.nix)

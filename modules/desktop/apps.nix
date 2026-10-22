@@ -57,6 +57,11 @@ _: {
         };
       };
 
+      # Syncthing sam łączy się z peerami, przekaźnikami i serwerami discovery,
+      # więc zamknięte porty go nie odcinają — lockdown (base-lockdown)
+      # zatrzymuje usługę.
+      customBot.lockdownServices = [ "syncthing" ];
+
       programs.appimage = {
         enable = true;
         binfmt = true;

@@ -25,7 +25,7 @@ flake.nix                 inputs, binary caches (nixConfig), outputs = import-tr
 modules/
   hosts/registry.nix      host registry: hosts.<name> -> nixosConfigurations, CI
   hosts/base/             what every host gets (nix, shell, ssh, git, update aliases),
-                          plus opt-in user secrets, fail2ban and LAN-only SSH
+                          plus opt-in user secrets, fail2ban, LAN-only SSH and lockdown
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
   hosts/*.nix             features linking two hosts (laptop-run, claude-notify)
   desktop/  gaming/       workstation features any desktop host can import
@@ -48,6 +48,7 @@ Every `.nix` file under `modules/` is a flake-parts module (paths with a
 update              # switch to the latest commit on GitHub
 update-local        # switch to /etc/nixos (local changes)
 update-boot / update-reboot / update-local-boot
+lockdown on / off   # emergency: cut off everything but SSH / restore (nixos, RPi)
 nix develop         # dev shell: formatter, linters and pre-commit hooks
 flake-update        # update flake.lock and local packages, commit
 ```

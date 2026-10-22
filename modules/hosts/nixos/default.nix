@@ -30,6 +30,7 @@
         self.modules.nixos.desktop
         self.modules.nixos.gaming
         self.modules.nixos.base-fail2ban
+        self.modules.nixos.base-lockdown
         self.modules.nixos.ai-skills
         self.modules.nixos.ai-skills-external
         self.modules.nixos.nixos-remote-agent
