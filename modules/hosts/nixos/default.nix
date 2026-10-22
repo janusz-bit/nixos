@@ -40,6 +40,8 @@
 
       customBot = {
         defaultUser = customTop.users.laptop;
+        # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840), nie
+        # trilium-server z RPi (8081, wartość domyślna opcji).
         triliumMcpUrl = "http://127.0.0.1:37840/mcp";
       };
 

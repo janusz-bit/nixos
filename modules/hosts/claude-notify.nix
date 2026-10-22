@@ -112,43 +112,46 @@ let
       + builtins.readFile ./_claude-notify/claude-notify.sh;
     };
 
-  # environment hosta: claude-notify i ustawienia zarządzane Claude Code (każdy
-  # użytkownik i projekt). Notification: prośby o zgodę i pytania MCP (koniec
-  # pracy zgłasza skill hermes-notify, więc bez Stop i idle_prompt).
-  # PermissionRequest (--record tylko zapisuje) daje narzędzie z argumentami,
-  # których Notification nie ma. async: nie decyduje i nie opóźnia okna zgody
-  # (synchroniczny czekałby na start jq), a zapis kończy się na długo przed
-  # Notification (~6 s później).
-  # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`: obejmuje też
-  # samo `claude-notify` z tekstem na stdin.
-  # `claude -p` pluginu claude-subscription-directsdk Hermesa też dostaje te
-  # ustawienia (--setting-sources "" nie wyłącza zarządzanych), ale bez skutku:
-  # --tools "" (bez Bash), --disable-slash-commands (bez skilli) i
-  # --permission-mode dontAsk (bez próśb o zgodę), a jego MCP nie prosi
-  # o elicitation.
+  # Wartość `environment` hosta-klienta: claude-notify i ustawienia zarządzane
+  # Claude Code (każdy użytkownik i projekt). Argumenty jak mkClaudeNotify:
+  # config, pkgs, target, sshOptions, receiver.
   clientEnvironment =
-    { pkgs, ... }@args:
+    { pkgs, ... }@notifyArgs:
     let
-      claudeNotify = mkClaudeNotify args;
+      claudeNotify = mkClaudeNotify notifyArgs;
       hook = flag: {
         type = "command";
         command = "${lib.escapeShellArg (lib.getExe claudeNotify)} ${flag}";
+        # Hook nie decyduje i nie opóźnia okna zgody (synchroniczny czekałby na
+        # start jq); zapis rekordu kończy się na długo przed Notification (~6 s
+        # później).
         async = true;
       };
     in
     {
       systemPackages = [ claudeNotify ];
+      # `claude -p` pluginu claude-subscription-directsdk Hermesa też dostaje te
+      # ustawienia (--setting-sources "" nie wyłącza zarządzanych), ale bez
+      # skutku: --tools "" (bez Bash), --disable-slash-commands (bez skilli)
+      # i --permission-mode dontAsk (bez próśb o zgodę), a jego MCP nie prosi
+      # o elicitation.
       etc."claude-code/managed-settings.d/50-hermes-notify.json".source =
         (pkgs.formats.json { }).generate "50-hermes-notify.json"
           {
+            # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`:
+            # obejmuje też samo `claude-notify` z tekstem na stdin.
             permissions.allow = [ "Bash(claude-notify *)" ];
             hooks = {
+              # Prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
+              # hermes-notify, więc bez Stop i idle_prompt.
               Notification = [
                 {
                   matcher = "permission_prompt|elicitation_dialog";
                   hooks = [ (hook "--hook") ];
                 }
               ];
+              # Daje narzędzie z argumentami, których Notification nie ma
+              # (--record tylko zapisuje rekord dla --hook).
               PermissionRequest = [ { hooks = [ (hook "--record" // { timeout = 10; }) ]; } ];
             };
           };

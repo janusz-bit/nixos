@@ -8,7 +8,7 @@ _: {
   flake.modules.nixos.nixos-snapper =
     { config, pkgs, ... }:
     let
-      common = {
+      commonConfig = {
         ALLOW_USERS = [ config.customBot.defaultUser ];
         TIMELINE_CREATE = true;
         TIMELINE_CLEANUP = true;
@@ -29,13 +29,13 @@ _: {
         snapshotInterval = "hourly";
         cleanupInterval = "1d";
         configs = {
-          root = common // {
+          root = commonConfig // {
             SUBVOLUME = "/";
             TIMELINE_LIMIT_HOURLY = 5;
             TIMELINE_LIMIT_WEEKLY = 2;
             TIMELINE_LIMIT_MONTHLY = 0;
           };
-          home = common // {
+          home = commonConfig // {
             SUBVOLUME = "/home";
             TIMELINE_LIMIT_HOURLY = 10;
             TIMELINE_LIMIT_WEEKLY = 4;

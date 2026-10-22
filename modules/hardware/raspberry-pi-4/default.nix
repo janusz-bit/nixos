@@ -7,7 +7,7 @@
 #   sudo micro /mnt/config.txt   # np. dtparam=audio=on
 { inputs, ... }:
 {
-  flake.modules.nixos.hardware-raspberry-pi-4 = {
+  flake.modules.nixos.hardware-raspberry-pi-4 = _: {
     imports = [ inputs.nixos-hardware.nixosModules.raspberry-pi-4 ];
 
     # Bez tego budowa initrd pada na brakującym module dw-hdmi (generyczny

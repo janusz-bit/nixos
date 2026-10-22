@@ -16,12 +16,13 @@
     let
       inherit (customTop) domain;
       continuwuity = config.services.matrix-continuwuity.settings.global;
-      # Z pominięciem tunelu (Hermes, delegacja .well-known).
+      # Adres lokalny z pominięciem tunelu: łączy się nim Hermes, a nginx
+      # proxuje na niego .well-known.
       localUrl = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
 
       # Jedyne konto, które może rozmawiać z Hermesem. Zakładasz je jako
       # pierwsze — dostaje admina serwera.
-      owner = "@${customTop.users.matrix}:${domain}";
+      ownerId = "@${customTop.users.matrix}:${domain}";
 
       # Token konta bota @hermes:${domain}, plik env: MATRIX_ACCESS_TOKEN=…
       # i opcjonalnie MATRIX_RECOVERY_KEY=… (niżej). Bez pliku w gicie serwer
@@ -31,9 +32,9 @@
 
       hermesEnv = {
         MATRIX_HOMESERVER = localUrl;
-        MATRIX_ALLOWED_USERS = owner;
+        MATRIX_ALLOWED_USERS = ownerId;
         # Cel powiadomień (cron `deliver: "matrix"`, `hermes send matrix …`):
-        # DM z ${owner}. Nie przez /sethome — w trybie zarządzanym (Nix)
+        # DM z ownerId. Nie przez /sethome — w trybie zarządzanym (Nix)
         # Hermes nie zapisuje config.yaml, więc wybór zginąłby po restarcie.
         MATRIX_HOME_ROOM = "!dTrQicK0YGC8YxepExnDhhmVWD9O2u3QRiTwj4YaY20";
         # TLS klientów kończy się w Cloudflare, więc treść rozmów chroni

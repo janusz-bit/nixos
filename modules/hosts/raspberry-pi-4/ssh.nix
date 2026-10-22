@@ -28,6 +28,8 @@
           keys.hosts.raspberry-pi-4
           keys.users.phone
         ];
+        # Klucz głównego użytkownika laptopa: `ssh ssh.<domena>` loguje jako
+        # root (tunel).
         root.openssh.authorizedKeys.keys = [ keys.users.janusz-bit ];
       };
     };

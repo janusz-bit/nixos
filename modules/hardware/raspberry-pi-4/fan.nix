@@ -21,7 +21,7 @@ _: {
         description = "Waveshare PWM Fan Control";
         wantedBy = [ "multi-user.target" ];
         # rpi-lgpio nie wykrywa rewizji płytki: w device tree tego kernela
-        # brakuje węzła system/ (temporary-fixes.md).
+        # brakuje węzła system/ (temporary-fixes.md nr 7).
         environment.RPI_LGPIO_REVISION = "0xc03114"; # RPi4B Rev 1.4
         serviceConfig = {
           ExecStart = "${python.interpreter} ${./_fan/pwm_fan.py}";

@@ -27,8 +27,9 @@
           or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — zdefiniuj go w modules/hosts/base/secrets.nix")
         ).path;
 
-      # Zmienna env czytana z sekretu agenix (nazwa z base-secrets).
-      secretEnv = var: secret: { inherit var secret; };
+      # envFromSecret ZMIENNA SEKRET: ZMIENNA z pliku age.secrets.SEKRET (nazwy
+      # sekretów z base-secrets).
+      envFromSecret = var: secret: { inherit var secret; };
 
       # name: nazwa funkcji fish; exec: zawijane polecenie (domyślnie name).
       fishWrappers = [
@@ -37,35 +38,36 @@
           description = "prime-agent z kluczami OLLAMA/OPENROUTER i tokenem Trilium z agenix";
           # Tych nazw zmiennych używają models.json i settings.json (base-prime-agent).
           vars = [
-            (secretEnv "OLLAMA_API_KEY" "ollama-api-key")
-            (secretEnv "OPENROUTER_API_KEY" "openrouter-api-key")
-            (secretEnv "TRILIUM_ETAPI_TOKEN" "trilium-etapi")
+            (envFromSecret "OLLAMA_API_KEY" "ollama-api-key")
+            (envFromSecret "OPENROUTER_API_KEY" "openrouter-api-key")
+            (envFromSecret "TRILIUM_ETAPI_TOKEN" "trilium-etapi")
           ];
         }
         {
           name = "opencode";
           description = "opencode z kluczami API z agenix";
           vars = [
-            (secretEnv "OLLAMA_API_KEY" "ollama-api-key")
-            (secretEnv "OPENCODE_GO_API_KEY" "opencode")
+            (envFromSecret "OLLAMA_API_KEY" "ollama-api-key")
+            (envFromSecret "OPENCODE_GO_API_KEY" "opencode")
             # Plik env ("KLUCZ=wartość"): wartość to wszystko za pierwszym '='.
-            {
-              var = "LLMGATEWAY_API_KEY";
-              secret = "llmgateway-api-key-shared";
-              valueFilter = "string split -m1 -f2 '='";
-            }
+            (
+              envFromSecret "LLMGATEWAY_API_KEY" "llmgateway-api-key-shared"
+              // {
+                valueFilter = "string split -m1 -f2 '='";
+              }
+            )
           ];
         }
         {
           name = "gemini";
           description = "gemini CLI z kluczem GOOGLE z agenix";
-          vars = [ (secretEnv "GOOGLE_API_KEY" "google-api-key") ];
+          vars = [ (envFromSecret "GOOGLE_API_KEY" "google-api-key") ];
         }
         {
           name = "cachix-push";
           exec = "cachix push";
           description = "cachix push z tokenem z agenix";
-          vars = [ (secretEnv "CACHIX_AUTH_TOKEN" "cachix-authtoken") ];
+          vars = [ (envFromSecret "CACHIX_AUTH_TOKEN" "cachix-authtoken") ];
         }
       ];
 

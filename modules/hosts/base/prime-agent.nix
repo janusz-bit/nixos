@@ -18,10 +18,10 @@
       user = config.customBot.defaultUser;
       agentDir = "${config.users.users.${user}.home}/.prime/agent";
 
-      # Thinking + obraz na wejściu (modele Ollamy: `ollama show <model>`,
-      # Capabilities). Schemat prime-agenta dopuszcza tylko input
-      # ["text","image"] — modalności "video" nie ma w walidatorze.
-      reasoningModel = id: {
+      # Model z myśleniem i obrazem na wejściu (u modeli Ollamy sprawdź
+      # w `ollama show <model>`, sekcja Capabilities). Schemat prime-agenta zna
+      # tylko input "text" i "image" — "video" odrzuca walidator.
+      visionReasoningModel = id: {
         inherit id;
         reasoning = true;
         input = [
@@ -46,7 +46,7 @@
             };
             models = [
               { id = "ornith:35b"; }
-              (reasoningModel "kimi-k3:cloud")
+              (visionReasoningModel "kimi-k3:cloud")
             ];
           };
           ollama-cloud = {
@@ -54,8 +54,8 @@
             api = "openai-completions";
             apiKey = "OLLAMA_API_KEY";
             models = [
-              (reasoningModel "deepseek-v4.1-flash:cloud")
-              (reasoningModel "glm-5.3-flash:cloud")
+              (visionReasoningModel "deepseek-v4.1-flash:cloud")
+              (visionReasoningModel "glm-5.3-flash:cloud")
             ];
           };
           openrouter = {
@@ -64,7 +64,7 @@
             apiKey = "OPENROUTER_API_KEY";
             models = [
               (
-                reasoningModel "deepseek/deepseek-v4.1-flash"
+                visionReasoningModel "deepseek/deepseek-v4.1-flash"
                 // {
                   name = "DeepSeek V4.1 Flash (OpenRouter)";
                   contextWindow = 1048576;

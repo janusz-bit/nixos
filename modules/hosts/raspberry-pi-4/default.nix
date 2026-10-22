@@ -45,6 +45,8 @@
       system.stateVersion = "26.05";
       time.timeZone = customTop.locale.timeZone;
 
+      # Hasło początkowe z obrazu SD: zmienić `passwd` po pierwszym logowaniu
+      # (SSH i tak przyjmuje tylko klucze).
       users.users.${user} = {
         initialPassword = user;
         isNormalUser = true;

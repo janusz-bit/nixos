@@ -11,6 +11,9 @@
   ];
 
   fileSystems."/" = {
+    # Stały UUID, który make-ext4-fs nadaje partycji root obrazu SD
+    # (sd-image.nix bez rootPartitionUUID); obraz przeniesiony dd na SSD go
+    # zachowuje.
     device = "/dev/disk/by-uuid/44444444-4444-4444-8888-888888888888";
     fsType = "ext4";
   };

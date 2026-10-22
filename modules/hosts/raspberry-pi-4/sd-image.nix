@@ -6,7 +6,7 @@
 # aarch64), zapis: dd na kartę/dysk; partycja rozszerza się przy 1. starcie.
 { inputs, self, ... }:
 {
-  flake.modules.nixos.rpi-sd-image = {
+  flake.modules.nixos.rpi-sd-image = _: {
     imports = [ "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix" ];
     sdImage = {
       expandOnBoot = true;

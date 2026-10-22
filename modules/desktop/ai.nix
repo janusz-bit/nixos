@@ -1,6 +1,7 @@
 # Narzędzia AI stacji roboczej: lokalna Ollama i llama.cpp, agenty kodujące
 # (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz
 # alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
+#
 # Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII).
 { inputs, customTop, ... }:
 {
@@ -18,7 +19,7 @@
       # Zawsze w devShellu: hooki z .claude/ i pre-commit potrzebują jego narzędzi.
       # `env -C` nie zmienia katalogu bieżącej powłoki; argumenty przechodzą
       # dalej (`claude-nixos --continue`).
-      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.place} nix develop -c claude";
+      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.path} nix develop -c claude";
 
       services.ollama = {
         enable = true;
@@ -28,16 +29,17 @@
         package = lib.mkIf config.hardware.nvidia.enabled pkgs.ollama-cuda;
       };
 
+      # Bez uv: jest w base (hosts/base/configuration.nix).
       environment.systemPackages = with pkgs; [
-        # uv jest w base (hosts/base/configuration.nix).
         codex
         claude-code
         # chatgpt z nixpkgs jest tylko na aarch64-darwin; llm-agents ma deb x86_64.
         inputs.llm-agents.packages.${system}.chatgpt
         repomix
         nodejs
-        # Bez pythonowego unsloth: torch z nixpkgs nie ma tu CUDA, a unsloth bez GPU
-        # się nie importuje. Fine-tuning w projekcie uv z kołami torch+CUDA.
+        # Python bez biblioteki unsloth (unsloth-desktop niżej to osobna
+        # aplikacja): torch z nixpkgs nie ma tu CUDA, a unsloth bez GPU się nie
+        # importuje. Fine-tuning w projekcie uv z kołami torch+CUDA.
         (python3.withPackages (python-pkgs: [ python-pkgs.pip ]))
         antigravity-ide-fhs
         antigravity-cli

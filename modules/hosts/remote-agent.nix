@@ -1,7 +1,7 @@
 # Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos): konto
 # claude-remote na laptopie, a na RPi `ssh laptop` i `laptop-run` do ewaluacji
-# i buildów x86_64 (krok 3 weryfikacji), które na RPi trwają minuty albo są
-# niewykonalne.
+# i buildów x86_64 (krok 3 weryfikacji z AGENTS.md), które na RPi trwają
+# minuty albo są niewykonalne.
 #
 # Granica zaufania: laptop ma roota na RPi, a RPi jest wystawione do internetu
 # (tunel: Nextcloud, ttyd, Hermes). Klucz z RPi NIE loguje więc na konto
@@ -16,6 +16,9 @@
 # - aktywacja (switch) zostaje u użytkownika (`update-local`).
 # Ryzyko resztkowe: zwykłe konto lokalne widzi usługi na localhost (ollama
 # :11434 bez autoryzacji) i może obciążyć CPU/dysk.
+#
+# Działa tylko przy włączonym laptopie w domowym LAN-ie; fail2ban laptopa nie
+# ignoruje LAN-u (base/fail2ban.nix), więc 5 nieudanych logowań banuje RPi.
 { customTop, ... }:
 let
   inherit (customTop) keys;

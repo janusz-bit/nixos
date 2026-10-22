@@ -3,10 +3,11 @@
 # się w modules/hosts/<nazwa>/default.nix; procedura nowego hosta: README.md.
 #
 # Rejestr ustawia: nazwa hosta = nazwa konfiguracji = networking.hostName =
-# customBot.flakeTarget (cel aliasów update/push); polegają na tym
-# post-install (wpisy keys.nix) i nixos-rebuild bez `#<host>`. Obraz SD
-# (sd-image.nix), składany poza rejestrem, ustawia te same wartości sam; inna
-# wartość niż nazwa w rejestrze to błąd ewaluacji.
+# customBot.flakeTarget (cel aliasów update/push); host, który ustawi inną
+# wartość, kończy ewaluację błędem (conflicting definition values). Polegają
+# na tym post-install (wpisy keys.nix) i nixos-rebuild bez `#<host>`. Obraz
+# SD (sd-image.nix) składa moduł hosta poza rejestrem, więc ustawia te
+# wartości sam.
 #
 # Pułapki ewaluacji:
 # - `modules` to types.raw, nie deferredModule: ten opakowuje każdą definicję

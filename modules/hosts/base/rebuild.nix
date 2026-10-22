@@ -8,27 +8,27 @@
   flake.modules.nixos.base-rebuild =
     { config, ... }:
     let
-      inherit (customTop.repository) flake place;
+      inherit (customTop.repository) flake path;
       inherit (config.customBot) flakeTarget;
       rebuild =
-        mode: remote:
+        mode: flakeRef:
         let
-          flakeRef = if remote then flake else place;
+          refresh = lib.optionalString (flakeRef == flake) " --refresh";
         in
-        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${flakeTarget}${lib.optionalString remote " --refresh"}";
-      sudoRebuild = mode: remote: "sudo ${rebuild mode remote}";
+        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${flakeTarget}${refresh}";
+      sudoRebuild = mode: flakeRef: "sudo ${rebuild mode flakeRef}";
     in
     {
       environment.shellAliases = {
-        update = sudoRebuild "switch" true;
-        update-boot = sudoRebuild "boot" true;
+        update = sudoRebuild "switch" flake;
+        update-boot = sudoRebuild "boot" flake;
         # Jedno sudo na całość: po długim buildzie osobne `sudo systemctl reboot`
         # pytałoby znowu o hasło (wygasły timestamp) i reboot by nie nastąpił.
-        update-reboot = "sudo sh -c '${rebuild "boot" true} && systemctl reboot'";
-        update-local = sudoRebuild "switch" false;
-        update-local-boot = sudoRebuild "boot" false;
+        update-reboot = "sudo sh -c '${rebuild "boot" flake} && systemctl reboot'";
+        update-local = sudoRebuild "switch" path;
+        update-local-boot = sudoRebuild "boot" path;
       };
 
-      programs.fish.shellAliases.update-my-pkgs = "nix run ${place}#flake-update";
+      programs.fish.shellAliases.update-my-pkgs = "nix run ${path}#flake-update";
     };
 }

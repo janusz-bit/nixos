@@ -9,7 +9,7 @@
 # przy aktywacji.
 # - Aktywacja pisze w /var/lib/hermes wyłącznie jako hermes (setpriv), nigdy
 #   jako root: moduł to kopia upstreamu z _hermes-agent/ (zmiany w jej
-#   nagłówku, temporary-fixes.md). Wpisy HERMES_HOME innych kont przejmuje
+#   nagłówku, temporary-fixes.md nr 2). Wpisy HERMES_HOME innych kont przejmuje
 #   kopią, oryginały zostają jako .foreign-<nazwa> do usunięcia:
 #   `sudo rm -r /var/lib/hermes/.hermes/.foreign-*`.
 # - CLI (hermes, hermes-acp, hermes-agent) to opakowania hermesCli przez
@@ -64,7 +64,7 @@
       # dla statycznych tekstów CLI, bramki i TUI; odpowiedzi modelu bez zmian.
       # Commit = v0.2.0 z plugin.yaml — upstream nie otagował tej wersji.
       # Bez `requires_hermes`: pakiet Nix Hermesa stempluje wersję 0.0.0, więc
-      # loader pominąłby plugin (temporary-fixes.md).
+      # loader pominąłby plugin (temporary-fixes.md nr 5).
       polishLanguagePack = pkgs.applyPatches {
         name = "hermes-lang-pl";
         src = pkgs.fetchFromGitHub {
@@ -79,7 +79,7 @@
       };
 
       cfg = config.services.hermes-agent;
-      common = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
+      hermesCommon = import "${inputs.hermes-agent}/nix/moduleCommon.nix" { inherit lib; };
       hermesHome = "${cfg.stateDir}/.hermes";
 
       # Pliki env łączy w $HERMES_HOME/.env aktywacja modułu procesem z uid
@@ -98,14 +98,14 @@
         pkgs.writeShellScriptBin name ''
           if [ "$(${pkgs.coreutils}/bin/id -un)" = ${lib.escapeShellArg cfg.user} ]; then
             export HERMES_HOME="''${HERMES_HOME:-${hermesHome}}"
-            exec ${common.effectivePackage cfg}/bin/${name} "$@"
+            exec ${hermesCommon.effectivePackage cfg}/bin/${name} "$@"
           fi
           exec /run/wrappers/bin/sudo -u ${cfg.user} -H -- ${pkgs.coreutils}/bin/env \
             HERMES_HOME=${hermesHome} \
             PATH=${
-              lib.makeBinPath (common.processPath { inherit pkgs cfg; })
+              lib.makeBinPath (hermesCommon.processPath { inherit pkgs cfg; })
             }:/etc/profiles/per-user/${cfg.user}/bin:/run/current-system/sw/bin \
-            ${common.effectivePackage cfg}/bin/${name} "$@"
+            ${hermesCommon.effectivePackage cfg}/bin/${name} "$@"
         '';
 
       # Ollama dostaje tylko OLLAMA_API_KEY (modele `:cloud` bez klucza: 401),
@@ -123,7 +123,7 @@
     in
     {
       imports = [
-        # Kopia modułu upstream (_hermes-agent/, temporary-fixes.md).
+        # Kopia modułu upstream (_hermes-agent/, temporary-fixes.md nr 2).
         (import ./_hermes-agent/nixos-module.nix {
           inputs.self = inputs.hermes-agent;
         }).flake.nixosModules.default
@@ -162,7 +162,7 @@
           settings = {
             # Bez zgód: skutki prompt injection ogranicza konto hermes (nagłówek).
             execution.require_approval = false;
-            # „Mózg": Claude Code na subskrypcji (claudeSubscriptionPlugin); dane
+            # „Mózg”: Claude Code na subskrypcji (claudeSubscriptionPlugin); dane
             # w /var/lib/hermes/.claude (0600 hermes). Plugin nie startuje, gdy
             # w środowisku usługi są ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN lub
             # ANTHROPIC_BASE_URL — nie dodawać ich do hermes-env.age.
@@ -276,7 +276,7 @@
 
         hermes-agent.serviceConfig = {
           # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie
-          # blokują start (temporary-fixes.md). Rekord hosta (gateway-locks
+          # blokują start (temporary-fixes.md nr 3). Rekord hosta (gateway-locks
           # w $XDG_STATE_HOME) przeżywa też twardy reset: jego PID trafia potem
           # na inny proces, a bramka czeka na niego bez końca. Bez „+”: katalog
           # należy do hermes, więc rm działa jako użytkownik usługi niezależnie

@@ -1,14 +1,21 @@
-# customTop: wszystko, co jest specyficzne dla tego repozytorium i jego
-# właściciela (konto GitHub, e-mail, domena, konta użytkowników, język
-# i strefa czasowa, domowy LAN, cache binarne, sekrety i klucze publiczne),
-# podane jako argument każdego modułu flake-parts.
+# customTop: wartości specyficzne dla tego repozytorium i jego właściciela
+# (konto GitHub, e-mail, domena, konta użytkowników, język i strefa czasowa,
+# domowy LAN, cache binarne, sekrety i klucze publiczne), podane jako argument
+# każdego modułu flake-parts.
 #
 # To _module.args, nie opcje: wartości są te same na każdym hoście. Moduły
 # NixOS biorą je z domknięcia pliku (`{ customTop, ... }:` na górze), nie
 # z `config`; ustawienia zależne od hosta to opcje customBot
 # (modules/hosts/base/options.nix). Literałów stąd nie powiela się w modułach.
-# Wyjątki, które nix czyta bez ewaluacji: inputs i nixConfig we flake.nix
-# oraz modules/_secrets/keys.nix (importuje go też agenix CLI).
+# Wyjątki spoza customTop: inputs i nixConfig we flake.nix (nix czyta je przed
+# ewaluacją, więc muszą być literałami) oraz modules/_secrets/keys.nix
+# (samodzielne wyrażenie bez argumentów: importuje go secrets.nix dla agenix
+# CLI, a `post-install ssh` podmienia w nim tekst kluczy).
+#
+# Fork: poza tym plikiem trzeba zmienić nixConfig i wejście brulion we
+# flake.nix, _secrets/keys.nix i wszystkie pliki .age, MATRIX_HOME_ROOM
+# (hosts/raspberry-pi-4/matrix.nix), tunel w cloudflared.nix, dysk i wpis
+# Windows laptopa (hosts/nixos/disko.nix, boot.nix) oraz modules/hardware/.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.nix.settings.extra-substituters`
 # daje tę samą listę co nixConfig we flake.nix.
@@ -17,27 +24,29 @@ let
   owner = "janusz-bit";
   repositoryName = "nixos";
   cachixName = "janusz-bit";
-  # Jedyna lista cache to nixConfig we flake.nix (literał — nix czyta go przed
-  # ewaluacją); hosty biorą z niego te same listy (base-nix).
   inherit (import ../flake.nix) nixConfig;
 in
 {
   _module.args.customTop = {
     # Konto GitHub, zarazem autor commitów (git user.name).
-    inherit owner nixConfig;
+    inherit owner;
     email = "janusz-bit@proton.me";
+    # Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą domeną,
+    # reszta usług RPi pod <usługa>.<domena> (cloudflared.nix).
     domain = "janusz-bit.com";
 
     repository = {
       name = repositoryName;
       flake = "github:${owner}/${repositoryName}";
       url = "https://github.com/${owner}/${repositoryName}.git";
-      # Klon na każdym hoście (update-local, claude-nixos).
-      place = "/etc/nixos";
+      # Lokalny klon na każdym hoście (update-local, claude-nixos,
+      # install-system).
+      path = "/etc/nixos";
     };
 
     users = {
-      # customBot.defaultUser laptopa; pozostałe hosty mają domyślne konto.
+      # Główne konto hosta (customBot.defaultUser): laptop ma własne,
+      # pozostałe hosty `default` (base/options.nix).
       laptop = "dinosaur";
       default = "nixos";
       # Konto Matrix (@<nazwa>:<domena>), jedyne, któremu odpowiada Hermes.
@@ -46,7 +55,7 @@ in
 
     locale = {
       timeZone = "Europe/Warsaw";
-      language = "pl_PL.UTF-8";
+      defaultLocale = "pl_PL.UTF-8";
       keyMap = "pl2";
       xkbLayout = "pl";
       wifiRegdom = "PL";
@@ -59,6 +68,11 @@ in
       subnet = "192.168.100.0/24";
       laptop = "192.168.100.14";
     };
+
+    # Jedyna lista cache to nixConfig we flake.nix (literał: nix czyta go
+    # przed ewaluacją); hosty biorą z niej nix.settings (base-nix), a cachix
+    # niżej swój klucz.
+    inherit nixConfig;
 
     # Własny cache: alias `push` i CI (cachix-action).
     cachix = {

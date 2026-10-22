@@ -1,6 +1,8 @@
-# Opcje customBot: ustawienia zależne od hosta z wartościami domyślnymi
-# (cel aliasów update/push, fastfetch w powitaniu fish, główny użytkownik,
-# endpoint MCP Trilium); host nadpisuje je w swoim default.nix.
+# Opcje customBot: ustawienia zależne od hosta (cel aliasów update/push,
+# fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium,
+# dodatkowi providerzy Prime Agenta). flakeTarget (bez wartości domyślnej)
+# ustawia rejestr hostów i sd-image.nix, primeAgentProviders
+# skills/external.nix, a resztę host nadpisuje w swoim default.nix.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
 { customTop, ... }:

@@ -1,4 +1,8 @@
-# Instalacja hosta nixos — paczki:
+# Instalacja hosta nixos: install-system (z live ISO, z siecią),
+# install-system-offline (wbudowany w ISO z iso.nix) i post-install (kroki
+# na nowym systemie).
+#
+# Paczki:
 #   install-system          z live ISO: `nix run github:janusz-bit/nixos` albo
 #                           `nix run .` z klonu (packages.default; na stockowym
 #                           ISO: `nix --extra-experimental-features
@@ -30,7 +34,9 @@
       installHost = "nixos";
       host = self.nixosConfigurations.${installHost};
       inherit (host) config;
-      inherit (customTop.repository) place url;
+      inherit (customTop.repository) url;
+      # Nazwa jak zmienna $place w skryptach (też _install/post-install.sh).
+      place = customTop.repository.path;
       inherit (config.disko) rootMountPoint;
       user = config.customBot.defaultUser;
       inherit (config.users.users.${user}) group;
@@ -293,6 +299,8 @@
 
             usage() { printf '%s' ${lib.escapeShellArg postInstallUsage}; }
           ''
+          # post-install.sh nie definiuje place ani usage, tylko używa tych
+          # z prefiksu wyżej.
           + builtins.readFile ./_install/post-install.sh;
         };
       };
