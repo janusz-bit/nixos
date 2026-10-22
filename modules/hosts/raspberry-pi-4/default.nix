@@ -1,9 +1,8 @@
 # Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB),
 # usługi wystawione wyłącznie przez Cloudflare Tunnel (cloudflared.nix).
-# Tu: wpis rejestru, tożsamość (hostname, stateVersion, konto) i lista
-# modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/.
-# Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza
-# rejestrem hostów.
+# Tu: wpis rejestru, stateVersion, konto i lista modułów hosta; płytka
+# i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base,
+# bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
 { self, customTop, ... }:
 {
   hosts.raspberry-pi-4 = {
@@ -43,12 +42,8 @@
         self.modules.nixos.ai-skills
       ];
 
-      networking.hostName = "raspberry-pi-4";
       system.stateVersion = "26.05";
       time.timeZone = customTop.locale.timeZone;
-      # Ustawia to też rejestr hostów; tutaj dla obrazu SD, który składa ten
-      # moduł poza rejestrem.
-      customBot.flakeTarget = "raspberry-pi-4";
 
       users.users.${user} = {
         initialPassword = user;

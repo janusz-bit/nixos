@@ -4,9 +4,7 @@
 #
 # Hermes odpowiada tylko kontu właściciela (MATRIX_ALLOWED_USERS): w DM
 # zawsze, w pokojach z innymi osobami tylko na @wzmiankę (domyślne
-# MATRIX_REQUIRE_MENTION). TLS kończy się w Cloudflare, dlatego E2EE jest
-# wymagane. Bez hermes-matrix.age (token bota) w gicie serwer działa,
-# ewaluacja ostrzega, a Hermes się nie łączy.
+# MATRIX_REQUIRE_MENTION).
 #
 # Sprawdzenie: `systemctl status continuwuity`,
 # `curl -s http://127.0.0.1:6167/_matrix/client/versions`,
@@ -17,25 +15,22 @@
     { config, lib, ... }:
     let
       inherit (customTop) domain;
-      # Adres serwera dla klientów (Element) — przez Cloudflare Tunnel
-      # (cloudflared.nix). ID kont: @nazwa:${domain} (server_name).
-      clientUrl = "https://matrix.${domain}";
       continuwuity = config.services.matrix-continuwuity.settings.global;
+      # Z pominięciem tunelu (Hermes, delegacja .well-known).
+      localUrl = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
 
-      # Jedyne konto, które może rozmawiać z Hermesem (customTop.users.matrix).
-      # Zakładasz je jako pierwsze — dostaje admina serwera.
+      # Jedyne konto, które może rozmawiać z Hermesem. Zakładasz je jako
+      # pierwsze — dostaje admina serwera.
       owner = "@${customTop.users.matrix}:${domain}";
 
-      # Token dostępu konta bota @hermes:${domain}, plik env:
-      #   MATRIX_ACCESS_TOKEN=…
-      #   MATRIX_RECOVERY_KEY=…   (opcjonalnie, patrz niżej)
-      # Dopóki pliku nie ma w gicie, serwer działa, a Hermes się nie łączy.
+      # Token konta bota @hermes:${domain}, plik env: MATRIX_ACCESS_TOKEN=…
+      # i opcjonalnie MATRIX_RECOVERY_KEY=… (niżej). Bez pliku w gicie serwer
+      # działa, a Hermes się nie łączy (ostrzeżenie).
       secretFile = customTop.secretsDir + "/hermes-matrix.age";
       hasSecret = builtins.pathExists secretFile;
 
       hermesEnv = {
-        # Bezpośrednio, z pominięciem tunelu.
-        MATRIX_HOMESERVER = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
+        MATRIX_HOMESERVER = localUrl;
         MATRIX_ALLOWED_USERS = owner;
         # Cel powiadomień (cron `deliver: "matrix"`, `hermes send matrix …`):
         # DM z ${owner}. Nie przez /sethome — w trybie zarządzanym (Nix)
@@ -64,26 +59,23 @@
           enable = true;
           settings.global = {
             server_name = domain;
-            # Prywatny kanał do Hermesa, nie serwer publiczny: bez federacji
-            # (pushe na telefon idą osobnym klientem do bramki push z
-            # rejestracji klienta, więc działają) i bez otwartej rejestracji.
-            # Pierwsze konto zakłada się jednorazowym tokenem, który serwer
-            # wypisuje przy pierwszym starcie (journalctl -u continuwuity);
-            # kolejne tworzy admin w pokoju #admins: !admin users create-user …
+            # Prywatny kanał do Hermesa: bez federacji (pushe na telefon idą
+            # bramką push klienta, więc działają) i bez otwartej rejestracji.
+            # Pierwsze konto: jednorazowy token z `journalctl -u continuwuity`
+            # (pierwszy start); kolejne: `!admin users create-user …` w #admins.
             allow_federation = false;
             trusted_servers = [ ];
-            well_known.client = clientUrl;
+            # Klienci (Element) przez tunel (cloudflared.nix).
+            well_known.client = "https://matrix.${domain}";
           };
         };
 
-        # server_name to domena główna, którą serwuje Nextcloud — delegacja
-        # klientów (wpisujących samo ${domain}) na matrix.${domain}. Dokładne
-        # `=` ma pierwszeństwo przed `^~ /.well-known` z modułu nextcloud.
-        # Odpowiedź (z well_known.client) i nagłówek CORS daje continuwuity —
-        # własny add_header w lokacji skasowałby nagłówki bezpieczeństwa
-        # vhosta (gixy: add_header_redefinition).
-        services.nginx.virtualHosts.${domain}.locations."= /.well-known/matrix/client".proxyPass =
-          "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
+        # server_name to domena główna, którą serwuje Nextcloud: delegacja
+        # klientów na matrix.${domain}. Dokładne `=` ma pierwszeństwo przed
+        # `^~ /.well-known` z modułu nextcloud. Odpowiedź i nagłówek CORS daje
+        # continuwuity — własny add_header w lokacji skasowałby nagłówki
+        # bezpieczeństwa vhosta (gixy: add_header_redefinition).
+        services.nginx.virtualHosts.${domain}.locations."= /.well-known/matrix/client".proxyPass = localUrl;
       }
 
       (lib.mkIf hasSecret {
@@ -91,7 +83,7 @@
         # usługi (jak hermes-env w hermes.nix).
         age.secrets.hermes-matrix = {
           file = secretFile;
-          owner = "hermes";
+          owner = config.services.hermes-agent.user;
           mode = "0400";
         };
 

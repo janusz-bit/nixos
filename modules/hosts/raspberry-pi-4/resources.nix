@@ -25,8 +25,8 @@ _: {
       };
     };
 
-    # Serwer headless: bez /share/doc. Przy okazji nie buduje się
-    # python3.11-doc (nixpkgs#499166), więc overlay python-docs-fix jest zbędny.
+    # Włączona dokumentacja ciągnie przez python311 budowę python3.11-doc,
+    # która pada (nixpkgs#499166, temporary-fixes.md).
     documentation.doc.enable = false;
   };
 }

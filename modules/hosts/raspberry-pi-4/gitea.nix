@@ -17,13 +17,11 @@
           ROOT_URL = "https://git.${customTop.domain}/";
           HTTP_ADDR = "127.0.0.1";
           HTTP_PORT = 3000;
-          DISABLE_SSH = false;
           START_SSH_SERVER = false;
-          # Adres klonowania przez SSH: git.<domena> tunel podaje tylko jako
-          # HTTP, sshd osiąga ssh.<domena> (`cloudflared access ssh` z bloku
-          # `Host ssh.*` w base-ssh; jawny `gitea@` wygrywa z `User root`).
+          # Klonowanie przez SSH idzie przez ssh.<domena> (git.<domena> tunel
+          # podaje tylko jako HTTP); jawny `gitea@` wygrywa z `User root`
+          # z bloku `Host ssh.*` w base-ssh.
           SSH_DOMAIN = "ssh.${customTop.domain}";
-          SSH_PORT = 22;
         };
         service.DISABLE_REGISTRATION = true;
         session.COOKIE_SECURE = true;

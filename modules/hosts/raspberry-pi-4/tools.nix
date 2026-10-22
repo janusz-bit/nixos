@@ -11,11 +11,10 @@
         ripgrep
         ffmpeg
         python311
-        tea # Gitea official CLI client
+        tea # CLI Gitei
         antigravity-cli
-        # Claude Code — agent kodujący w terminalu (nixpkgs)
         claude-code
-        # OpenCode 2 CLI z llm-agents (binarka opencode2 obok opencode v1)
+        # Binarka opencode2 (obok opencode v1).
         inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode2
       ];
     };
