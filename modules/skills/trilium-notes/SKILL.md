@@ -9,12 +9,11 @@ Trilium's built-in HTTP MCP server (Trilium 0.106; the server must have the
 *MCP server* option enabled in Options -> AI/LLM), Bearer auth with an ETAPI
 token. Server URL comes from `TRILIUM_MCP_URL`, set for every session from
 `customBot.triliumMcpUrl` (`modules/hosts/base/options.nix`, exported in
-`modules/hosts/base/prime-agent.nix`):
-
-- raspberry-pi-4: `http://127.0.0.1:8081/mcp` (option default; also the
-  fallback in `src/trilium_notes/__init__.py` when the variable is unset),
-- nixos (laptop): `http://127.0.0.1:37840/mcp` (desktop Trilium, set in
-  `modules/hosts/nixos/default.nix`).
+`modules/hosts/base/prime-agent.nix`): only the laptop (host `nixos`) sets it,
+to the desktop Trilium at `http://127.0.0.1:37840/mcp`
+(`modules/hosts/nixos/default.nix`; also the fallback in
+`src/trilium_notes/__init__.py` when the variable is unset). Hosts without it
+get neither this skill nor the token.
 
 The token is read from `TRILIUM_ETAPI_TOKEN` (the fish wrapper `prime-agent`
 from `modules/hosts/base/agenix.nix` sets it for that process only); if the
@@ -79,10 +78,7 @@ returns text notes as Markdown. Use native structures only — no inline
 
 ## Details
 
-- Server (raspberry-pi-4): systemd unit `trilium-server`
-  (`modules/hosts/raspberry-pi-4/trilium.nix`), port 8081, data dir
-  `/var/lib/trilium`.
-- Server (nixos): desktop app `trilium-desktop`
+- Server: desktop app `trilium-desktop`
   (`modules/desktop/apps.nix`), started manually — MCP works only
   while it runs; port 37840, data dir `~/trilium-data` if it exists, otherwise
   `~/.local/share/trilium-data`.
@@ -91,12 +87,9 @@ returns text notes as Markdown. Use native structures only — no inline
   `uv pip install --editable` can't work there). It is importable thanks to
   `PYTHONPATH` set from `modules/skills/default.nix` (pythonSkills).
 - The same server is also configured as `mcpServers.trilium-notes` in Prime
-  Agent's `settings.json`, and Hermes on raspberry-pi-4 uses it with the same
-  token (`modules/hosts/raspberry-pi-4/hermes.nix`, header
-  `Bearer ${TRILIUM_ETAPI_TOKEN}` from Hermes' own environment). Rotate the
-  token in Trilium (Options -> ETAPI), then update BOTH the agenix secret on
-  the laptop (`cd modules/_secrets && sudo agenix -e trilium-etapi.age -i /root/.ssh/id_ed25519`)
-  and the variable in Hermes' environment.
+  Agent's `settings.json`. Rotate the token in Trilium (Options -> ETAPI),
+  then update the agenix secret on the laptop
+  (`cd modules/_secrets && sudo agenix -e trilium-etapi.age -i /root/.ssh/id_ed25519`).
 - Destructive calls (`delete_note`, `set_note_content`, `move_note`,
   `delete_attribute`) — always confirm with the user first;
   `set_note_content` saves a note revision before overwriting.

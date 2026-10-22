@@ -9,8 +9,7 @@ Usage in the kernel:
     r = await trilium_notes.get_note_content(noteId="gizBJ1qzBFsT")
 
 The ETAPI token lives in agenix (/run/agenix/trilium-etapi, owned by the host's
-default user, 0400; group hermes may read it on raspberry-pi-4)
-and is loaded into TRILIUM_ETAPI_TOKEN for the runtime's bearer-token auth.
+default user, 0400) and is loaded into TRILIUM_ETAPI_TOKEN for the runtime's bearer-token auth.
 """
 
 from __future__ import annotations
@@ -43,16 +42,15 @@ def _load_token() -> None:
 _load_token()
 
 
-# URL MCP Trilium — hostowo zależny (TRILIUM_MCP_URL z customBot.triliumMcpUrl,
-# environment.sessionVariables w modules/hosts/base/prime-agent.nix):
-#   - raspberry-pi-4: trilium-server na 127.0.0.1:8081 (default poniżej),
-#   - nixos: desktopowy Trilium na 127.0.0.1:37840.
-_DEFAULT_URL = "http://127.0.0.1:8081/mcp"
+# URL MCP Trilium (TRILIUM_MCP_URL z customBot.triliumMcpUrl,
+# environment.sessionVariables w modules/hosts/base/prime-agent.nix); ustawia
+# go tylko laptop — desktopowy Trilium na 127.0.0.1:37840 (default poniżej).
+_DEFAULT_URL = "http://127.0.0.1:37840/mcp"
 _URL_ENV = "TRILIUM_MCP_URL"
 
 
 class TriliumMcp(McpIntegration):
-    """Client of the Trilium Notes MCP server (default: 127.0.0.1:8081,
+    """Client of the Trilium Notes MCP server (default: 127.0.0.1:37840,
     nadpisywany zmienną TRILIUM_MCP_URL — patrz _URL_ENV)."""
 
     server = "trilium-notes"

@@ -43,8 +43,7 @@
 
       customBot = {
         defaultUser = "dinosaur";
-        # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840),
-        # a nie trilium-server:8081 z raspberry-pi-4.
+        # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840).
         triliumMcpUrl = "http://127.0.0.1:37840/mcp";
       };
 

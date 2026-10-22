@@ -66,10 +66,11 @@ providera z prime-agent.nix kończy ewaluację błędem.
 ### `customBot.triliumMcpUrl`
 
 Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
-trilium-notes (TRILIUM_MCP_URL). Zależny od hosta: RPi ma
-trilium-server na 8081, laptop desktopowy Trilium na 37840.
+trilium-notes (TRILIUM_MCP_URL); null = host bez Trilium: bez
+serwera MCP, skilla i tokenu ETAPI. Laptop ustawia desktopowy
+Trilium na 37840.
 
-- Type: string
-- Default: `"http://127.0.0.1:8081/mcp"`
+- Type: null or string
+- Default: `null`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 

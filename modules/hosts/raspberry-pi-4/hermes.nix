@@ -1,8 +1,8 @@
 # Hermes Agent (Nous Research) jako usługa konta `hermes`: model główny to
 # Claude Code na subskrypcji (zapas: openai-codex, ollama-cloud), polski
-# interfejs, MCP Trilium i mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
+# interfejs, MCP mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
 #
-# Granica zaufania: agent czyta treści z sieci, notatek i komunikatorów
+# Granica zaufania: agent czyta treści z sieci i komunikatorów
 # (Matrix), więc prompt injection nie może dawać
 # roota. Konto hermes nie ma sudo, wheel, disk, keys ani trusted-users; pliki
 # z użytkownikiem nixos dzieli przez upstreamowe katalogi stanu 2770 (setgid
@@ -162,12 +162,6 @@
           owner = "hermes";
           mode = "0400";
         };
-        # Token ETAPI Trilium współdzielony z prime-agentem użytkownika nixos
-        # (właściciel z modules/hosts/base/secrets.nix) — odczyt dla grupy hermes.
-        trilium-etapi = {
-          group = "hermes";
-          mode = "0440";
-        };
       };
 
       services = {
@@ -263,15 +257,6 @@
           ];
 
           mcpServers = {
-            trilium-notes = {
-              url = "http://127.0.0.1:8081/mcp";
-              enabled = true;
-              connect_timeout = 30;
-              timeout = 60;
-              headers = {
-                Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
-              };
-            };
             # Pakiet z nixpkgs zamiast `uvx mcp-nixos` (niepinowany PyPI w runtime).
             nixos = {
               command = lib.getExe pkgs.mcp-nixos;

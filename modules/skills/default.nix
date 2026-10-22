@@ -29,8 +29,12 @@
 
       skills = {
         ai-tutor = ./ai-tutor;
-        trilium-notes = ./trilium-notes;
         obscura = ./obscura;
+      }
+      # Bez Trilium na hoście (customBot.triliumMcpUrl) skill nie ma serwera
+      # MCP ani tokenu ETAPI.
+      // lib.optionalAttrs (config.customBot.triliumMcpUrl != null) {
+        trilium-notes = ./trilium-notes;
       };
 
       # Programy, bez których skill nie działa — instalowane przez ten moduł
@@ -92,8 +96,10 @@
       # `import <skill>` i wyłącza skill z warningiem, gdy import się nie uda.
       # Dlatego src/ trafia do PYTHONPATH wrappera prime-agenta (-> kernel) i
       # skill jest importowalny out-of-the-box. Nowy skill pythonowy:
-      # dodaj do `skills` ORAZ do `pythonSkills`.
-      pythonSkills = [ "trilium-notes" ];
+      # dodaj do `skills` ORAZ do `pythonSkills`. Filtr pomija skille, których
+      # ten host nie dostaje; pusta lista daje wrapper bez zmiany PYTHONPATH
+      # (makeWrapper --prefix z pustą wartością nic nie robi).
+      pythonSkills = lib.filter (name: skills ? ${name}) [ "trilium-notes" ];
       pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
 
       # PYTHONPATH tylko dla prime-agenta — globalna zmienna sesji trafiałaby

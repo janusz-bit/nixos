@@ -31,13 +31,13 @@ _: {
           description = "Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).";
         };
         triliumMcpUrl = lib.mkOption {
-          type = lib.types.str;
-          # trilium-server z raspberry-pi-4 (modules/hosts/raspberry-pi-4/trilium.nix)
-          default = "http://127.0.0.1:8081/mcp";
+          type = lib.types.nullOr lib.types.str;
+          default = null;
           description = ''
             Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
-            trilium-notes (TRILIUM_MCP_URL). Zależny od hosta: RPi ma
-            trilium-server na 8081, laptop desktopowy Trilium na 37840.
+            trilium-notes (TRILIUM_MCP_URL); null = host bez Trilium: bez
+            serwera MCP, skilla i tokenu ETAPI. Laptop ustawia desktopowy
+            Trilium na 37840.
           '';
         };
         primeAgentProviders = lib.mkOption {

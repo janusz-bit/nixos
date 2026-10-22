@@ -131,11 +131,11 @@
           "/etc/ai-skills"
           "/etc/ai"
         ];
-        # Notatki Trilium przez MCP (endpoint zależny od hosta —
-        # customBot.triliumMcpUrl). Token tylko przez zmienną środowiskową —
+        # Notatki Trilium przez MCP, tylko na hoście z Trilium
+        # (customBot.triliumMcpUrl). Token tylko przez zmienną środowiskową —
         # literalne sekrety prime-agent odrzuca
         # (docs: packages/coding-agent/docs/mcp-integrations.md).
-        mcpServers = {
+        mcpServers = lib.optionalAttrs (config.customBot.triliumMcpUrl != null) {
           trilium-notes = {
             type = "http";
             url = config.customBot.triliumMcpUrl;
@@ -159,7 +159,7 @@
           PRIME_AGENT_TELEMETRY = "0";
           DO_NOT_TRACK = "1";
           # Skill trilium-notes (modules/skills/trilium-notes) — ten sam endpoint.
-          TRILIUM_MCP_URL = config.customBot.triliumMcpUrl;
+          TRILIUM_MCP_URL = lib.mkIf (config.customBot.triliumMcpUrl != null) config.customBot.triliumMcpUrl;
         };
 
         etc = {
