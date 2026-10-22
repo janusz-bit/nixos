@@ -1,12 +1,10 @@
 # Fork llama.cpp z PrismML (gałąź prism, wydania jako tagi prism-bNNNNN-rev):
 # formaty niskobitowe i runtime modeli Bonsai (PQ2_0, Q2_0_g64, dspark).
 # Pakiet lokalny, bo w nixpkgs go nie ma, a README forka zabrania mieszania
-# jego bibliotek ggml-* z buildem stockowego llama.cpp. Świadomie nie
-# podmienia atrybutu llama-cpp: whisper-cpp (przez kdenlive i ffmpeg-full)
-# buduje się na nagłówkach llama w wersji 0.6.0, a fork raportuje 0.2.0.
-# Stockowy llama-cpp jest w PATH (desktop/ai.nix), a fork, z tymi samymi
-# nazwami binarek, tylko pod aliasami llama-prism i bonsai-serve
-# (modules/skills/external.nix).
+# jego bibliotek ggml-* ze stockowym llama.cpp. Nie podmienia atrybutu
+# llama-cpp: whisper-cpp (przez kdenlive i ffmpeg-full) buduje się na
+# nagłówkach llama 0.6.0, a fork raportuje 0.2.0. Uruchamiany przez aliasy
+# z skills/external.nix.
 #
 # Treść to kopia pkgs/by-name/ll/llama-cpp/package.nix z przypiętego nixpkgs
 # (rev fe13242281a67641c0102cdb1087f0ebe586c7df) z podmienionym źródłem:
@@ -16,10 +14,9 @@
 # package.nix z nixpkgs.
 #
 # Sprawdzenie: `nix build .#llama-cpp-prism` (CPU) i `./result/bin/llama-cli
-# --version`; wariant CUDA buduje host nixos (skills/external.nix, cudaSupport
-# z hardware.nvidia.enabled), a `llama-prism serve --list-devices` pokazuje
-# CUDA0.
-# nvidia-offload jest zbędne: CUDA widzi dGPU bez zmiennych PRIME offload.
+# --version`; wariant CUDA (cudaSupport z hardware.nvidia.enabled) pokazuje
+# CUDA0 w `llama-prism serve --list-devices`, bez nvidia-offload (CUDA widzi
+# dGPU bez zmiennych PRIME offload).
 {
   lib,
   buildPackages,
@@ -128,13 +125,10 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-rW/pMeYEahstWuQYTFLSzwwLPpVNaGfXGez6hCg8xjA=";
   };
 
-  # Dwa błędy w testach forka wychodzą dopiero z flagami nixpkgs:
-  # test-dfly-fusion linkuje się z wewnętrznym ggml_graph_compute, którego nie
-  # eksportuje build z GGML_BACKEND_DL (mainline bramkuje tak test-barrier
-  # przez `if (NOT GGML_BACKEND_DL)`), a test-kv-mean-center tworzy model bez
-  # załadowania backendów (ta sama klasa błędu, którą upstream naprawił w
-  # test-llama-archs: ggml-org/llama.cpp#30034). Oba do usunięcia razem z
-  # --replace-fail, gdy fork je naprawi (temporary-fixes.md, wpis 9).
+  # Testy forka niezgodne z flagami nixpkgs (GGML_BACKEND_DL): test-dfly-fusion
+  # pod tym samym warunkiem co test-barrier w mainline, a test-kv-mean-center
+  # z llama_backend_init(); do usunięcia, gdy fork je naprawi
+  # (temporary-fixes.md, wpis 9).
   postPatch = ''
     substituteInPlace tests/CMakeLists.txt \
       --replace-fail ${lib.escapeShellArg "    llama_build_and_test(test-dfly-fusion.cpp)\n"} \
@@ -266,13 +260,10 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     "test-arg-parser"
     "test-thread-safety"
     "test-state-restore-fragmented"
-    # Wymaga fixture'u test-download-model (sieć); test dodano po wersji,
-    # dla której nixpkgs pisał tę listę.
+    # Wymaga fixture'u test-download-model (sieć).
     "test-save-load-state"
-    # Błędy forka: test-llama-archs pada na asercie ggml_is_padded_1d w grafie
-    # qwen35 (delta-net na backendzie BLAS), a test-generate-models nie zapisuje
-    # metadanych dspark ("key not found in model: dspark.dspark.block_size").
-    # Rollbacki wymagają fixture'u test-generate-models, więc wypadają z nim.
+    # Błędy forka (temporary-fixes.md, wpis 9); rollbacki wymagają fixture'u
+    # test-generate-models, więc wypadają z nim.
     "test-llama-archs"
     "test-generate-models"
     "test-recurrent-state-rollback"

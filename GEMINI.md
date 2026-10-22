@@ -152,7 +152,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 ### Local packages (`modules/packages/_<name>/default.nix`)
 
 - `callPackage` style with `mkDerivation (finalAttrs: { … })` / `buildGoModule (finalAttrs: { … })`; sources from `fetchFromGitHub` with `tag = "v${finalAttrs.version}"` where upstream tags releases.
-- `passthru.updateScript = nix-update-script { };` plus an entry in `flake-update` (`modules/packages/scripts.nix`) when the package should be bumped automatically.
+- `passthru.updateScript = nix-update-script { };` plus an entry in `flake-update` (`modules/packages/_scripts/flake-update.sh`) when the package should be bumped automatically.
 - `versionCheckHook` + `doInstallCheck = true` when the binary supports `--version`.
 - Complete `meta`: `description`, `homepage`, `license`, `mainProgram`, `platforms`; prebuilt binaries add `sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];`.
 - Register the package in `localPackages` (`modules/packages/packages.nix`), which exports both the overlay and `packages.<system>.<name>`.
