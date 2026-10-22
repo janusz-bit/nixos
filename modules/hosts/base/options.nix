@@ -50,6 +50,17 @@ _: {
             providera z prime-agent.nix kończy ewaluację błędem.
           '';
         };
+        agentSkills = lib.mkOption {
+          type = lib.types.attrsOf lib.types.path;
+          default = { };
+          description = ''
+            Skille (katalog z SKILL.md) dla każdego agenta kodującego hosta:
+            Prime Agent, Claude Code, Codex i opencode. Linkuje je ai-skills
+            (modules/skills/default.nix), więc działają tylko na hostach, które
+            go importują. Ta sama nazwa z dwóch definicji kończy ewaluację
+            błędem.
+          '';
+        };
       };
     };
 }

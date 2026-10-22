@@ -1,20 +1,25 @@
-# Skille agentów AI (format SKILL.md) — zarządzane deklaratywnie.
-# Źródła: modules/skills/<nazwa-skill>/ → instalowane do /etc/ai-skills.
-# Prime Agent czyta je bez importera: `skills` w settings.json
-# (modules/hosts/base/prime-agent.nix) wymienia /etc/ai-skills i /etc/ai.
+# Skille agentów AI (format SKILL.md) — zarządzane deklaratywnie. Skille
+# z customBot.agentSkills (stąd ai-tutor, obscura i nixos-system, z
+# external.nix paczki z wejść flake'a) trafiają do katalogów skilli
+# systemowych każdego agenta kodującego: Prime Agenta, Claude Code, Codexa
+# i opencode (lista agentSkillDirs), dla każdego użytkownika hosta, bez Home
+# Managera i bez plików w $HOME. Skill, który działa tylko w jednym agencie,
+# idzie do primeAgentSkills albo claudeSkills.
 #
 # Runtime drop-in: /etc/ai to katalog na skille dodawane BEZ rebuilda (ręcznie
 # lub przez samego Prime Agenta), widoczne przy następnym starcie agenta.
-# Przy kolizji nazw wygrywa wcześniejszy wpis listy, więc skille deklaratywne
-# (/etc/ai-skills) mają pierwszeństwo przed /etc/ai: nix pozostaje źródłem
-# prawdy. Inne agenty (opencode, gemini-cli) tych katalogów nie czytają.
+# Czyta go tylko Prime Agent. Przy kolizji nazw wygrywa wcześniejszy wpis
+# listy `skills` w settings.json (modules/hosts/base/prime-agent.nix), więc
+# skille deklaratywne (/etc/ai-skills) mają pierwszeństwo przed /etc/ai: nix
+# pozostaje źródłem prawdy.
 #
-# Claude Code: osobna lista `claudeSkills` → /etc/claude-code/.claude/skills,
-# katalog skilli zarządzanych (policy) czytany przez każdego użytkownika hosta
-# w każdym katalogu roboczym — bez Home Managera i bez ~/.claude/skills.
+# Antigravity (agy) nie ma katalogu skilli systemowych (tylko
+# ~/.gemini/config/skills), więc skille do niego nie trafiają.
 #
-# Skille z cudzych repozytoriów (wejścia flake'a, aktualizowane przez
-# flake-update, także dla Codexa i opencode): external.nix.
+# Sprawdzenie: `nix eval --json .#nixosConfigurations.<host>.config.environment.etc --apply 'e: builtins.filter (n: builtins.match "(ai-skills|claude-code/.claude/skills|codex/skills|opencode/skills)/.*" n != null) (builtins.attrNames e)'`;
+# po aktywacji `/skills` w Claude Code i w Codexie, w opencode2
+# `opencode2 api skill.list` dwa razy (pierwsze wywołanie w nowym katalogu
+# zwraca pustą listę, zanim serwer wczyta skille).
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills =
@@ -27,35 +32,47 @@
     let
       user = config.customBot.defaultUser;
 
-      skills = {
-        ai-tutor = ./ai-tutor;
-        obscura = ./obscura;
-      }
-      # Bez Trilium na hoście (customBot.triliumMcpUrl) skill nie ma serwera
-      # MCP ani tokenu ETAPI.
-      // lib.optionalAttrs (config.customBot.triliumMcpUrl != null) {
+      # Katalogi (względem /etc), w których agent szuka skilli systemowych bez
+      # konfiguracji użytkownika; wpis <katalog>/<nazwa> to symlink do skilla:
+      # - Prime Agent: /etc/ai-skills (lista skills w base/prime-agent.nix),
+      # - Claude Code: /etc/claude-code/.claude/skills, skille zarządzane
+      #   (`claude --debug`: „Loading skills from: managed=…”); wyłączenie per
+      #   proces: CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. `claude -p` Hermesa na
+      #   RPi (claudeSubscriptionPlugin) skilli nie użyje: plugin uruchamia go
+      #   z `--tools ''` i `--disable-slash-commands`,
+      # - Codex: /etc/codex/skills (scope ADMIN; Codex wchodzi w symlinki
+      #   katalogów),
+      # - opencode2: skanuje skills/ każdego katalogu konfiguracji, także
+      #   systemowego /etc/opencode (ten sam kod co ~/.config/opencode/skills),
+      #   więc nie potrzebuje opencode.json i działa też na RPi. Tablica
+      #   skills.paths w zarządzanym opencode.json zastępowałaby (nie
+      #   sklejała) skills.paths użytkownika.
+      agentSkillDirs = [
+        "ai-skills"
+        "claude-code/.claude/skills"
+        "codex/skills"
+        "opencode/skills"
+      ];
+
+      # Tylko Prime Agent: skill pythonowy działa w kernelu IPython Prime
+      # Agenta (pythonSkills niżej). Bez Trilium na hoście
+      # (customBot.triliumMcpUrl) skill nie ma serwera MCP ani tokenu ETAPI.
+      primeAgentSkills = lib.optionalAttrs (config.customBot.triliumMcpUrl != null) {
         trilium-notes = ./trilium-notes;
+      };
+
+      # Tylko Claude Code: część integracji claude-notify z hookami Claude Code
+      # (modules/hosts/claude-notify.nix). Program skilla zależy od hosta,
+      # więc pakiet powstaje tam, nie w skillPackages — skill tylko tam, gdzie
+      # ten moduł wdrożył klucz.
+      claudeSkills = lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
+        hermes-notify = ./hermes-notify;
       };
 
       # Programy, bez których skill nie działa — instalowane przez ten moduł
       # razem ze skillem, żeby skill nie trafił na host bez swojego narzędzia.
       skillPackages = {
         obscura = [ pkgs.obscura ];
-      };
-
-      # Skille Claude Code (format SKILL.md jak wyżej). Claude Code na Linuksie
-      # ładuje skille zarządzane z /etc/claude-code/.claude/skills/<nazwa>
-      # (`claude --debug`: „Loading skills from: managed=…”), dla każdego
-      # użytkownika i projektu; symlinki są dozwolone. Wyłączenie per proces:
-      # CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. Prime Agent ich nie dostaje.
-      claudeSkills = {
-        nixos-system = nixosSystemSkill;
-      }
-      # Program skilla (claude-notify) zależy od hosta, więc jest w
-      # modules/hosts/claude-notify.nix, nie w skillPackages —
-      # skill tylko tam, gdzie ten moduł wdrożył klucz.
-      // lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
-        hermes-notify = ./hermes-notify;
       };
 
       # nixos-system: statyczna treść + sekcja „This host” liczona z config
@@ -96,11 +113,11 @@
       # `import <skill>` i wyłącza skill z warningiem, gdy import się nie uda.
       # Dlatego src/ trafia do PYTHONPATH wrappera prime-agenta (-> kernel) i
       # skill jest importowalny out-of-the-box. Nowy skill pythonowy:
-      # dodaj do `skills` ORAZ do `pythonSkills`. Filtr pomija skille, których
-      # ten host nie dostaje; pusta lista daje wrapper bez zmiany PYTHONPATH
-      # (makeWrapper --prefix z pustą wartością nic nie robi).
-      pythonSkills = lib.filter (name: skills ? ${name}) [ "trilium-notes" ];
-      pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
+      # dodaj do `primeAgentSkills` ORAZ do `pythonSkills`. Filtr pomija
+      # skille, których ten host nie dostaje; pusta lista daje wrapper bez
+      # zmiany PYTHONPATH (makeWrapper --prefix z pustą wartością nic nie robi).
+      pythonSkills = lib.filter (name: primeAgentSkills ? ${name}) [ "trilium-notes" ];
+      pythonSkillSrcs = map (name: primeAgentSkills.${name} + "/src") pythonSkills;
 
       # PYTHONPATH tylko dla prime-agenta — globalna zmienna sesji trafiałaby
       # do każdego procesu Pythona (venvy, uv, nix-shell) i mogła przesłaniać
@@ -115,23 +132,25 @@
         '';
       };
 
-      # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
-      # Cały katalog skilla: SKILL.md, references/, a przy skillach pythonowych
-      # też src/ + pyproject.toml (kernel Prime Agenta importuje je z PYTHONPATH,
-      # bo PRIME_AGENT_KERNEL_PYTHON to read-only env — bez uv pip install).
-      etcEntries = lib.mkMerge (
-        lib.mapAttrsToList (name: path: {
-          "ai-skills/${name}".source = path;
-        }) skills
-      );
+      # Cały katalog skilla (read-only, zarządzany przez nix): SKILL.md,
+      # references/, a przy skillach pythonowych też src/ + pyproject.toml.
+      linkSkills = dir: lib.mapAttrsToList (name: path: { "${dir}/${name}".source = path; });
     in
     {
-      environment.etc = lib.mkMerge [
-        etcEntries
-        (lib.mapAttrs' (
-          name: path: lib.nameValuePair "claude-code/.claude/skills/${name}" { source = path; }
-        ) claudeSkills)
-      ];
+      customBot.agentSkills = {
+        ai-tutor = ./ai-tutor;
+        obscura = ./obscura;
+        nixos-system = nixosSystemSkill;
+      };
+
+      # mkMerge zamiast `//`: ta sama nazwa w agentSkills i w skillach jednego
+      # agenta to dwie definicje jednej opcji, więc kolizja jest błędem,
+      # a nie cichym nadpisaniem.
+      environment.etc = lib.mkMerge (
+        lib.concatMap (dir: linkSkills dir config.customBot.agentSkills) agentSkillDirs
+        ++ linkSkills "ai-skills" primeAgentSkills
+        ++ linkSkills "claude-code/.claude/skills" claudeSkills
+      );
 
       # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
       environment.systemPackages = [

@@ -29,6 +29,18 @@ Platforma hosta: nixpkgs.hostPlatform i runner CI.
 
 ## Host options (`customBot`, NixOS)
 
+### `customBot.agentSkills`
+
+Skille (katalog z SKILL.md) dla każdego agenta kodującego hosta:
+Prime Agent, Claude Code, Codex i opencode. Linkuje je ai-skills
+(modules/skills/default.nix), więc działają tylko na hostach, które
+go importują. Ta sama nazwa z dwóch definicji kończy ewaluację
+błędem.
+
+- Type: attribute set of absolute path
+- Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
 ### `customBot.defaultUser`
 
 Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).

@@ -137,7 +137,8 @@ binary cache — no channel download, versions match the system.
    `update-local` (switch from `/etc/nixos`) or `update` (switch from GitHub
    `master`, i.e. only after a push); `update-boot` / `update-local-boot` apply
    on next boot, `update-reboot` = `update-boot` + reboot.
-   Not via Claude Code's `!` prefix (no tty for the sudo password). Afterwards
+   Not through the agent's shell or Claude Code's `!` prefix (no tty for the
+   sudo password). Afterwards
    check units with `systemctl status` / `journalctl`.
 5. Rollback: the previous generation in the boot menu, or (user, root)
    `sudo nixos-rebuild switch --rollback`. Never run `nix-collect-garbage -d`
@@ -171,4 +172,4 @@ be edited directly — unless the file is a symlink into `/nix/store` or `/etc`.
 | `npm ERR! EACCES` on `-g` | → `--prefix ~/.local` or `npx` |
 | `systemctl enable` / `edit` fails or reverts | units are generated → `systemd.*` in the flake |
 | change "lost" after reboot | made imperatively → put it in the flake |
-| alias like `update-local` missing in the Bash tool | aliases and fish functions are interactive-only → give the command to the user |
+| alias like `update-local` missing in the agent's shell tool | aliases and fish functions are interactive-only → give the command to the user |
