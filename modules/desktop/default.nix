@@ -3,7 +3,7 @@
 # części funkcji importuje pojedyncze desktop-* zamiast agregatu.
 { self, ... }:
 {
-  flake.modules.nixos.desktop = {
+  flake.modules.nixos.desktop = _: {
     imports = [
       self.modules.nixos.desktop-plasma
       self.modules.nixos.desktop-audio

@@ -1,6 +1,7 @@
 # Steam z Protonem: Proton-CachyOS (x86-64-v3, z Chaotic-Nyx) jako narzędzie
 # zgodności, protontricks, Remote Play, NTSYNC w kernelu i warstwa Vulkan
 # low-latency-layer. GameMode i zmienne uruchamiania gier: gaming/gamemode.nix.
+#
 # Sprawdzenie: Steam → Ustawienia → Zgodność widzi „Proton-CachyOS x86-64-v3”;
 # `ls -l /dev/ntsync`.
 { inputs, ... }:

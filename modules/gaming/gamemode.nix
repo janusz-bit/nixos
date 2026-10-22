@@ -6,10 +6,10 @@
 # Bez ananicy-cpp (reguły CachyOS): przy cgroup v2 każda aplikacja ma własny
 # scope, a nice działa tylko w obrębie jednej cgroup (zmierzone: nice -4 vs +15
 # w osobnych scope'ach 50/50 CPU, w jednym 91/9); ioclass ignoruje scheduler
-# NVMe `none`. Jego nice -4/16 dla Konsoli/Steama blokował za to renice
-# GameMode'a, który zmienia tylko wątki z nice 0 („Refused to renice … prio was
-# (-4)”), a nixpkgs wymusza mu cgroup_realtime_workaround (KWin i Xwayland
-# w root cgroup).
+# NVMe `none`. Do tego ananicy dawało Konsoli/Steamowi nice -4/16, a GameMode
+# zmienia nice tylko wątkom z nice 0 („Refused to renice … prio was (-4)”);
+# moduł ananicy w nixpkgs wymusza też cgroup_realtime_workaround (KWin
+# i Xwayland w root cgroup).
 #
 # Sprawdzenie: `gamemoded -s` w trakcie gry („gamemode is active”),
 # `powerprofilesctl get` → performance.

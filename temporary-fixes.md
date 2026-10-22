@@ -7,9 +7,9 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 ## Zasady
 
-- Dodając fix: dopisz wpis w „Aktywne" z **warunkiem usunięcia** i linkiem
+- Dodając fix: dopisz wpis w „Aktywne” z **warunkiem usunięcia** i linkiem
   do issue upstream; w kodzie zostaw komentarz z odesłaniem do tej listy.
-- Wycofując fix: przenieś wpis do „Zamknięte" (z datą) zamiast kasować
+- Wycofując fix: przenieś wpis do „Zamknięte” (z datą) zamiast kasować
   bez śladu.
 
 ## Aktywne
@@ -273,4 +273,4 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 
 - **Pin `hermes-agent` `3f2a389c`** — zdjęty; upstream naprawił broken
   import `@hermes/shared/charge-settlement` (`topup.ts` → `nix/tui.nix`),
-  flake znowu śledzi upstream (komentarz w `flake.nix`).
+  flake znowu śledzi upstream (wejście `hermes-agent` we `flake.nix` bez pinu).

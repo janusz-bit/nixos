@@ -30,8 +30,9 @@
       # Hook generatora woła `nix run .#<generator>` na bieżącym drzewie, bo
       # wpis hooka jest przypięty do store path z chwili wejścia do dev shella:
       # przypięta paczka generowałaby pliki ze starej wersji flake'a i cofała
-      # świeże zmiany (incydent v504). W piaskownicy checks.pre-commit (CI lint)
-      # nie ma nix, więc tam działa przypięta kopia z tego samego commita.
+      # świeże zmiany (tak stary hook cofnął nowe workflowy w v504).
+      # W piaskownicy checks.pre-commit (CI lint) nie ma nix, więc tam działa
+      # przypięta kopia z tego samego commita.
       generatorHook = name: {
         enable = true;
         entry = lib.getExe (

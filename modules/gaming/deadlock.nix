@@ -7,6 +7,7 @@
 # Steam trzyma w config.vdf i nadpisuje przy wyjściu, więc flake go nie ustawi.
 # 2026-10-12: na experimental-11.0-20261001 gra działała słabo, na
 # cachyos-11.0-20260703 dobrze (ten sam SteamLinuxRuntime_4).
+#
 # Sprawdzenie: log Protona (PROTON_LOG=1) ma "dxvk.enableNvRawAccessChains = False"
 # i "shaderRawAccessChains : 0", a `journalctl -k | grep Xid` po meczu jest pusty.
 _: {

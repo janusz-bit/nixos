@@ -12,6 +12,9 @@
 # zainstalowany system uruchamiać z dyskiem `-device nvme` (initrd z facter
 # nie ma virtio_blk). Jak oficjalny ISO: root bez hasła na konsoli, obraz
 # niepodpisany (Secure Boot w BIOS musi być wyłączony).
+#
+# Build: `nix build .#packages.x86_64-linux.nixos-iso` → result/iso/*.iso
+# (dd albo Ventoy na pendrive od 32 GB).
 {
   self,
   inputs,

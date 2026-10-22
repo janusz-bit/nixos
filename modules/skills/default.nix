@@ -75,10 +75,11 @@
             "Laptop (host `nixos`, x86_64) is reachable when it is on and at home, from the account that holds `~/.ssh/id_ed25519_laptop` (`${user}`): `laptop-run <cmd>` runs `<cmd>` there as unprivileged `claude-remote` (no sudo) in a snapshot of the current git repo (tracked files with uncommitted changes), e.g. `laptop-run nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`, `laptop-run nixos-rebuild build --flake .#nixos` then `laptop-run nix store diff-closures /run/current-system ./result`. Prefer it to evaluating or building x86_64 hosts here. `ssh laptop <cmd>` for read-only state (`systemctl status`). Every failed login counts towards the laptop's fail2ban (5 → this host is banned). Activation stays with the user (`update-local`) — `modules/hosts/remote-agent.nix`.";
 
       # Skille pythonowe (src/ + pyproject.toml; każdy także w `skills`). Kernel
-      # Prime Agenta to read-only env z llm-agents: bootstrap nie zrobi
-      # `uv pip install` i wyłącza skill, którego nie zaimportuje, więc src/
-      # trafia do PYTHONPATH wrappera prime-agent. Tylko wrappera: globalna
-      # zmienna przesłaniałaby moduły innym Pythonom (venvy, uv, nix-shell).
+      # IPython Prime Agenta (PRIME_AGENT_KERNEL_PYTHON) to read-only env
+      # z llm-agents: bootstrap nie zrobi `uv pip install` i wyłącza skill,
+      # którego nie zaimportuje, więc src/ trafia do PYTHONPATH wrappera
+      # prime-agent. Tylko wrappera: globalna zmienna przesłaniałaby moduły
+      # innym Pythonom (venvy, uv, nix-shell).
       pythonSkills = [ "trilium-notes" ];
       pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
       primeAgentWithSkills = pkgs.symlinkJoin {

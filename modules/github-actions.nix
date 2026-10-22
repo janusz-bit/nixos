@@ -26,7 +26,7 @@ in
   perSystem =
     { config, pkgs, ... }:
     let
-      # Bump SHA: `git ls-remote https://github.com/<repo> 'refs/tags/<tag>^{}' 'refs/tags/<tag>'`.
+      # Nowy SHA: `git ls-remote https://github.com/<repo> 'refs/tags/<tag>^{}' 'refs/tags/<tag>'`.
       actions = {
         checkout = "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"; # v5
         installNix = "cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24"; # v31
@@ -66,7 +66,7 @@ in
         }
       ];
 
-      mkBuildWorkflow =
+      mkWorkflow =
         name:
         {
           arch,
@@ -134,7 +134,7 @@ in
       githubActions = {
         enable = true;
         workflows =
-          lib.mapAttrs mkBuildWorkflow (
+          lib.mapAttrs mkWorkflow (
             lib.mapAttrs (_: host: {
               arch = host.system;
               tags = host.buildOnTags;

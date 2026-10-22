@@ -6,7 +6,8 @@
 # ścieżką (https://forums.developer.nvidia.com/t/directx12-performance-is-terrible-on-linux/303207 ,
 # nadal otwarte); -dx11 przełącza grę na DXVK, przez które dobrze działa tu
 # Deadlock. dGPU wybiera GAMEMODERUNEXEC (gaming/gamemode.nix). Wrapper, a nie
-# zmienne sesji, bo Steam odpala go przy każdym starcie tej jednej gry.
+# zmienne sesji: -dx11 i zmienne niżej mają dotyczyć tylko tej gry.
+#
 # Sprawdzenie: Launch Options `PROTON_LOG=1 dbdrun %command%`, w ~/steam-381210.log
 # "D3D11InternalCreateDevice: Using feature level" i
 # "dxvk.enableNvRawAccessChains = False"; po meczu `journalctl -k | grep Xid`
@@ -16,8 +17,8 @@ _: {
     { lib, pkgs, ... }:
     let
       # DXVK_CONFIG tymczasowo (temporary-fixes.md nr 6): w DX11 renderuje DXVK,
-      # więc grozi ten sam zawias GPU co w Deadlocku (Xid 109), a zawieszony mecz
-      # to rozłączenie i kara w matchmakingu.
+      # więc grozi to samo zawieszenie GPU co w Deadlocku (Xid 109), a zawieszony
+      # mecz to rozłączenie i kara w matchmakingu.
       # __GL_SHADER_DISK_CACHE_SKIP_CLEANUP: sterownik NVIDII nie przycina cache
       # shaderów (także Vulkan) po przekroczeniu limitu rozmiaru, więc
       # skompilowane pipeline'y zostają między sesjami.

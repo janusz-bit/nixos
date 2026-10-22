@@ -64,9 +64,9 @@ _: {
     # zRAM zstd (priorytet 100 > swap dyskowy -1) na cały RAM jak w CachyOS: przy
     # 50% (15,5 GiB) user.slice doszedł do 14,7 GiB swapu (2026-08-28, jeszcze
     # z zswap), a nadmiar szedłby na swap LUKS (losowe odczyty przez dm-crypt
-    # zamiast dekompresji z RAM). RAM zajmują tylko
-    # skompresowane strony i tablica slotów (~130 MB). Swap NVMe zostaje dla
-    # hibernacji. Nowy rozmiar po restarcie (restartIfChanged = false).
+    # zamiast dekompresji z RAM). RAM zajmują tylko skompresowane strony
+    # i tablica slotów (~130 MB). Swap NVMe zostaje dla hibernacji. Nowy rozmiar
+    # po restarcie (restartIfChanged = false).
     zramSwap = {
       enable = true;
       algorithm = "zstd";
@@ -77,7 +77,7 @@ _: {
     systemd = {
       # 00-timeout.conf z CachyOS (tylko stop, też menedżer użytkownika niżej):
       # jednostki bez własnego TimeoutStopSec giną po 10 s zamiast 90 s. W 225
-      # wyłączeniach (mediana 2,2 s) jedyny zawias z domyślnym limitem to
+      # wyłączeniach (mediana 2,2 s) jedyne zawieszenie do domyślnego limitu to
       # cups-browsed (90 s); najdłuższy normalny stop: 6,5 s (sleep-actions).
       # Mount/swap biorą limit z DefaultTimeoutStartSec — bez zmian.
       settings.Manager.DefaultTimeoutStopSec = "10s";

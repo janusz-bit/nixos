@@ -4,7 +4,7 @@
 # jego bibliotek ggml-* ze stockowym llama.cpp. Nie podmienia atrybutu
 # llama-cpp: whisper-cpp (przez kdenlive i ffmpeg-full) buduje się na
 # nagłówkach llama 0.6.0, a fork raportuje 0.2.0. Uruchamiany przez aliasy
-# z skills/external.nix.
+# ze skills/external.nix.
 #
 # Treść to kopia pkgs/by-name/ll/llama-cpp/package.nix z przypiętego nixpkgs
 # (rev fe13242281a67641c0102cdb1087f0ebe586c7df) z podmienionym źródłem:
@@ -125,10 +125,11 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-rW/pMeYEahstWuQYTFLSzwwLPpVNaGfXGez6hCg8xjA=";
   };
 
-  # Testy forka niezgodne z flagami nixpkgs (GGML_BACKEND_DL): test-dfly-fusion
-  # pod tym samym warunkiem co test-barrier w mainline, a test-kv-mean-center
-  # z llama_backend_init(); do usunięcia, gdy fork je naprawi
-  # (temporary-fixes.md, wpis 9).
+  # Tymczasowe (temporary-fixes.md nr 9): testy forka psują się z flagami
+  # nixpkgs. test-dfly-fusion woła wewnętrzne ggml_graph_compute, którego build
+  # z GGML_BACKEND_DL nie eksportuje, więc buduje się go pod tym samym
+  # `if (NOT GGML_BACKEND_DL)` co test-barrier w mainline; test-kv-mean-center
+  # tworzy model bez załadowanych backendów, więc dostaje llama_backend_init().
   postPatch = ''
     substituteInPlace tests/CMakeLists.txt \
       --replace-fail ${lib.escapeShellArg "    llama_build_and_test(test-dfly-fusion.cpp)\n"} \
@@ -262,7 +263,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     "test-state-restore-fragmented"
     # Wymaga fixture'u test-download-model (sieć).
     "test-save-load-state"
-    # Błędy forka (temporary-fixes.md, wpis 9); rollbacki wymagają fixture'u
+    # Błędy forka (temporary-fixes.md nr 9); rollbacki wymagają fixture'u
     # test-generate-models, więc wypadają z nim.
     "test-llama-archs"
     "test-generate-models"

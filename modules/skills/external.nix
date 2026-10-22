@@ -2,9 +2,10 @@
 # opencode i Prime Agenta; obecnie Qt Development Skills (wejście
 # qt-agent-skills: Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie QML,
 # design tokeny z Figmy). Moduł jest jedynym właścicielem zarządzanego
-# /etc/opencode/opencode.json, więc wpisuje tam też lokalny model Ternary
-# Bonsai 2 27B (fork llama.cpp od PrismML), ten sam provider daje Prime
-# Agentowi i definiuje aliasy llama-prism, bonsai-serve i bonsai-serve-mtp.
+# /etc/opencode/opencode.json, więc dopisuje tam też lokalny model Ternary
+# Bonsai 2 27B (fork llama.cpp od PrismML). Z tego samego serwera korzysta
+# Prime Agent (provider llamacpp); uruchamiają go aliasy bonsai-serve
+# i bonsai-serve-mtp, a llama-prism daje pozostałe polecenia forka.
 #
 # Każdy podkatalog paczki z SKILL.md to skill linkowany do agentSkillDirs
 # (Codex wchodzi w symlinki katalogów); opencode dostaje skills.paths
@@ -112,14 +113,19 @@
       #   2-3 tokeny pomagają tylko edycjom, a mieszczą 28K/15K kontekstu.
       #   -c 49152 sprawdzone (szczyt 7540 MiB przy 48K zajętego), 57344
       #   zostawia ok. 75 MiB zapasu, 65536 pada przy pierwszym żądaniu.
-      # Szablon czatu przyjmuje tylko effort xhigh/medium/low (inny daje HTTP
-      # 500), a domyślne CORS `*` z credentials wpuszcza każdą stronę otwartą
-      # w przeglądarce. Domyślny effort medium: przy xhigh model potrafi zużyć
-      # cały limit wyjścia na myślenie (pomiary sudoingX na RTX 3060, repo
-      # local-ai-on-your-gaming-gpu, kernel/reasoning_effort.md). Sampling
-      # (temp 1.0, top-k 20, top-p 0.95) pochodzi z GGUF, --jinja jest domyślne.
-      # Grupy flag (także serverFlags) dzielone na spacjach na argumenty, więc
-      # wartości (nazwy plików .gguf) nie mogą zawierać spacji.
+      #
+      # Pozostałe flagi:
+      # - --reasoning-effort-allow xhigh,medium,low: szablon czatu przyjmuje
+      #   tylko te (inny effort daje HTTP 500);
+      # - --reasoning-effort medium: przy xhigh model potrafi zużyć cały limit
+      #   wyjścia na myślenie (pomiary sudoingX na RTX 3060, repo
+      #   local-ai-on-your-gaming-gpu, kernel/reasoning_effort.md);
+      # - --cors-origins localhost: domyślne CORS `*` z credentials wpuszcza
+      #   każdą stronę otwartą w przeglądarce;
+      # - bez flag samplingu (temp 1.0, top-k 20, top-p 0.95 z GGUF) i --jinja
+      #   (domyślne).
+      # Grupy flag (także serverFlags) dzieli się na spacjach, więc wartości
+      # (nazwy plików .gguf) nie mogą zawierać spacji.
       bonsaiServe =
         variant:
         lib.escapeShellArgs (
@@ -135,9 +141,6 @@
           )
         );
 
-      # reasoningField: llama-server oddaje tok myślenia w reasoning_content.
-      # Domyślny effort modelu to xhigh (szablon czatu); medium to jedyny
-      # sensowny skrót, bo low wg karty modelu zachowuje się prawie jak xhigh.
       opencodeConfig = {
         skills.paths = skillPacks;
         providers.llamacpp = {
@@ -147,6 +150,7 @@
           models = lib.mapAttrs (_: variant: {
             modelID = variant.model;
             inherit (variant) name;
+            # llama-server oddaje tok myślenia w reasoning_content.
             compatibility.reasoningField = "reasoning_content";
             capabilities = {
               tools = true;
@@ -154,6 +158,8 @@
               output = [ "text" ];
               reasoning = {
                 supported = true;
+                # Domyślny effort modelu to xhigh (szablon czatu); bez low, bo wg
+                # karty modelu zachowuje się prawie jak xhigh.
                 effort = [
                   "medium"
                   "xhigh"
