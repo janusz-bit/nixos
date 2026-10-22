@@ -63,7 +63,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 - **[hosts/claude-notify.nix](../../modules/hosts/claude-notify.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
 - **[hosts/registry.nix](../../modules/hosts/registry.nix)** — Rejestr hostów: jedno miejsce, z którego powstają nixosConfigurations.\<nazwa>, workflowy CI (github-actions.nix: build każdego hosta i lista ewaluacji) i strony docs/reference/ (modules/docs.nix). Nazwa hosta = nazwa konfiguracji = networking.hostName = cel aliasów update/push (customBot.flakeTarget). Ustawia je rejestr; host może je powtórzyć (obraz SD składa moduł hosta poza rejestrem), ale inna wartość to błąd ewaluacji. Na nazwie hosta opiera się m.in. post-install (wpisy keys.nix) i nixos-rebuild bez `#<host>`.
-- **[hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)** (`nixos-remote-agent`, `rpi-remote-agent`) · hosts: `nixos`, `raspberry-pi-4` — Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos).
+- **[hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)** (`nixos-remote-agent`, `rpi-remote-agent`) · hosts: `nixos`, `raspberry-pi-4` — Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos): konto claude-remote na laptopie, a na RPi `ssh laptop` i `laptop-run` do ewaluacji i buildów x86_64 (krok 3 weryfikacji), które na RPi trwają minuty albo są niewykonalne.
 
 ## modules/hosts/base/
 
@@ -83,9 +83,9 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/hosts/nixos/
 
-- **[hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)** (`nixos-boot`) · hosts: `nixos` — Rozruch laptopa: Limine podpisany własnymi kluczami Secure Boot (sbctl) i wpis Windows z drugiego dysku NVMe. Firmware Insyde ukrywa zmienne EFI przed Linuksem (sbctl status, bootctl i efibootmgr pokazują bzdury), więc stan czyta się z logu kernela albo dziennika TPM (AGENTS.md), a klucze wpisuje `nix run /etc/nixos#post-install secure-boot`. Z tego samego powodu limine-install odtwarza swój wpis NVRAM przy każdym rebuildzie. Sprawdzenie: `journalctl -k -b | grep -i "secure boot"`.
-- **[hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)** (`nixos`) · hosts: `nixos` — Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur. Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/, gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
-- **[hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)** (`nixos-disko`) · hosts: `nixos` — Układ dysku laptopa (disko): ESP 6 GB, zaszyfrowany swap 36 GB pod hibernację (>= RAM) i LUKS + Btrfs z podwolumenami /, /home i /nix. install-system (modules/installer/install.nix) formatuje według niego dowolny wskazany dysk; system montuje partycje po etykietach by-partlabel/disk-main-*, więc `device` to tylko podpowiedź instalatora. Snapshoty: snapper.nix. Sprawdzenie: `lsblk -f`, `sudo btrfs subvolume list /`.
+- **[hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)** (`nixos-boot`) · hosts: `nixos` — Rozruch laptopa: Limine podpisany własnymi kluczami Secure Boot (sbctl) i wpis Windows z drugiego dysku NVMe. Firmware Insyde ukrywa zmienne EFI przed Linuksem, więc stan Secure Boot i wpisywanie kluczy opisuje AGENTS.md (`post-install secure-boot`).
+- **[hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)** (`nixos`) · hosts: `nixos` — Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami. Tu tylko wpis rejestru, tożsamość (stateVersion, konto) i lista modułów hosta; dysk i rozruch: disko.nix, snapper.nix, boot.nix obok.
+- **[hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)** (`nixos-disko`) · hosts: `nixos` — Układ dysku laptopa (disko): ESP 6 GB, zaszyfrowany swap 36 GB pod hibernację (>= RAM) i LUKS + Btrfs z podwolumenami /, /home i /nix. install-system (modules/installer/install.nix) formatuje według niego dowolny wskazany dysk; system montuje partycje po etykietach by-partlabel/disk-main-*, więc `device` to tylko podpowiedź instalatora.
 - **[hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)** (`nixos-snapper`) · hosts: `nixos` — Snapper na laptopie: godzinowe snapshoty timeline podwolumenów btrfs / i /home (układ z disko.nix), sprzątane codziennie według limitów retencji; customBot.defaultUser obsługuje je bez roota (ALLOW_USERS), też w snapper-gui.
 
 ## modules/hosts/raspberry-pi-4/
@@ -106,7 +106,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/hosts/wsl/
 
-- **[hosts/wsl/default.nix](../../modules/hosts/wsl/default.nix)** (`wsl`) · hosts: `wsl` — Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. WSL nie jest odbiorcą agenix, więc nie importuje base-agenix (sekrety użytkownika, wrappery fish, alias push).
+- **[hosts/wsl/default.nix](../../modules/hosts/wsl/default.nix)** (`wsl`) · hosts: `wsl` — Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). WSL nie jest odbiorcą agenix, więc nie importuje base-agenix (sekrety użytkownika, wrappery fish, alias push).
 
 ## modules/installer/
 

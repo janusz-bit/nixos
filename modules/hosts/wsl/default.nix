@@ -1,6 +1,5 @@
 # Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty
-# aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base
-# są tu czyszczone. WSL nie jest odbiorcą agenix, więc nie importuje
+# aplikacji w menu Start). WSL nie jest odbiorcą agenix, więc nie importuje
 # base-agenix (sekrety użytkownika, wrappery fish, alias push).
 { inputs, self, ... }:
 {
@@ -9,7 +8,6 @@
     modules = [
       self.modules.nixos.base
       self.modules.nixos.wsl
-      { customBot.enableFastfetch = false; }
     ];
   };
 
@@ -19,6 +17,7 @@
       imports = [ inputs.nixos-wsl.nixosModules.default ];
 
       system.stateVersion = "25.05";
+      customBot.enableFastfetch = false;
 
       wsl = {
         enable = true;
@@ -27,8 +26,8 @@
         startMenuLaunchers = true;
       };
 
-      # resolv.conf generuje WSL (wsl.wslConf.network.generateResolvConf) —
-      # serwery DNS z base i tak byłyby ignorowane (ostrzeżenie ewaluacji).
+      # resolv.conf generuje WSL (wsl.wslConf.network.generateResolvConf), więc
+      # serwery DNS z base byłyby ignorowane (z ostrzeżeniem ewaluacji).
       networking.nameservers = [ ];
 
       environment.sessionVariables.ZED_ALLOW_EMULATED_GPU = "1";

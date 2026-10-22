@@ -12,7 +12,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 ## nixos
 
-Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami, użytkownik dinosaur. Tu jest tylko to, co czyni go tą maszyną: wpis rejestru, tożsamość (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/, gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
+Host nixos: laptop Lenovo LOQ 15IRX10 (i5-13450HX + RTX 5060, PRIME offload) — stacja robocza z Plasmą 6 i grami. Tu tylko wpis rejestru, tożsamość (stateVersion, konto) i lista modułów hosta; dysk i rozruch: disko.nix, snapper.nix, boot.nix obok.
 
 ```mermaid
 flowchart LR
@@ -184,7 +184,7 @@ flowchart LR
 
 ## wsl
 
-Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). resolv.conf generuje WSL, więc serwery DNS z base są tu czyszczone. WSL nie jest odbiorcą agenix, więc nie importuje base-agenix (sekrety użytkownika, wrappery fish, alias push).
+Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w menu Start). WSL nie jest odbiorcą agenix, więc nie importuje base-agenix (sekrety użytkownika, wrappery fish, alias push).
 
 ```mermaid
 flowchart LR
