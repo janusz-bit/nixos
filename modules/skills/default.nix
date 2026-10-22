@@ -3,18 +3,10 @@
 # Prime Agent czyta je bez importera: `skills` w settings.json
 # (modules/hosts/base/prime-agent.nix) wymienia /etc/ai-skills i /etc/ai.
 #
-# Runtime drop-in: /etc/ai to katalog na skille dodawane BEZ rebuilda (ręcznie
-# lub przez samego Prime Agenta), widoczne przy następnym starcie agenta.
-# Przy kolizji nazw wygrywa wcześniejszy wpis listy, więc skille deklaratywne
-# (/etc/ai-skills) mają pierwszeństwo przed /etc/ai: nix pozostaje źródłem
-# prawdy. Inne agenty (opencode, gemini-cli) tych katalogów nie czytają.
-#
-# Claude Code: osobna lista `claudeSkills` → /etc/claude-code/.claude/skills,
-# katalog skilli zarządzanych (policy) czytany przez każdego użytkownika hosta
-# w każdym katalogu roboczym — bez Home Managera i bez ~/.claude/skills.
-#
-# Skille z cudzych repozytoriów (wejścia flake'a, aktualizowane przez
-# flake-update, także dla Codexa i opencode): external.nix.
+# /etc/ai: drop-in skilli bez rebuilda (ręcznie albo przez Prime Agenta);
+# skille deklaratywne wygrywają kolizję nazw (kolejność w base/prime-agent.nix).
+# Claude Code dostaje osobną listę claudeSkills. Skille z wejść flake'a (także
+# dla Codexa i opencode): external.nix.
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills =
@@ -33,30 +25,26 @@
         obscura = ./obscura;
       };
 
-      # Programy, bez których skill nie działa — instalowane przez ten moduł
-      # razem ze skillem, żeby skill nie trafił na host bez swojego narzędzia.
+      # Programy, bez których skill nie działa — instalowane razem ze skillem.
       skillPackages = {
         obscura = [ pkgs.obscura ];
       };
 
-      # Skille Claude Code (format SKILL.md jak wyżej). Claude Code na Linuksie
-      # ładuje skille zarządzane z /etc/claude-code/.claude/skills/<nazwa>
-      # (`claude --debug`: „Loading skills from: managed=…”), dla każdego
-      # użytkownika i projektu; symlinki są dozwolone. Wyłączenie per proces:
-      # CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. Prime Agent ich nie dostaje.
+      # Skille zarządzane Claude Code (każdy użytkownik i projekt; symlinki są
+      # dozwolone, wyłączenie per proces: CLAUDE_CODE_DISABLE_POLICY_SKILLS=1).
+      # Prime Agent ich nie dostaje.
       claudeSkills = {
         nixos-system = nixosSystemSkill;
       }
-      # Program skilla (claude-notify) zależy od hosta, więc jest w
-      # modules/hosts/claude-notify.nix, nie w skillPackages —
-      # skill tylko tam, gdzie ten moduł wdrożył klucz.
+      # Program skilla (claude-notify) zależy od hosta, więc instaluje go
+      # hosts/claude-notify.nix, a skill trafia tylko tam, gdzie ten moduł
+      # wdrożył klucz.
       // lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {
         hermes-notify = ./hermes-notify;
       };
 
       # nixos-system: statyczna treść + sekcja „This host” liczona z config
-      # hosta, na którym skill jest wdrożony (laptop i RPi dostają różne
-      # fakty, a ręcznie pisane rozjechałyby się z konfiguracją).
+      # hosta (ręcznie pisane fakty rozjechałyby się z konfiguracją).
       nixosSystemSkill = pkgs.writeTextDir "SKILL.md" (
         builtins.readFile ./nixos-system/SKILL.md + nixosSystemHostFacts
       );
@@ -86,19 +74,13 @@
           fact (config.programs.ssh.knownHosts ? laptop)
             "Laptop (host `nixos`, x86_64) is reachable when it is on and at home, from the account that holds `~/.ssh/id_ed25519_laptop` (`${user}`): `laptop-run <cmd>` runs `<cmd>` there as unprivileged `claude-remote` (no sudo) in a snapshot of the current git repo (tracked files with uncommitted changes), e.g. `laptop-run nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`, `laptop-run nixos-rebuild build --flake .#nixos` then `laptop-run nix store diff-closures /run/current-system ./result`. Prefer it to evaluating or building x86_64 hosts here. `ssh laptop <cmd>` for read-only state (`systemctl status`). Every failed login counts towards the laptop's fail2ban (5 → this host is banned). Activation stays with the user (`update-local`) — `modules/hosts/remote-agent.nix`.";
 
-      # Skille pythonowe (src/ + pyproject.toml). Kernel Prime Agenta działa na
-      # PRIME_AGENT_KERNEL_PYTHON (read-only env z flake llm-agents), więc
-      # bootstrap NIE zrobi `uv pip install --editable` — tylko sprawdza
-      # `import <skill>` i wyłącza skill z warningiem, gdy import się nie uda.
-      # Dlatego src/ trafia do PYTHONPATH wrappera prime-agenta (-> kernel) i
-      # skill jest importowalny out-of-the-box. Nowy skill pythonowy:
-      # dodaj do `skills` ORAZ do `pythonSkills`.
+      # Skille pythonowe (src/ + pyproject.toml; każdy także w `skills`). Kernel
+      # Prime Agenta to read-only env z llm-agents: bootstrap nie zrobi
+      # `uv pip install` i wyłącza skill, którego nie zaimportuje, więc src/
+      # trafia do PYTHONPATH wrappera prime-agent. Tylko wrappera: globalna
+      # zmienna przesłaniałaby moduły innym Pythonom (venvy, uv, nix-shell).
       pythonSkills = [ "trilium-notes" ];
       pythonSkillSrcs = map (name: skills.${name} + "/src") pythonSkills;
-
-      # PYTHONPATH tylko dla prime-agenta — globalna zmienna sesji trafiałaby
-      # do każdego procesu Pythona (venvy, uv, nix-shell) i mogła przesłaniać
-      # moduły. hiPrio: wygrywa z niezawiniętym prime-agentem z base.
       primeAgentWithSkills = pkgs.symlinkJoin {
         name = "prime-agent-with-skills";
         paths = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent ];
@@ -109,34 +91,22 @@
         '';
       };
 
-      # Kopiowanie skilli do /etc/ai-skills (read-only, zarządzane przez nix).
-      # Cały katalog skilla: SKILL.md, references/, a przy skillach pythonowych
-      # też src/ + pyproject.toml (kernel Prime Agenta importuje je z PYTHONPATH,
-      # bo PRIME_AGENT_KERNEL_PYTHON to read-only env — bez uv pip install).
-      etcEntries = lib.mkMerge (
-        lib.mapAttrsToList (name: path: {
-          "ai-skills/${name}".source = path;
-        }) skills
-      );
+      etcSkills =
+        dir: lib.mapAttrs' (name: source: lib.nameValuePair "${dir}/${name}" { inherit source; });
     in
     {
-      environment.etc = lib.mkMerge [
-        etcEntries
-        (lib.mapAttrs' (
-          name: path: lib.nameValuePair "claude-code/.claude/skills/${name}" { source = path; }
-        ) claudeSkills)
-      ];
+      environment.etc =
+        etcSkills "ai-skills" skills // etcSkills "claude-code/.claude/skills" claudeSkills;
 
-      # Import skili pythonowych w kernelu (patrz pythonSkills wyżej).
+      # hiPrio: zawinięty prime-agent wygrywa z niezawiniętym z base.
       environment.systemPackages = [
         (lib.hiPrio primeAgentWithSkills)
       ]
       ++ lib.concatLists (lib.attrValues skillPackages);
 
-      # Drop-in na skille runtime — zapisywalny tylko przez defaultUsera
-      # (on i jego Prime Agent dodają skille bez sudo). Wcześniej 0775
-      # root:users: na RPi agent hermes (grupa users) mógł podrzucić skill
-      # ładowany automatycznie przez prime-agenta użytkownika nixos.
+      # Zapisywalny tylko przez defaultUsera (on i jego Prime Agent dodają skille
+      # bez sudo): zapis grupowy pozwoliłby kontu hermes (grupa users) podrzucić
+      # skill ładowany przez prime-agenta użytkownika.
       systemd.tmpfiles.rules = [ "d /etc/ai 0755 ${user} root - -" ];
     };
 }
