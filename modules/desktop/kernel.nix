@@ -12,7 +12,20 @@
   flake.modules.nixos.desktop-kernel =
     { pkgs, ... }:
     {
-      nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
+      nixpkgs.overlays = [
+        inputs.nix-cachyos-kernel.overlays.pinned
+        # Od NixOS/nixpkgs 6bd7526 (2026-10-13) aggregateModules (drzewo
+        # /lib/modules) wymaga modules.cer i *.ko.cer, które daje tylko kernel
+        # zbudowany tym nixpkgs; kernel i nvidia z overlays.pinned ich nie mają,
+        # więc linux-…-modules pada na `cp: cannot stat …/modules.cer`. Drzewo
+        # składa nixpkgs, które zbudowało moduły (temporary-fixes.md, nr 10).
+        (final: _: {
+          inherit
+            (inputs.nix-cachyos-kernel.inputs.nixpkgs.legacyPackages.${final.stdenv.hostPlatform.system})
+            aggregateModules
+            ;
+        })
+      ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3;
     };
 }

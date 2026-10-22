@@ -212,6 +212,29 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   na zmienionym kontekście; sprawdzenie: `nix build .#llama-cpp-prism` z `doCheck`
   i bez `postPatch`/wyłączeń musi przejść.
 
+### 10. Kernel CachyOS — `aggregateModules` z nixpkgs inputu
+
+- **Od:** 2026-10-22.
+- **Plik:** `modules/desktop/kernel.nix` (drugi overlay w `nixpkgs.overlays`).
+- **Objaw:** `update` na laptopie pada na
+  `linux-cachyos-bore-lto-x86_64-v3-7.2.8-modules.drv` z
+  `cp: cannot stat '…/lib/modules/7.2.8-cachyos-lto/modules.cer'`.
+- **Przyczyna:** NixOS/nixpkgs 6bd7526 (2026-10-13) podpisuje moduły
+  kmodigestem: kernel instaluje `modules.cer`, moduły zewnętrzne `*.ko.cer`, a
+  `aggregateModules` bezwarunkowo je scala. `overlays.pinned` buduje kernel
+  i nvidia nixpkgs-em inputu `nix-cachyos-kernel` (545c226, 2026-09-27), więc
+  plików brak. Gałąź `release` stoi od 2026-09-28 (budowa 7.2.9 pada,
+  xddxdd/nix-cachyos-kernel#108). Zgłoszenie:
+  https://github.com/xddxdd/nix-cachyos-kernel/issues/111; brakujące `*.ko.cer`
+  pakietów nixpkgs: https://github.com/NixOS/nixpkgs/issues/575192.
+- **Obejście:** `aggregateModules` z nixpkgs inputu (tego, które zbudowało
+  moduły) — drzewo jak przed bumpem, bez przebudowy kernela.
+- **Kiedy usunąć:** gdy nixpkgs zablokowany przez `nix-cachyos-kernel` zawiera
+  6bd7526 (kernel ma wtedy `modules.cer`) albo upstream naprawi #111.
+  Sprawdzenie: `nix flake metadata --json | jq '.locks.nodes[.locks.nodes[.locks.nodes.root.inputs."nix-cachyos-kernel"].inputs.nixpkgs].locked.lastModified'`
+  ≥ 1791856909 (2026-10-13), potem usunąć overlay i `nix build` toplevelu
+  `nixos` musi przejść.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte
