@@ -11,18 +11,12 @@
           user.name = customTop.owner;
           user.email = customTop.email;
           init.defaultBranch = "main";
-          url = {
-            "https://github.com/" = {
-              insteadOf = [
-                "gh:"
-                "github:"
-              ];
-            };
-          };
+          url."https://github.com/".insteadOf = [
+            "gh:"
+            "github:"
+          ];
         };
       };
-      environment.systemPackages = with pkgs; [
-        gh
-      ];
+      environment.systemPackages = [ pkgs.gh ];
     };
 }

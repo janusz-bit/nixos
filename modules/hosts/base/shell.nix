@@ -5,13 +5,13 @@
 {
   flake.modules.nixos.base-shell =
     { config, pkgs, ... }:
+    let
+      ezaAlias = flags: "eza ${flags} --color=always --group-directories-first --icons=always";
+    in
     {
       programs = {
         bash = {
           enable = true;
-          # Fish jako powłoka logowania psuje m.in. tryb ratunkowy systemd
-          # (emergency mode); jak na Gentoo wiki: bash zostaje powłoką
-          # systemową i tylko interaktywnie wykonuje exec fish.
           interactiveShellInit = ''
             if [[ $(${lib.getExe' pkgs.procps "ps"} --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
             then
@@ -24,19 +24,14 @@
         fish = {
           enable = true;
           shellAliases = {
-            # Eza zamiast ls
-            ls = "eza -al --color=always --group-directories-first --icons=always";
-            la = "eza -a --color=always --group-directories-first --icons=always";
-            ll = "eza -l --color=always --group-directories-first --icons=always";
-            lt = "eza -aT --color=always --group-directories-first --icons=always";
+            ls = ezaAlias "-al";
+            la = ezaAlias "-a";
+            ll = ezaAlias "-l";
+            lt = ezaAlias "-aT";
             "l." = "eza -a | grep -e '^\\.'";
-
-            # Nawigacja
             ".." = "cd ..";
             "..." = "cd ../..";
             "...." = "cd ../../..";
-
-            # Inne narzędzia
             grep = "grep --color=auto";
             cat = "bat";
             hw = "hwinfo --short";
@@ -86,8 +81,8 @@
         eza
         bat
         fastfetch
-        p7zip # 7z (archiwizator; wymagany m.in. przez reshadelinux)
-        chafa # obrazki w terminalu (Sixel/Kitty/iTerm2, fallback: znaki Unicode)
+        p7zip # wymagany m.in. przez reshadelinux
+        chafa
       ];
     };
 }

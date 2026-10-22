@@ -2,12 +2,6 @@
 # (cel aliasów update/push, fastfetch w powitaniu fish, główny użytkownik,
 # endpoint MCP Trilium); host nadpisuje je w swoim default.nix.
 #
-# To opcje NixOS (`config.customBot.*`), bo różnią się między hostami;
-# stałe wspólne dla całego repo są w customTop (modules/args.nix).
-# flakeTarget (bez domyślnej) ustawia rejestr hostów; raspberry-pi-4 powtarza
-# go u siebie tylko dla obrazu SD, składanego poza rejestrem. Opisy opcji
-# trafiają do generowanego docs/reference/options.md.
-#
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
 { customTop, ... }:
 {
@@ -15,8 +9,8 @@
     { lib, ... }:
     {
       options.customBot = {
-        # Bez wartości domyślnej: dawne "default" (= laptop) dawało hostowi,
-        # który zapomniał tej opcji, aliasy wdrażające system laptopa.
+        # Bez domyślnej: konfiguracja spoza rejestru, która jej nie ustawi,
+        # kończy ewaluację błędem zamiast dostać aliasy wdrażające inny host.
         flakeTarget = lib.mkOption {
           type = lib.types.str;
           description = "Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr hostów (modules/hosts/registry.nix).";
@@ -33,7 +27,6 @@
         };
         triliumMcpUrl = lib.mkOption {
           type = lib.types.str;
-          # trilium-server z raspberry-pi-4 (modules/hosts/raspberry-pi-4/trilium.nix)
           default = "http://127.0.0.1:8081/mcp";
           description = ''
             Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla

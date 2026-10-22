@@ -1,8 +1,7 @@
 # Sekrety użytkownika wspólne dla hostów (wrappery fish, nix access-tokens,
-# skille). Właścicielem jest customBot.defaultUser, tryb 0400 — nie grupa
-# `users`: na RPi do tej grupy należeli też użytkownicy usług (hermes).
-# Moduł usługi, który potrzebuje dostępu, dopisuje go jawnie u siebie
-# (np. trilium-etapi w modules/hosts/raspberry-pi-4/hermes.nix).
+# skille): właściciel customBot.defaultUser, tryb 0400, nigdy grupa `users`,
+# do której należą też inne konta. Usługa, która potrzebuje sekretu, dopisuje
+# dostęp jawnie u siebie (np. trilium-etapi w raspberry-pi-4/hermes.nix).
 { inputs, customTop, ... }:
 {
   flake.modules.nixos.base-secrets =
@@ -15,9 +14,7 @@
       };
     in
     {
-      imports = [
-        inputs.agenix.nixosModules.default
-      ];
+      imports = [ inputs.agenix.nixosModules.default ];
 
       age = {
         secrets = {
@@ -32,9 +29,7 @@
           llmgateway-api-key-shared = userSecret "llmgateway-api-key.age";
           openrouter-api-key = userSecret "openrouter-api-key.age";
         };
-        identityPaths = [
-          "/root/.ssh/id_ed25519"
-        ];
+        identityPaths = [ "/root/.ssh/id_ed25519" ];
       };
     };
 }

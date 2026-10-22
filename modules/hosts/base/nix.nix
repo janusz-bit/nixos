@@ -2,11 +2,10 @@
 # nixConfig we flake.nix), okresowe GC i deduplikacja sklepu, pakiety
 # niewolne i overlay repo (pakiety lokalne).
 #
-# nix.settings.trusted-users celowo zostaje domyślne (tylko root) — bez
-# @wheel. Trusted user nixa może importować niepodpisane ścieżki i zmieniać
-# substitutery, czyli ma roota bez hasła, a jako użytkownik działa tu wiele
-# agentów AI. Wszystkie potrzebne cache są w nix.settings, więc zwykły
-# użytkownik z nich korzysta; nixos-rebuild i tak idzie przez sudo.
+# trusted-users zostaje domyślne (tylko root, bez @wheel): trusted user może
+# importować niepodpisane ścieżki i zmieniać substitutery, czyli ma roota bez
+# hasła, a jako użytkownik działa tu wiele agentów AI. Cache z nix.settings
+# działają i bez tego, a nixos-rebuild idzie przez sudo.
 #
 # Sprawdzenie: `nix config show | grep -E '^(extra-)?(substituters|trusted)'`.
 { customTop, self, ... }:
@@ -16,9 +15,7 @@
     {
       nixpkgs = {
         config.allowUnfree = true;
-        overlays = [
-          self.overlays.local-packages
-        ];
+        overlays = [ self.overlays.local-packages ];
       };
 
       nix = {

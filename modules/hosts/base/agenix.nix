@@ -2,34 +2,15 @@
 # wstrzykiwane per proces, plus alias push. Opcjonalny: importują go nixos
 # i raspberry-pi-4; WSL nie jest odbiorcą agenix.
 #
-# Dawny environment.shellInit eksportował wszystkie klucze w każdym shellu,
-# a przez import-environment trafiały one do całej sesji KDE — każda
-# aplikacja i każdy agent AI dziedziczył komplet tokenów. Obecna zasada:
-# sekret injektujemy per-proces, w najwęższym możliwym obwodzie:
+# Export w environment.shellInit trafiłby przez import-environment do całej
+# sesji KDE, czyli do każdej aplikacji i każdego agenta AI. Dlatego klucz
+# dostaje tylko zawijany proces: funkcje fish z vendor_functions.d robią
+# `set -lx` + `command …`, a token nix renderuje do ~/.config/nix/nix.conf
+# (0600) jednostka --user nix-access-tokens. W store są tylko ścieżki plików.
 #
-#   * prime-agent / opencode / gemini / cachix-push — funkcje fish z pakietu
-#     wrappera (share/fish/vendor_functions.d, ładowane przez fish z
-#     $NIX_PROFILES), czytające pliki age i przekazujące klucz tylko danemu
-#     procesowi (set -lx + command ...),
-#   * nix (access-tokens) — ~/.config/nix/nix.conf (0600) renderowany przez
-#     oneshot systemd --user `nix-access-tokens`,
-#   * `cachix push` — funkcja fish `cachix-push`.
-#
-# Odporność na zmiany ścieżek (nic nie jest hard-kodowane):
-#   * ścieżki sekretów zawsze z config.age.secrets.<name>.path — zmiana
-#     age.secretsDir lub nadpisana path po prostu się propaga,
-#   * funkcje fish trafiają do share/fish/vendor_functions.d w profilu
-#     systemowym (standard programs.fish.vendor.functions) — zero hard-
-#     kodowanego /home/$user i tmpfile-symlinków; własna funkcja użytkownika
-#     w ~/.config/fish/functions i tak ma pierwszeństwo w fish_function_path.
-#
-# Wartości sekretów nigdy nie trafiają do /nix/store — wrappery zawierają
-# wyłącznie odwołania do plików age (same ścieżki).
-#
-# Granica ochrony: wrappery chronią przed PRZYPADKOWYM wyciekiem przez env
-# (logi, procesy potomne, cała sesja KDE). Pliki sekretów należą do
-# customBot.defaultUser (0400, modules/hosts/base/secrets.nix), więc proces
-# działający jako ten użytkownik nadal może je przeczytać wprost.
+# Granica: to chroni przed PRZYPADKOWYM wyciekiem przez env (logi, procesy
+# potomne). Pliki należą do customBot.defaultUser (0400), więc proces tego
+# użytkownika nadal może je przeczytać wprost.
 { self, customTop, ... }:
 {
   flake.modules.nixos.base-agenix =
@@ -40,49 +21,34 @@
       ...
     }:
     let
-      # Ścieżka pliku z odszyfrowanym sekretem — zawsze przez opcje agenix,
-      # nigdy literalnie /run/agenix.
       secretPath =
         name:
         (config.age.secrets.${name}
           or (throw "base-agenix: brak sekreta 'age.secrets.${name}' — zdefiniuj go w modules/hosts/base/secrets.nix")
         ).path;
 
-      # Funkcje-wrappery: `name` = nazwa wykonywanego programu; `vars` =
-      # zmienne środowiskowe podpinane pod sekrety agenix.
+      # Zmienna env czytana z sekretu agenix (nazwa z base-secrets).
+      secretEnv = var: secret: { inherit var secret; };
+
+      # name: nazwa funkcji fish; exec: zawijane polecenie (domyślnie name).
       fishWrappers = [
         {
           name = "prime-agent";
           description = "prime-agent z kluczami OLLAMA/OPENROUTER i tokenem Trilium z agenix";
+          # Tych nazw zmiennych używają models.json i settings.json (base-prime-agent).
           vars = [
-            {
-              var = "OLLAMA_API_KEY";
-              secret = "ollama-api-key";
-            }
-            {
-              var = "OPENROUTER_API_KEY";
-              secret = "openrouter-api-key";
-            }
-            {
-              var = "TRILIUM_ETAPI_TOKEN";
-              secret = "trilium-etapi";
-            }
+            (secretEnv "OLLAMA_API_KEY" "ollama-api-key")
+            (secretEnv "OPENROUTER_API_KEY" "openrouter-api-key")
+            (secretEnv "TRILIUM_ETAPI_TOKEN" "trilium-etapi")
           ];
         }
         {
           name = "opencode";
           description = "opencode z kluczami API z agenix";
           vars = [
-            {
-              var = "OLLAMA_API_KEY";
-              secret = "ollama-api-key";
-            }
-            {
-              var = "OPENCODE_GO_API_KEY";
-              secret = "opencode";
-            }
-            # llmgateway-api-key-shared to plik env ("KLUCZ=wartość") —
-            # fish-native: bierz wszystko za pierwszym '='.
+            (secretEnv "OLLAMA_API_KEY" "ollama-api-key")
+            (secretEnv "OPENCODE_GO_API_KEY" "opencode")
+            # Plik env ("KLUCZ=wartość"): wartość to wszystko za pierwszym '='.
             {
               var = "LLMGATEWAY_API_KEY";
               secret = "llmgateway-api-key-shared";
@@ -93,30 +59,17 @@
         {
           name = "gemini";
           description = "gemini CLI z kluczem GOOGLE z agenix";
-          vars = [
-            {
-              var = "GOOGLE_API_KEY";
-              secret = "google-api-key";
-            }
-          ];
+          vars = [ (secretEnv "GOOGLE_API_KEY" "google-api-key") ];
         }
         {
           name = "cachix-push";
-          # zawijamy binarkę `cachix` z subkomendą `push`, nie funkcję `cachix-push`
           exec = "cachix push";
           description = "cachix push z tokenem z agenix";
-          vars = [
-            {
-              var = "CACHIX_AUTH_TOKEN";
-              secret = "cachix-authtoken";
-            }
-          ];
+          vars = [ (secretEnv "CACHIX_AUTH_TOKEN" "cachix-authtoken") ];
         }
       ];
 
-      # Generyczny wrapper: zmienna env ładowana z pliku sekreta widoczna
-      # TYLKO dla zawijanego procesu (set -lx). `command cat` celowo omija
-      # aliasy/funkcje fish (w base-shell `cat` jest aliasem na `bat`).
+      # `command cat` omija alias cat → bat z base-shell.
       loadVarLines =
         name:
         {
@@ -142,8 +95,6 @@
           name,
           description,
           vars,
-          # zwykle = name; inaczej, gdy nazwa funkcji nie jest nazwą programu
-          # (np. `cachix-push` opakowuje `cachix push`).
           exec ? name,
         }:
         lib.concatStringsSep "\n" (
@@ -165,37 +116,28 @@
           w: pkgs.writeTextDir "share/fish/vendor_functions.d/${w.name}.fish" (mkSecretWrapper w)
         ) fishWrappers;
       };
-
     in
     {
       imports = [ self.modules.nixos.base-secrets ];
 
-      # === per-procesowe wrappery (funkcje fish przez vendor_functions.d) ===
-      # vendor.functions to warunek działania tego modułu — fish dodaje
-      # <profil>/share/fish/vendor_functions.d do fish_function_path.
       programs.fish = {
+        # Bez tego fish nie szuka funkcji w <profil>/share/fish/vendor_functions.d.
+        # Funkcja o tej samej nazwie w ~/.config/fish/functions wygrywa z wrapperem.
         vendor.functions.enable = true;
-        # push: build toplevela z GitHuba i wypchnięcie do cachix przez
-        # cachix-push (token tylko dla tego procesu).
         shellAliases.push = "nix build ${customTop.repository.flake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cachix.name}";
       };
       environment.systemPackages = [ fishWrappersPkg ];
 
-      # === nix: access-tokens z agenix w pliku 0600 (zamiast NIX_CONFIG w profilu) ===
       systemd.user.services.nix-access-tokens = {
         description = "Render ~/.config/nix/nix.conf z access-tokensem z agenix (0600)";
         wantedBy = [ "default.target" ];
-        # oneshot z retryem: sekrety agenix są odszyfrowywane zanim sesja
-        # użytkownika ruszy, ale przy pierwszym logowaniu po instalacji
-        # lepiej by jednostka sprawdziła się drugi raz zamiast padnąć.
+        # Retry zamiast porażki przy pierwszym logowaniu po instalacji.
         serviceConfig = {
           Type = "oneshot";
           UMask = "0077";
           Restart = "on-failure";
           RestartSec = "5s";
         };
-        # Substitutery są w systemowym nix.conf (base-configuration) — tu
-        # wyłącznie token, który nie może trafić do /nix/store.
         script = ''
           set -euo pipefail
           # jawny PATH — jednostka --user nie musi nic odziedziczać
