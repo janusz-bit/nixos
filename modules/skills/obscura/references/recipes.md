@@ -1,6 +1,6 @@
 # Obscura — full recipes
 
-## 1) Helper for the IPython kernel
+## 1) Python helper (Prime Agent's IPython kernel or any script)
 
 ```python
 import subprocess, json

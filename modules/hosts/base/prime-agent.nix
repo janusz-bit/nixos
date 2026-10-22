@@ -94,11 +94,14 @@
           "/etc/ai-skills"
           "/etc/ai"
         ];
-        # Token tylko przez zmienną env — literalne sekrety prime-agent odrzuca.
-        mcpServers.trilium-notes = {
-          type = "http";
-          url = config.customBot.triliumMcpUrl;
-          bearerTokenEnvVar = "TRILIUM_ETAPI_TOKEN";
+        # Tylko na hoście z Trilium (customBot.triliumMcpUrl). Token tylko przez
+        # zmienną env — literalne sekrety prime-agent odrzuca.
+        mcpServers = lib.optionalAttrs (config.customBot.triliumMcpUrl != null) {
+          trilium-notes = {
+            type = "http";
+            url = config.customBot.triliumMcpUrl;
+            bearerTokenEnvVar = "TRILIUM_ETAPI_TOKEN";
+          };
         };
       };
     in
@@ -114,7 +117,7 @@
           PRIME_AGENT_TELEMETRY = "0";
           DO_NOT_TRACK = "1";
           # Skill trilium-notes — ten sam endpoint co mcpServers.
-          TRILIUM_MCP_URL = config.customBot.triliumMcpUrl;
+          TRILIUM_MCP_URL = lib.mkIf (config.customBot.triliumMcpUrl != null) config.customBot.triliumMcpUrl;
         };
 
         etc = {

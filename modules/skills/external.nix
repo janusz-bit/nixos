@@ -7,17 +7,15 @@
 # Prime Agent (provider llamacpp); uruchamiają go aliasy bonsai-serve
 # i bonsai-serve-mtp, a llama-prism daje pozostałe polecenia forka.
 #
-# Każdy podkatalog paczki z SKILL.md to skill linkowany do agentSkillDirs
-# (Codex wchodzi w symlinki katalogów); opencode dostaje skills.paths
-# w zarządzanym opencode.json, który ma najwyższy priorytet i zastępuje (nie
-# skleja) tablice, więc własne skille opencode trzymać w
-# ~/.config/opencode/skills/. Ta sama nazwa z dwóch paczek albo z ai-skills
-# kończy ewaluację błędem „conflicting definition values”.
+# Każdy podkatalog paczki z SKILL.md to jeden skill w customBot.agentSkills;
+# ai-skills (modules/skills/default.nix) linkuje go do katalogów skilli
+# systemowych każdego agenta. Ta sama nazwa z dwóch paczek albo z paczki
+# i z ai-skills kończy ewaluację błędem „conflicting definition values”.
 #
-# Tylko laptop: na RPi `claude` jest też modelem Hermesa
-# (claudeSubscriptionPlugin), a skille zarządzane dostaje każde konto. Skrypty
-# skilli Qt wołają python3 (desktop-ai); qmllint, qmlprofiler i qmltestrunner
-# pochodzą z Qt projektu (nix develop, devenv), nie z systemu.
+# Tylko laptop (import w hosts/nixos): skille Qt i lokalny model na GPU są
+# narzędziami stacji roboczej. Skrypty skilli Qt wołają python3 (desktop-ai);
+# qmllint, qmlprofiler i qmltestrunner pochodzą z Qt projektu (nix develop,
+# devenv), nie z systemu.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.nixos.config.environment.etc --apply 'e: builtins.filter (n: builtins.match "codex/.*" n != null) (builtins.attrNames e)'`;
 # po aktywacji `/skills` w Claude Code i w Codexie, `opencode2 models |
@@ -43,18 +41,11 @@
 
       skillsIn =
         pack:
-        lib.mapAttrsToList
-          (name: _: {
-            inherit name;
-            source = "${pack}/${name}";
-          })
-          (
-            lib.filterAttrs (
-              name: type: type == "directory" && builtins.pathExists "${pack}/${name}/SKILL.md"
-            ) (builtins.readDir pack)
-          );
-
-      skills = lib.concatMap skillsIn skillPacks;
+        lib.mapAttrs (name: _: "${pack}/${name}") (
+          lib.filterAttrs (
+            name: type: type == "directory" && builtins.pathExists "${pack}/${name}/SKILL.md"
+          ) (builtins.readDir pack)
+        );
 
       # Wspólne dla aliasów serwera i providerów opencode2 i Prime Agenta, więc
       # -c/-n serwera nie rozjadą się z limitami modelu. Port jawnie: fork
@@ -142,7 +133,6 @@
         );
 
       opencodeConfig = {
-        skills.paths = skillPacks;
         providers.llamacpp = {
           name = "llama.cpp (local)";
           package = "@opencode/ai/providers/openai-compatible";
@@ -173,14 +163,12 @@
           }) bonsai.variants;
         };
       };
-
-      agentSkillDirs = [
-        "claude-code/.claude/skills"
-        "codex/skills"
-        "ai-skills"
-      ];
     in
     {
+      # Każda paczka to osobna definicja opcji, więc ta sama nazwa w dwóch
+      # paczkach jest błędem, a nie cichym nadpisaniem.
+      customBot.agentSkills = lib.mkMerge (map skillsIn skillPacks);
+
       # Ten sam serwer dla Prime Agenta. Poziomy myślenia Prime mapują się na
       # off/medium/xhigh jak effort w opencode wyżej; "none" wyłącza myślenie
       # (tools/server/server-common.cpp forka), a null wyłącza poziom (Prime
@@ -220,15 +208,6 @@
         _: variant: lib.nameValuePair variant.alias (bonsaiServe variant)
       ) bonsai.variants;
 
-      # mkMerge zamiast `//`: ta sama nazwa to dwie definicje jednej opcji,
-      # więc kolizja jest błędem, a nie cichym nadpisaniem.
-      environment.etc = lib.mkMerge (
-        lib.concatMap (
-          dir: map (skill: { "${dir}/${skill.name}".source = skill.source; }) skills
-        ) agentSkillDirs
-        ++ [
-          { "opencode/opencode.json".text = builtins.toJSON opencodeConfig; }
-        ]
-      );
+      environment.etc."opencode/opencode.json".text = builtins.toJSON opencodeConfig;
     };
 }

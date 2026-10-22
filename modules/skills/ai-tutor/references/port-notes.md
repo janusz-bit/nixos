@@ -42,6 +42,11 @@ replacing the earlier Polish distillation of the same methodology.
    ("Use ANY time you're explaining or teaching").
 7. Rendering target: upstream assumed an Obsidian-rendered log; here a plain
    `.md` file, Obsidian-compatible (LaTeX + mermaid render natively there).
+8. **Agent-neutral tool wording** (2026-10-22): the skill is installed for
+   every coding agent on the host (Prime Agent, Claude Code, Codex, opencode;
+   `customBot.agentSkills` in `modules/skills/default.nix`), so web search and
+   the session log name the agent's own tools, with Prime Agent's `ipython`
+   and `websearch` as its case.
 
 ## Dropped from the previous local `ai-tutor` (deliberate, for fidelity)
 

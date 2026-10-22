@@ -1,7 +1,7 @@
 # Sekrety użytkownika wspólne dla hostów (wrappery fish, nix access-tokens,
 # skille): właściciel customBot.defaultUser, tryb 0400, nigdy grupa `users`,
 # do której należą też inne konta. Usługa, która potrzebuje sekretu, dopisuje
-# dostęp jawnie u siebie (np. trilium-etapi w raspberry-pi-4/hermes.nix).
+# dostęp jawnie u siebie (grupa i tryb przy swoim wpisie age.secrets).
 { inputs, customTop, ... }:
 {
   flake.modules.nixos.base-secrets =
@@ -23,7 +23,8 @@
           github-token = userSecret "GITHUB_TOKEN.age";
           cachix-authtoken = userSecret "cachix-authtoken-token.age";
           notes = userSecret "notes.age";
-          trilium-etapi = userSecret "trilium-etapi.age";
+          # Tylko host z Trilium (customBot.triliumMcpUrl).
+          trilium-etapi = lib.mkIf (config.customBot.triliumMcpUrl != null) (userSecret "trilium-etapi.age");
           google-api-key = userSecret "google-api-key.age";
           opencode = userSecret "opencode.age";
           llmgateway-api-key-shared = userSecret "llmgateway-api-key.age";

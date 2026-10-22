@@ -29,6 +29,18 @@ Platforma hosta: nixpkgs.hostPlatform i runner CI.
 
 ## Host options (`customBot`, NixOS)
 
+### `customBot.agentSkills`
+
+Skille (katalog z SKILL.md) dla każdego agenta kodującego hosta:
+Prime Agent, Claude Code, Codex i opencode. Linkuje je ai-skills
+(modules/skills/default.nix), więc działają tylko na hostach, które
+go importują. Ta sama nazwa z dwóch definicji kończy ewaluację
+błędem.
+
+- Type: attribute set of absolute path
+- Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
 ### `customBot.defaultUser`
 
 Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).
@@ -66,10 +78,11 @@ providera z prime-agent.nix kończy ewaluację błędem.
 ### `customBot.triliumMcpUrl`
 
 Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
-trilium-notes (TRILIUM_MCP_URL). Zależny od hosta: RPi ma
-trilium-server na 8081, laptop desktopowy Trilium na 37840.
+trilium-notes (TRILIUM_MCP_URL); null = host bez Trilium: bez
+serwera MCP, skilla i tokenu ETAPI. Laptop ustawia desktopowy
+Trilium na 37840.
 
-- Type: string
-- Default: `"http://127.0.0.1:8081/mcp"`
+- Type: null or string
+- Default: `null`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 

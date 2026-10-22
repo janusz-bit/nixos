@@ -13,7 +13,10 @@ https://docs.obscura.sh). Rust + V8. Commands: `fetch`, `scrape`, `serve`,
 `--user-agent`, `--obey-robots`, `--allow-private-network`, `--storage-dir`,
 `--v8-flags`. Check `obscura <command> --help` for the rest.
 
-## Quick usage (IPython kernel via subprocess)
+## Quick usage
+
+From a shell: `obscura fetch -q --dump text https://example.com`. From Python
+(Prime Agent's IPython kernel or any script) through `subprocess`:
 
 ```python
 import json, subprocess

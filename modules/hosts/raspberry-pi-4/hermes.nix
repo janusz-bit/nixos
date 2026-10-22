@@ -1,12 +1,11 @@
 # Hermes Agent (Nous Research) jako usługa konta `hermes`: model główny to
 # Claude Code na subskrypcji (zapas: openai-codex, ollama-cloud), polski
-# interfejs, MCP Trilium i mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
+# interfejs, MCP mcp-nixos, lokalna Ollama, CLI przez sudo -u hermes.
 #
-# Granica zaufania: agent czyta treści z sieci, notatek i Matrixa, więc
-# prompt injection nie może dawać roota. Konto hermes nie ma sudo, wheel,
-# disk, keys ani trusted-users; pliki z użytkownikiem nixos dzieli przez
-# upstreamowe katalogi stanu 2770 (setgid hermes) + UMask 0007 + chmod g+rw
-# przy aktywacji.
+# Granica zaufania: agent czyta treści z sieci i Matrixa, więc prompt
+# injection nie może dawać roota. Konto hermes nie ma sudo, wheel, disk, keys
+# ani trusted-users; pliki z użytkownikiem nixos dzieli przez upstreamowe
+# katalogi stanu 2770 (setgid hermes) + UMask 0007 + chmod g+rw przy aktywacji.
 # - Aktywacja pisze w /var/lib/hermes wyłącznie jako hermes (setpriv), nigdy
 #   jako root: moduł to kopia upstreamu z _hermes-agent/ (zmiany w jej
 #   nagłówku, temporary-fixes.md nr 2). Wpisy HERMES_HOME innych kont przejmuje
@@ -140,12 +139,6 @@
       age.secrets = {
         hermes-env = hermesSecret "hermes-env";
         llmgateway-api-key = hermesSecret "llmgateway-api-key";
-        # Token ETAPI Trilium współdzielony z prime-agentem użytkownika nixos
-        # (właściciel z modules/hosts/base/secrets.nix) — odczyt dla grupy hermes.
-        trilium-etapi = {
-          inherit (cfg) group;
-          mode = "0440";
-        };
       };
 
       services = {
@@ -236,12 +229,6 @@
           ];
 
           mcpServers = {
-            trilium-notes = {
-              url = "http://127.0.0.1:${toString config.services.trilium-server.port}/mcp";
-              connect_timeout = 30;
-              timeout = 60;
-              headers.Authorization = "Bearer \${TRILIUM_ETAPI_TOKEN}";
-            };
             # Pakiet z nixpkgs zamiast `uvx mcp-nixos` (niepinowany PyPI w runtime).
             nixos = {
               command = lib.getExe pkgs.mcp-nixos;

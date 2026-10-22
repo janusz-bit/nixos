@@ -32,7 +32,7 @@ modules/
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, offline installer ISO, post-install
   packages/               local packages (overlay local-packages), maintenance scripts (_scripts/)
-  skills/                 AI agent skills (Prime Agent, Claude Code)
+  skills/                 AI agent skills (Prime Agent, Claude Code, Codex, opencode)
   checks/                 NixOS VM tests
   _secrets/               agenix secrets and public keys
 docs/reference/           generated documentation

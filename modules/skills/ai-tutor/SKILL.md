@@ -24,7 +24,7 @@ The upstream skill assumes pi extensions (`quiz`, `ask_user_question`, `research
 
 - **`quiz`** → graded questions asked in chat: pose the question (options for MCQ), wait for the answer, then score it explicitly (✅ / ⚠️ partial / ❌), reveal the correct answer, and give a one-or-two-sentence explanation.
 - **`ask_user_question`** → an open question asked directly in chat. Reserved for genuine no-right-answer forks (preferences, direction, what to teach next).
-- **`researcher`** → Prime Agent's built-in `websearch` skill (`await websearch("query")` in the `ipython` tool; needs a Serper key set up via `/login`, otherwise it returns a setup message) or any other research tooling in this session. If none works: when unsure of a fact and unable to verify it, say you are unsure instead of guessing.
+- **`researcher`** → this agent's web search: in Prime Agent the built-in `websearch` skill (`await websearch("query")` in the `ipython` tool; needs a Serper key set up via `/login`, otherwise it returns a setup message), elsewhere the agent's own web search/fetch tools, or any other research tooling in this session. If none works: when unsure of a fact and unable to verify it, say you are unsure instead of guessing.
 - **`md-log`** → the session log — see "Session log" below.
 
 **Language:** teach in the learner's language — Polish by default (mirror whatever language they write in). Pedagogical terms (unconditional truth, edge, DAG) may stay in English.
@@ -67,4 +67,4 @@ Run all three phases in order, every time; scale each phase's *size* to the topi
 
 ## Session log
 
-From Phase 1 on, keep the session as a Markdown notebook (`~/nauka/ai-tutor/<topic>-<YYYY-MM-DD>.md`, fallback `<topic>.md` in the cwd), written from the `ipython` tool and appended right after every answered question — never batched; give the learner its path at the end. What to record and the template: references/notebook.md.
+From Phase 1 on, keep the session as a Markdown notebook (`~/nauka/ai-tutor/<topic>-<YYYY-MM-DD>.md`, fallback `<topic>.md` in the cwd), written with this agent's file tools (in Prime Agent: from the `ipython` tool) and appended right after every answered question — never batched; give the learner its path at the end. What to record and the template: references/notebook.md.

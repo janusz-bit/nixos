@@ -35,13 +35,16 @@
       fishWrappers = [
         {
           name = "prime-agent";
-          description = "prime-agent z kluczami OLLAMA/OPENROUTER i tokenem Trilium z agenix";
+          description = "prime-agent z kluczami API z agenix";
           # Tych nazw zmiennych używają models.json i settings.json (base-prime-agent).
           vars = [
             (envFromSecret "OLLAMA_API_KEY" "ollama-api-key")
             (envFromSecret "OPENROUTER_API_KEY" "openrouter-api-key")
-            (envFromSecret "TRILIUM_ETAPI_TOKEN" "trilium-etapi")
-          ];
+          ]
+          # Token jest tylko na hoście z Trilium (base/secrets.nix).
+          ++ lib.optional (config.age.secrets ? trilium-etapi) (
+            envFromSecret "TRILIUM_ETAPI_TOKEN" "trilium-etapi"
+          );
         }
         {
           name = "opencode";

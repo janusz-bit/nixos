@@ -32,7 +32,6 @@
         self.modules.nixos.rpi-tools
         self.modules.nixos.rpi-cloudflared
         self.modules.nixos.rpi-nextcloud
-        self.modules.nixos.rpi-trilium
         self.modules.nixos.rpi-gitea
         self.modules.nixos.rpi-hermes
         self.modules.nixos.rpi-matrix

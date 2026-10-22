@@ -1,8 +1,9 @@
 # Opcje customBot: ustawienia zależne od hosta (cel aliasów update/push,
 # fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium,
-# dodatkowi providerzy Prime Agenta). flakeTarget (bez wartości domyślnej)
-# ustawia rejestr hostów i sd-image.nix, primeAgentProviders
-# skills/external.nix, a resztę host nadpisuje w swoim default.nix.
+# dodatkowi providerzy Prime Agenta, skille agentów kodujących). flakeTarget
+# (bez wartości domyślnej) ustawia rejestr hostów i sd-image.nix,
+# primeAgentProviders i agentSkills moduły skilli (modules/skills/), a resztę
+# host nadpisuje w swoim default.nix.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
 { customTop, ... }:
@@ -28,12 +29,13 @@
           description = "Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).";
         };
         triliumMcpUrl = lib.mkOption {
-          type = lib.types.str;
-          default = "http://127.0.0.1:8081/mcp";
+          type = lib.types.nullOr lib.types.str;
+          default = null;
           description = ''
             Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
-            trilium-notes (TRILIUM_MCP_URL). Zależny od hosta: RPi ma
-            trilium-server na 8081, laptop desktopowy Trilium na 37840.
+            trilium-notes (TRILIUM_MCP_URL); null = host bez Trilium: bez
+            serwera MCP, skilla i tokenu ETAPI. Laptop ustawia desktopowy
+            Trilium na 37840.
           '';
         };
         primeAgentProviders = lib.mkOption {
@@ -44,6 +46,17 @@
             schemat jak w modules/hosts/base/prime-agent.nix), np. lokalny
             serwer, który działa tylko na tym hoście. Nazwa zajęta przez
             providera z prime-agent.nix kończy ewaluację błędem.
+          '';
+        };
+        agentSkills = lib.mkOption {
+          type = lib.types.attrsOf lib.types.path;
+          default = { };
+          description = ''
+            Skille (katalog z SKILL.md) dla każdego agenta kodującego hosta:
+            Prime Agent, Claude Code, Codex i opencode. Linkuje je ai-skills
+            (modules/skills/default.nix), więc działają tylko na hostach, które
+            go importują. Ta sama nazwa z dwóch definicji kończy ewaluację
+            błędem.
           '';
         };
       };
