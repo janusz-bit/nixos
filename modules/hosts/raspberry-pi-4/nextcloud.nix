@@ -11,13 +11,30 @@
 # `sudo nextcloud-occ group:adduser admin <nazwa>`. Hasło istniejącego `admin`
 # jest tylko kopią w `nextcloud-adminpass.age` (żaden host go nie deklaruje).
 #
+# PHP pochodzi z inputu `nixpkgs-php` (PHP2Shell, temporary-fixes.md); asercja
+# pilnuje, żeby żadna zmiana nie wróciła do PHP < 8.4.27.
+#
 # Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
 # `sudo nextcloud-occ config:system:get trusted_proxies`.
-{ customTop, ... }:
+{ customTop, inputs, ... }:
 {
   flake.modules.nixos.rpi-nextcloud =
-    { pkgs, ... }:
     {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      # PHP2Shell (CVE-2026-109618, CVE-2026-109619): nieuwierzytelnione RCE
+      # w PHP, poprawione w 8.4.27; Nextcloud jest wystawiony do internetu.
+      assertions = [
+        {
+          assertion = lib.versionAtLeast config.services.nextcloud.phpPackage.version "8.4.27";
+          message = "rpi-nextcloud: PHP ${config.services.nextcloud.phpPackage.version} jest podatne na PHP2Shell (CVE-2026-109618/109619); użyj php84 >= 8.4.27.";
+        }
+      ];
+
       services = {
         nextcloud = {
           enable = true;
@@ -25,6 +42,11 @@
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
           package = pkgs.nextcloud35;
+          # PHP2Shell: przypięty nixpkgs ma php84 8.4.26, poprawka (8.4.27,
+          # NixOS/nixpkgs#576853) jest na razie tylko w nixos-unstable-small.
+          # Usunąć razem z inputem `nixpkgs-php`, gdy pkgs.php84 >= 8.4.27
+          # (temporary-fixes.md).
+          phpPackage = inputs.nixpkgs-php.legacyPackages.${pkgs.stdenv.hostPlatform.system}.php84;
 
           database.createLocally = true;
 

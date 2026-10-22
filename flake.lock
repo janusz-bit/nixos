@@ -558,6 +558,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-php": {
+      "locked": {
+        "lastModified": 1792617723,
+        "narHash": "sha256-IyFA94SfEEqeru/RZyRRbmk8gtBejDTiojSReKzUOc8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dce1caf58d1a943af38b376e824a0d036ec3eea7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable-small",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1785318670,
@@ -739,6 +755,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
+        "nixpkgs-php": "nixpkgs-php",
         "qt-agent-skills": "qt-agent-skills"
       }
     },
