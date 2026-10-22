@@ -6,19 +6,19 @@
 # (defaultListenAddresses w network.nix) i nie ma mDNS (avahi). Ten vhost serwuje też
 # /.well-known/matrix/client (matrix.nix).
 #
+# Konto `admin` powstało przy pierwszej instalacji; nixpkgs instaluje teraz bez
+# admina (`occ maintenance:install --disable-admin-user`), więc po świeżej
+# instalacji: `sudo nextcloud-occ user:add <nazwa>` i
+# `sudo nextcloud-occ group:adduser admin <nazwa>`. Hasło obecnego `admin` zostaje
+# tylko jako kopia w `nextcloud-adminpass.age` (żaden host go nie deklaruje).
+#
 # Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
 # `sudo nextcloud-occ config:system:get trusted_proxies`.
 { customTop, ... }:
 {
   flake.modules.nixos.rpi-nextcloud =
-    { config, pkgs, ... }:
+    { pkgs, ... }:
     {
-      # nextcloud-setup czyta plik przez LoadCredential.
-      age.secrets.nextcloud-adminpass = {
-        file = customTop.secretsDir + "/nextcloud-adminpass.age";
-        owner = "nextcloud";
-        mode = "0400";
-      };
       services = {
         nextcloud = {
           enable = true;
@@ -29,11 +29,7 @@
 
           database.createLocally = true;
 
-          config = {
-            dbtype = "pgsql";
-            adminpassFile = config.age.secrets.nextcloud-adminpass.path;
-            adminuser = "admin";
-          };
+          config.dbtype = "pgsql";
 
           configureRedis = true;
           maxUploadSize = "2G";
