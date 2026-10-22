@@ -18,14 +18,25 @@
 {
   flake.modules.nixos.rpi-cloudflared =
     { config, ... }:
+    let
+      tunnelName = "raspberry-pi-4";
+    in
     {
       # Moduł cloudflared czyta plik przez LoadCredential (DynamicUser),
       # więc wystarcza domyślne root:root 0400.
       age.secrets.cloudflared-tunnel.file = customTop.secretsDir + "/cloudflared-tunnel.age";
+
+      # Bez sieci cloudflared kończy się zaraz po starcie (brak DNS dla
+      # rekordów SRV argotunnel.com). Przy domyślnych 100 ms między
+      # restartami 5 startów mieściło się w 2 s, czyli w StartLimitBurst
+      # (5 w 10 s), i systemd porzucał usługę na stałe — tunel nie wracał
+      # nawet po podłączeniu kabla. Co 5 s w 10 s mieszczą się najwyżej 3.
+      systemd.services."cloudflared-tunnel-${tunnelName}".serviceConfig.RestartSec = 5;
+
       services.cloudflared = {
         enable = true;
         tunnels = {
-          "raspberry-pi-4" = {
+          ${tunnelName} = {
             # Force HTTP/2 over TCP instead of the default QUIC (UDP).
             # QUIC connections died in clusters ("Failed to dial a quic
             # connection … timeout: no recent network activity"), sometimes
