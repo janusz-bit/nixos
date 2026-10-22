@@ -2,6 +2,7 @@
 # github-actions), formatter, hooki pre-commit (gitleaks, nixfmt, statix,
 # deadnix, generatory .github/workflows i docs/reference) oraz dev shell,
 # w którym te hooki się instalują (`nix develop`, alias claude-nixos).
+#
 # Sprawdzenie: `nix develop -c pre-commit run --all-files`; to samo w CI:
 # `nix build .#checks.x86_64-linux.pre-commit` (oblewa nieaktualne pliki
 # generowane).
@@ -23,20 +24,17 @@
       config,
       lib,
       pkgs,
-      self',
       ...
     }:
     let
-      # Hook generatora (workflowy CI, docs/reference): lokalnie
-      # `nix run .#<generator>` na bieżącym drzewie. Wpis hooka jest przypięty
-      # do store path z chwili wejścia do dev shella, więc wołana wprost
-      # paczka generowałaby pliki ze STAREJ wersji flake'a i cofała świeże
-      # zmiany (tak powstał incydent v504). W piaskownicy checks.pre-commit
-      # (CI lint) nie ma nix — tam działa przypięta kopia, zbudowana z tego
-      # samego commita, więc też aktualna.
-      freshGenerator =
-        name:
-        lib.getExe (
+      # Hook generatora woła `nix run .#<generator>` na bieżącym drzewie, bo
+      # wpis hooka jest przypięty do store path z chwili wejścia do dev shella:
+      # przypięta paczka generowałaby pliki ze starej wersji flake'a i cofała
+      # świeże zmiany (incydent v504). W piaskownicy checks.pre-commit (CI lint)
+      # nie ma nix, więc tam działa przypięta kopia z tego samego commita.
+      generatorHook = name: {
+        enable = true;
+        entry = lib.getExe (
           pkgs.writeShellApplication {
             name = "${name}-hook";
             text = ''
@@ -47,10 +45,16 @@
             '';
           }
         );
+        # Przy każdym commicie: filtr plików pomijałby commity z samymi
+        # usunięciami (pre-commit nie przekazuje usuniętych plików), a wynik
+        # zależy też od flake.lock. Generator nie ewaluuje hostów (~7 s na RPi).
+        always_run = true;
+        pass_filenames = false;
+      };
     in
     {
       formatter = pkgs.nixfmt-tree;
-      packages.default = self'.packages.install-system;
+      packages.default = config.packages.install-system;
 
       pre-commit.settings.hooks = {
         gitleaks.enable = true;
@@ -60,23 +64,8 @@
           enable = true;
           settings.noLambdaPatternNames = true;
         };
-        sync-github-actions = {
-          enable = true;
-          name = "sync-github-actions";
-          entry = freshGenerator "sync-github-actions";
-          # Przy każdym commicie: filtr plików pomijałby commity z samymi
-          # usunięciami (pre-commit nie przekazuje usuniętych plików), a wynik
-          # zależy też od flake.lock. Generator nie ewaluuje hostów (~7 s na RPi).
-          always_run = true;
-          pass_filenames = false;
-        };
-        sync-docs = {
-          enable = true;
-          name = "sync-docs";
-          entry = freshGenerator "sync-docs";
-          always_run = true;
-          pass_filenames = false;
-        };
+        sync-github-actions = generatorHook "sync-github-actions";
+        sync-docs = generatorHook "sync-docs";
       };
 
       devShells.default = pkgs.mkShell {
@@ -85,8 +74,7 @@
         '';
 
         packages = config.pre-commit.settings.enabledPackages ++ [
-          # jq: hook Claude Code (.claude/hooks/post-edit.sh) parsuje nim
-          # JSON z wejścia hooka.
+          # jq: .claude/hooks/post-edit.sh parsuje nim JSON hooka Claude Code.
           pkgs.jq
           config.packages.flake-update
           config.packages.flake-release
