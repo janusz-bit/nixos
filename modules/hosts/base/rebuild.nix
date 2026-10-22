@@ -11,12 +11,12 @@
   flake.modules.nixos.base-rebuild =
     { config, ... }:
     let
-      inherit (customTop.repository) linkFlake place;
+      inherit (customTop.repository) flake place;
       inherit (config.customBot) flakeTarget;
       rebuild =
         mode: remote:
         let
-          flakeRef = if remote then linkFlake else place;
+          flakeRef = if remote then flake else place;
         in
         "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${flakeTarget}${lib.optionalString remote " --refresh"}";
       update_alias = mode: remote: "sudo ${rebuild mode remote}";

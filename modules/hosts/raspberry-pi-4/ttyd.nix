@@ -126,7 +126,7 @@
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr$http_cf_connecting_ip zone=ttyd:1m rate=10r/m;
         '';
-        virtualHosts."ttyd.${customTop.site.full}" = {
+        virtualHosts."ttyd.${customTop.domain}" = {
           listen = [
             {
               addr = "127.0.0.1";

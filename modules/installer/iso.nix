@@ -24,7 +24,12 @@
 # Build:  nix build .#packages.x86_64-linux.nixos-iso
 # Wynik:  result/iso/*.iso — nagraj na USB (dd/ventoy) albo wypal na DVD.
 #         ISO nie jest podpisane: Secure Boot w BIOS musi być wyłączony.
-{ self, inputs, ... }:
+{
+  self,
+  inputs,
+  customTop,
+  ...
+}:
 {
   flake.modules.nixos.installer-iso =
     { lib, ... }:
@@ -47,7 +52,7 @@
 
       services.getty.helpLine = ''
 
-        === janusz-bit/nixos ===
+        === ${customTop.owner}/${customTop.repository.name} ===
         Zaloguj się jako root (bez hasła) i uruchom:
 
           install-system [--disk URZĄDZENIE]

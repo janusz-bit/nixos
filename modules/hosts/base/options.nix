@@ -9,7 +9,8 @@
 # trafiają do generowanego docs/reference/options.md.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
-_: {
+{ customTop, ... }:
+{
   flake.modules.nixos.base-options =
     { lib, ... }:
     {
@@ -27,7 +28,7 @@ _: {
         };
         defaultUser = lib.mkOption {
           type = lib.types.str;
-          default = "nixos";
+          default = customTop.users.default;
           description = "Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).";
         };
         triliumMcpUrl = lib.mkOption {

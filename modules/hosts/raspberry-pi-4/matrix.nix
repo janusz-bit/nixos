@@ -16,15 +16,15 @@
   flake.modules.nixos.rpi-matrix =
     { config, lib, ... }:
     let
-      domain = customTop.site.full;
+      inherit (customTop) domain;
       # Adres serwera dla klientów (Element) — przez Cloudflare Tunnel
       # (cloudflared.nix). ID kont: @nazwa:${domain} (server_name).
       clientUrl = "https://matrix.${domain}";
       continuwuity = config.services.matrix-continuwuity.settings.global;
 
-      # Jedyne konto, które może rozmawiać z Hermesem. Zakładasz je jako
-      # pierwsze (dostaje admina serwera) — przy innej nazwie zmień tutaj.
-      owner = "@janusz:${domain}";
+      # Jedyne konto, które może rozmawiać z Hermesem (customTop.users.matrix).
+      # Zakładasz je jako pierwsze — dostaje admina serwera.
+      owner = "@${customTop.users.matrix}:${domain}";
 
       # Token dostępu konta bota @hermes:${domain}, plik env:
       #   MATRIX_ACCESS_TOKEN=…

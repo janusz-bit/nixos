@@ -51,8 +51,8 @@ in
             extra_nix_config = ''
               experimental-features = nix-command flakes
               access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cache.cachix.url}
-              extra-trusted-public-keys = ${customTop.cache.cachix.pubKey}
+              extra-substituters = ${customTop.cachix.url}
+              extra-trusted-public-keys = ${customTop.cachix.pubKey}
               build-fallback = true
             '';
           };
@@ -61,7 +61,7 @@ in
           name = "Setup Cachix";
           uses = actions.cachix;
           with_ = {
-            name = customTop.cache.cachix.name;
+            inherit (customTop.cachix) name;
             authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
           };
         }

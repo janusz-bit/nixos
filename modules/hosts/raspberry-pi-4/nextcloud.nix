@@ -1,4 +1,4 @@
-# Nextcloud 35 pod domeną główną (customTop.site.full): PostgreSQL i Redis
+# Nextcloud 35 pod domeną główną (customTop.domain): PostgreSQL i Redis
 # lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny
 # wyłącznie przez Cloudflare Tunnel (cloudflared → nginx :80).
 #
@@ -22,7 +22,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = customTop.site.full;
+          hostName = customTop.domain;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
           package = pkgs.nextcloud35;
@@ -65,7 +65,7 @@
           settings = {
             maintenance_window_start = 1;
             overwriteprotocol = "https";
-            "overwrite.cli.url" = "https://${customTop.site.full}";
+            "overwrite.cli.url" = "https://${customTop.domain}";
             trusted_proxies = [
               "127.0.0.1"
               "::1"
@@ -74,7 +74,7 @@
         };
 
         # HSTS Header
-        nginx.virtualHosts."${customTop.site.full}".extraConfig = ''
+        nginx.virtualHosts."${customTop.domain}".extraConfig = ''
           add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
         '';
 

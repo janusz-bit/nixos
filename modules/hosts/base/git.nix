@@ -8,8 +8,8 @@
       programs.git = {
         enable = true;
         config = {
-          user.name = customTop.repository.user;
-          user.email = customTop.email.full;
+          user.name = customTop.owner;
+          user.email = customTop.email;
           init.defaultBranch = "main";
           url = {
             "https://github.com/" = {

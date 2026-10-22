@@ -4,7 +4,7 @@
 # modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/.
 # Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza
 # rejestrem hostów.
-{ self, ... }:
+{ self, customTop, ... }:
 {
   hosts.raspberry-pi-4 = {
     system = "aarch64-linux";
@@ -45,7 +45,7 @@
 
       networking.hostName = "raspberry-pi-4";
       system.stateVersion = "26.05";
-      time.timeZone = "Europe/Warsaw";
+      time.timeZone = customTop.locale.timeZone;
       # Ustawia to też rejestr hostów; tutaj dla obrazu SD, który składa ten
       # moduł poza rejestrem.
       customBot.flakeTarget = "raspberry-pi-4";

@@ -267,7 +267,7 @@ in
         ssh = config.programs.ssh.package;
         tmux = config.programs.tmux.package;
         key = config.age.secrets.hermes-notify-key.path;
-        target = "ssh.${customTop.site.full}";
+        target = "ssh.${customTop.domain}";
         sshOptions = [
           "-o"
           "ProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h"

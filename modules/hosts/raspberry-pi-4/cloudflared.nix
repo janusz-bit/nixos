@@ -53,7 +53,7 @@
               # upload streams mid-transfer ("stream canceled by remote with
               # error code 0"). 300s gives PHP-FPM enough time to process
               # large files even under memory pressure.
-              "${customTop.site.full}" = {
+              "${customTop.domain}" = {
                 service = "http://localhost:80";
                 originRequest = {
                   connectTimeout = "300s";
@@ -61,13 +61,13 @@
                   keepAliveTimeout = "2m";
                 };
               };
-              "notes.${customTop.site.full}" = "http://localhost:8081";
+              "notes.${customTop.domain}" = "http://localhost:8081";
               # nginx z Basic Auth przed ttyd (modules/hosts/raspberry-pi-4/ttyd.nix)
-              "ttyd.${customTop.site.full}" = "http://localhost:8083";
-              "ssh.${customTop.site.full}" = "ssh://localhost:22";
-              "git.${customTop.site.full}" = "http://localhost:3000";
+              "ttyd.${customTop.domain}" = "http://localhost:8083";
+              "ssh.${customTop.domain}" = "ssh://localhost:22";
+              "git.${customTop.domain}" = "http://localhost:3000";
               # continuwuity (modules/hosts/raspberry-pi-4/matrix.nix)
-              "matrix.${customTop.site.full}" = "http://localhost:6167";
+              "matrix.${customTop.domain}" = "http://localhost:6167";
             };
           };
         };

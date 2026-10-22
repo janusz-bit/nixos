@@ -14,7 +14,7 @@
 
       settings = {
         server = {
-          ROOT_URL = "https://git.${customTop.site.full}/";
+          ROOT_URL = "https://git.${customTop.domain}/";
           HTTP_ADDR = "127.0.0.1";
           HTTP_PORT = 3000;
           DISABLE_SSH = false;
@@ -22,7 +22,7 @@
           # Adres klonowania przez SSH: git.<domena> tunel podaje tylko jako
           # HTTP, sshd osiąga ssh.<domena> (`cloudflared access ssh` z bloku
           # `Host ssh.*` w base-ssh; jawny `gitea@` wygrywa z `User root`).
-          SSH_DOMAIN = "ssh.${customTop.site.full}";
+          SSH_DOMAIN = "ssh.${customTop.domain}";
           SSH_PORT = 22;
         };
         service.DISABLE_REGISTRATION = true;

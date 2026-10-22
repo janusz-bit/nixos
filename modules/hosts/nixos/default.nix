@@ -4,7 +4,7 @@
 # (hostname, stateVersion, konto), dysk (disko.nix, snapper.nix), rozruch
 # (boot.nix); SSH tylko z LAN-u daje base-ssh-lan. Funkcje stacji roboczej: modules/desktop/,
 # gry: modules/gaming/, sprzęt: modules/hardware/LOQ-15IRX10/.
-{ self, ... }:
+{ self, customTop, ... }:
 {
   hosts.nixos = {
     system = "x86_64-linux";
@@ -42,7 +42,7 @@
       system.stateVersion = "25.11";
 
       customBot = {
-        defaultUser = "dinosaur";
+        defaultUser = customTop.users.laptop;
         # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840),
         # a nie trilium-server:8081 z raspberry-pi-4.
         triliumMcpUrl = "http://127.0.0.1:37840/mcp";

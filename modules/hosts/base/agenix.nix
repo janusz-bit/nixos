@@ -177,7 +177,7 @@
         vendor.functions.enable = true;
         # push: build toplevela z GitHuba i wypchnięcie do cachix przez
         # cachix-push (token tylko dla tego procesu).
-        shellAliases.push = "nix build ${customTop.repository.linkFlake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cache.cachix.name}";
+        shellAliases.push = "nix build ${customTop.repository.flake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cachix.name}";
       };
       environment.systemPackages = [ fishWrappersPkg ];
 

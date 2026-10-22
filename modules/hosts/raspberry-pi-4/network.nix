@@ -49,7 +49,7 @@
         # Domena regulacyjna PL (jak raspi-config w Raspberry Pi OS). Bez niej
         # cfg80211 zostaje w domenie światowej "00": kanały 12–13 (2,4 GHz)
         # są tylko pasywne, więc router na takim kanale byłby nieosiągalny.
-        boot.kernelParams = [ "cfg80211.ieee80211_regdom=PL" ];
+        boot.kernelParams = [ "cfg80211.ieee80211_regdom=${customTop.locale.wifiRegdom}" ];
       }
       (lib.mkIf hasSecret {
         # NetworkManager-ensure-profiles działa jako root i czyta plik przez

@@ -1,13 +1,11 @@
 # Polski układ i język: strefa czasowa, locale, klawiatura w konsoli i w
 # sesji graficznej (xkb czyta też KWin na Waylandzie).
-_: {
+{ customTop, ... }:
+{
   flake.modules.nixos.desktop-locale = _: {
-    time.timeZone = "Europe/Warsaw";
-    i18n.defaultLocale = "pl_PL.UTF-8";
-    console.keyMap = "pl2";
-    services.xserver.xkb = {
-      layout = "pl";
-      variant = "";
-    };
+    time.timeZone = customTop.locale.timeZone;
+    i18n.defaultLocale = customTop.locale.language;
+    console.keyMap = customTop.locale.keyMap;
+    services.xserver.xkb.layout = customTop.locale.xkbLayout;
   };
 }
