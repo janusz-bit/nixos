@@ -10,7 +10,6 @@ _: {
         (prismlauncher.override {
           # ffmpeg wymagany przez niektóre mody
           additionalPrograms = [ ffmpeg ];
-          # Środowiska Javy dostępne w Prism Launcherze
           jdks = [
             graalvmPackages.graalvm-ce
             zulu8

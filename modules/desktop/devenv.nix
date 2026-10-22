@@ -1,18 +1,11 @@
 # devenv (https://devenv.sh): deklaratywne środowiska deweloperskie projektów.
 #
-# devenv rejestruje swoje cache (`cachix.pull`) per projekt, ale demon nix
-# przyjmuje substituters od klienta tylko od trusted-users, a tu
-# `trusted-users` celowo zostaje domyślne (tylko root, AGENTS.md: Security
-# invariants). Bez cache w konfiguracji demona devenv po cichu buduje lokalnie
-# wszystko z `devenv-nixpkgs/rolling`, dlatego devenv.cachix.org jest dodane
-# tutaj, na poziomie hosta. To cache dla projektów devenv, nie dla tego
-# flake'a: celowo nie ma go w `nixConfig` we flake.nix.
+# Demon nix bierze cache z `cachix.pull` projektu tylko od trusted-users (celowo
+# sam root), więc bez devenv.cachix.org w konfiguracji hosta devenv po cichu buduje
+# lokalnie całe devenv-nixpkgs. Cache służy projektom devenv, nie temu flake'owi,
+# stąd celowo poza nixConfig.
 #
-# direnv jest włączony w base (`programs.direnv`), więc `devenv init` + `.envrc`
-# z `use devenv` działa bez dodatkowej konfiguracji.
-#
-# Weryfikacja: `nix config show extra-substituters` zawiera devenv.cachix.org;
-# `devenv shell` w nowym projekcie pobiera zależności zamiast je budować.
+# Sprawdzenie: `nix config show extra-substituters` zawiera devenv.cachix.org.
 _: {
   flake.modules.nixos.desktop-devenv =
     { pkgs, ... }:

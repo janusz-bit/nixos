@@ -1,29 +1,25 @@
-# Dead by Daylight (appid 381210): wrapper w stylu gamemoderun, który
-# uruchamia grę w DX11. W Launch Options Steama wpisz:  dbdrun %command%
-# bez -dx12 (UE5 kończy się błędem, gdy dostanie dwa wymuszone RHI).
-# Od patcha 7.7.0 (UE5, kwiecień 2024) DBD domyślnie renderuje w DX12, czyli
-# pod Protonem przez vkd3d-proton — na NVIDII najwolniejszą ścieżkę
-# (https://forums.developer.nvidia.com/t/directx12-performance-is-terrible-on-linux/303207 ,
-# nadal otwarte; ścieżka descriptor heap z vkd3d-proton 3.0.1 jest tylko za
-# VKD3D_CONFIG z powodu błędów NVIDII). -dx11 (wg PCGamingWiki nadal
-# wspierane) przełącza grę na DXVK, przez które dobrze działa tu Deadlock.
-# dGPU wybiera już GAMEMODERUNEXEC (gaming/gamemode.nix,
-# __VK_LAYER_NV_optimus=NVIDIA_only); wrapper, a nie zmienne sesji, bo Steam
-# odpala go przy każdym starcie gry.
-# Sprawdzenie: Launch Options `PROTON_LOG=1 dbdrun %command%`, w
-# ~/steam-381210.log są "D3D11InternalCreateDevice: Using feature level"
-# i "dxvk.enableNvRawAccessChains = False"; po meczu
-# `journalctl -k | grep Xid` jest puste. A/B z DX12: `gamemoderun %command%`.
-{
+# Dead by Daylight (appid 381210): wrapper na gamemoderun uruchamiający grę
+# w DX11; Launch Options: `dbdrun %command%`, bez -dx12 (dwa wymuszone RHI to
+# błąd UE5).
+#
+# Domyślne DX12 idzie pod Protonem przez vkd3d-proton, na NVIDII najwolniejszą
+# ścieżką (https://forums.developer.nvidia.com/t/directx12-performance-is-terrible-on-linux/303207 ,
+# nadal otwarte); -dx11 przełącza grę na DXVK, przez które dobrze działa tu
+# Deadlock. dGPU wybiera GAMEMODERUNEXEC (gaming/gamemode.nix). Wrapper, a nie
+# zmienne sesji, bo Steam odpala go przy każdym starcie tej jednej gry.
+# Sprawdzenie: Launch Options `PROTON_LOG=1 dbdrun %command%`, w ~/steam-381210.log
+# "D3D11InternalCreateDevice: Using feature level" i
+# "dxvk.enableNvRawAccessChains = False"; po meczu `journalctl -k | grep Xid`
+# puste. A/B z DX12: `gamemoderun %command%`.
+_: {
   flake.modules.nixos.gaming-dbd =
     { lib, pkgs, ... }:
     let
-      # See temporary-fixes.md: w DX11 grę renderuje DXVK, więc grozi jej ten
-      # sam zawias GPU co Deadlockowi (Xid 109 przez VK_NV_raw_access_chains na
-      # NVIDIA 610/615, poprawki DXVK nie ma jeszcze w żadnym Protonie), a
-      # zawieszony mecz to rozłączenie i kara w matchmakingu.
-      # __GL_SHADER_DISK_CACHE_SKIP_CLEANUP: sterownik NVIDII nie przycina
-      # cache shaderów (także Vulkan) po przekroczeniu limitu rozmiaru, więc
+      # DXVK_CONFIG tymczasowo (temporary-fixes.md nr 6): w DX11 renderuje DXVK,
+      # więc grozi ten sam zawias GPU co w Deadlocku (Xid 109), a zawieszony mecz
+      # to rozłączenie i kara w matchmakingu.
+      # __GL_SHADER_DISK_CACHE_SKIP_CLEANUP: sterownik NVIDII nie przycina cache
+      # shaderów (także Vulkan) po przekroczeniu limitu rozmiaru, więc
       # skompilowane pipeline'y zostają między sesjami.
       dbdrun = pkgs.writeShellApplication {
         name = "dbdrun";

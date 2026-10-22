@@ -4,11 +4,12 @@
 # wołają gamemoderun, więc dziedziczą to samo.
 #
 # Bez ananicy-cpp (reguły CachyOS): przy cgroup v2 każda aplikacja ma własny
-# scope, a nice działa tylko wewnątrz jednej cgroup — zmierzone: nice -4 vs
-# +15 w osobnych scope'ach 50/50 CPU, w jednym 91/9; ioclass ignoruje
-# scheduler NVMe `none`. Za to ustawiał Konsoli/Steamowi nice -4/16, przez co
-# GameMode odmawiał renice („Refused to renice … prio was (-4)”), a nixpkgs
-# wymusza cgroup_realtime_workaround = true (KWin i Xwayland w root cgroup).
+# scope, a nice działa tylko w obrębie jednej cgroup (zmierzone: nice -4 vs +15
+# w osobnych scope'ach 50/50 CPU, w jednym 91/9); ioclass ignoruje scheduler
+# NVMe `none`. Jego nice -4/16 dla Konsoli/Steama blokował za to renice
+# GameMode'a, który zmienia tylko wątki z nice 0 („Refused to renice … prio was
+# (-4)”), a nixpkgs wymusza mu cgroup_realtime_workaround (KWin i Xwayland
+# w root cgroup).
 #
 # Sprawdzenie: `gamemoded -s` w trakcie gry („gamemode is active”),
 # `powerprofilesctl get` → performance.
@@ -21,12 +22,9 @@ _: {
       ...
     }:
     let
-      # GameMode → power-profiles-daemon: na czas gry profil "performance"
-      # (platform_profile firmware Lenovo jak Fn+Q: wyższe limity mocy,
-      # głośniejsze wentylatory + EPP "performance"), po grze przywraca
-      # profil sprzed startu (np. power-saver na baterii).
-      # gamemoded (usługa użytkownika) ma PATH zawężony do pkexec, więc
-      # skrypt niesie własny PATH (runtimeInputs).
+      # Na czas gry profil "performance" (platform_profile Lenovo jak Fn+Q: wyższe
+      # limity mocy i EPP), po grze profil sprzed startu. gamemoded ma PATH
+      # zawężony do pkexec, stąd runtimeInputs.
       gamemodePowerProfile = pkgs.writeShellApplication {
         name = "gamemode-power-profile";
         runtimeInputs = [
@@ -64,19 +62,14 @@ _: {
       ];
     in
     {
-      # GameMode: dynamiczne zarządzanie priorytetami CPU/GPU i profili energetycznych.
-      # Domyślnie (1.8.2) już: governor "performance", pinning gry na
-      # P-rdzenie (hybryda P+E), wyłączona mitygacja split-lock. GameMode
-      # pomija ioprio („ioprio was (0) but we expected (4)” w journalu),
-      # a scheduler NVMe `none` i tak ignoruje priorytety I/O.
+      # GameMode 1.8.2 domyślnie: governor "performance", gra na P-rdzeniach,
+      # mitygacja split-lock wyłączona; ioprio pomija, a NVMe `none` i tak je ignoruje.
       programs.gamemode = {
         enable = true;
         settings = {
-          # nice -10 dla procesów gry (gamemoded ma CAP_SYS_NICE z wrappera NixOS).
-          # Działa tylko względem procesów z tej samej cgroup (scope Steama:
-          # steamwebhelper, fossilize_replay); między aplikacjami decyduje
-          # cpu.weight. GameMode renicuje wątki tylko z nice 0 — dlatego bez
-          # ananicy-cpp (nagłówek).
+          # nice -10 (CAP_SYS_NICE z wrappera NixOS) działa tylko w cgroup gry (scope
+          # Steama: steamwebhelper, fossilize_replay); między aplikacjami decyduje
+          # cpu.weight.
           general.renice = 10;
           custom = lib.mkIf config.services.power-profiles-daemon.enable {
             start = "${lib.getExe gamemodePowerProfile} start";
@@ -89,8 +82,7 @@ _: {
         [ "env" ] ++ primeOffloadEnv ++ protonEnv
       );
 
-      # Reguła polkit GameMode pozwala członkom grupy gamemode zmieniać
-      # governor CPU i zegary GPU bez hasła.
+      # Polkit GameMode: grupa gamemode zmienia governor CPU i zegary GPU bez hasła.
       users.users.${config.customBot.defaultUser}.extraGroups = [ "gamemode" ];
     };
 }
