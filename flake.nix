@@ -1,10 +1,11 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # Tylko PHP Nextclouda na RPi (PHP2Shell, rpi-nextcloud): nixos-unstable
-    # nie ma jeszcze PHP 8.4.27, a przestawienie głównego nixpkgs przebudowałoby
-    # wszystkie hosty. Tymczasowe: temporary-fixes.md.
-    nixpkgs-php.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    # Kanał nixos-unstable-small z własnym nixpkgs; obecnie tylko PHP Nextclouda
+    # na RPi (PHP2Shell, rpi-nextcloud): nixos-unstable nie ma jeszcze PHP 8.4.27,
+    # a przestawienie głównego nixpkgs przebudowałoby wszystkie hosty.
+    # Tymczasowe: temporary-fixes.md.
+    nixpkgs-unstable-small.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     import-tree.url = "github:vic/import-tree";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";

@@ -255,10 +255,10 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   albo test `home_mode_unsafe` (zaakceptuje grupę współdzieloną); wtedy usunąć
   zmianę 4 z kopii modułu.
 
-### 12. Nextcloud — PHP z inputu `nixpkgs-php` (PHP2Shell)
+### 12. Nextcloud — PHP z inputu `nixpkgs-unstable-small` (PHP2Shell)
 
 - **Od:** 2026-10-22.
-- **Pliki:** `flake.nix` (input `nixpkgs-php` = `nixos-unstable-small`),
+- **Pliki:** `flake.nix` (input `nixpkgs-unstable-small` = `nixos-unstable-small`),
   `modules/hosts/raspberry-pi-4/nextcloud.nix` (`services.nextcloud.phpPackage`).
 - **Objaw:** `phpfpm-nextcloud` działa na PHP 8.4.26, podatnym na PHP2Shell
   (CVE-2026-109618, CVE-2026-109619: nieuwierzytelnione RCE), a Nextcloud jest
@@ -271,8 +271,8 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (i pozostałe hosty) bez zmian. Asercja w `nextcloud.nix` wymaga PHP ≥ 8.4.27.
 - **Kiedy usunąć:** gdy przypięty `nixpkgs` ma `php84` ≥ 8.4.27. Sprawdzenie:
   `nix eval --raw .#nixosConfigurations.raspberry-pi-4.pkgs.php84.version`;
-  potem usunąć input `nixpkgs-php` (`nix flake lock`) i `phpPackage` —
-  asercja zostaje.
+  potem usunąć `phpPackage` i, jeśli nic innego go nie używa, input
+  `nixpkgs-unstable-small` (`nix flake lock`) — asercja zostaje.
 
 ## Zamknięte
 

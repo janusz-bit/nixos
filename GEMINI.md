@@ -41,7 +41,7 @@ Base (every host): bash exec'ing fish, tmux, nix-ld, comma, direnv, Quad9 DNS (`
 ### `raspberry-pi-4` (server)
 - `base` (inside the aggregate: the SD image composes it outside the registry) + `base-agenix` + `base-fail2ban` + `base-ssh-lan` + `base-lockdown` + `ai-skills` + `hardware-raspberry-pi-4` (+ `-fan`) + `rpi-*` modules (incl. `rpi-remote-agent`, `rpi-claude-notify` from `hosts/*.nix`); overrides in `resources.nix` (GC daily/3d, `max-jobs = 2`) and `ssh.nix` (`PermitRootLogin = "prohibit-password"`: admin path `ssh ssh.<domain>` as root through cloudflared).
 - Kernel: the `nixos-hardware` vendor kernel (it forces `PREEMPT=y`, `PREEMPT_LAZY=n`); no binary cache serves it, a new one compiles on the host that builds it.
-- Nextcloud's PHP comes from input `nixpkgs-php` (`nixos-unstable-small`) until the pinned `nixpkgs` has `php84` >= 8.4.27 (PHP2Shell; `temporary-fixes.md`); an assertion in `nextcloud.nix` keeps it >= 8.4.27.
+- Nextcloud's PHP comes from input `nixpkgs-unstable-small` (`nixos-unstable-small`) until the pinned `nixpkgs` has `php84` >= 8.4.27 (PHP2Shell; `temporary-fixes.md`); an assertion in `nextcloud.nix` keeps it >= 8.4.27.
 - Web services are published only through the Cloudflare Tunnel (`cloudflared.nix`; its header maps hostnames to ports): Nextcloud, Gitea, ttyd (Unix socket behind nginx Basic Auth), Matrix (continuwuity, no federation, no registration), plus `ssh.<domain>`. They listen on localhost only (nginx `defaultListenAddresses`, `network.nix`); sshd accepts only the home LAN (`base-ssh-lan`; fail2ban ignores the LAN). Ollama (`hermes.nix`) stays local.
 - `lockdown on` (`base-lockdown`) keeps cloudflared, which carries `ssh.<domain>` (stopping it would also cut the session that ran the command), and stops its HTTP backends (nginx, Gitea, continuwuity) and Hermes, so the other hostnames answer 502. A CVE in cloudflared itself: stop `cloudflared-tunnel-raspberry-pi-4` from the LAN.
 - Wi-Fi (`network.nix`): profile `home-wifi` from `wifi.age`, powersave off, regdom `PL`. Pitfall: with no secret agent, NetworkManager blocks the profile until reboot after a "no secrets" failure (`autoconnect-retries` does not cover it), so timer `home-wifi-reconnect` reactivates it every 5 min. cloudflared exits at once without DNS; its `RestartSec = 5` keeps systemd's start limit from giving up on the tunnel.
@@ -145,7 +145,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 
 ### Flake inputs and dependencies
 
-- New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless they are built against their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`, `nixpkgs-php`); then say so in a comment next to the input.
+- New inputs follow our nixpkgs (`inputs.nixpkgs.follows = "nixpkgs"`) unless they are built against their own nixpkgs (`nix-cachyos-kernel`, `llm-agents`, `nixpkgs-unstable-small`); then say so in a comment next to the input.
 - An input with its own binary cache: add the cache to `nixConfig` in `flake.nix` (see **Binary caches**).
 - Adding or removing an input: `nix flake lock` (does not bump other inputs). Updating one input: `nix flake update <input>`. Full updates only through `flake-update`.
 - Every fetcher has a real hash. **NEVER** commit `lib.fakeHash`.
