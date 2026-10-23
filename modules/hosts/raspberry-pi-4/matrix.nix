@@ -6,6 +6,10 @@
 # zawsze, w pokojach z innymi osobami tylko na @wzmiankę (domyślne
 # MATRIX_REQUIRE_MENTION).
 #
+# Matrix jest domyślnym kanałem powiadomień: cron i `hermes send` przez
+# MATRIX_HOME_ROOM, powiadomienia o restarcie bramy tylko tutaj (e-mail je
+# wycisza, Hermes startuje po continuwuity i zatrzymuje się przed nim).
+#
 # Sprawdzenie: `systemctl status continuwuity`,
 # `curl -s http://127.0.0.1:6167/_matrix/client/versions`,
 # `journalctl -u hermes-agent -b | grep -i matrix`.
@@ -91,14 +95,27 @@
         services.hermes-agent = {
           environment = hermesEnv;
           environmentFiles = [ config.age.secrets.hermes-matrix.path ];
+          # Powiadomienia o zatrzymaniu/restarcie bramy idą do kanałów domowych
+          # wszystkich platform; e-mail (EMAIL_HOME_ADDRESS z hermes-env.age)
+          # zostaje do rozmów, a powiadomienia tylko na Matrixie. Bez klucza
+          # `enabled` Hermes nadal włącza e-mail z danych w .env.
+          settings.platforms.email.gateway_restart_notification = false;
         };
 
-        # Brama czyta .env tylko przy starcie, a moduł nie restartuje jej po
-        # zmianie konfiguracji (ścieżka /run/agenix/… jest stała).
-        systemd.services.hermes-agent.restartTriggers = [
-          (builtins.hashFile "sha256" secretFile)
-          (builtins.toJSON hermesEnv)
-        ];
+        systemd.services.hermes-agent = {
+          # systemd zatrzymuje jednostki w kolejności odwrotnej do `after`:
+          # bez tego continuwuity znika razem z Hermesem przy restarcie lub
+          # aktywacji i powiadomienie o zatrzymaniu nie dochodzi na Matrix
+          # (Cannot connect to host 127.0.0.1:6167).
+          after = [ "continuwuity.service" ];
+          wants = [ "continuwuity.service" ];
+          # Brama czyta .env tylko przy starcie, a moduł nie restartuje jej po
+          # zmianie konfiguracji (ścieżka /run/agenix/… jest stała).
+          restartTriggers = [
+            (builtins.hashFile "sha256" secretFile)
+            (builtins.toJSON hermesEnv)
+          ];
+        };
       })
     ];
 }
