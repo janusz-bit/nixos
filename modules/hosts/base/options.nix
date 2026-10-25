@@ -7,9 +7,9 @@
 # nadpisuje w swoim default.nix. Do tego opcja tylko do odczytu customTop:
 # stałe repozytorium z modules/args.nix dla modułów NixOS.
 #
-# customTop w NixOS to wartość opcji flake-parts customTop (tam typy
-# i opisy), żeby moduły NixOS czytały ją z `config.customTop`. Moduł
-# base-options importuje każda konfiguracja NixOS z modułami, które ją
+# customTop w NixOS to wartość opcji flake-parts customTop (typy i opisy
+# w modules/options.nix), żeby moduły NixOS czytały ją z `config.customTop`.
+# Moduł base-options importuje każda konfiguracja NixOS z modułami, które ją
 # czytają (hosty przez base, ISO instalatora wprost).
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`

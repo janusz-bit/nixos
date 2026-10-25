@@ -122,7 +122,7 @@ automatically.
        ];
        # networking.hostName comes from the registry (= <name>).
        system.stateVersion = "26.11"; # the release it is installed with; never change it later
-       # declare and set customTop.users.<name> in modules/args.nix, or omit the line to keep customTop.users.default
+       # declare customTop.users.<name> in modules/options.nix and set it in modules/args.nix, or omit the line to keep customTop.users.default
        customBot.defaultUser = config.customTop.users.<name>;
        users.users.${config.customBot.defaultUser} = {
          isNormalUser = true;

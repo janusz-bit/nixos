@@ -6,10 +6,11 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/
 
-- **[args.nix](../../modules/args.nix)** — customTop: wartości specyficzne dla tego repozytorium i jego właściciela (konto GitHub, e-mail, domena, konta użytkowników, język i strefa czasowa, domowy LAN, cache binarne, sekrety i klucze publiczne) jako opcja tylko do odczytu `config.customTop`, w modułach flake-parts i NixOS.
+- **[args.nix](../../modules/args.nix)** — Wartości customTop: stałe tego repozytorium i jego właściciela, wspólne dla wszystkich hostów (deklaracja z typami i opisami: modules/options.nix). Literałów stąd nie powiela się w modułach; czytają je z `config.customTop`.
 - **[default.nix](../../modules/default.nix)** — Szkielet flake'a: systemy, moduły flake-parts (flake.modules, git-hooks, github-actions), formatter, hooki pre-commit (gitleaks, nixfmt, statix, deadnix, generatory .github/workflows i docs/reference) oraz dev shell, w którym te hooki się instalują (`nix develop`, alias claude-nixos).
 - **[docs.nix](../../modules/docs.nix)** — Dokumentacja referencyjna generowana z flake'a: docs/reference/hosts.md (hosty z rejestru, moduły każdego hosta, diagram), modules.md (katalog wszystkich modułów z opisem z nagłówka) i options.md (opcje rejestru hostów, customTop i customBot). Opis modułu to pierwszy akapit komentarza na początku pliku.
 - **[github-actions.nix](../../modules/github-actions.nix)** — Generator workflowów GitHub Actions (github-actions-nix): build toplevelu każdego hosta z rejestru, obrazy (SD RPi, ISO instalatora), ewaluacja wszystkich hostów, lint (pre-commit) i ręczna aktualizacja kernela CachyOS.
+- **[options.nix](../../modules/options.nix)** — Deklaracja opcji customTop: stałe tego repozytorium i jego właściciela (konto GitHub, e-mail, domena, konta użytkowników, język i strefa czasowa, domowy LAN, cache binarne, sekrety i klucze publiczne) jako opcja tylko do odczytu `config.customTop`, w modułach flake-parts i NixOS. Wartości są w modules/args.nix.
 
 ## modules/checks/
 

@@ -36,7 +36,7 @@ Read-only; the values are set in [args.nix](../../modules/args.nix).
 Własny cache: alias `push` i CI (cachix-action).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.cachix.pubKey`
 
@@ -44,7 +44,7 @@ Klucz publiczny własnego cache.
 
 - Type: string
 - Default: `lib.findFirst (lib.hasPrefix "${cachix.name}.cachix.org-1:") (throw "…") nixConfig.extra-trusted-public-keys`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.cachix.url`
 
@@ -52,7 +52,7 @@ Adres własnego cache.
 
 - Type: string
 - Default: `"https://${cachix.name}.cachix.org"`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.domain`
 
@@ -60,14 +60,14 @@ Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą
 domeną, reszta usług RPi pod \<usługa>.\<domena> (cloudflared.nix).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.email`
 
 E-mail autora commitów (git user.email).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.keys`
 
@@ -75,7 +75,7 @@ Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts) z modules/_secr
 
 - Type: attribute set of attribute set of string
 - Default: `{ }`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.lan.laptop`
 
@@ -83,7 +83,7 @@ Adres, pod którym RPi łączy się z laptopem (`ssh laptop`; RPi nie
 ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.lan.subnet`
 
@@ -91,42 +91,42 @@ Domowy LAN: SSH laptopa i RPi tylko z tej podsieci, fail2ban na
 RPi jej nie banuje.
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.locale.defaultLocale`
 
 Locale systemu (i18n.defaultLocale).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.locale.keyMap`
 
 Układ klawiatury w konsoli (console.keyMap).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.locale.timeZone`
 
 Strefa czasowa (time.timeZone).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.locale.wifiRegdom`
 
 Domena regulacyjna Wi-Fi (cfg80211.ieee80211_regdom).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.locale.xkbLayout`
 
 Układ klawiatury w sesji graficznej (services.xserver.xkb.layout).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.nixConfig`
 
@@ -136,14 +136,14 @@ a cachix swój klucz.
 
 - Type: attribute set of list of string
 - Default: `{ }`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.owner`
 
 Konto GitHub, zarazem autor commitów (git user.name).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.repository.flake`
 
@@ -151,21 +151,21 @@ Referencja flake'a dla update i push.
 
 - Type: string
 - Default: `"github:${owner}/${repository.name}"`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.repository.name`
 
 Nazwa repozytorium na GitHubie.
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.repository.path`
 
 Lokalny klon na każdym hoście (update-local, claude-nixos, install-system).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.repository.url`
 
@@ -173,7 +173,7 @@ Adres klonu git (install-system).
 
 - Type: string
 - Default: `"https://github.com/${owner}/${repository.name}.git"`
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.secretsDir`
 
@@ -183,28 +183,28 @@ więc każdy commit zmieniałby toplevel wszystkich hostów. Ścieżka
 kopiuje do store tylko użyty plik.
 
 - Type: absolute path
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.users.default`
 
 Główne konto pozostałych hostów (domyślne customBot.defaultUser).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.users.laptop`
 
 Główne konto laptopa (jego customBot.defaultUser).
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.users.matrix`
 
 Konto Matrix (@\<nazwa>:\<domena>), jedyne, któremu odpowiada Hermes.
 
 - Type: string
-- Declared in: [args.nix](../../modules/args.nix)
+- Declared in: [options.nix](../../modules/options.nix)
 
 ## Host options (`customBot`, NixOS)
 
