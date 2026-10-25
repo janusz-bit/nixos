@@ -24,6 +24,7 @@
       config,
       lib,
       pkgs,
+      system,
       ...
     }:
     let
@@ -54,6 +55,15 @@
       };
     in
     {
+      # allowUnfree jak na hostach (base-nix): domyślne pkgs flake-parts to
+      # legacyPackages nixpkgs, które odmawia ewaluacji pakietów niewolnych,
+      # więc packages.<system> (pakiety lokalne, package-import, nix-update)
+      # nie mogłyby zawierać np. pakietów CUDA.
+      _module.args.pkgs = import inputs.nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
       formatter = pkgs.nixfmt-tree;
       packages.default = config.packages.install-system;
 

@@ -16,9 +16,18 @@ if [[ -e "$dest" ]]; then
 fi
 
 # --inputs-from: nixpkgs przypięty w flake.lock (ten sam, którego
-# używają hosty), nie wpis z rejestru.
-position=$(nix eval --inputs-from . --raw "nixpkgs#$name.meta.position")
-upstream_drv=$(nix eval --inputs-from . --raw "nixpkgs#$name.drvPath")
+# używają hosty), nie wpis z rejestru. legacyPackages flake'a nixpkgs
+# odmawia pakietów niewolnych (CUDA), więc ewaluacja idzie przez
+# instancję z allowUnfree jak na hostach i w packages.<system>.
+upstream() {
+  nix eval --inputs-from . --raw nixpkgs#pkgs --apply "pkgs:
+    (import pkgs.path {
+      inherit (pkgs.stdenv.hostPlatform) system;
+      config.allowUnfree = true;
+    }).${name}.$1"
+}
+position=$(upstream meta.position)
+upstream_drv=$(upstream drvPath)
 file=${position%:*}
 dir=$(dirname "$file")
 entry=$(basename "$file")
