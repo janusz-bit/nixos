@@ -94,7 +94,7 @@ automatically.
 2. **Host.** Create `modules/hosts/<name>/default.nix`:
 
    ```nix
-   { self, customTop, ... }:
+   { self, ... }:
    {
      hosts.<name> = {
        system = "x86_64-linux";
@@ -122,8 +122,8 @@ automatically.
        ];
        # networking.hostName comes from the registry (= <name>).
        system.stateVersion = "26.11"; # the release it is installed with; never change it later
-       # add users.<name> to modules/args.nix, or omit the line to keep customTop.users.default
-       customBot.defaultUser = customTop.users.<name>;
+       # declare and set customTop.users.<name> in modules/args.nix, or omit the line to keep customTop.users.default
+       customBot.defaultUser = config.customTop.users.<name>;
        users.users.${config.customBot.defaultUser} = {
          isNormalUser = true;
          extraGroups = [ "networkmanager" "wheel" ];

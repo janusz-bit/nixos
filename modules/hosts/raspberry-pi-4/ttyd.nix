@@ -18,8 +18,7 @@
 # Sprawdzenie: `systemctl status ttyd ttyd-htpasswd`,
 # `sudo ls -l /run/ttyd/ttyd.sock` (srw-rw---- root nginx),
 # `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/` (401).
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.rpi-ttyd =
     {
       config,
@@ -52,7 +51,7 @@
       ];
 
       # Czyta je wyłącznie systemd (LoadCredential) — domyślne root:root 0400.
-      age.secrets.ttyd-password.file = customTop.secretsDir + "/ttyd-password.age";
+      age.secrets.ttyd-password.file = config.customTop.secretsDir + "/ttyd-password.age";
 
       services.ttyd = {
         enable = true;
@@ -120,7 +119,7 @@
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr$http_cf_connecting_ip zone=ttyd:1m rate=10r/m;
         '';
-        virtualHosts."ttyd.${customTop.domain}" = {
+        virtualHosts."ttyd.${config.customTop.domain}" = {
           listen = [
             {
               addr = "127.0.0.1";

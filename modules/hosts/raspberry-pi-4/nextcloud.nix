@@ -16,7 +16,7 @@
 #
 # Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
 # `sudo nextcloud-occ config:system:get trusted_proxies`.
-{ customTop, inputs, ... }:
+{ inputs, ... }:
 {
   flake.modules.nixos.rpi-nextcloud =
     {
@@ -38,7 +38,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = customTop.domain;
+          hostName = config.customTop.domain;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
           package = pkgs.nextcloud35;
@@ -79,7 +79,7 @@
           settings = {
             maintenance_window_start = 1;
             overwriteprotocol = "https";
-            "overwrite.cli.url" = "https://${customTop.domain}";
+            "overwrite.cli.url" = "https://${config.customTop.domain}";
             trusted_proxies = [
               "127.0.0.1"
               "::1"
@@ -87,7 +87,7 @@
           };
         };
 
-        nginx.virtualHosts.${customTop.domain}.extraConfig = ''
+        nginx.virtualHosts.${config.customTop.domain}.extraConfig = ''
           add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
         '';
 

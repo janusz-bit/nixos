@@ -19,9 +19,8 @@
 #
 # Działa tylko przy włączonym laptopie w domowym LAN-ie; fail2ban laptopa nie
 # ignoruje LAN-u (base/fail2ban.nix), więc 5 nieudanych logowań banuje RPi.
-{ customTop, ... }:
+_:
 let
-  inherit (customTop) keys;
   user = "claude-remote";
 in
 {
@@ -29,6 +28,7 @@ in
     { config, ... }:
     let
       inherit (config.users.users.${user}) home homeMode;
+      inherit (config.customTop) keys lan;
     in
     {
       users = {
@@ -37,7 +37,7 @@ in
           group = user;
           description = "Claude Code z raspberry-pi-4 (eval/build, bez sudo)";
           openssh.authorizedKeys.keys = [
-            ''from="${customTop.lan.subnet}",restrict ${keys.users.claude-rpi}''
+            ''from="${lan.subnet}",restrict ${keys.users.claude-rpi}''
           ];
         };
         groups.${user} = { };
@@ -53,6 +53,8 @@ in
   flake.modules.nixos.rpi-remote-agent =
     { config, pkgs, ... }:
     let
+      inherit (config.customTop) keys lan;
+
       # laptop-run [CMD...]: CMD na laptopie w migawce bieżącego repo
       # (~/work/<repo>); bez CMD tylko synchronizacja. Migawka = to, co widzi
       # lokalny flake (śledzone pliki ze zmianami i nowe dodane do indeksu),
@@ -97,12 +99,12 @@ in
     {
       programs.ssh = {
         knownHosts.laptop = {
-          hostNames = [ customTop.lan.laptop ];
+          hostNames = [ lan.laptop ];
           publicKey = keys.sshHostKeys.nixos;
         };
         extraConfig = ''
           Host laptop
-            HostName ${customTop.lan.laptop}
+            HostName ${lan.laptop}
             User ${user}
             IdentityFile ~/.ssh/id_ed25519_laptop
             IdentitiesOnly yes

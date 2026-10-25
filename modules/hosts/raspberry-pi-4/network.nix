@@ -6,8 +6,7 @@
 #
 # Sprawdzenie: `nmcli connection show`, `iw reg get`,
 # `journalctl -u home-wifi-reconnect -b`.
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.rpi-network =
     {
       config,
@@ -19,7 +18,7 @@
       wifiProfile = "home-wifi";
       # SSID i hasło: wifi.age (agenix -e), plik env: WIFI_SSID='…',
       # WIFI_PSK='…'. Bez pliku w gicie profil nie powstaje (ostrzeżenie).
-      secretFile = customTop.secretsDir + "/wifi.age";
+      secretFile = config.customTop.secretsDir + "/wifi.age";
       hasSecret = builtins.pathExists secretFile;
 
       # Lista do zmiennej: przy pipefail wczesne wyjście `grep -q` mogłoby
@@ -61,7 +60,7 @@
         # Domena regulacyjna PL (jak raspi-config w Raspberry Pi OS). Bez niej
         # cfg80211 zostaje w domenie światowej "00": kanały 12–13 (2,4 GHz)
         # są tylko pasywne, więc router na takim kanale byłby nieosiągalny.
-        boot.kernelParams = [ "cfg80211.ieee80211_regdom=${customTop.locale.wifiRegdom}" ];
+        boot.kernelParams = [ "cfg80211.ieee80211_regdom=${config.customTop.locale.wifiRegdom}" ];
       }
       (lib.mkIf hasSecret {
         # NetworkManager-ensure-profiles działa jako root i czyta plik przez

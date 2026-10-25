@@ -1,8 +1,8 @@
 # Dokumentacja referencyjna generowana z flake'a: docs/reference/hosts.md
 # (hosty z rejestru, moduły każdego hosta, diagram), modules.md (katalog
-# wszystkich modułów z opisem z nagłówka) i options.md (opcje customBot
-# i rejestru hostów). Opis modułu to pierwszy akapit komentarza na początku
-# pliku.
+# wszystkich modułów z opisem z nagłówka) i options.md (opcje rejestru
+# hostów, customTop i customBot). Opis modułu to pierwszy akapit komentarza
+# na początku pliku.
 #
 # Generator czyta tylko źródła modułów (readFile + wyrażenia regularne na
 # flake.modules.nixos.<nazwa> i self.modules.nixos.<nazwa>), dane rejestru
@@ -204,6 +204,11 @@ let
       "## Host registry (flake-parts)\n\n"
     ]
     ++ map renderOption (docList "hosts." { inherit (options) hosts; })
+    ++ [
+      "## Repository constants (`customTop`, flake-parts and NixOS)\n\n"
+      "Read-only; the values are set in [args.nix](../../modules/args.nix).\n\n"
+    ]
+    ++ map renderOption (docList "customTop." { inherit (options) customTop; })
     ++ [ "## Host options (`customBot`, NixOS)\n\n" ]
     ++ map renderOption (docList "customBot." customBotOptions)
   );

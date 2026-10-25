@@ -3,12 +3,12 @@
 # update-my-pkgs (flake-update). Alias push jest w base-agenix (token cachix).
 #
 # Sprawdzenie: `nix eval --raw .#nixosConfigurations.<host>.config.environment.shellAliases.update-reboot`.
-{ customTop, lib, ... }:
+{ lib, ... }:
 {
   flake.modules.nixos.base-rebuild =
     { config, ... }:
     let
-      inherit (customTop.repository) flake path;
+      inherit (config.customTop.repository) flake path;
       inherit (config.customBot) flakeTarget;
       rebuild =
         mode: flakeRef:

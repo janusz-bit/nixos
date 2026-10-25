@@ -2,13 +2,13 @@
 # skille): właściciel customBot.defaultUser, tryb 0400, nigdy grupa `users`,
 # do której należą też inne konta. Usługa, która potrzebuje sekretu, dopisuje
 # dostęp jawnie u siebie (grupa i tryb przy swoim wpisie age.secrets).
-{ inputs, customTop, ... }:
+{ inputs, ... }:
 {
   flake.modules.nixos.base-secrets =
     { config, lib, ... }:
     let
       userSecret = file: {
-        file = customTop.secretsDir + "/${file}";
+        file = config.customTop.secretsDir + "/${file}";
         owner = config.customBot.defaultUser;
         mode = lib.mkDefault "0400";
       };

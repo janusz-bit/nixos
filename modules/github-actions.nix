@@ -14,13 +14,13 @@
 # (pusto = workflowy w repo zgodne z generatorem).
 {
   config,
-  customTop,
   lib,
   ...
 }:
 let
-  # Rejestr hostów (modules/hosts/registry.nix); perSystem ma własne `config`.
-  inherit (config) hosts;
+  # Rejestr hostów (modules/hosts/registry.nix) i customTop (modules/args.nix);
+  # perSystem ma własne `config`.
+  inherit (config) hosts customTop;
 in
 {
   perSystem =

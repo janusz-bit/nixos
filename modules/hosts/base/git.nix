@@ -1,15 +1,14 @@
 # Git na każdym hoście: tożsamość z customTop (commity z tego repo i agentów),
 # gałąź domyślna main, skróty gh:/github: oraz GitHub CLI.
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.base-git =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
       programs.git = {
         enable = true;
         config = {
-          user.name = customTop.owner;
-          user.email = customTop.email;
+          user.name = config.customTop.owner;
+          user.email = config.customTop.email;
           init.defaultBranch = "main";
           url."https://github.com/".insteadOf = [
             "gh:"

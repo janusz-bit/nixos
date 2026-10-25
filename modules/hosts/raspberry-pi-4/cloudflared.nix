@@ -14,19 +14,18 @@
 # Sprawdzenie: `systemctl status cloudflared-tunnel-raspberry-pi-4`,
 # `journalctl -u cloudflared-tunnel-raspberry-pi-4 -b | grep -i registered`
 # (połączenia z protocol=http2).
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.rpi-cloudflared =
     { config, ... }:
     let
-      inherit (customTop) domain;
+      inherit (config.customTop) domain;
       tunnelName = "raspberry-pi-4";
       localHttp = port: "http://localhost:${toString port}";
     in
     {
       # Moduł czyta plik przez LoadCredential (DynamicUser), więc wystarcza
       # domyślne root:root 0400.
-      age.secrets.cloudflared-tunnel.file = customTop.secretsDir + "/cloudflared-tunnel.age";
+      age.secrets.cloudflared-tunnel.file = config.customTop.secretsDir + "/cloudflared-tunnel.age";
 
       # Bez sieci (brak DNS) cloudflared kończy się zaraz po starcie. Przy
       # domyślnych 100 ms 5 restartów mieściło się w StartLimitBurst (5 w 10 s)

@@ -4,12 +4,11 @@
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.raspberry-pi-4.config.users.users.nixos.openssh.authorizedKeys.keys`
 # (i `…users.users.root…`) — tylko klucze wymienione niżej.
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.rpi-ssh =
     { config, ... }:
     let
-      inherit (customTop) keys;
+      inherit (config.customTop) keys lan;
     in
     {
       services.openssh.settings.PermitRootLogin = "prohibit-password";
@@ -17,7 +16,7 @@
       programs.ssh.enableAskPassword = false;
 
       # Stała sieć domowa — nie banuj hostów z LAN.
-      services.fail2ban.ignoreIP = [ customTop.lan.subnet ];
+      services.fail2ban.ignoreIP = [ lan.subnet ];
 
       users.users = {
         # Klucze roota laptopa i RPi oraz telefonu. Lista jawna, nie

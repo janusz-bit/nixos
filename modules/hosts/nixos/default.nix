@@ -2,7 +2,7 @@
 # offload) — stacja robocza z Plasmą 6 i grami. Tu tylko wpis rejestru,
 # tożsamość (stateVersion, konto) i lista modułów hosta; dysk i rozruch:
 # disko.nix, snapper.nix, boot.nix obok.
-{ self, customTop, ... }:
+{ self, ... }:
 {
   hosts.nixos = {
     system = "x86_64-linux";
@@ -40,7 +40,7 @@
       system.stateVersion = "25.11";
 
       customBot = {
-        defaultUser = customTop.users.laptop;
+        defaultUser = config.customTop.users.laptop;
         # Desktopowy Trilium (trilium-desktop, ETAPI/MCP na 37840).
         triliumMcpUrl = "http://127.0.0.1:37840/mcp";
       };

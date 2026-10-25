@@ -13,12 +13,11 @@
 # Sprawdzenie: `systemctl status continuwuity`,
 # `curl -s http://127.0.0.1:6167/_matrix/client/versions`,
 # `journalctl -u hermes-agent -b | grep -i matrix`.
-{ customTop, ... }:
-{
+_: {
   flake.modules.nixos.rpi-matrix =
     { config, lib, ... }:
     let
-      inherit (customTop) domain;
+      inherit (config.customTop) domain;
       continuwuity = config.services.matrix-continuwuity.settings.global;
       # Adres lokalny z pominięciem tunelu: łączy się nim Hermes, a nginx
       # proxuje na niego .well-known.
@@ -26,12 +25,12 @@
 
       # Jedyne konto, które może rozmawiać z Hermesem. Zakładasz je jako
       # pierwsze — dostaje admina serwera.
-      ownerId = "@${customTop.users.matrix}:${domain}";
+      ownerId = "@${config.customTop.users.matrix}:${domain}";
 
       # Token konta bota @hermes:${domain}, plik env: MATRIX_ACCESS_TOKEN=…
       # i opcjonalnie MATRIX_RECOVERY_KEY=… (niżej). Bez pliku w gicie serwer
       # działa, a Hermes się nie łączy (ostrzeżenie).
-      secretFile = customTop.secretsDir + "/hermes-matrix.age";
+      secretFile = config.customTop.secretsDir + "/hermes-matrix.age";
       hasSecret = builtins.pathExists secretFile;
 
       hermesEnv = {

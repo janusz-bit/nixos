@@ -11,7 +11,7 @@
 # Granica: to chroni przed PRZYPADKOWYM wyciekiem przez env (logi, procesy
 # potomne). Pliki należą do customBot.defaultUser (0400), więc proces tego
 # użytkownika nadal może je przeczytać wprost.
-{ self, customTop, ... }:
+{ self, ... }:
 {
   flake.modules.nixos.base-agenix =
     {
@@ -129,7 +129,7 @@
         # Bez tego fish nie szuka funkcji w <profil>/share/fish/vendor_functions.d.
         # Funkcja o tej samej nazwie w ~/.config/fish/functions wygrywa z wrapperem.
         vendor.functions.enable = true;
-        shellAliases.push = "nix build ${customTop.repository.flake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${customTop.cachix.name}";
+        shellAliases.push = "nix build ${config.customTop.repository.flake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${config.customTop.cachix.name}";
       };
       environment.systemPackages = [ fishWrappersPkg ];
 

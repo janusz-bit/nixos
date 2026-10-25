@@ -3,7 +3,7 @@
 # alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
 #
 # Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII).
-{ inputs, customTop, ... }:
+{ inputs, ... }:
 {
   flake.modules.nixos.desktop-ai =
     {
@@ -19,7 +19,7 @@
       # Zawsze w devShellu: hooki z .claude/ i pre-commit potrzebują jego narzędzi.
       # `env -C` nie zmienia katalogu bieżącej powłoki; argumenty przechodzą
       # dalej (`claude-nixos --continue`).
-      environment.shellAliases.claude-nixos = "env -C ${customTop.repository.path} nix develop -c claude";
+      environment.shellAliases.claude-nixos = "env -C ${config.customTop.repository.path} nix develop -c claude";
 
       services.ollama = {
         enable = true;

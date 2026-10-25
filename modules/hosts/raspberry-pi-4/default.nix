@@ -3,7 +3,7 @@
 # Tu: wpis rejestru, stateVersion, konto i lista modułów hosta; płytka
 # i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base,
 # bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
-{ self, customTop, ... }:
+{ self, ... }:
 {
   hosts.raspberry-pi-4 = {
     system = "aarch64-linux";
@@ -43,7 +43,7 @@
       ];
 
       system.stateVersion = "26.05";
-      time.timeZone = customTop.locale.timeZone;
+      time.timeZone = config.customTop.locale.timeZone;
 
       # Hasło początkowe z obrazu SD: zmienić `passwd` po pierwszym logowaniu
       # (SSH i tak przyjmuje tylko klucze).

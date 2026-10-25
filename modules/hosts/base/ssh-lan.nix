@@ -5,12 +5,13 @@
 #
 # Sprawdzenie: `sudo iptables -S nixos-fw | grep 'dport 22'` (tylko z LAN-u)
 # i `sudo ip6tables -S nixos-fw | grep -c 'dport 22'` (0).
-{ customTop, ... }:
-{
-  flake.modules.nixos.base-ssh-lan = _: {
-    services.openssh.openFirewall = false;
-    networking.firewall.extraCommands = ''
-      iptables -A nixos-fw -p tcp -s ${customTop.lan.subnet} --dport 22 -j nixos-fw-accept
-    '';
-  };
+_: {
+  flake.modules.nixos.base-ssh-lan =
+    { config, ... }:
+    {
+      services.openssh.openFirewall = false;
+      networking.firewall.extraCommands = ''
+        iptables -A nixos-fw -p tcp -s ${config.customTop.lan.subnet} --dport 22 -j nixos-fw-accept
+      '';
+    };
 }

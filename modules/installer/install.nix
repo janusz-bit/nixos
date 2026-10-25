@@ -24,7 +24,7 @@
 # bo sbctl enroll-keys nie widzi zmiennych EFI) robi post-install, z siecią.
 # Do tego czasu Secure Boot w BIOS zostaje wyłączony, a sekrety agenix się
 # nie odszyfrowują.
-{ self, customTop, ... }:
+{ self, ... }:
 {
   perSystem =
     { pkgs, lib, ... }:
@@ -34,9 +34,9 @@
       installHost = "nixos";
       host = self.nixosConfigurations.${installHost};
       inherit (host) config;
-      inherit (customTop.repository) url;
+      inherit (config.customTop.repository) url;
       # Nazwa jak zmienna $place w skryptach (też _install/post-install.sh).
-      place = customTop.repository.path;
+      place = config.customTop.repository.path;
       inherit (config.disko) rootMountPoint;
       user = config.customBot.defaultUser;
       inherit (config.users.users.${user}) group;

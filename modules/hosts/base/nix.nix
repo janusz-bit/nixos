@@ -8,10 +8,10 @@
 # działają i bez tego, a nixos-rebuild idzie przez sudo.
 #
 # Sprawdzenie: `nix config show | grep -E '^(extra-)?(substituters|trusted)'`.
-{ customTop, self, ... }:
+{ self, ... }:
 {
   flake.modules.nixos.base-nix =
-    { lib, ... }:
+    { config, lib, ... }:
     {
       nixpkgs = {
         config.allowUnfree = true;
@@ -24,7 +24,7 @@
             "nix-command"
             "flakes"
           ];
-          inherit (customTop.nixConfig) extra-substituters extra-trusted-public-keys;
+          inherit (config.customTop.nixConfig) extra-substituters extra-trusted-public-keys;
         };
         # mkDefault: RPi ma ciaśniejszy dysk i nadpisuje harmonogram GC.
         gc = {

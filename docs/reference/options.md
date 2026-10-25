@@ -27,6 +27,185 @@ Platforma hosta: nixpkgs.hostPlatform i runner CI.
 - Type: one of "x86_64-linux", "aarch64-linux"
 - Declared in: [hosts/registry.nix](../../modules/hosts/registry.nix)
 
+## Repository constants (`customTop`, flake-parts and NixOS)
+
+Read-only; the values are set in [args.nix](../../modules/args.nix).
+
+### `customTop.cachix.name`
+
+Własny cache: alias `push` i CI (cachix-action).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.cachix.pubKey`
+
+Klucz publiczny własnego cache.
+
+- Type: string
+- Default: `lib.findFirst (lib.hasPrefix "${cachix.name}.cachix.org-1:") (throw "…") nixConfig.extra-trusted-public-keys`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.cachix.url`
+
+Adres własnego cache.
+
+- Type: string
+- Default: `"https://${cachix.name}.cachix.org"`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.domain`
+
+Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą
+domeną, reszta usług RPi pod \<usługa>.\<domena> (cloudflared.nix).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.email`
+
+E-mail autora commitów (git user.email).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.keys`
+
+Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts) z modules/_secrets/keys.nix.
+
+- Type: attribute set of attribute set of string
+- Default: `{ }`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.lan.laptop`
+
+Adres, pod którym RPi łączy się z laptopem (`ssh laptop`; RPi nie
+ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.lan.subnet`
+
+Domowy LAN: SSH laptopa i RPi tylko z tej podsieci, fail2ban na
+RPi jej nie banuje.
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.locale.defaultLocale`
+
+Locale systemu (i18n.defaultLocale).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.locale.keyMap`
+
+Układ klawiatury w konsoli (console.keyMap).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.locale.timeZone`
+
+Strefa czasowa (time.timeZone).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.locale.wifiRegdom`
+
+Domena regulacyjna Wi-Fi (cfg80211.ieee80211_regdom).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.locale.xkbLayout`
+
+Układ klawiatury w sesji graficznej (services.xserver.xkb.layout).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.nixConfig`
+
+nixConfig z flake.nix, jedyna lista cache (literał: nix czyta go
+przed ewaluacją); hosty biorą z niej nix.settings (base-nix),
+a cachix swój klucz.
+
+- Type: attribute set of list of string
+- Default: `{ }`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.owner`
+
+Konto GitHub, zarazem autor commitów (git user.name).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.repository.flake`
+
+Referencja flake'a dla update i push.
+
+- Type: string
+- Default: `"github:${owner}/${repository.name}"`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.repository.name`
+
+Nazwa repozytorium na GitHubie.
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.repository.path`
+
+Lokalny klon na każdym hoście (update-local, claude-nixos, install-system).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.repository.url`
+
+Adres klonu git (install-system).
+
+- Type: string
+- Default: `"https://github.com/${owner}/${repository.name}.git"`
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.secretsDir`
+
+Katalog plików .age. Literał ścieżki, nie `self + "/modules/_secrets"`:
+string ze ścieżką do źródła flake'a niesie kontekst całego repo,
+więc każdy commit zmieniałby toplevel wszystkich hostów. Ścieżka
+kopiuje do store tylko użyty plik.
+
+- Type: absolute path
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.users.default`
+
+Główne konto pozostałych hostów (domyślne customBot.defaultUser).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.users.laptop`
+
+Główne konto laptopa (jego customBot.defaultUser).
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
+### `customTop.users.matrix`
+
+Konto Matrix (@\<nazwa>:\<domena>), jedyne, któremu odpowiada Hermes.
+
+- Type: string
+- Declared in: [args.nix](../../modules/args.nix)
+
 ## Host options (`customBot`, NixOS)
 
 ### `customBot.agentSkills`

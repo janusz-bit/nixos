@@ -40,13 +40,14 @@
 # Po wdrożeniu: `echo test | claude-notify` na obu hostach, na RPi też
 # `sudo -u hermes claude-notify test` (bez ssh); pusty stdin albo 31. wiadomość
 # w godzinie → kod 1. Hook: polecenie wymagające zgody w sesji Claude Code w tmux.
-{ customTop, lib, ... }:
+{ config, lib, ... }:
 let
-  inherit (customTop) keys;
+  # Moduły NixOS i mkClaudeNotify niżej mają własne `config`.
+  inherit (config.customTop) keys;
 
   # Dopóki pliku nie ma w gicie (flake widzi tylko śledzone pliki), funkcja jest
   # wyłączona, a ewaluacja tylko ostrzega.
-  secretFile = customTop.secretsDir + "/hermes-notify-key.age";
+  secretFile = config.customTop.secretsDir + "/hermes-notify-key.age";
   hasSecret = builtins.pathExists secretFile;
 
   rpi = "raspberry-pi-4";
@@ -257,7 +258,7 @@ in
 
         environment = clientEnvironment {
           inherit config pkgs;
-          target = "ssh.${customTop.domain}";
+          target = "ssh.${config.customTop.domain}";
           sshOptions = [
             "-o"
             "ProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h"

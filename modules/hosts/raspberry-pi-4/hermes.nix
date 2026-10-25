@@ -28,7 +28,6 @@
 # `nix build -L .#checks.aarch64-linux.hermes-activation` (kvm).
 {
   inputs,
-  customTop,
   ...
 }:
 {
@@ -87,7 +86,7 @@
       # Pliki env łączy w $HERMES_HOME/.env aktywacja modułu procesem z uid
       # usługi (setpriv), więc muszą należeć do hermes; wystarczy 0400.
       hermesSecret = name: {
-        file = customTop.secretsDir + "/${name}.age";
+        file = config.customTop.secretsDir + "/${name}.age";
         owner = cfg.user;
         mode = "0400";
       };

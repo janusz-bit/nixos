@@ -4,14 +4,36 @@
 # skille agentów kodujących). flakeTarget (bez wartości domyślnej) ustawia
 # rejestr hostów i sd-image.nix, primeAgentProviders i agentSkills moduły
 # skilli (modules/skills/), lockdownServices moduły usług, a resztę host
-# nadpisuje w swoim default.nix.
+# nadpisuje w swoim default.nix. Do tego opcja tylko do odczytu customTop:
+# stałe repozytorium z modules/args.nix dla modułów NixOS.
 #
-# Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`.
-{ customTop, ... }:
+# customTop w NixOS to wartość opcji flake-parts customTop (tam typy
+# i opisy), żeby moduły NixOS czytały ją z `config.customTop`. Moduł
+# base-options importuje każda konfiguracja NixOS z modułami, które ją
+# czytają (hosty przez base, ISO instalatora wprost).
+#
+# Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`
+# i `nix eval --json .#nixosConfigurations.wsl.config.customTop.lan`.
+{ config, ... }:
+let
+  # Moduł NixOS niżej ma własne `config`.
+  inherit (config) customTop;
+in
 {
   flake.modules.nixos.base-options =
     { lib, ... }:
     {
+      options.customTop = lib.mkOption {
+        type = lib.types.raw;
+        readOnly = true;
+        default = customTop;
+        defaultText = lib.literalMD "wartość opcji flake-parts `customTop` (modules/args.nix)";
+        description = ''
+          Stałe repozytorium (modules/args.nix), te same na każdym hoście;
+          typy i opisy pól ma opcja flake-parts customTop.
+        '';
+      };
+
       options.customBot = {
         # Bez domyślnej: konfiguracja spoza rejestru, która jej nie ustawi,
         # kończy ewaluację błędem zamiast dostać aliasy wdrażające inny host.

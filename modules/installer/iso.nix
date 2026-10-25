@@ -18,14 +18,22 @@
 {
   self,
   inputs,
-  customTop,
   ...
 }:
 {
   flake.modules.nixos.installer-iso =
-    { lib, pkgs, ... }:
     {
-      imports = [ "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix" ];
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      imports = [
+        "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+        # config.customTop dla helpLine niżej.
+        self.modules.nixos.base-options
+      ];
 
       # mkForce: iso-image.nix ustawia image.baseName na zwykłym priorytecie,
       # a legacy isoImage.isoBaseName to tylko alias tej opcji, więc kolidowałby
@@ -43,7 +51,7 @@
 
       services.getty.helpLine = ''
 
-        === ${customTop.owner}/${customTop.repository.name} ===
+        === ${config.customTop.owner}/${config.customTop.repository.name} ===
         Zaloguj się jako root (bez hasła) i uruchom:
 
           install-system [--disk URZĄDZENIE]
