@@ -62,7 +62,7 @@
       };
 
       # Tylko Claude Code: część integracji claude-notify z hookami Claude Code
-      # (modules/hosts/claude-notify/default.nix). Program skilla zależy od hosta,
+      # (modules/claude-notify/default.nix). Program skilla zależy od hosta,
       # więc pakiet powstaje tam, nie w skillPackages — skill tylko tam, gdzie
       # ten moduł wdrożył klucz.
       claudeSkills = lib.optionalAttrs (config.age.secrets ? hermes-notify-key) {

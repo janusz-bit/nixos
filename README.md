@@ -28,7 +28,7 @@ modules/
                           plus opt-in user secrets, fail2ban, LAN-only SSH and lockdown
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
   hosts/remote-agent.nix  laptop-run: feature linking two hosts
-  hosts/claude-notify/    claude-notify: feature linking two hosts, scripts in _client/
+  claude-notify/          Claude Code notifications to Matrix (laptop and RPi)
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, offline installer ISO, post-install

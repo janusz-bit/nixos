@@ -17,6 +17,10 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[checks/lockdown.nix](../../modules/checks/lockdown.nix)** — Test VM lockdown (modules/hosts/base/lockdown.nix): `lockdown on` zamyka port otwarty w firewallu i zatrzymuje usługę z customBot.lockdownServices, a SSH zostaje osiągalny z drugiej maszyny (także gdy openFirewall wpisał 22 do allowedTCPPorts). Stan przeżywa reload firewalla, ponowny start multi-user.target (to robi switch-to-configuration) i reboot; `lockdown off` przywraca port i usługę.
 - **[checks/tuning.nix](../../modules/checks/tuning.nix)** — Test VM strojenia z modules/desktop/tuning.nix na tym samym kernelu CachyOS co host nixos: sprawdza, czy ustawienia zostały zastosowane (wartości oczekiwane bierze z konfiguracji hosta, więc rozjazd host ↔ moduł też oblewa test), a dla zmian przejętych z CachyOS mierzy efekt.
 
+## modules/claude-notify/
+
+- **[claude-notify/default.nix](../../modules/claude-notify/default.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
+
 ## modules/desktop/
 
 - **[desktop/ai.nix](../../modules/desktop/ai.nix)** (`desktop-ai`) · hosts: `nixos` — Narzędzia AI stacji roboczej: lokalna Ollama i llama.cpp, agenty kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
@@ -81,10 +85,6 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[hosts/base/shell.nix](../../modules/hosts/base/shell.nix)** (`base-shell`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Powłoka na każdym hoście: bash zostaje powłoką logowania i interaktywnie przechodzi w fish (tryb ratunkowy systemd i skrypty dalej mają basha), aliasy eza/bat, powitanie fastfetch (customBot.enableFastfetch) i tmux.
 - **[hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)** (`base-ssh-lan`) · hosts: `nixos`, `raspberry-pi-4` — SSH tylko z domowego LAN-u (customTop.lan.subnet): reguła iptables zamiast openFirewall. Laptop nie przyjmuje SSH w obcych sieciach, a port 22 nie jest otwarty przez IPv6, gdzie router może nie filtrować ruchu przychodzącego. Tunelu Cloudflare (sshd przez localhost) to nie dotyczy.
 - **[hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)** (`base-ssh`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — SSH na każdym hoście: sshd tylko z kluczami, root domyślnie bez logowania, agent GnuPG, ssh-askpass oraz wpis `Host ssh.*` w ssh_config, przez który `ssh ssh.<domena>` loguje się jako root na RPi przez Cloudflare Access.
-
-## modules/hosts/claude-notify/
-
-- **[hosts/claude-notify/default.nix](../../modules/hosts/claude-notify/default.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
 
 ## modules/hosts/nixos/
 

@@ -18,7 +18,7 @@
     # głównego użytkownika ani roota.
     claude-rpi = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBm08oKyzMIfuwdh0a6xb4zArEJPL6bOpej5IgY1xs/U claude@raspberry-pi-4";
     # Loguje WYŁĄCZNIE na konto hermes RPi z localhost, z wymuszonym poleceniem
-    # hermes-notify-receive (hosts/claude-notify/); prywatny w hermes-notify-key.age.
+    # hermes-notify-receive (modules/claude-notify/); prywatny w hermes-notify-key.age.
     hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
   };
   # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts.

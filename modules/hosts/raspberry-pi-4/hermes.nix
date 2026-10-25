@@ -17,7 +17,7 @@
 # - CLI (hermes, hermes-acp, hermes-agent) to opakowania hermesCli przez
 #   `sudo -u hermes`: HERMES_HOME (pluginy, .env, config.yaml, polecenia
 #   serwerów MCP) jest zapisywalny przez agenta, więc binarka uruchomiona jako
-#   root lub nixos wykonałaby jego kod. hosts/claude-notify/ bierze opakowanie
+#   root lub nixos wykonałaby jego kod. modules/claude-notify/ bierze opakowanie
 #   z services.hermes-agent.cliWrapper.
 #
 # Logowanie Claude jednorazowo, na koncie usługi:
