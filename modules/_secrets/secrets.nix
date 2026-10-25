@@ -38,7 +38,7 @@ in
   # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
   # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
   "hermes-matrix.age" = mkSecret allHosts;
-  # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify.nix).
+  # Prywatny klucz SSH claude-notify (modules/hosts/claude-notify/default.nix).
   "hermes-notify-key.age" = mkSecret allHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
   # Format env z nazwami sekretów CI github:janusz-bit/brulion:

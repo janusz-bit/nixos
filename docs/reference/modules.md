@@ -62,7 +62,6 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/hosts/
 
-- **[hosts/claude-notify.nix](../../modules/hosts/claude-notify.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
 - **[hosts/registry.nix](../../modules/hosts/registry.nix)** — Rejestr hostów: z niego powstają nixosConfigurations.\<nazwa>, workflowy CI (github-actions.nix) i strony docs/reference/ (docs.nix). Host deklaruje się w modules/hosts/\<nazwa>/default.nix; procedura nowego hosta: README.md.
 - **[hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)** (`nixos-remote-agent`, `rpi-remote-agent`) · hosts: `nixos`, `raspberry-pi-4` — Zdalny dostęp Claude Code z raspberry-pi-4 do laptopa (host nixos): konto claude-remote na laptopie, a na RPi `ssh laptop` i `laptop-run` do ewaluacji i buildów x86_64 (krok 3 weryfikacji z AGENTS.md), które na RPi trwają minuty albo są niewykonalne.
 
@@ -82,6 +81,10 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[hosts/base/shell.nix](../../modules/hosts/base/shell.nix)** (`base-shell`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — Powłoka na każdym hoście: bash zostaje powłoką logowania i interaktywnie przechodzi w fish (tryb ratunkowy systemd i skrypty dalej mają basha), aliasy eza/bat, powitanie fastfetch (customBot.enableFastfetch) i tmux.
 - **[hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)** (`base-ssh-lan`) · hosts: `nixos`, `raspberry-pi-4` — SSH tylko z domowego LAN-u (customTop.lan.subnet): reguła iptables zamiast openFirewall. Laptop nie przyjmuje SSH w obcych sieciach, a port 22 nie jest otwarty przez IPv6, gdzie router może nie filtrować ruchu przychodzącego. Tunelu Cloudflare (sshd przez localhost) to nie dotyczy.
 - **[hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)** (`base-ssh`) · hosts: `nixos`, `raspberry-pi-4`, `wsl` — SSH na każdym hoście: sshd tylko z kluczami, root domyślnie bez logowania, agent GnuPG, ssh-askpass oraz wpis `Host ssh.*` w ssh_config, przez który `ssh ssh.<domena>` loguje się jako root na RPi przez Cloudflare Access.
+
+## modules/hosts/claude-notify/
+
+- **[hosts/claude-notify/default.nix](../../modules/hosts/claude-notify/default.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
 
 ## modules/hosts/nixos/
 

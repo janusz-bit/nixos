@@ -26,7 +26,7 @@
 # claude-notify nie trafia do skillPackages (modules/skills/default.nix): cel
 # ssh, ścieżka klucza i odbiornik zależą od hosta, więc pakiet powstaje tutaj.
 #
-# Wiadomość (_claude-notify/claude-notify.jq): Markdown z nagłówkiem (host,
+# Wiadomość (_client/claude-notify.jq): Markdown z nagłówkiem (host,
 # konto, katalog, sesja i okno tmux). Prośba o zgodę: narzędzie i argumenty
 # z rekordu hooka PermissionRequest (`--record`, $XDG_RUNTIME_DIR/claude-notify,
 # 0700), bez rekordu (np. sieć komend w sandboksie) treść powiadomienia i okno
@@ -106,10 +106,10 @@ let
         key=${lib.escapeShellArg key}
         receiver=${lib.escapeShellArg (lib.optionalString (receiver != null) (lib.getExe receiver))}
         ssh_command=(${lib.escapeShellArgs sshCommand})
-        format=${./_claude-notify/claude-notify.jq}
+        format=${./_client/claude-notify.jq}
         service_user=${lib.escapeShellArg hermesUser}
       ''
-      + builtins.readFile ./_claude-notify/claude-notify.sh;
+      + builtins.readFile ./_client/claude-notify.sh;
     };
 
   # Wartość `environment` hosta-klienta: claude-notify i ustawienia zarządzane
