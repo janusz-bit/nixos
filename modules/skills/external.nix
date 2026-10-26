@@ -54,7 +54,11 @@
       bonsai = {
         mmproj = "Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf";
         port = 8080;
-        output = 16384;
+        # -n serwera to tylko domyślny limit żądań bez max_tokens (większe
+        # max_tokens przechodzi); opencode2 i Prime wysyłają ten. opencode2
+        # liczy próg kompakcji z context minus bufor, nie minus output, więc
+        # ta wartość nie zmniejsza kontekstu na wejście (także w wariancie MTP).
+        output = 32768;
         # Serwer startuje z --mmproj (projekcja wizyjna), więc model rozumie obrazy.
         input = [
           "text"
@@ -65,7 +69,7 @@
             alias = "bonsai-serve";
             model = "Ternary-Bonsai-2-27B-PTQ1_0.gguf";
             name = "Ternary Bonsai 2 27B PTQ1_0 (local)";
-            context = 81920;
+            context = 98304;
             serverFlags = [ ];
           };
           # Ten sam trzon z głowicą MTP Qwen 3.8 (plik lean z HF
@@ -87,7 +91,7 @@
       # - Natywne kernele FlashAttention mają tylko pary q4_0/q4_0, q8_0/q8_0
       #   i f16; inne typy KV (także q8_0/q4_0, q4_1, q5_x) konwertują KV do
       #   f16 i przy 32K kontekstu generują o 40-48% wolniej. q4_0/q4_0 mieści
-      #   do 84K kontekstu, q8_0/q8_0 (prawie bezstratne, KLD ok. 0,0002) do 45K.
+      #   ponad 96K kontekstu, q8_0/q8_0 (prawie bezstratne, KLD ok. 0,0002) do 45K.
       # - Bez GGML_CUDA_ENABLE_UNIFIED_MEMORY: ukrywa brak VRAM, nadmiar
       #   stronicuje się przez PCIe (przy 40K 21 zamiast 37 t/s). Bez niej brak
       #   VRAM wywraca serwer, także cuBLAS przy pierwszym żądaniu (ok. 120 MiB
@@ -97,8 +101,10 @@
       #   zajmuje ok. 830 MiB, ponad połowę kontekstu.
       # - Największe -c: `llama serve` z tymi flagami bez -c i z -fitt 256 (log
       #   „n_ctx_slot”); samodzielne llama-fit-params rezerwuje logity całego
-      #   ubatcha (ok. 485 MiB) i zaniża wynik. -c 81920 z tymi flagami
-      #   sprawdzone: szczyt 7372 MiB z 8151 przy 64K zajętego kontekstu.
+      #   ubatcha (ok. 485 MiB) i zaniża wynik. -c 98304 z tymi flagami
+      #   sprawdzone (2026-10-26): szczyt 7668 MiB z 8151 przy 96K zajętego
+      #   kontekstu; każde 8K kontekstu to ok. 148 MiB, więc 106496 zostawiłoby
+      #   ok. 335 MiB zapasu na inne procesy na dGPU.
       # - MTP, 1 token draftu, prawdziwe wagi: nowy kod +66%, edycje +84%,
       #   myślenie +42%, kod przy 26K kontekstu +58% (41 -> 68 t/s na świeżo).
       #   2-3 tokeny pomagają tylko edycjom, a mieszczą 28K/15K kontekstu.
