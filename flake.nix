@@ -39,6 +39,10 @@
     # builtins.readDir przy ewaluacji, na wyniku fetchera byłoby to IFD.
     qt-agent-skills.url = "github:TheQtCompanyRnD/agent-skills";
     qt-agent-skills.flake = false;
+    # Skille workflow PR Theo Browne'a (full-send, babysit-pr, council, ...);
+    # flake = false z tego samego powodu co qt-agent-skills.
+    tstack.url = "github:t3dotgg/tstack";
+    tstack.flake = false;
   };
 
   # Jedyna lista cache: hosty (customTop.nixConfig), CI i pierwszy rebuild

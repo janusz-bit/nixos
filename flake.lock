@@ -756,7 +756,8 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
         "nixpkgs-unstable-small": "nixpkgs-unstable-small",
-        "qt-agent-skills": "qt-agent-skills"
+        "qt-agent-skills": "qt-agent-skills",
+        "tstack": "tstack"
       }
     },
     "systems": {
@@ -792,6 +793,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "tstack": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792895150,
+        "narHash": "sha256-XZL19Kq8sMKjgIUahJZuNgSz/N/Lx/u5aDYxhLl78Ag=",
+        "owner": "t3dotgg",
+        "repo": "tstack",
+        "rev": "7de017b3fc9d50c03cf3ecb98fb71e0ca65a78bd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "t3dotgg",
+        "repo": "tstack",
         "type": "github"
       }
     },

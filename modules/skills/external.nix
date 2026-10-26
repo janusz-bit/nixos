@@ -1,7 +1,8 @@
 # Zewnętrzne paczki skilli (SKILL.md) z wejść flake'a dla Claude Code, Codexa,
 # opencode i Prime Agenta; obecnie Qt Development Skills (wejście
 # qt-agent-skills: Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie QML,
-# design tokeny z Figmy). Moduł jest jedynym właścicielem zarządzanego
+# design tokeny z Figmy) i tstack (wejście tstack: prowadzenie PR przez
+# review i CI do merge'a, przez gh). Moduł jest jedynym właścicielem zarządzanego
 # /etc/opencode/opencode.json, więc dopisuje tam też lokalny model Ternary
 # Bonsai 2 27B (fork llama.cpp od PrismML). Z tego samego serwera korzysta
 # Prime Agent (provider llamacpp); uruchamiają go aliasy bonsai-serve
@@ -13,7 +14,9 @@
 # i z ai-skills kończy ewaluację błędem „conflicting definition values”.
 #
 # Tylko laptop (import w hosts/nixos): skille Qt i lokalny model na GPU są
-# narzędziami stacji roboczej. Skrypty skilli Qt wołają python3 (desktop-ai);
+# narzędziami stacji roboczej. Skrypty skilli Qt i pr-wait z babysit-pr wołają
+# python3 (desktop-ai), skille tstack także gh (base-git); council i sol-loop
+# potrzebują subagentów na modelach innych dostawców.
 # qmllint, qmlprofiler i qmltestrunner pochodzą z Qt projektu (nix develop,
 # devenv), nie z systemu.
 #
@@ -37,6 +40,7 @@
 
       skillPacks = [
         "${inputs.qt-agent-skills}/skills"
+        "${inputs.tstack}/skills"
       ];
 
       skillsIn =
