@@ -183,13 +183,14 @@
           };
         }
         // lib.optionalAttrs config.hardware.nvidia.enabled {
-          # Serwer `strata launch --family coder --model IQ1_M --context 32k
-          # --no-api-key` (desktop-ai), ten sam port co bonsai-serve. Nie przez
-          # `strata connect opencode --write`: pisze format opencode v1
-          # (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
-          # 128K nie mieści się w 8 GB VRAM: wagi, MTP i KV (1931 MiB) nie
-          # zostawiają miejsca na cache ekspertów ani bufory prefillu; 32K
-          # sprawdzone (2026-10-26). Bez klucza serwer i tak odrzuca strony
+          # Serwer `strata launch --family coder --model IQ1_M --context 128k
+          # --kv q4_0 --no-api-key` (desktop-ai), ten sam port co bonsai-serve.
+          # Nie przez `strata connect opencode --write`: pisze format opencode
+          # v1 (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
+          # Przy 128K domyślne KV int8 (1931 MiB) nie zostawia w 8 GB VRAM
+          # miejsca na cache ekspertów ani bufory prefillu; q4_0 mieści się na
+          # styk (2026-10-26: 131 MiB wolnego po starcie, 55 MiB w trakcie
+          # odpowiedzi, 26,7 tok/s). Bez klucza serwer i tak odrzuca strony
           # z przeglądarki (sprawdza Host i Origin).
           strata = {
             name = "Strata (local)";
@@ -219,7 +220,7 @@
                 };
               };
               limit = {
-                context = 32768;
+                context = 131072;
                 # Limit wyjścia, z którym Strata testuje swoje konfiguracje
                 # (OUTPUT_CAP w strata_cli/launch/harness.py).
                 output = 4096;
