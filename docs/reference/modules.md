@@ -24,7 +24,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/desktop/
 
-- **[desktop/ai.nix](../../modules/desktop/ai.nix)** (`desktop-ai`) · hosts: `nixos` — Narzędzia AI stacji roboczej: lokalna Ollama i llama.cpp, agenty kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
+- **[desktop/ai.nix](../../modules/desktop/ai.nix)** (`desktop-ai`) · hosts: `nixos` — Narzędzia AI stacji roboczej: lokalna Ollama, llama.cpp i Strata, agenty kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
 - **[desktop/apps.nix](../../modules/desktop/apps.nix)** (`desktop-apps`) · hosts: `nixos` — Aplikacje graficzne stacji roboczej (biuro, multimedia, komunikatory, grafika, notatki), Flatpak, AppImage, Mullvad VPN, Syncthing i reguły udev klawiatury Wooting.
 - **[desktop/audio.nix](../../modules/desktop/audio.nix)** (`desktop-audio`) · hosts: `nixos` — Dźwięk: PipeWire z warstwami ALSA (także 32-bit dla gier) i PulseAudio; rtkit daje PipeWire priorytet czasu rzeczywistego.
 - **[desktop/autostart.nix](../../modules/desktop/autostart.nix)** (`desktop-autostart`) · hosts: `nixos` — Aplikacje startujące przy logowaniu do Plasmy każdego użytkownika hosta, deklaratywnie (Ustawienia → Autostart piszą do ~/.config/autostart, poza flake'iem): makeAutostartItem kopiuje plik .desktop pakietu do etc/xdg/autostart profilu systemu (/run/current-system/sw); `name` to nazwa pliku z share/applications bez .desktop, nie nazwa pakietu.
