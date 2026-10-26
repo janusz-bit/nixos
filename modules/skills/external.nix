@@ -3,8 +3,9 @@
 # qt-agent-skills: Qt 6 C++/QML, CMake, testy Qt Quick, profilowanie QML,
 # design tokeny z Figmy) i tstack (wejście tstack: prowadzenie PR przez
 # review i CI do merge'a, przez gh). Moduł jest jedynym właścicielem zarządzanego
-# /etc/opencode/opencode.json, więc dopisuje tam też lokalny model Ternary
-# Bonsai 2 27B (fork llama.cpp od PrismML). Z tego samego serwera korzysta
+# /etc/opencode/opencode.json, więc dopisuje tam też lokalne modele: Ternary
+# Bonsai 2 27B (fork llama.cpp od PrismML) i, przy NVIDIA, Qwen3.8-Flash-Next
+# Coder z serwera Strata (provider strata). Z serwera Bonsai korzysta też
 # Prime Agent (provider llamacpp); uruchamiają go aliasy bonsai-serve
 # i bonsai-serve-mtp, a llama-prism daje pozostałe polecenia forka.
 #
@@ -22,7 +23,8 @@
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.nixos.config.environment.etc --apply 'e: builtins.filter (n: builtins.match "codex/.*" n != null) (builtins.attrNames e)'`;
 # po aktywacji `/skills` w Claude Code i w Codexie, `opencode2 models |
-# grep llamacpp/` (model jest na liście także bez działającego serwera).
+# grep -E 'llamacpp/|strata/'` (modele są na liście także bez działającego
+# serwera).
 { inputs, ... }:
 {
   flake.modules.nixos.ai-skills-external =
@@ -149,34 +151,81 @@
         );
 
       opencodeConfig = {
-        providers.llamacpp = {
-          name = "llama.cpp (local)";
-          package = "@opencode/ai/providers/openai-compatible";
-          settings.baseURL = baseUrl;
-          models = lib.mapAttrs (_: variant: {
-            modelID = variant.model;
-            inherit (variant) name;
-            # llama-server oddaje tok myślenia w reasoning_content.
-            compatibility.reasoningField = "reasoning_content";
-            capabilities = {
-              tools = true;
-              inherit (bonsai) input;
-              output = [ "text" ];
-              reasoning = {
-                supported = true;
-                # Domyślny effort modelu to xhigh (szablon czatu); bez low, bo wg
-                # karty modelu zachowuje się prawie jak xhigh.
-                effort = [
-                  "medium"
-                  "xhigh"
+        providers = {
+          llamacpp = {
+            name = "llama.cpp (local)";
+            package = "@opencode/ai/providers/openai-compatible";
+            settings.baseURL = baseUrl;
+            models = lib.mapAttrs (_: variant: {
+              modelID = variant.model;
+              inherit (variant) name;
+              # llama-server oddaje tok myślenia w reasoning_content.
+              compatibility.reasoningField = "reasoning_content";
+              capabilities = {
+                tools = true;
+                inherit (bonsai) input;
+                output = [ "text" ];
+                reasoning = {
+                  supported = true;
+                  # Domyślny effort modelu to xhigh (szablon czatu); bez low, bo wg
+                  # karty modelu zachowuje się prawie jak xhigh.
+                  effort = [
+                    "medium"
+                    "xhigh"
+                  ];
+                };
+              };
+              limit = {
+                inherit (variant) context;
+                inherit (bonsai) output;
+              };
+            }) bonsai.variants;
+          };
+        }
+        // lib.optionalAttrs config.hardware.nvidia.enabled {
+          # Serwer `strata launch --family coder --model IQ1_M --context 32k
+          # --no-api-key` (desktop-ai), ten sam port co bonsai-serve. Nie przez
+          # `strata connect opencode --write`: pisze format opencode v1
+          # (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
+          # 128K nie mieści się w 8 GB VRAM: wagi, MTP i KV (1931 MiB) nie
+          # zostawiają miejsca na cache ekspertów ani bufory prefillu; 32K
+          # sprawdzone (2026-10-26). Bez klucza serwer i tak odrzuca strony
+          # z przeglądarki (sprawdza Host i Origin).
+          strata = {
+            name = "Strata (local)";
+            package = "@opencode/ai/providers/openai-compatible";
+            settings.baseURL = baseUrl;
+            models.qwen3-8-flash-next-coder-iq1_m = {
+              modelID = "qwen3.8-flash-next-coder-iq1_m";
+              name = "Qwen3.8-Flash-Next Coder IQ1_M (local)";
+              compatibility.reasoningField = "reasoning_content";
+              capabilities = {
+                tools = true;
+                # Obrazy czyta strata-vision na CPU (domyślne --vision przy <24 GB).
+                input = [
+                  "text"
+                  "image"
                 ];
+                output = [ "text" ];
+                reasoning = {
+                  supported = true;
+                  # Poziomy, które serwer rozumie (serve/server.py, EFFORT_TEXT).
+                  effort = [
+                    "low"
+                    "medium"
+                    "high"
+                    "xhigh"
+                  ];
+                };
+              };
+              limit = {
+                context = 32768;
+                # Limit wyjścia, z którym Strata testuje swoje konfiguracje
+                # (OUTPUT_CAP w strata_cli/launch/harness.py).
+                output = 4096;
               };
             };
-            limit = {
-              inherit (variant) context;
-              inherit (bonsai) output;
-            };
-          }) bonsai.variants;
+          };
         };
       };
     in
