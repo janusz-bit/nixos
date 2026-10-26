@@ -119,8 +119,14 @@
       #   local-ai-on-your-gaming-gpu, kernel/reasoning_effort.md);
       # - --cors-origins localhost: domyślne CORS `*` z credentials wpuszcza
       #   każdą stronę otwartą w przeglądarce;
-      # - bez flag samplingu (temp 1.0, top-k 20, top-p 0.95 z GGUF) i --jinja
-      #   (domyślne).
+      # - --presence-penalty 1.0 przeciw pętlom w myśleniu (ternarne wagi
+      #   zapętlają się łatwiej). Karta modelu zaleca 0 z myśleniem i 1.5 bez,
+      #   Qwen 0-2 na niekończące się powtórzenia (wyższe grozi mieszaniem
+      #   języków). llama.cpp liczy karę tylko w oknie --repeat-last-n (64
+      #   tokeny), więc powtarzane identyfikatory w kodzie prawie jej nie
+      #   odczuwają; żądanie z presence_penalty ją nadpisuje;
+      # - pozostały sampling z GGUF (temp 1.0, top-k 20, top-p 0.95; min-p 0.05
+      #   to domyślne llama.cpp i zalecenie karty), --jinja domyślne.
       # Grupy flag (także serverFlags) dzieli się na spacjach, więc wartości
       # (nazwy plików .gguf) nie mogą zawierać spacji.
       bonsaiServe =
@@ -131,7 +137,7 @@
             [
               "serve -m ${variant.model} --mmproj ${bonsai.mmproj} --no-mmproj-offload"
               "--port ${toString bonsai.port} -c ${toString variant.context} -n ${toString bonsai.output}"
-              "-np 1 -ngl 99 -ctk q4_0 -ctv q4_0 -ub 256"
+              "-np 1 -ngl 99 -ctk q4_0 -ctv q4_0 -ub 256 --presence-penalty 1.0"
               "--reasoning-effort medium --reasoning-effort-allow xhigh,medium,low --cors-origins localhost"
             ]
             ++ variant.serverFlags
