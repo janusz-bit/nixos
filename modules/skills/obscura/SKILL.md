@@ -89,4 +89,4 @@ const b = await chromium.connectOverCDP("http://127.0.0.1:9333");
 - The packaged version follows `flake.lock` (0.2.2 at the time of writing;
   upstream already has newer releases). Compare `obscura --version` with
   upstream releases before assuming a feature exists. Installed together with
-  the skill by `modules/skills/default.nix` (`skillPackages`).
+  the skill by `modules/ai/harness.nix` (`ai.skills.obscura.packages`).

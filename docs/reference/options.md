@@ -208,18 +208,6 @@ Konto Matrix (@\<nazwa>:\<domena>), jedyne, któremu odpowiada Hermes.
 
 ## Host options (`customBot`, NixOS)
 
-### `customBot.agentSkills`
-
-Skille (katalog z SKILL.md) dla każdego agenta kodującego hosta:
-Prime Agent, Claude Code, Codex i opencode. Linkuje je ai-skills
-(modules/skills/default.nix), więc działają tylko na hostach, które
-go importują. Ta sama nazwa z dwóch definicji kończy ewaluację
-błędem.
-
-- Type: attribute set of absolute path
-- Default: `{ }`
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
 ### `customBot.defaultUser`
 
 Główny użytkownik interaktywny hosta (właściciel sekretów użytkownika).
@@ -256,96 +244,6 @@ na hoście bez base-lockdown lista nic nie robi.
 - Default: `[ ]`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
-### `customBot.modelProviders`
-
-Lokalne serwery modeli (API zgodne z OpenAI, bez klucza, w konwencji
-llama.cpp: myślenie w reasoning_content, reasoning_effort "none" je
-wyłącza) dla agentów kodujących hosta; nazwa atrybutu to nazwa
-providera. Ustawia je ai-models (modules/skills/models.nix), a do
-opencode2 i Prime Agenta wpina ai-harness
-(modules/skills/harness.nix), więc działają tylko na hostach, które
-go importują.
-
-- Type: attribute set of (submodule)
-- Default: `{ }`
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.baseUrl`
-
-Adres API zgodnego z OpenAI (z /v1).
-
-- Type: string
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models`
-
-Modele serwera; klucz to nazwa modelu w opencode2 (\<provider>/\<klucz>).
-
-- Type: attribute set of (submodule)
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.context`
-
-Okno kontekstu w tokenach, to samo co -c serwera.
-
-- Type: positive integer, meaning >0
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.id`
-
-Identyfikator modelu w polu `model` żądań do serwera.
-
-- Type: string
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.input`
-
-Rodzaje wejścia modelu.
-
-- Type: non-empty (list of (one of "text", "image"))
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.name`
-
-Nazwa modelu wyświetlana w agentach.
-
-- Type: string
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.output`
-
-Limit tokenów wyjścia, który agenty wysyłają w żądaniu.
-
-- Type: positive integer, meaning >0
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.models.<name>.reasoningEfforts`
-
-Poziomy reasoning_effort, które agenty oferują dla modelu; serwer
-musi je przyjmować. Wyłączenie myślenia (poziom off Prime Agenta)
-dodaje ai-harness.
-
-- Type: non-empty (list of (one of "minimal", "low", "medium", "high", "xhigh", "max"))
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.modelProviders.<name>.name`
-
-Nazwa providera wyświetlana w opencode2.
-
-- Type: string
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
-### `customBot.primeAgentProviders`
-
-Dodatkowi providerzy prime-agenta (providers.\<nazwa> w models.json,
-schemat jak w modules/hosts/base/prime-agent.nix); lokalne serwery
-z modelProviders dopisuje tu ai-harness. Nazwa zajęta przez
-providera z prime-agent.nix kończy ewaluację błędem.
-
-- Type: attribute set of attribute set of anything
-- Default: `{ }`
-- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
-
 ### `customBot.triliumMcpUrl`
 
 Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
@@ -356,4 +254,238 @@ Trilium na 37840.
 - Type: null or string
 - Default: `null`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+## Agent skills and models (`ai`, NixOS)
+
+### `ai.models`
+
+Modele znane konfiguracji; do agentów trafiają włączone.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.agents`
+
+Agenci, którzy widzą model.
+
+- Type: list of (one of "prime-agent", "opencode")
+- Default: `[
+  "prime-agent"
+  "opencode"
+]`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.context`
+
+Okno kontekstu w tokenach; wymagane dla opencode2.
+
+- Type: null or (positive integer, meaning >0)
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.cost`
+
+Prime Agent: cennik (input, output, cacheRead, cacheWrite) w USD za 1M tokenów.
+
+- Type: null or (attribute set of (signed integer or floating point number))
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.enable`
+
+Czy model ‹name› ma trafić do agentów hosta.
+
+- Type: boolean
+- Default: `false`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.id`
+
+Identyfikator modelu wysyłany do API.
+
+- Type: string
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.input`
+
+Rodzaje wejścia; Prime Agent zna tylko text i image.
+
+- Type: list of (one of "text", "image")
+- Default: `[
+  "text"
+]`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.name`
+
+Nazwa w interfejsie agenta.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.output`
+
+Limit tokenów wyjścia; wymagany dla opencode2.
+
+- Type: null or (positive integer, meaning >0)
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.provider`
+
+Nazwa wpisu w ai.providers.
+
+- Type: string
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.reasoning`
+
+Model z myśleniem (null: bez).
+
+- Type: null or (submodule)
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.reasoning.efforts`
+
+Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime Agent mapuje poziomy o tych nazwach na siebie, resztę wyłącza.
+
+- Type: list of string
+- Default: `[ ]`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.models.<name>.reasoning.offEffort`
+
+Prime Agent: wartość effort, która wyłącza myślenie (razem z efforts).
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers`
+
+Serwery zgodne z API OpenAI, z których korzystają modele.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.apiKey`
+
+Prime Agent: nazwa zmiennej env z kluczem (wartość wstrzykuje
+wrapper z agenix, nigdy nie trafia do /nix/store) albo literał
+dla serwera, który klucza nie sprawdza; wymagane dla
+providera z modelem Prime Agenta.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.baseUrl`
+
+Adres API (z /v1).
+
+- Type: string
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.compat`
+
+Prime Agent: flagi compat providera (schemat models.json).
+
+- Type: attribute set of anything
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.name`
+
+Nazwa w interfejsie opencode2.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.reasoningField`
+
+opencode2: pole odpowiedzi z tokiem myślenia (compatibility.reasoningField).
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skillPacks`
+
+Paczki skilli: katalog, którego podkatalogi z SKILL.md są skillami. Nazwa skilla z dwóch źródeł kończy ewaluację błędem.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skillPacks.<name>.enable`
+
+Czy paczka skilli ‹name› ma trafić do agentów hosta.
+
+- Type: boolean
+- Default: `false`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skillPacks.<name>.source`
+
+Katalog z podkatalogami skilli (wejście flake'a, nie wynik fetchera: nazwy czyta builtins.readDir).
+
+- Type: absolute path
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills`
+
+Skille (katalog z SKILL.md) znane konfiguracji; do agentów trafiają włączone.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills.<name>.agents`
+
+Agenci, którzy dostają skill; węższa lista dla skilla, który działa tylko w jednym (kernel Pythona Prime Agenta, hooki Claude Code).
+
+- Type: list of (one of "prime-agent", "claude-code", "codex", "opencode")
+- Default: `[
+  "prime-agent"
+  "claude-code"
+  "codex"
+  "opencode"
+]`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills.<name>.enable`
+
+Czy skill ‹name› ma trafić do agentów hosta.
+
+- Type: boolean
+- Default: `false`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills.<name>.packages`
+
+Programy, bez których skill nie działa; instalowane razem z nim, żeby nie trafił na host bez swojego narzędzia.
+
+- Type: list of package
+- Default: `[ ]`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills.<name>.python`
+
+Skill pythonowy: jego src/ trafia do PYTHONPATH kernela Prime Agenta (agents musi zawierać prime-agent).
+
+- Type: boolean
+- Default: `false`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.skills.<name>.source`
+
+Katalog skilla (SKILL.md, references/, przy skillu pythonowym też src/ i pyproject.toml).
+
+- Type: absolute path
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
 

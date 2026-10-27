@@ -31,10 +31,7 @@
         self.modules.nixos.gaming
         self.modules.nixos.base-fail2ban
         self.modules.nixos.base-lockdown
-        self.modules.nixos.ai-skills
-        self.modules.nixos.ai-skills-external
-        self.modules.nixos.ai-models
-        self.modules.nixos.ai-harness
+        self.modules.nixos.nixos-ai
         self.modules.nixos.nixos-remote-agent
         self.modules.nixos.nixos-claude-notify
       ];

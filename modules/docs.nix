@@ -1,7 +1,7 @@
 # Dokumentacja referencyjna generowana z flake'a: docs/reference/hosts.md
 # (hosty z rejestru, moduły każdego hosta, diagram), modules.md (katalog
 # wszystkich modułów z opisem z nagłówka) i options.md (opcje rejestru
-# hostów, customTop i customBot). Opis modułu to pierwszy akapit komentarza
+# hostów, customTop, customBot i ai). Opis modułu to pierwszy akapit komentarza
 # na początku pliku.
 #
 # Generator czyta tylko źródła modułów (readFile + wyrażenia regularne na
@@ -191,10 +191,11 @@ let
       ) opt.declarations
     }\n\n";
 
-  customBotOptions =
+  nixosOptions =
+    module:
     (lib.evalModules {
       class = "nixos";
-      modules = [ config.flake.modules.nixos.base-options ];
+      modules = [ module ];
     }).options;
 
   optionsPage = lib.concatStrings (
@@ -210,7 +211,9 @@ let
     ]
     ++ map renderOption (docList "customTop." { inherit (options) customTop; })
     ++ [ "## Host options (`customBot`, NixOS)\n\n" ]
-    ++ map renderOption (docList "customBot." customBotOptions)
+    ++ map renderOption (docList "customBot." (nixosOptions config.flake.modules.nixos.base-options))
+    ++ [ "## Agent skills and models (`ai`, NixOS)\n\n" ]
+    ++ map renderOption (docList "ai." (nixosOptions config.flake.modules.nixos.ai-options))
   );
 in
 {

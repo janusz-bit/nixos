@@ -1,6 +1,7 @@
-# Deklaratywna konfiguracja Prime Agenta: models.json (providerzy, także
-# customBot.primeAgentProviders hosta) i settings.json w /etc/prime-agent,
-# linkowane przez tmpfiles do ~/.prime/agent/ głównego użytkownika.
+# Deklaratywna konfiguracja Prime Agenta: settings.json i models.json
+# w /etc/prime-agent, linkowane przez tmpfiles do ~/.prime/agent/ głównego
+# użytkownika. models.json (providerzy i modele) powstaje z opcji ai.models
+# w ai-harness (modules/ai/harness.nix).
 #
 # apiKey i bearerTokenEnvVar to nazwy zmiennych env (prime-agent czyta je
 # z process.env); wartości wstrzykuje wrapper prime-agent z base-agenix, więc
@@ -18,78 +19,13 @@
       user = config.customBot.defaultUser;
       agentDir = "${config.users.users.${user}.home}/.prime/agent";
 
-      # Model z myśleniem i obrazem na wejściu (u modeli Ollamy sprawdź
-      # w `ollama show <model>`, sekcja Capabilities). Schemat prime-agenta zna
-      # tylko input "text" i "image" — "video" odrzuca walidator.
-      visionReasoningModel = id: {
-        inherit id;
-        reasoning = true;
-        input = [
-          "text"
-          "image"
-        ];
-      };
-
-      models = {
-        # unionOfDisjoint zamiast `//`: provider hosta o nazwie wspólnej z tymi
-        # niżej kończy ewaluację, zamiast po cichu zastąpić wspólnego.
-        providers = lib.attrsets.unionOfDisjoint config.customBot.primeAgentProviders {
-          ollama = {
-            baseUrl = "http://localhost:11434/v1";
-            api = "openai-completions";
-            # Literał, nie nazwa zmiennej: lokalny Ollama ignoruje klucz, ale
-            # schemat go wymaga.
-            apiKey = "ollama";
-            compat = {
-              supportsDeveloperRole = false;
-              supportsReasoningEffort = false;
-            };
-            models = [
-              { id = "ornith:35b"; }
-              (visionReasoningModel "kimi-k3:cloud")
-            ];
-          };
-          ollama-cloud = {
-            baseUrl = "https://ollama.com/v1";
-            api = "openai-completions";
-            apiKey = "OLLAMA_API_KEY";
-            models = [
-              (visionReasoningModel "deepseek-v4.1-flash:cloud")
-              (visionReasoningModel "glm-5.3-flash:cloud")
-            ];
-          };
-          openrouter = {
-            baseUrl = "https://openrouter.ai/api/v1";
-            api = "openai-completions";
-            apiKey = "OPENROUTER_API_KEY";
-            models = [
-              (
-                visionReasoningModel "deepseek/deepseek-v4.1-flash"
-                // {
-                  name = "DeepSeek V4.1 Flash (OpenRouter)";
-                  contextWindow = 1048576;
-                  maxTokens = 384000;
-                  # USD za 1M tokenów (cennik OpenRouter).
-                  cost = {
-                    input = 0.15;
-                    output = 0.6;
-                    cacheRead = 0.003;
-                    cacheWrite = 0;
-                  };
-                }
-              )
-            ];
-          };
-        };
-      };
-
       settings = {
         defaultProvider = "ollama-cloud";
         defaultModel = "glm-5.3-flash:cloud";
         telemetry.enabled = false;
         # Przy kolizji nazw wygrywa wcześniejszy katalog, więc deklaratywne
-        # skille (ai-skills) mają pierwszeństwo przed drop-inem /etc/ai;
-        # brakujący katalog (WSL bez ai-skills) prime-agent pomija.
+        # skille (ai-harness) mają pierwszeństwo przed drop-inem /etc/ai;
+        # brakujący katalog (WSL bez skilli) prime-agent pomija.
         skills = [
           "/etc/ai-skills"
           "/etc/ai"
@@ -107,8 +43,8 @@
     in
     {
       environment = {
-        # Hosty z ai-skills dokładają wariant z PYTHONPATH skilli (hiPrio,
-        # modules/skills/default.nix).
+        # Host ze skillem pythonowym dokłada wariant z PYTHONPATH skilli
+        # (hiPrio, modules/ai/harness.nix).
         systemPackages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.prime-agent ];
 
         sessionVariables = {
@@ -120,10 +56,7 @@
           TRILIUM_MCP_URL = lib.mkIf (config.customBot.triliumMcpUrl != null) config.customBot.triliumMcpUrl;
         };
 
-        etc = {
-          "prime-agent/models.json".text = builtins.toJSON models + "\n";
-          "prime-agent/settings.json".text = builtins.toJSON settings + "\n";
-        };
+        etc."prime-agent/settings.json".text = builtins.toJSON settings + "\n";
       };
 
       systemd.tmpfiles.rules = [

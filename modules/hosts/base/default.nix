@@ -13,6 +13,8 @@
       self.modules.nixos.base-ssh
       self.modules.nixos.base-prime-agent
       self.modules.nixos.base-options
+      self.modules.nixos.ai
+      self.modules.nixos.base-ai
     ];
   };
 }

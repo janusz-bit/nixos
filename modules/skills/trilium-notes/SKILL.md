@@ -85,7 +85,8 @@ returns text notes as Markdown. Use native structures only — no inline
 - The Python package is NOT installed by the kernel bootstrap
   (`PRIME_AGENT_KERNEL_PYTHON` points to a read-only env, so
   `uv pip install --editable` can't work there). It is importable thanks to
-  `PYTHONPATH` set from `modules/skills/default.nix` (pythonSkills).
+  `PYTHONPATH` set from `modules/ai/harness.nix` (`python = true` in
+  `ai.skills.trilium-notes`).
 - The same server is also configured as `mcpServers.trilium-notes` in Prime
   Agent's `settings.json`. Rotate the token in Trilium (Options -> ETAPI),
   then update the agenix secret on the laptop

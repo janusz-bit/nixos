@@ -35,7 +35,7 @@
     # Plasma (wtyczki motywów pasują).
     brulion.url = "github:janusz-bit/brulion?ref=release";
     brulion.inputs.nixpkgs.follows = "nixpkgs";
-    # Wejście, nie pakiet lokalny: skills/external.nix czyta nazwy skilli przez
+    # Wejście, nie pakiet lokalny: ai/harness.nix czyta nazwy skilli przez
     # builtins.readDir przy ewaluacji, na wyniku fetchera byłoby to IFD.
     qt-agent-skills.url = "github:TheQtCompanyRnD/agent-skills";
     qt-agent-skills.flake = false;

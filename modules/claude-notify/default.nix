@@ -23,8 +23,9 @@
 # Klient przypina klucz hosta RPi (keys.sshHostKeys) i pomija ssh_config
 # (-F /dev/null), bo base-ssh ma `Host ssh.*` → User root.
 #
-# claude-notify nie trafia do skillPackages (modules/skills/default.nix): cel
-# ssh, ścieżka klucza i odbiornik zależą od hosta, więc pakiet powstaje tutaj.
+# claude-notify nie trafia do ai.skills.hermes-notify.packages (modules/ai/skills.nix):
+# cel ssh, ścieżka klucza i odbiornik zależą od hosta, więc pakiet powstaje
+# tutaj, razem z włączeniem skilla hermes-notify tam, gdzie moduł wdrożył klucz.
 #
 # Wiadomość (_client/claude-notify.jq): Markdown z nagłówkiem (host,
 # konto, katalog, sesja i okno tmux). Prośba o zgodę: narzędzie i argumenty
@@ -220,6 +221,8 @@ in
         # Klucz klienta dla nixos (grupa hermes). ssh nie odrzuca go jako
         # „too open”: tryb sprawdza tylko u właściciela pliku, a hermes
         # (właściciel) nie używa ssh, tylko woła odbiornik wprost.
+        ai.skills.hermes-notify.enable = true;
+
         age.secrets.hermes-notify-key = {
           file = secretFile;
           owner = cfg.user;
@@ -250,6 +253,8 @@ in
         ];
       }
       (lib.mkIf hasSecret {
+        ai.skills.hermes-notify.enable = true;
+
         age.secrets.hermes-notify-key = {
           file = secretFile;
           owner = config.customBot.defaultUser;

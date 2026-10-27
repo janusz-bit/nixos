@@ -6,9 +6,9 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 50 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 30 |
-| [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 53 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
+| [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
 
@@ -28,12 +28,13 @@ flowchart LR
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
   host_nixos --> base_lockdown[base-lockdown]
-  host_nixos --> ai_skills[ai-skills]
-  host_nixos --> ai_skills_external[ai-skills-external]
-  host_nixos --> ai_models[ai-models]
-  host_nixos --> ai_harness[ai-harness]
+  host_nixos --> nixos_ai[nixos-ai]
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_claude_notify[nixos-claude-notify]
+  ai --> ai_options[ai-options]
+  ai --> ai_skills[ai-skills]
+  ai --> ai_models[ai-models]
+  ai --> ai_harness[ai-harness]
   base --> base_configuration[base-configuration]
   base --> base_shell[base-shell]
   base --> base_git[base-git]
@@ -42,6 +43,8 @@ flowchart LR
   base --> base_ssh[base-ssh]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
+  base --> ai[ai]
+  base --> base_ai[base-ai]
   base_agenix --> base_secrets[base-secrets]
   desktop --> desktop_plasma[desktop-plasma]
   desktop --> desktop_audio[desktop-audio]
@@ -68,12 +71,14 @@ flowchart LR
   hardware_LOQ_15IRX10 --> hardware_x86_64_v3[hardware-x86-64-v3]
 ```
 
-- `ai-harness` — [skills/harness.nix](../../modules/skills/harness.nix)
-- `ai-models` — [skills/models.nix](../../modules/skills/models.nix)
-- `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
-- `ai-skills-external` — [skills/external.nix](../../modules/skills/external.nix)
+- `ai` — [ai/default.nix](../../modules/ai/default.nix)
+- `ai-harness` — [ai/harness.nix](../../modules/ai/harness.nix)
+- `ai-models` — [ai/models.nix](../../modules/ai/models.nix)
+- `ai-options` — [ai/options.nix](../../modules/ai/options.nix)
+- `ai-skills` — [ai/skills.nix](../../modules/ai/skills.nix)
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
 - `base-agenix` — [hosts/base/agenix.nix](../../modules/hosts/base/agenix.nix)
+- `base-ai` — [hosts/base/ai.nix](../../modules/hosts/base/ai.nix)
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-fail2ban` — [hosts/base/fail2ban.nix](../../modules/hosts/base/fail2ban.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
@@ -113,6 +118,7 @@ flowchart LR
 - `hardware-lenovo` — [hardware/lenovo.nix](../../modules/hardware/lenovo.nix)
 - `hardware-x86-64-v3` — [hardware/x86-64-v3.nix](../../modules/hardware/x86-64-v3.nix)
 - `nixos` — [hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)
+- `nixos-ai` — [hosts/nixos/ai.nix](../../modules/hosts/nixos/ai.nix)
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
 - `nixos-claude-notify` — [claude-notify/default.nix](../../modules/claude-notify/default.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
@@ -145,7 +151,11 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_ttyd[rpi-ttyd]
   host_raspberry_pi_4 --> rpi_claude_notify[rpi-claude-notify]
   host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
-  host_raspberry_pi_4 --> ai_skills[ai-skills]
+  host_raspberry_pi_4 --> rpi_ai[rpi-ai]
+  ai --> ai_options[ai-options]
+  ai --> ai_skills[ai-skills]
+  ai --> ai_models[ai-models]
+  ai --> ai_harness[ai-harness]
   base --> base_configuration[base-configuration]
   base --> base_shell[base-shell]
   base --> base_git[base-git]
@@ -154,12 +164,19 @@ flowchart LR
   base --> base_ssh[base-ssh]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
+  base --> ai[ai]
+  base --> base_ai[base-ai]
   base_agenix --> base_secrets[base-secrets]
 ```
 
-- `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
+- `ai` — [ai/default.nix](../../modules/ai/default.nix)
+- `ai-harness` — [ai/harness.nix](../../modules/ai/harness.nix)
+- `ai-models` — [ai/models.nix](../../modules/ai/models.nix)
+- `ai-options` — [ai/options.nix](../../modules/ai/options.nix)
+- `ai-skills` — [ai/skills.nix](../../modules/ai/skills.nix)
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
 - `base-agenix` — [hosts/base/agenix.nix](../../modules/hosts/base/agenix.nix)
+- `base-ai` — [hosts/base/ai.nix](../../modules/hosts/base/ai.nix)
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-fail2ban` — [hosts/base/fail2ban.nix](../../modules/hosts/base/fail2ban.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
@@ -175,6 +192,7 @@ flowchart LR
 - `hardware-raspberry-pi-4` — [hardware/raspberry-pi-4/default.nix](../../modules/hardware/raspberry-pi-4/default.nix)
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
+- `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
 - `rpi-claude-notify` — [claude-notify/default.nix](../../modules/claude-notify/default.nix)
 - `rpi-cloudflared` — [hosts/raspberry-pi-4/cloudflared.nix](../../modules/hosts/raspberry-pi-4/cloudflared.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
@@ -196,6 +214,10 @@ Host wsl: NixOS-WSL na Windowsie (sterownik GPU z Windowsa, skróty aplikacji w 
 flowchart LR
   host_wsl([wsl])
   host_wsl --> base[base]
+  ai --> ai_options[ai-options]
+  ai --> ai_skills[ai-skills]
+  ai --> ai_models[ai-models]
+  ai --> ai_harness[ai-harness]
   base --> base_configuration[base-configuration]
   base --> base_shell[base-shell]
   base --> base_git[base-git]
@@ -204,9 +226,17 @@ flowchart LR
   base --> base_ssh[base-ssh]
   base --> base_prime_agent[base-prime-agent]
   base --> base_options[base-options]
+  base --> ai[ai]
+  base --> base_ai[base-ai]
 ```
 
+- `ai` — [ai/default.nix](../../modules/ai/default.nix)
+- `ai-harness` — [ai/harness.nix](../../modules/ai/harness.nix)
+- `ai-models` — [ai/models.nix](../../modules/ai/models.nix)
+- `ai-options` — [ai/options.nix](../../modules/ai/options.nix)
+- `ai-skills` — [ai/skills.nix](../../modules/ai/skills.nix)
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)
+- `base-ai` — [hosts/base/ai.nix](../../modules/hosts/base/ai.nix)
 - `base-configuration` — [hosts/base/configuration.nix](../../modules/hosts/base/configuration.nix)
 - `base-git` — [hosts/base/git.nix](../../modules/hosts/base/git.nix)
 - `base-nix` — [hosts/base/nix.nix](../../modules/hosts/base/nix.nix)
