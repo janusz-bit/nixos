@@ -223,7 +223,7 @@
                 context = 131072;
                 # Limit wyjścia, z którym Strata testuje swoje konfiguracje
                 # (OUTPUT_CAP w strata_cli/launch/harness.py).
-                output = 4096;
+                output = 16384;
               };
             };
           };
