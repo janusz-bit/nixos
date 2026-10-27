@@ -127,7 +127,7 @@ If a change is not minimal, declarative and verified before handing off to the u
 - Conditionals inside modules: `lib.mkIf`, `lib.mkMerge`, `lib.optionals`, `lib.optionalString`. **NEVER** wrap a module attrset in `if config.… then { … } else { }` (infinite recursion, lost merging).
 - Priorities: `lib.mkDefault` in `base/` for values hosts may override. `lib.mkForce` only with a comment naming the definition it overrides and why.
 - Platform: `pkgs.stdenv.hostPlatform.system`, never the deprecated `pkgs.system`.
-- Paths: relative path literals (`./file`). **NEVER** string paths into the repo, `/home/…` or `/etc/nixos/…` in Nix code (exception: files consumed at runtime by programs outside Nix, documented where they are referenced, e.g. `M27Q.icm`).
+- Paths: relative path literals (`./file`); a file in another module directory is `"${self}/modules/<dir>/<file>"`, not `../`. **NEVER** other string paths into the repo, `/home/…` or `/etc/nixos/…` in Nix code (exception: files consumed at runtime by programs outside Nix, documented where they are referenced, e.g. `M27Q.icm`).
 - Three or more assignments with the same prefix in one attrset (`foo.a = …; foo.b = …;`) are nested into `foo = { … };` (statix `repeated_keys`).
 - **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗), in Nix code, scripts, comments or commit messages.
 - **NEVER** commit commented-out code. The only exception is a disabled import with a pointer to its re-enable procedure.

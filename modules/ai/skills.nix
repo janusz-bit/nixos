@@ -22,7 +22,7 @@
 # po aktywacji `/skills` w Claude Code i w Codexie, w opencode2
 # `opencode2 api skill.list` dwa razy (pierwsze wywołanie w nowym katalogu
 # zwraca pustą listę, zanim serwer wczyta skille).
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.modules.nixos.ai-skills =
     {
@@ -38,7 +38,7 @@
       # hosta, na którym skill jest wdrożony (laptop i RPi dostają różne
       # fakty, a ręcznie pisane rozjechałyby się z konfiguracją).
       nixosSystemSkill = pkgs.writeTextDir "SKILL.md" (
-        builtins.readFile ../skills/nixos-system/SKILL.md + nixosSystemHostFacts
+        builtins.readFile "${self}/modules/skills/nixos-system/SKILL.md" + nixosSystemHostFacts
       );
 
       nixosSystemHostFacts =
@@ -68,15 +68,15 @@
     in
     {
       ai.skills = {
-        ai-tutor.source = ../skills/ai-tutor;
+        ai-tutor.source = "${self}/modules/skills/ai-tutor";
         nixos-system.source = nixosSystemSkill;
         obscura = {
-          source = ../skills/obscura;
+          source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
         };
         # Skill pythonowy działa w kernelu IPython Prime Agenta.
         trilium-notes = {
-          source = ../skills/trilium-notes;
+          source = "${self}/modules/skills/trilium-notes";
           agents = [ "prime-agent" ];
           python = true;
         };
@@ -84,7 +84,7 @@
         # moduł claude-notify tam, gdzie wdrożył klucz (program skilla zależy
         # od hosta, więc pakiet powstaje tam, nie w packages).
         hermes-notify = {
-          source = ../skills/hermes-notify;
+          source = "${self}/modules/skills/hermes-notify";
           agents = [ "claude-code" ];
         };
       };
