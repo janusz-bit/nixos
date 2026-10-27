@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 48 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 50 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 30 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 10 |
 
@@ -30,6 +30,8 @@ flowchart LR
   host_nixos --> base_lockdown[base-lockdown]
   host_nixos --> ai_skills[ai-skills]
   host_nixos --> ai_skills_external[ai-skills-external]
+  host_nixos --> ai_models[ai-models]
+  host_nixos --> ai_harness[ai-harness]
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_claude_notify[nixos-claude-notify]
   base --> base_configuration[base-configuration]
@@ -66,6 +68,8 @@ flowchart LR
   hardware_LOQ_15IRX10 --> hardware_x86_64_v3[hardware-x86-64-v3]
 ```
 
+- `ai-harness` — [skills/harness.nix](../../modules/skills/harness.nix)
+- `ai-models` — [skills/models.nix](../../modules/skills/models.nix)
 - `ai-skills` — [skills/default.nix](../../modules/skills/default.nix)
 - `ai-skills-external` — [skills/external.nix](../../modules/skills/external.nix)
 - `base` — [hosts/base/default.nix](../../modules/hosts/base/default.nix)

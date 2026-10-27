@@ -4,7 +4,7 @@
 # jego bibliotek ggml-* ze stockowym llama.cpp. Nie podmienia atrybutu
 # llama-cpp: whisper-cpp (przez kdenlive i ffmpeg-full) buduje się na
 # nagłówkach llama 0.6.0, a fork raportuje 0.2.0. Uruchamiany przez aliasy
-# ze skills/external.nix.
+# ze skills/models.nix.
 #
 # overrideAttrs llama-cpp z nixpkgs z podmienionym źródłem: przy aktualizacji
 # podbić version, src (tag z listy wydań forka), buildNumber, buildCommit

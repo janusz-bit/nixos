@@ -256,11 +256,90 @@ na hoście bez base-lockdown lista nic nie robi.
 - Default: `[ ]`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
+### `customBot.modelProviders`
+
+Lokalne serwery modeli (API zgodne z OpenAI, bez klucza, w konwencji
+llama.cpp: myślenie w reasoning_content, reasoning_effort "none" je
+wyłącza) dla agentów kodujących hosta; nazwa atrybutu to nazwa
+providera. Ustawia je ai-models (modules/skills/models.nix), a do
+opencode2 i Prime Agenta wpina ai-harness
+(modules/skills/harness.nix), więc działają tylko na hostach, które
+go importują.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.baseUrl`
+
+Adres API zgodnego z OpenAI (z /v1).
+
+- Type: string
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models`
+
+Modele serwera; klucz to nazwa modelu w opencode2 (\<provider>/\<klucz>).
+
+- Type: attribute set of (submodule)
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.context`
+
+Okno kontekstu w tokenach, to samo co -c serwera.
+
+- Type: positive integer, meaning >0
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.id`
+
+Identyfikator modelu w polu `model` żądań do serwera.
+
+- Type: string
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.input`
+
+Rodzaje wejścia modelu.
+
+- Type: non-empty (list of (one of "text", "image"))
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.name`
+
+Nazwa modelu wyświetlana w agentach.
+
+- Type: string
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.output`
+
+Limit tokenów wyjścia, który agenty wysyłają w żądaniu.
+
+- Type: positive integer, meaning >0
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.models.<name>.reasoningEfforts`
+
+Poziomy reasoning_effort, które agenty oferują dla modelu; serwer
+musi je przyjmować. Wyłączenie myślenia (poziom off Prime Agenta)
+dodaje ai-harness.
+
+- Type: non-empty (list of (one of "minimal", "low", "medium", "high", "xhigh", "max"))
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.modelProviders.<name>.name`
+
+Nazwa providera wyświetlana w opencode2.
+
+- Type: string
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
 ### `customBot.primeAgentProviders`
 
 Dodatkowi providerzy prime-agenta (providers.\<nazwa> w models.json,
-schemat jak w modules/hosts/base/prime-agent.nix), np. lokalny
-serwer, który działa tylko na tym hoście. Nazwa zajęta przez
+schemat jak w modules/hosts/base/prime-agent.nix); lokalne serwery
+z modelProviders dopisuje tu ai-harness. Nazwa zajęta przez
 providera z prime-agent.nix kończy ewaluację błędem.
 
 - Type: attribute set of attribute set of anything
