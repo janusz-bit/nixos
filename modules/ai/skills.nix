@@ -33,6 +33,7 @@
     }:
     let
       user = config.customBot.defaultUser;
+      brulionPackage = inputs.brulion.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       # nixos-system: statyczna treść + sekcja „This host” liczona z config
       # hosta, na którym skill jest wdrożony (laptop i RPi dostają różne
@@ -70,6 +71,14 @@
       ai.skills = {
         ai-tutor.source = "${self}/modules/skills/ai-tutor";
         nixos-system.source = nixosSystemSkill;
+        # Skill dostarcza sam Brulion w pakiecie, razem z brulion-cli, który
+        # opisuje, więc zawsze pasuje do wersji CLI w systemie. Ten sam pakiet
+        # instaluje programs.brulion (desktop-brulion), więc nie dochodzi
+        # żaden build.
+        brulion = {
+          source = "${brulionPackage}/share/brulion/agent-skills/brulion";
+          packages = [ brulionPackage ];
+        };
         obscura = {
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
