@@ -56,7 +56,7 @@
 }:
 
 let
-  engineVersion = "0.1.50";
+  engineVersion = "0.1.52";
 
   python = python3.withPackages (
     ps: with ps; [
@@ -119,20 +119,20 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "strata";
-  version = "0.2.6";
+  version = "0.2.7";
 
   src = fetchFromGitHub {
     owner = "Niko1221";
     repo = "Strata";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-HLlmKl+RDIP84KdifVUzduQ+ZN+51DbGaw9t+ITJkm8=";
+    hash = "sha256-6Q0IM0EuRdvW0z0TW9xp4PeiWpjt24rVFG5nyVTg32s=";
   };
 
   # Silnik ma własną numerację w nazwie assetu (bywa starszy niż Control),
   # więc engineVersion nie wynika z version — podbija go update.sh.
   engine = fetchurl {
     url = "https://github.com/Niko1221/Strata/releases/download/v${finalAttrs.version}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
-    hash = "sha256-kMYB3BBgr0iqzPhQYpdaEcSuJWkOwkLjvJPplFfJOAs=";
+    hash = "sha256-QXfBqP/Fm/ZgdAk7IqxV7Ud7y+hPi9EuN4sPEjbaVcc=";
   };
 
   llamaCpp = fetchFromGitHub {
