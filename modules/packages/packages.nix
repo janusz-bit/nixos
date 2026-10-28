@@ -16,9 +16,6 @@ let
     helium = pkgs.callPackage ./_helium { };
     llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
     strata = pkgs.callPackage ./_strata { };
-    # Podbija strata; nix-update nie odczyta z tagu wersji silnika, więc
-    # flake-update woła ten pakiet (nix run .#update-strata) zamiast nix-update.
-    update-strata = pkgs.callPackage ./_strata/update.nix { };
     waywallen = pkgs.callPackage ./_waywallen { };
     waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };
   };

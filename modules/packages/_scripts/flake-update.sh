@@ -25,7 +25,10 @@ nix-update --system x86_64-linux -F waywallen-kde-plugin
 nix-update --system aarch64-linux -F waywallen --version skip
 
 echo "Updating strata..."
-nix run .#update-strata
+# engineTag/engineVersion i rev llama.cpp podbija się RĘCZNIE
+# w modules/packages/_strata/default.nix (SHA256SUMS.txt i setup.py wydania);
+# nix-update podbija tylko version i src.
+nix-update -F strata
 echo "Syncing GitHub Actions workflows and docs from the updated flake..."
 nix run .#sync-github-actions
 nix run .#sync-docs

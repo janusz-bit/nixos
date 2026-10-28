@@ -30,13 +30,16 @@
 # w setup.py i linkowany do katalogu instalacji, jak
 # w docker/entrypoint.sh — inaczej setup pobrałby zip.
 #
-# Aktualizacja: `nix run .#update-strata` (flake-update robi to samo).
-# Wersję, hash src i hashe engine/llamaCpp podbija nix-update; update.nix
-# dokłada to, czego z tagu nie da się odczytać — wersję silnika
-# (SHA256SUMS.txt wydania) i LLAMA_CPP_COMMIT z setup.py wydania. Dlatego
-# version, src, engine i llamaCpp są atrybutami tej derywacji, a nie kryją
-# się w wrapperze: tylko wtedy nix-update widzi położenie version/src
-# i podmienia hashe (`--custom-dep`).
+# Aktualizacja: `nix-update -F strata` (flake-update robi to samo) podbija
+# version i src. Silnik ma własną numerację, a jego asset leży tylko
+# w wydaniu, które go wydało, więc engineTag i engineVersion podbija się
+# RĘCZNIE z SHA256SUMS.txt wydania (potem `nix-update -F strata
+# --custom-dep engine` przelicza hash), tak samo jak rev llama.cpp
+# z setup.py wydania (`--custom-dep llamaCpp`). Nowszy Control ze starszym
+# silnikiem działa: to silnik deklaruje min_runtime. Dlatego version, src,
+# engine i llamaCpp są atrybutami tej derywacji, a nie kryją się
+# w wrapperze — tylko wtedy nix-update widzi położenie version/src
+# i podmienia hashe.
 #
 # Sprawdzenie: `nix build .#strata` (installCheck uruchamia `strata
 # --version`), potem na laptopie `strata components engine` (usable: true)
@@ -56,6 +59,9 @@
 }:
 
 let
+  # Tag wydania, które zawiera poniższy silnik: asset istnieje tylko tam, więc
+  # nie wynika z `version` (nowszy Control działa ze starszym silnikiem).
+  engineTag = "v0.2.7";
   engineVersion = "0.1.52";
 
   python = python3.withPackages (
@@ -128,10 +134,11 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-6Q0IM0EuRdvW0z0TW9xp4PeiWpjt24rVFG5nyVTg32s=";
   };
 
-  # Silnik ma własną numerację w nazwie assetu (bywa starszy niż Control),
-  # więc engineVersion nie wynika z version — podbija go update.sh.
+  # Silnik ma własną numerację, więc engineTag i engineVersion podbija się
+  # ręcznie (SHA256SUMS.txt wydania); hash przelicza
+  # `nix-update -F strata --custom-dep engine`.
   engine = fetchurl {
-    url = "https://github.com/Niko1221/Strata/releases/download/v${finalAttrs.version}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
+    url = "https://github.com/Niko1221/Strata/releases/download/${engineTag}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
     hash = "sha256-QXfBqP/Fm/ZgdAk7IqxV7Ud7y+hPi9EuN4sPEjbaVcc=";
   };
 
