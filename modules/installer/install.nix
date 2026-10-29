@@ -37,9 +37,7 @@
       inherit (config.customTop.repository) url;
       # Nazwa jak zmienna $place w skryptach (też _install/post-install.sh).
       place = config.customTop.repository.path;
-      inherit (config.disko) rootMountPoint;
       user = config.customBot.defaultUser;
-      inherit (config.users.users.${user}) group;
       configuredDisk = config.disko.devices.disk.main.device;
       # Skrypt disko zbudowany z góry (bez ewaluacji w trakcie instalacji, więc
       # też offline) dla dowiązania, które install-system tuż przed formatowaniem
@@ -123,7 +121,7 @@
           text = ''
             configured_disk=${lib.escapeShellArg configuredDisk}
             disk_link=${lib.escapeShellArg diskLink}
-            mnt=${lib.escapeShellArg rootMountPoint}
+            mnt=${lib.escapeShellArg config.disko.rootMountPoint}
             place=${lib.escapeShellArg place}
 
             usage() { printf '%s' ${lib.escapeShellArg usage}; }
@@ -149,8 +147,7 @@
 
             # Ustawia $disk: wybór z listy dysków, Enter = dysk z disko.nix.
             choose_disk() {
-              local configured="" mark name type answer i
-              local -a disks=()
+              local configured="" mark name type answer i disks=()
               if [[ -b "$configured_disk" ]]; then
                 configured="$(readlink -f "$configured_disk")"
               fi
@@ -207,9 +204,7 @@
               esac
             done
 
-            if [[ $EUID -ne 0 ]]; then
-              exec sudo "$0" "''${args[@]}"
-            fi
+            [[ $EUID -eq 0 ]] || exec sudo "$0" "''${args[@]}"
 
             # Wszystko, co może się nie udać, sprawdzamy PRZED czyszczeniem dysku.
             [[ -d /sys/firmware/efi ]] || die "system nie jest uruchomiony w trybie UEFI"
@@ -249,7 +244,7 @@
             ${nixosInstall}
 
             enter() { nixos-enter --root "$mnt" --silent -- "$@"; }
-            enter ${sw}/chown -R ${user}:${group} "$place"
+            enter ${sw}/chown -R ${user}:${config.users.users.${user}.group} "$place"
             # initialPassword z konfiguracji (root/root, ${user}/${user}) zastępujemy od razu.
             for account in root ${user}; do
               echo "Hasło dla $account:"

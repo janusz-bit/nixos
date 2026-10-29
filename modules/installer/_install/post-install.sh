@@ -36,10 +36,9 @@ set_key() {
 }
 
 ssh_key() {
-  local key=/root/.ssh/id_ed25519
+  local key=/root/.ssh/id_ed25519 host host_key root_key
   # Nazwa z działającego systemu, nie z flake'a: post-install może
   # ruszyć na dowolnym hoście, a wpisy keys.nix są per host.
-  local host host_key root_key
   host="$(uname -n)"
   [[ -f "$keys_nix" ]] || die "brak $keys_nix"
 
@@ -117,7 +116,6 @@ secure_boot() {
   echo "Zrób kopię /var/lib/sbctl — bez niej reinstalacja wymaga ponownego wpisania kluczy."
 }
 
-args=("$@")
 case "${1:-}" in
   "" | ssh | secure-boot) ;;
   -h | --help)
@@ -129,9 +127,7 @@ case "${1:-}" in
     exit 1
     ;;
 esac
-if [[ $EUID -ne 0 ]]; then
-  exec sudo "$0" "${args[@]}"
-fi
+[[ $EUID -eq 0 ]] || exec sudo "$0" "$@"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT

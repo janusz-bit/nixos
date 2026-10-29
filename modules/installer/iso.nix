@@ -15,11 +15,7 @@
 #
 # Build: `nix build .#packages.x86_64-linux.nixos-iso` → result/iso/*.iso
 # (dd albo Ventoy na pendrive od 32 GB).
-{
-  self,
-  inputs,
-  ...
-}:
+{ self, inputs, ... }:
 {
   flake.modules.nixos.installer-iso =
     {
