@@ -63,6 +63,17 @@ let
   # i bonsai-serve.
   port = 8090;
   target = "127.0.0.1:${toString port}";
+  proxySandbox = {
+    DynamicUser = true;
+    ProtectHome = true;
+    PrivateDevices = true;
+    # AF_UNIX: nss-systemd (userdb przez varlink) dla użytkownika dynamicznego.
+    RestrictAddressFamilies = [
+      "AF_UNIX"
+      "AF_INET"
+      "AF_INET6"
+    ];
+  };
 in
 {
   flake.modules.nixos.nixos-laptop-llm =
@@ -189,10 +200,7 @@ in
             description = "Strata dla Hermesa";
           };
         };
-        groups = {
-          ${user} = { };
-          ${strataUser} = { };
-        };
+        groups = lib.genAttrs [ user strataUser ] (_: { });
       };
 
       # mkAfter: wszystko po Match należy do bloku, a extraConfig idzie za
@@ -223,16 +231,8 @@ in
             wants = [ "strata-hermes.service" ];
             after = [ "strata-hermes.service" ];
             environment.STRATA_HERMES_IDLE = "15min";
-            serviceConfig = {
+            serviceConfig = proxySandbox // {
               ExecStart = lib.getExe proxy;
-              DynamicUser = true;
-              ProtectHome = true;
-              PrivateDevices = true;
-              RestrictAddressFamilies = [
-                "AF_UNIX"
-                "AF_INET"
-                "AF_INET6"
-              ];
             };
           };
 
@@ -305,39 +305,25 @@ in
         # laptopa. Klucz hosta laptopa przypięty, ssh_config pominięty.
         services."laptop-llm@" = {
           description = "Połączenie z LLM laptopa przez ssh";
-          serviceConfig = {
+          serviceConfig = proxySandbox // {
             ExecStart = lib.escapeShellArgs [
               (lib.getExe config.programs.ssh.package)
               "-F"
               "/dev/null"
               "-i"
               "%d/key"
-              "-o"
-              "IdentitiesOnly=yes"
-              "-o"
-              "BatchMode=yes"
-              "-o"
-              "ConnectTimeout=5"
-              "-o"
-              "StrictHostKeyChecking=yes"
-              "-o"
-              "UserKnownHostsFile=${knownHosts}"
+              "-oIdentitiesOnly=yes"
+              "-oBatchMode=yes"
+              "-oConnectTimeout=5"
+              "-oStrictHostKeyChecking=yes"
+              "-oUserKnownHostsFile=${knownHosts}"
               "-W"
               target
               "${user}@${lan.laptop}"
             ];
             StandardInput = "socket";
             StandardError = "journal";
-            DynamicUser = true;
             LoadCredential = "key:${config.age.secrets.hermes-llm-key.path}";
-            ProtectHome = true;
-            PrivateDevices = true;
-            # AF_UNIX: nss-systemd (userdb przez varlink) dla użytkownika dynamicznego.
-            RestrictAddressFamilies = [
-              "AF_UNIX"
-              "AF_INET"
-              "AF_INET6"
-            ];
           };
         };
       };

@@ -30,7 +30,6 @@
 {
   options.hosts = lib.mkOption {
     description = "Hosty NixOS tego flake'a (nazwa = nixosConfigurations.<nazwa>).";
-    default = { };
     type = lib.types.attrsOf (
       lib.types.submodule {
         options = {
