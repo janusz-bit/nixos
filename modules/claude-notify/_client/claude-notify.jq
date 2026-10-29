@@ -1,5 +1,5 @@
 # claude-notify: format wiadomości (Markdown dla Hermesa) i rekordy hooka
-# PermissionRequest. Opis w nagłówku claude-notify.nix.
+# PermissionRequest. Opis w nagłówku ../default.nix.
 #
 # $mode: "record" — stdin to JSON PermissionRequest, wynik to jedna linia JSON;
 # "hook" — stdin to JSON Notification; "plain" — jq -n, tekst w $text.
@@ -34,14 +34,15 @@ def block($lang):
   ("`" * ([3, longest_backticks + 1] | max)) as $f
   | "\($f)\($lang)\n\(.)\n\($f)";
 
+# Początkowe linie tablicy: najwyżej $n i $b bajtów łącznie (każda z `\n`);
+# suma tylko rośnie, więc select odcina wszystko od pierwszej linii ponad limit.
+def take($n; $b): [foreach .[:$n][] as $l (0; . + ($l | utf8bytelength + 1); select(. <= $b) | $l)];
+
 # Najwyżej $n linii po $w znaków i $b bajtów łącznie; ucięcie widać jako `…`.
 def fit($n; $w; $b):
   (split("\n") | map(sub("\\s+$"; "") | cut($w))) as $all
-  | reduce $all[] as $l ({out: [], bytes: 0, full: false};
-      ($l | utf8bytelength + 1) as $size
-      | if .full or (.out | length) >= $n or .bytes + $size > $b then .full = true
-        else .out += [$l] | .bytes += $size end)
-  | (.out | join("\n")) + (if (.out | length) < ($all | length) then "\n…" else "" end);
+  | ($all | take($n; $b)) as $out
+  | ($out | join("\n")) + (if ($out | length) < ($all | length) then "\n…" else "" end);
 
 def is_path_tool: IN("Read", "Edit", "MultiEdit", "Write", "NotebookEdit");
 
@@ -81,9 +82,8 @@ def record:
 # akapitu listą. $compact: bez opisów opcji, krótsze teksty.
 def questions($compact):
   [.questions[]
-   | (if $compact then 150 else 300 end) as $qw
    | (if .header != "" then "**\(.header | esc)** — " else "" end)
-     + (.question | cut($qw) | esc)
+     + (.question | cut(if $compact then 150 else 300 end) | esc)
      + (if .multi then " _(można wybrać kilka)_" else "" end)
      + "\n\n"
      + ([.options | to_entries[]
@@ -153,12 +153,7 @@ def excerpt:
       | select(is_blank | not)
       | cut(100)
     )
-  | reverse
-  | reduce .[] as $l ({out: [], bytes: 0, full: false};
-      ($l | utf8bytelength + 1) as $size
-      | if .full or (.out | length) >= 20 or .bytes + $size > 1800 then .full = true
-        else .out = [$l] + .out | .bytes += $size end)
-  | .out
+  | reverse | take(20; 1800) | reverse
   | if length == 0 then "" else "\n" + (join("\n") | block("")) end;
 
 # Emoji jako ucieczki: źródło zostaje bez emoji.
@@ -184,9 +179,8 @@ def body($compact):
       fresh_records as $recs
       | ($recs[0:3]) as $shown
       | (2400 / ($shown | length) | floor) as $b
-      | ($shown | map(.tool)) as $tools
-      | (if ($tools | all(. == "AskUserQuestion")) then "\u2753 **Claude pyta**\n\n"
-         elif ($tools | all(. == "ExitPlanMode")) then "\ud83d\udccb **Claude prosi o akceptację planu**\n"
+      | (if ($shown | all(.tool == "AskUserQuestion")) then "\u2753 **Claude pyta**\n\n"
+         elif ($shown | all(.tool == "ExitPlanMode")) then "\ud83d\udccb **Claude prosi o akceptację planu**\n"
          else "\(pause) **Claude czeka na zgodę**: " end)
         + ([$shown[] | detail($compact; $b)] | join("\n\n"))
         + if ($recs | length) > 3 then "\n\n… i jeszcze \(($recs | length) - 3)" else "" end

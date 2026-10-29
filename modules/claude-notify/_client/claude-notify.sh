@@ -5,7 +5,7 @@
 # --print: wiadomość na stdout zamiast wysyłki (testy; deduplikacja i zużycie
 # rekordów działają jak przy wysyłce).
 # Zmienne key, receiver, ssh_command, format i service_user ustawia Nix
-# (mkClaudeNotify w claude-notify.nix).
+# (mkClaudeNotify w ../default.nix).
 
 user=$(id -un)
 
@@ -16,8 +16,7 @@ if [[ ${1-} == --print ]]; then
 fi
 mode=plain
 case ${1-} in
-  --hook) mode=hook ;;
-  --record) mode=record ;;
+  --hook | --record) mode=${1#--} ;;
 esac
 
 if [[ $mode != plain ]]; then
@@ -91,10 +90,8 @@ if [[ $mode == hook && -n $state && -n $sid ]] &&
   [[ $(jq -r '.notification_type // empty' <<<"$input") == permission_prompt ]]; then
   {
     flock 9
-    if [[ -f $state/$sid.jsonl ]]; then
-      records=$(jq -cRs 'split("\n") | map(fromjson? // empty)' "$state/$sid.jsonl") || records='[]'
-      rm -f "$state/$sid.jsonl"
-    fi
+    records=$(jq -cRs 'split("\n") | map(fromjson? // empty)' "$state/$sid.jsonl") || records='[]'
+    rm -f "$state/$sid.jsonl"
   } 9>"$state/lock"
 fi
 
@@ -103,11 +100,8 @@ fi
 if [[ -n ${TMUX-} ]]; then
   target=()
   [[ -z ${TMUX_PANE-} ]] || target=(-t "$TMUX_PANE")
-  if tmux_where=$(tmux display-message -p "${target[@]}" '#S:#I' 2>/dev/null) && [[ -n $tmux_where ]]; then
-    printf -v attach 'tmux attach -t %q' "${tmux_where%:*}"
-  else
-    tmux_where=
-  fi
+  tmux_where=$(tmux display-message -p "${target[@]}" '#S:#I' 2>/dev/null) || tmux_where=
+  [[ -z $tmux_where ]] || printf -v attach 'tmux attach -t %q' "${tmux_where%:*}"
   if [[ $mode == hook ]]; then
     pane=$(tmux capture-pane -p -J "${target[@]}" 2>/dev/null) || pane=
   fi
@@ -121,23 +115,19 @@ msg=$(render)
 digest=
 if [[ -n $state ]]; then
   digest=$(printf '%s\0%s' "$sid" "$msg" | sha256sum | cut -d' ' -f1)
-  duplicate=false
   {
     flock 9
     now=$(date +%s)
     touch "$state/sent"
     mapfile -t recent < <(awk -v since="$((now - 60))" '$1 > since' "$state/sent")
     for entry in "${recent[@]}"; do
-      [[ ${entry#* } != "$digest" ]] || duplicate=true
+      if [[ ${entry#* } == "$digest" ]]; then
+        echo "claude-notify: pominięte, ta sama wiadomość poszła mniej niż 60 s temu" >&2
+        exit 0
+      fi
     done
-    if ! $duplicate; then
-      printf '%s\n' "${recent[@]}" "$now $digest" >"$state/sent"
-    fi
+    printf '%s\n' "${recent[@]}" "$now $digest" >"$state/sent"
   } 9>"$state/lock"
-  if $duplicate; then
-    echo "claude-notify: pominięte, ta sama wiadomość poszła mniej niż 60 s temu" >&2
-    exit 0
-  fi
 fi
 
 if $print; then
@@ -153,15 +143,13 @@ else
   [[ -r $key ]] || fail "brak dostępu do klucza $key (konto $user)"
   send=("${ssh_command[@]}")
 fi
-status=0
-"${send[@]}" <<<"$msg" || status=$?
-if ((status)); then
-  if [[ -n $digest ]]; then
-    {
-      flock 9
-      awk -v digest="$digest" '$2 != digest' "$state/sent" >"$state/sent.new"
-      mv "$state/sent.new" "$state/sent"
-    } 9>"$state/lock"
-  fi
-  fail "wysyłka nie powiodła się (kod $status)"
+"${send[@]}" <<<"$msg" && exit 0
+status=$?
+if [[ -n $digest ]]; then
+  {
+    flock 9
+    awk -v digest="$digest" '$2 != digest' "$state/sent" >"$state/sent.new"
+    mv "$state/sent.new" "$state/sent"
+  } 9>"$state/lock"
 fi
+fail "wysyłka nie powiodła się (kod $status)"

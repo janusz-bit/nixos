@@ -78,18 +78,12 @@ let
         "/dev/null"
         "-i"
         key
-        "-o"
-        "IdentitiesOnly=yes"
-        "-o"
-        "BatchMode=yes"
-        "-o"
-        "ConnectTimeout=10"
-        "-o"
-        "StrictHostKeyChecking=yes"
-        "-o"
-        "HostKeyAlias=${rpi}"
-        "-o"
-        "UserKnownHostsFile=${knownHosts}"
+        "-oIdentitiesOnly=yes"
+        "-oBatchMode=yes"
+        "-oConnectTimeout=10"
+        "-oStrictHostKeyChecking=yes"
+        "-oHostKeyAlias=${rpi}"
+        "-oUserKnownHostsFile=${knownHosts}"
       ]
       ++ sshOptions
       ++ [ "${hermesUser}@${target}" ];
@@ -118,7 +112,7 @@ let
   # Claude Code (każdy użytkownik i projekt). Argumenty jak mkClaudeNotify:
   # config, pkgs, target, sshOptions, receiver.
   clientEnvironment =
-    { pkgs, ... }@notifyArgs:
+    notifyArgs:
     let
       claudeNotify = mkClaudeNotify notifyArgs;
       hook = flag: {
@@ -137,26 +131,24 @@ let
       # skutku: --tools "" (bez Bash), --disable-slash-commands (bez skilli)
       # i --permission-mode dontAsk (bez próśb o zgodę), a jego MCP nie prosi
       # o elicitation.
-      etc."claude-code/managed-settings.d/50-hermes-notify.json".source =
-        (pkgs.formats.json { }).generate "50-hermes-notify.json"
-          {
-            # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`:
-            # obejmuje też samo `claude-notify` z tekstem na stdin.
-            permissions.allow = [ "Bash(claude-notify *)" ];
-            hooks = {
-              # Prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
-              # hermes-notify, więc bez Stop i idle_prompt.
-              Notification = [
-                {
-                  matcher = "permission_prompt|elicitation_dialog";
-                  hooks = [ (hook "--hook") ];
-                }
-              ];
-              # Daje narzędzie z argumentami, których Notification nie ma
-              # (--record tylko zapisuje rekord dla --hook).
-              PermissionRequest = [ { hooks = [ (hook "--record" // { timeout = 10; }) ]; } ];
-            };
-          };
+      etc."claude-code/managed-settings.d/50-hermes-notify.json".text = builtins.toJSON {
+        # `Bash(claude-notify *)` to w 2.1.285 `^claude-notify( .*)?$`:
+        # obejmuje też samo `claude-notify` z tekstem na stdin.
+        permissions.allow = [ "Bash(claude-notify *)" ];
+        hooks = {
+          # Prośby o zgodę i pytania MCP; koniec pracy zgłasza skill
+          # hermes-notify, więc bez Stop i idle_prompt.
+          Notification = [
+            {
+              matcher = "permission_prompt|elicitation_dialog";
+              hooks = [ (hook "--hook") ];
+            }
+          ];
+          # Daje narzędzie z argumentami, których Notification nie ma
+          # (--record tylko zapisuje rekord dla --hook).
+          PermissionRequest = [ { hooks = [ (hook "--record" // { timeout = 10; }) ]; } ];
+        };
+      };
     };
 in
 {
@@ -181,14 +173,12 @@ in
           # tekst na stdin, cel jest stały.
           limit=30
           state=${lib.escapeShellArg "${config.users.users.${cfg.user}.home}/.cache/hermes-notify"}
+          fail() { echo "hermes-notify-receive: $1" >&2; exit 1; }
 
           # Najwyżej 3500 bajtów; gdy cięcie wypadło w środku znaku UTF-8, sed
           # (bajtowo, locale C) usuwa z końca jego niepełną sekwencję.
           text=$(head -c 3500 | LC_ALL=C sed -z -E $'s/([\xc0-\xdf]|[\xe0-\xef][\x80-\xbf]?|[\xf0-\xf7][\x80-\xbf]{0,2})$//')
-          if [[ -z ''${text//[[:space:]]/} ]]; then
-            echo "hermes-notify-receive: pusty tekst" >&2
-            exit 1
-          fi
+          [[ -n ''${text//[[:space:]]/} ]] || fail "pusty tekst"
 
           # Znaczniki czasu wysyłek z ostatniej godziny; flock, bo naraz mogą
           # przyjść wiadomości z tunelu, z localhost i od samego Hermesa.
@@ -198,10 +188,7 @@ in
             now=$(date +%s)
             touch "$state/sent"
             mapfile -t recent < <(awk -v since="$((now - 3600))" '$1 > since' "$state/sent")
-            if ((''${#recent[@]} >= limit)); then
-              echo "hermes-notify-receive: wyczerpany limit $limit wiadomości na godzinę" >&2
-              exit 1
-            fi
+            ((''${#recent[@]} < limit)) || fail "wyczerpany limit $limit wiadomości na godzinę"
             printf '%s\n' "''${recent[@]}" "$now" >"$state/sent"
           } 9>"$state/lock"
 
@@ -264,10 +251,7 @@ in
         environment = clientEnvironment {
           inherit config pkgs;
           target = "ssh.${config.customTop.domain}";
-          sshOptions = [
-            "-o"
-            "ProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h"
-          ];
+          sshOptions = [ "-oProxyCommand=${lib.getExe pkgs.cloudflared} access ssh --hostname %h" ];
         };
       })
     ];
