@@ -15,9 +15,9 @@
 #   port dopiero po załadowaniu modelu, więc pierwsze żądanie czeka na
 #   załadowanie. Proxy kończy się po 15 min bez połączeń, a strata-hermes
 #   (StopWhenUnneeded) razem z nim, co oddaje VRAM i RAM.
-# - Przed startem strata-hermes sprawdza dGPU: Strata ze 128K kontekstu zajmuje
-#   prawie całe 8 GB VRAM, więc przy grze, bonsai-serve albo ręcznej Stracie
-#   odmawia. Wants=, nie Requires=: nieudany start Straty przy Requires= zostawiłby
+# - Przed startem strata-hermes sprawdza dGPU: Strata wypełnia VRAM cache'em
+#   ekspertów (prawie całe 8 GB), więc przy grze, bonsai-serve albo ręcznej
+#   Stracie odmawia. Wants=, nie Requires=: nieudany start Straty przy Requires= zostawiłby
 #   połączenie w kolejce gniazda, systemd ponawiałby start w pętli aż do
 #   trigger-limit-hit i gniazdo przestałoby przyjmować żądania. Tu proxy rusza
 #   mimo to, zamyka czekające połączenia (backend nie słucha) i kończy się po
@@ -83,9 +83,15 @@ in
       size = "IQ1_M";
       runConfig = "${stateDir}/.local/share/strata/install/strata-coder-${lib.toLower size}.json";
       strata = lib.getExe pkgs.strata;
+      # Jak `strata launch --family coder --model IQ1_M --context 128k --kv int8
+      # --set kv-resident=20480`: KV int8 leży w RAM, a w VRAM tylko okno 20480
+      # tokenów. Setup sam włącza to strumieniowanie dopiero, gdy RAM mieści
+      # model i KV (32 GB to za mało dla IQ1_M), więc jak launch dopisuje
+      # --kv-resident do args run configu.
+      kv = "int8";
+      kvResident = 20480;
 
-      # Instaluje model i pisze run config z tymi samymi ustawieniami co
-      # model w ai.models (kontekst 128K mieści się w 8 GB tylko z KV q4_0).
+      # Instaluje model i pisze run config z kontekstem modelu z ai.models.
       setup = pkgs.writeShellApplication {
         name = "strata-hermes-setup";
         runtimeInputs = [ pkgs.coreutils ];
@@ -95,19 +101,33 @@ in
           fi
           # Argumenty setup.py dopiero po `--` (inaczej parsuje je samo `strata`).
           exec ${strata} install -- --family coder --model ${size} --context ${toString model.context} \
-            --kv q4_0 --vision no --no-start --yes "$@"
+            --kv ${kv} --vision no --no-start --yes "$@"
         '';
       };
 
       # Wywołanie wrappera strata usuwa run config ze ścieżkami store, których
-      # nie ma; setup pisze go wtedy od nowa (kroki, które są zrobione, pomija).
+      # nie ma. Setup pisze go od nowa (kroki, które są zrobione, pomija), gdy
+      # go nie ma albo jego KV lub kontekst różni się od ustawień tutaj.
       ensureConfig = pkgs.writeShellApplication {
         name = "strata-hermes-config";
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.jq
+        ];
         text = ''
+          config=${lib.escapeShellArg runConfig}
           ${strata} --version >/dev/null
-          if [ ! -e ${lib.escapeShellArg runConfig} ]; then
-            exec ${lib.getExe setup}
+          if [ ! -e "$config" ] || ! jq -e --arg kv ${kv} --arg context ${toString model.context} '
+            .args as $a | ($a | index("--kv")) as $k | ($a | index("--max-context")) as $c
+            | $k != null and $c != null and $a[$k + 1] == $kv and $a[$c + 1] == $context
+          ' "$config" >/dev/null; then
+            ${lib.getExe setup}
           fi
+          jq --arg n ${toString kvResident} '
+            .args |= (index("--kv-resident") as $i
+              | if $i == null then . + ["--kv-resident", $n] else .[$i + 1] = $n end)
+          ' "$config" > "$config.tmp"
+          mv "$config.tmp" "$config"
         '';
       };
 

@@ -1,6 +1,7 @@
 # Test VM laptop-llm (modules/hosts/laptop-llm.nix): pierwsze żądanie konta
 # hermes z „RPi” uruchamia na „laptopie” Stratę dla Hermesa (run config
-# odtworzony z ustawieniami modelu z ai.models), po bezczynności proxy i Strata
+# odtworzony z ustawieniami modelu z ai.models i z --kv-resident; config
+# z innym KV jest odtwarzany, zgodny zostaje), po bezczynności proxy i Strata
 # się zatrzymują, a przy zajętym dGPU żądanie kończy się szybko i gniazdo
 # zostaje sprawne. Inne konto RPi dostaje odmowę; klucz tunelu nie daje na
 # laptopie przekierowania do innego portu, -R, gniazd Unix ani polecenia;
@@ -10,8 +11,9 @@
 # Moduły są prawdziwe. Testowy customTop podmienia tylko klucze na snakeoil
 # z nixpkgs (prywatna część keys.users.hermes-llm jest sekretem). Atrapy:
 # `strata` (pakiet lokalny tylko x86_64, model ok. 90 GB) trzyma się kontraktu
-# setup.py — `install` pisze strata-coder-<rozmiar>.json, `serve` bez niego
-# odmawia — i serwuje pliki przez http.server; `nvidia-smi` czyta zajętość VRAM
+# setup.py — `install` pisze strata-coder-<rozmiar>.json z --max-context i --kv
+# w args, `serve` bez niego odmawia — i serwuje pliki przez http.server;
+# `nvidia-smi` czyta zajętość VRAM
 # z /run/fake-vram-used.
 #
 # Uruchomienie: nix build -L .#checks.<system>.laptop-llm (wymaga kvm).
@@ -65,13 +67,16 @@ in
             install_dir=$HOME/.local/share/strata/install
             case $1 in
               install)
-                echo "$*" > "$HOME/install-args"
+                echo "$*" >> "$HOME/install-args"
                 while (($#)); do
                   [[ $1 == --model ]] && model=$2
+                  [[ $1 == --context ]] && context=$2
+                  [[ $1 == --kv ]] && kv=$2
                   shift
                 done
                 mkdir -p "$install_dir"
-                echo '{}' > "$install_dir/strata-coder-''${model,,}.json"
+                printf '{"args": ["--max-context", "%s", "--kv", "%s"]}\n' "$context" "$kv" \
+                  > "$install_dir/strata-coder-''${model,,}.json"
                 ;;
               serve)
                 while (($#)); do
@@ -101,6 +106,11 @@ in
         { nodes, ... }:
         let
           listen = lib.head nodes.rpi.systemd.sockets.laptop-llm.listenStreams;
+          strataArgs = lib.splitString " " nodes.laptop.systemd.services.strata-hermes.serviceConfig.ExecStart;
+          runConfig = lib.elemAt strataArgs (
+            lib.lists.findFirstIndex (arg: arg == "--config") null strataArgs + 1
+          );
+          inherit (nodes.laptop.ai.models.qwen3-8-flash-next-coder-iq1_m) context;
           port = lib.toInt (lib.last (lib.splitString ":" listen));
           otherPort = port + 1;
         in
@@ -208,6 +218,8 @@ in
           };
 
           testScript = ''
+            import json
+            import shlex
             import time
 
             url = "http://${listen}/marker"
@@ -218,6 +230,12 @@ in
                 assert "laptop-llm-ok" in rpi.succeed(f"runuser -u hermes -- curl -sf --max-time 30 {url}")
                 # 7: odmowa połączenia (REJECT), a nie błąd po drugiej stronie
                 assert rpi.execute(f"runuser -u nobody -- curl -s --max-time 5 {url}")[0] == 7
+
+            def setup_runs():
+                return laptop.succeed("cat /var/lib/strata/install-args").splitlines()
+
+            def config_args():
+                return json.loads(laptop.succeed("cat ${runConfig}"))["args"]
 
             def strata_stops():
                 laptop.wait_until_fails("systemctl is-active strata-hermes-proxy.service", timeout=30)
@@ -237,10 +255,24 @@ in
                 laptop.fail("systemctl is-active strata-hermes.service")
                 access_holds()
                 laptop.succeed("systemctl is-active strata-hermes.service")
-                args = laptop.succeed("cat /var/lib/strata/install-args")
-                assert "--context ${toString nodes.laptop.ai.models.qwen3-8-flash-next-coder-iq1_m.context} --kv q4_0 --vision no" in args, args
+                runs = setup_runs()
+                assert len(runs) == 1 and "--context ${toString context} --kv int8 --vision no" in runs[0], runs
+                args = config_args()
+                assert args[args.index("--kv-resident") + 1] == "20480", args
 
             with subtest("idle: the proxy exits and Strata stops with it"):
+                strata_stops()
+
+            with subtest("a run config with other KV is rebuilt, a matching one is kept"):
+                other = json.dumps({"args": ["--max-context", "${toString context}", "--kv", "q4_0"]})
+                laptop.succeed(f"printf %s {shlex.quote(other)} | runuser -u strata -- tee ${runConfig} >/dev/null")
+                access_holds()
+                assert len(setup_runs()) == 2
+                args = config_args()
+                assert args[args.index("--kv") + 1] == "int8" and "--kv-resident" in args, args
+                strata_stops()
+                access_holds()
+                assert len(setup_runs()) == 2
                 strata_stops()
 
             with subtest("busy dGPU: the request ends fast and the socket stays usable"):
