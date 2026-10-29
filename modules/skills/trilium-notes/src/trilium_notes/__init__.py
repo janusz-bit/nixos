@@ -14,6 +14,7 @@ default user, 0400) and is loaded into TRILIUM_ETAPI_TOKEN for the runtime's bea
 
 from __future__ import annotations
 
+import contextlib
 import os
 
 from rlm import McpIntegration
@@ -30,13 +31,9 @@ def _load_token() -> None:
     """Seed the bearer-token env var from the agenix secret (idempotent)."""
     if os.environ.get(_TOKEN_ENV, "").strip():
         return
-    try:
-        with open(_TOKEN_FILE) as fh:
-            token = fh.read().strip()
-    except OSError:
-        return
-    if token:
-        os.environ[_TOKEN_ENV] = token
+    with contextlib.suppress(OSError), open(_TOKEN_FILE) as fh:
+        if token := fh.read().strip():
+            os.environ[_TOKEN_ENV] = token
 
 
 _load_token()
