@@ -93,7 +93,8 @@ in
           if [ "$(id -un)" != ${lib.escapeShellArg strataUser} ]; then
             exec /run/wrappers/bin/sudo -u ${lib.escapeShellArg strataUser} -H -- "$0" "$@"
           fi
-          exec ${strata} install --family coder --model ${size} --context ${toString model.context} \
+          # Argumenty setup.py dopiero po `--` (inaczej parsuje je samo `strata`).
+          exec ${strata} install -- --family coder --model ${size} --context ${toString model.context} \
             --kv q4_0 --vision no --no-start --yes "$@"
         '';
       };
