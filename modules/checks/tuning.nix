@@ -184,22 +184,15 @@
               for cg in ("/system.slice", "/user.slice/user-1000.slice/user@1000.service"):
                   assert f"Path: {cg}\n" in oomd, oomd
 
-          def timed_stop(cmd):
-              t = time.monotonic()
-              machine.execute(cmd)
-              return time.monotonic() - t
-
           with subtest("DefaultTimeoutStopSec=10s: jednostka ignorująca SIGTERM ginie po ~10 s (domyślnie 90 s)"):
-              machine.succeed("systemctl start hang")
-              machine.wait_for_file("/run/hang-ready")
-              d = timed_stop("systemctl stop hang")
-              print(f"system: stop took {d:.1f} s")
-              assert 9 <= d <= 20, d
-              machine.succeed(f"{user} start hang")
-              machine.wait_for_file("/run/user/1000/hang-ready")
-              d = timed_stop(f"{user} stop hang")
-              print(f"user: stop took {d:.1f} s")
-              assert 9 <= d <= 20, d
+              for name, ctl, ready in (("system", "systemctl", "/run/hang-ready"), ("user", user, "/run/user/1000/hang-ready")):
+                  machine.succeed(f"{ctl} start hang")
+                  machine.wait_for_file(ready)
+                  t = time.monotonic()
+                  machine.execute(f"{ctl} stop hang")
+                  d = time.monotonic() - t
+                  print(f"{name}: stop took {d:.1f} s")
+                  assert 9 <= d <= 20, d
 
           def sysrq_r(mask):
               machine.succeed(f"sysctl -w kernel.sysrq={mask}", "dmesg -C")
@@ -314,21 +307,17 @@
               bloat = "-p MemoryHigh=5M -p MemorySwapMax=0 ${pkgs.coreutils}/bin/tail /dev/zero"
               urun = "systemd-run --user --machine=alice@"
 
-              def oom_killed(run, unit, cmd):
+              def assert_oom_kill(run, unit, cmd):
                   # --wait kończy się kodem ≠ 0, gdy jednostka padła — liczy się wynik
                   _, out = machine.execute(f"timeout 180 {run} --wait --unit={unit} {cmd} 2>&1")
-                  if "Finished with result: oom-kill" not in out:
-                      print(machine.execute("oomctl; cat /sys/fs/cgroup/system.slice/memory.pressure; swapon --show")[1])
-                  return out
+                  assert "Finished with result: oom-kill" in out, (run, out, machine.execute("oomctl; cat /sys/fs/cgroup/system.slice/memory.pressure; swapon --show")[1])
 
               for run in ("systemd-run", urun):
-                  out = oom_killed(run, "bloat", bloat)
-                  assert "Finished with result: oom-kill" in out, (run, out)
+                  assert_oom_kill(run, "bloat", bloat)
               # omit w user@1000.service (ten sam właściciel cgroup): sprawca
               # presji z omit przeżywa, ginie inny kandydat (64 MiB > init.scope)
               machine.succeed(f"{urun} --unit=bloat-omit -p ManagedOOMPreference=omit {bloat}")
-              out = oom_killed(urun, "victim", "${pkgs.python3}/bin/python3 ${memHog} 64 /tmp/victim-ready")
-              assert "Finished with result: oom-kill" in out, out
+              assert_oom_kill(urun, "victim", "${pkgs.python3}/bin/python3 ${memHog} 64 /tmp/victim-ready")
               # po kill oomd czeka 15 s (POST_ACTION_DELAY_USEC) — sprawdzić od razu
               machine.succeed(f"{user} is-active bloat-omit", f"{user} stop bloat-omit")
               # kontrola: -.slice nie jest monitorowany (enableRootSlice = false)

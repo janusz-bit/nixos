@@ -56,13 +56,10 @@
           machine.wait_for_unit("multi-user.target")
 
           with subtest("normal activation: state files owned by the service"):
-              machine.succeed("install -o hermes -g hermes -m 0400 /dev/null /run/hermes-test.env")
-              machine.succeed("echo TEST_SECRET=s3cret > /run/hermes-test.env")
+              machine.succeed("echo TEST_SECRET=s3cret | install -o hermes -g hermes -m 0400 /dev/stdin /run/hermes-test.env")
               # state left behind by the CLI run as root/nixos on the old module
-              machine.succeed(f"install -o root -g hermes -m 0660 /dev/null {home}/config.yaml")
-              machine.succeed(f"echo 'user_key: kept' > {home}/config.yaml")
-              machine.succeed(f"install -o root -g hermes -m 0644 /dev/null {home}/.hermes_history")
-              machine.succeed(f"echo old-prompt > {home}/.hermes_history")
+              machine.succeed(f"echo 'user_key: kept' | install -o root -g hermes -m 0660 /dev/stdin {home}/config.yaml")
+              machine.succeed(f"echo old-prompt | install -o root -g hermes -m 0644 /dev/stdin {home}/.hermes_history")
               machine.succeed(f"install -d -o root -g hermes -m 2755 {home}/runtime")
               machine.succeed(f"echo '{{}}' > {home}/runtime/active_sessions.json")
               machine.succeed(activate)

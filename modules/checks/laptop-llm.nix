@@ -172,10 +172,6 @@ in
                   };
                 };
               };
-              environment.systemPackages = [
-                pkgs.curl
-                pkgs.netcat
-              ];
             };
 
             rpi = {
@@ -210,10 +206,6 @@ in
                 };
                 groups.hermes = { };
               };
-              environment.systemPackages = [
-                pkgs.curl
-                pkgs.netcat
-              ];
             };
           };
 

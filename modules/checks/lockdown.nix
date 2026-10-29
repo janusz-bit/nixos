@@ -40,10 +40,7 @@
             };
             customBot.lockdownServices = [ "tunnel-backend" ];
           };
-          client.environment.systemPackages = [
-            pkgs.curl
-            pkgs.netcat
-          ];
+          client = { };
         };
 
         testScript = ''
