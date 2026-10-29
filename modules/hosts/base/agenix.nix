@@ -75,7 +75,7 @@
       ];
 
       # `command cat` omija alias cat → bat z base-shell.
-      loadVarLines =
+      loadVar =
         name:
         {
           var,
@@ -83,17 +83,16 @@
           valueFilter ? null,
         }:
         let
-          path = secretPath secret;
           read = "command cat \"$__sec\"" + lib.optionalString (valueFilter != null) " | ${valueFilter}";
         in
-        [
-          "  set -l __sec \"${path}\""
-          "  if not test -r \"$__sec\""
-          "    echo \"${name}: nie mogę odczytać sekreta: $__sec\" >&2"
-          "    return 1"
-          "  end"
-          "  set -lx ${var} (${read})"
-        ];
+        ''
+          set -l __sec "${secretPath secret}"
+          if not test -r "$__sec"
+            echo "${name}: nie mogę odczytać sekreta: $__sec" >&2
+            return 1
+          end
+          set -lx ${var} (${read})
+        '';
 
       mkSecretWrapper =
         {
@@ -102,25 +101,13 @@
           vars,
           exec ? name,
         }:
-        lib.concatStringsSep "\n" (
-          [
-            "# Wygenerowane automatycznie (modules/hosts/base/agenix.nix) — NIE edytuj."
-            "function ${name} --description ${lib.escapeShellArg description}"
-          ]
-          ++ lib.concatMap (loadVarLines name) vars
-          ++ [
-            "  command ${exec} $argv"
-            "end"
-            ""
-          ]
-        );
-
-      fishWrappersPkg = pkgs.symlinkJoin {
-        name = "fish-secret-wrappers";
-        paths = map (
-          w: pkgs.writeTextDir "share/fish/vendor_functions.d/${w.name}.fish" (mkSecretWrapper w)
-        ) fishWrappers;
-      };
+        ''
+          # Wygenerowane automatycznie (modules/hosts/base/agenix.nix) — NIE edytuj.
+          function ${name} --description ${lib.escapeShellArg description}
+          ${lib.concatMapStrings (loadVar name) vars}
+          command ${exec} $argv
+          end
+        '';
     in
     {
       imports = [ self.modules.nixos.base-secrets ];
@@ -131,7 +118,9 @@
         vendor.functions.enable = true;
         shellAliases.push = "nix build ${config.customTop.repository.flake}#nixosConfigurations.${config.customBot.flakeTarget}.config.system.build.toplevel --refresh --no-link --print-out-paths | cachix-push ${config.customTop.cachix.name}";
       };
-      environment.systemPackages = [ fishWrappersPkg ];
+      environment.systemPackages = map (
+        w: pkgs.writeTextDir "share/fish/vendor_functions.d/${w.name}.fish" (mkSecretWrapper w)
+      ) fishWrappers;
 
       systemd.user.services.nix-access-tokens = {
         description = "Render ~/.config/nix/nix.conf z access-tokensem z agenix (0600)";
@@ -145,10 +134,7 @@
         };
         script = ''
           set -euo pipefail
-          # jawny PATH — jednostka --user nie musi nic odziedziczać
-          PATH="${pkgs.coreutils}/bin:$PATH"
           conf_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/nix"
-          conf="$conf_dir/nix.conf"
           mkdir -p "$conf_dir"
           chmod 700 "$conf_dir"
           # render atomowo (tmp + chmod + mv), żeby nix nigdy nie przeczytał
@@ -157,7 +143,7 @@
           trap 'rm -f "$tmp"' EXIT
           printf 'access-tokens = github.com=%s\n' "$(cat ${secretPath "github-token"})" > "$tmp"
           chmod 600 "$tmp"
-          mv -f "$tmp" "$conf"
+          mv -f "$tmp" "$conf_dir/nix.conf"
         '';
       };
     };

@@ -10,16 +10,13 @@
     in
     {
       programs = {
-        bash = {
-          enable = true;
-          interactiveShellInit = ''
-            if [[ $(${lib.getExe' pkgs.procps "ps"} --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
-            then
-              shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
-              exec ${lib.getExe pkgs.fish} $LOGIN_OPTION
-            fi
-          '';
-        };
+        bash.interactiveShellInit = ''
+          if [[ $(${lib.getExe' pkgs.procps "ps"} --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+          then
+            shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+            exec ${lib.getExe pkgs.fish} $LOGIN_OPTION
+          fi
+        '';
 
         fish = {
           enable = true;
@@ -76,7 +73,6 @@
       };
 
       environment.systemPackages = with pkgs; [
-        fish
         fishPlugins.done
         eza
         bat

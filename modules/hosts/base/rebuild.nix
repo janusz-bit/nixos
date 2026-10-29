@@ -12,10 +12,8 @@
       inherit (config.customBot) flakeTarget;
       rebuild =
         mode: flakeRef:
-        let
-          refresh = lib.optionalString (flakeRef == flake) " --refresh";
-        in
-        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${flakeTarget}${refresh}";
+        "nixos-rebuild ${mode} --sudo --flake ${flakeRef}#${flakeTarget}"
+        + lib.optionalString (flakeRef == flake) " --refresh";
       sudoRebuild = mode: flakeRef: "sudo ${rebuild mode flakeRef}";
     in
     {

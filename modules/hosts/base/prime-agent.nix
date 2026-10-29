@@ -61,10 +61,8 @@
 
       systemd.tmpfiles.rules = [
         "d ${agentDir} 0700 ${user} users - -"
-      ]
-      ++ map (name: "L+ ${agentDir}/${name} - - - - /etc/prime-agent/${name}") [
-        "models.json"
-        "settings.json"
+        "L+ ${agentDir}/models.json - - - - /etc/prime-agent/models.json"
+        "L+ ${agentDir}/settings.json - - - - /etc/prime-agent/settings.json"
       ];
     };
 }

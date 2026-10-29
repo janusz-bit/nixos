@@ -5,9 +5,6 @@
 {
   flake.modules.nixos.base-configuration =
     { lib, pkgs, ... }:
-    let
-      editor = "micro";
-    in
     {
       imports = [ inputs.nix-index-database.nixosModules.default ];
 
@@ -38,8 +35,8 @@
         ];
         sessionVariables = {
           NIXOS_OZONE_WL = "1";
-          VISUAL = editor;
-          EDITOR = editor;
+          VISUAL = "micro";
+          EDITOR = "micro";
         };
         # uv instaluje narzędzia do ~/.local/bin.
         localBinInPath = true;

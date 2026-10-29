@@ -75,38 +75,32 @@ _: {
             exec sudo "$0" "$@"
           fi
 
-          show_status() {
-            if [[ -e $flag ]]; then
-              echo "lockdown: WŁĄCZONY od $(date -r "$flag" '+%F %T')"
-            else
-              echo "lockdown: wyłączony"
-            fi
-            echo "porty zamykane w firewallu:" ${lib.escapeShellArg closedSummary}
-            ${systemctlUnits "list-units --all --no-pager"}
-          }
-
           case $cmd in
             on)
               # Flaga przed stopem: od tej chwili nic nie podniesie usług z listy.
               touch "$flag"
               ${systemctlUnits "stop"}
               systemctl reload firewall.service
-              show_status
               ;;
             off)
               rm -f "$flag"
               systemctl reload firewall.service
               ${systemctlUnits "start"}
-              show_status
               ;;
-            status)
-              show_status
-              ;;
+            status) ;;
             *)
               echo "użycie: lockdown on|off|status" >&2
               exit 2
               ;;
           esac
+
+          if [[ -e $flag ]]; then
+            echo "lockdown: WŁĄCZONY od $(date -r "$flag" '+%F %T')"
+          else
+            echo "lockdown: wyłączony"
+          fi
+          echo "porty zamykane w firewallu:" ${lib.escapeShellArg closedSummary}
+          ${systemctlUnits "list-units --all --no-pager"}
         '';
       };
     in
