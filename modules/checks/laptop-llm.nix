@@ -1,13 +1,18 @@
-# Test VM tunelu laptop-llm (modules/hosts/laptop-llm.nix): konto hermes na
-# „RPi” dostaje przez 127.0.0.1:<port> odpowiedź serwera słuchającego tylko na
-# localhost „laptopa”, inne konto RPi dostaje odmowę. Klucz tunelu nie daje na
+# Test VM laptop-llm (modules/hosts/laptop-llm.nix): pierwsze żądanie konta
+# hermes z „RPi” uruchamia na „laptopie” Stratę dla Hermesa (run config
+# odtworzony z ustawieniami modelu z ai.models), po bezczynności proxy i Strata
+# się zatrzymują, a przy zajętym dGPU żądanie kończy się szybko i gniazdo
+# zostaje sprawne. Inne konto RPi dostaje odmowę; klucz tunelu nie daje na
 # laptopie przekierowania do innego portu, -R, gniazd Unix ani polecenia;
 # reguła iptables przeżywa reload firewalla bez mnożenia się, a przy
 # nieosiągalnym laptopie połączenie kończy się w czasie ConnectTimeout.
 #
-# Moduły są prawdziwe; testowy customTop podmienia tylko klucze (klucz kont
-# i klucz hosta laptopa) na snakeoil z nixpkgs, bo prywatna część
-# keys.users.hermes-llm jest sekretem, a adresy węzłów to te z customTop.lan.
+# Moduły są prawdziwe. Testowy customTop podmienia tylko klucze na snakeoil
+# z nixpkgs (prywatna część keys.users.hermes-llm jest sekretem). Atrapy:
+# `strata` (pakiet lokalny tylko x86_64, model ok. 90 GB) trzyma się kontraktu
+# setup.py — `install` pisze strata-coder-<rozmiar>.json, `serve` bez niego
+# odmawia — i serwuje pliki przez http.server; `nvidia-smi` czyta zajętość VRAM
+# z /run/fake-vram-used.
 #
 # Uruchomienie: nix build -L .#checks.<system>.laptop-llm (wymaga kvm).
 {
@@ -48,12 +53,47 @@ in
         ];
       };
 
-      httpServer = port: text: {
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          ExecStart = "${lib.getExe pkgs.python3} -m http.server --bind 127.0.0.1 --directory ${pkgs.writeTextDir "marker" text} ${toString port}";
-          DynamicUser = true;
+      fakeStrata =
+        final:
+        final.writeShellApplication {
+          name = "strata";
+          runtimeInputs = [
+            final.coreutils
+            final.python3
+          ];
+          text = ''
+            install_dir=$HOME/.local/share/strata/install
+            case $1 in
+              install)
+                echo "$*" > "$HOME/install-args"
+                while (($#)); do
+                  [[ $1 == --model ]] && model=$2
+                  shift
+                done
+                mkdir -p "$install_dir"
+                echo '{}' > "$install_dir/strata-coder-''${model,,}.json"
+                ;;
+              serve)
+                while (($#)); do
+                  [[ $1 == --config ]] && config=$2
+                  [[ $1 == --port ]] && port=$2
+                  shift
+                done
+                [[ -e $config ]]
+                exec python3 -m http.server --bind 127.0.0.1 --directory ${
+                  final.linkFarm "strata-fake-www" {
+                    marker = final.writeText "marker" "laptop-llm-ok\n";
+                    health = final.writeText "health" "ok\n";
+                  }
+                } "$port"
+                ;;
+            esac
+          '';
         };
+
+      fakeNvidiaSmi = pkgs.writeShellApplication {
+        name = "nvidia-smi";
+        text = "cat /run/fake-vram-used";
       };
     in
     {
@@ -66,13 +106,22 @@ in
         in
         {
           name = "laptop-llm";
+          # Węzeł laptop dokłada overlay z atrapą strata.
+          node.pkgsReadOnly = false;
           nodes = {
             laptop = {
               imports = [
                 testTop
+                self.modules.nixos.ai-options
+                self.modules.nixos.ai-models
                 self.modules.nixos.nixos-laptop-llm
                 (lanAddress lan.laptop)
               ];
+              nixpkgs.overlays = [ (final: _: { strata = fakeStrata final; }) ];
+              # Moduł bierze nvidia-smi z wyjścia `bin` pakietu sterownika.
+              hardware.nvidia.package = fakeNvidiaSmi // {
+                bin = fakeNvidiaSmi;
+              };
               services.openssh = {
                 enable = true;
                 hostKeys = [
@@ -88,9 +137,17 @@ in
                 mode = "0600";
               };
               systemd = {
+                tmpfiles.rules = [ "f /run/fake-vram-used 0644 root root - 44" ];
                 services = {
-                  llm = httpServer port "laptop-llm-ok";
-                  other = httpServer otherPort "other-port";
+                  # 15 min bezczynności to za długo na test.
+                  strata-hermes-proxy.environment.STRATA_HERMES_IDLE = lib.mkForce "3s";
+                  other = {
+                    wantedBy = [ "multi-user.target" ];
+                    serviceConfig = {
+                      ExecStart = "${lib.getExe pkgs.python3} -m http.server --bind 127.0.0.1 --directory ${pkgs.writeTextDir "marker" "other-port"} ${toString otherPort}";
+                      DynamicUser = true;
+                    };
+                  };
                   "unix-marker@".serviceConfig = {
                     ExecStart = "${pkgs.coreutils}/bin/echo unix-marker";
                     StandardInput = "socket";
@@ -158,21 +215,46 @@ in
             request = "printf 'GET /marker HTTP/1.0\\r\\n\\r\\n'"
 
             def access_holds():
-                assert "laptop-llm-ok" in rpi.succeed(f"runuser -u hermes -- curl -sf --max-time 20 {url}")
+                assert "laptop-llm-ok" in rpi.succeed(f"runuser -u hermes -- curl -sf --max-time 30 {url}")
                 # 7: odmowa połączenia (REJECT), a nie błąd po drugiej stronie
                 assert rpi.execute(f"runuser -u nobody -- curl -s --max-time 5 {url}")[0] == 7
 
+            def strata_stops():
+                laptop.wait_until_fails("systemctl is-active strata-hermes-proxy.service", timeout=30)
+                laptop.wait_until_fails("systemctl is-active strata-hermes.service", timeout=30)
+                laptop.succeed("systemctl is-active strata-hermes-proxy.socket")
+
             start_all()
             laptop.wait_for_unit("sshd.service")
-            laptop.wait_for_open_port(${toString port}, "127.0.0.1")
+            laptop.wait_for_unit("strata-hermes-proxy.socket")
             laptop.wait_for_open_port(${toString otherPort}, "127.0.0.1")
             rpi.wait_for_unit("laptop-llm.socket")
             rpi.wait_for_unit("multi-user.target")
             rpi.succeed("install -D -m 0400 ${snakeOil.snakeOilEd25519PrivateKey} ${nodes.rpi.age.secrets.hermes-llm-key.path}")
             rpi.succeed("install -m 0400 ${snakeOil.snakeOilEd25519PrivateKey} /root/test-key")
 
-            with subtest("only hermes reaches the laptop's localhost server"):
+            with subtest("the first hermes request starts Strata, other accounts are refused"):
+                laptop.fail("systemctl is-active strata-hermes.service")
                 access_holds()
+                laptop.succeed("systemctl is-active strata-hermes.service")
+                args = laptop.succeed("cat /var/lib/strata/install-args")
+                assert "--context ${toString nodes.laptop.ai.models.qwen3-8-flash-next-coder-iq1_m.context} --kv q4_0 --vision no" in args, args
+
+            with subtest("idle: the proxy exits and Strata stops with it"):
+                strata_stops()
+
+            with subtest("busy dGPU: the request ends fast and the socket stays usable"):
+                laptop.succeed("echo 4000 > /run/fake-vram-used")
+                start = time.monotonic()
+                status = rpi.execute(f"runuser -u hermes -- curl -s --max-time 30 {url}")[0]
+                elapsed = time.monotonic() - start
+                # 52/56: połączenie zamknięte bez odpowiedzi; 28 znaczyłoby zawieszenie
+                assert status in (52, 56) and elapsed < 15, f"curl {status} po {elapsed:.1f} s"
+                laptop.succeed("journalctl -b -u strata-hermes.service | grep -q 'dGPU zajęte'")
+                strata_stops()
+                laptop.succeed("echo 44 > /run/fake-vram-used")
+                access_holds()
+                strata_stops()
 
             with subtest("the key forwards only to the one port"):
                 assert "laptop-llm-ok" in rpi.succeed(f"{request} | {ssh} -W 127.0.0.1:${toString port}")
