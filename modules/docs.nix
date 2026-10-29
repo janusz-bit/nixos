@@ -66,11 +66,6 @@ let
   );
   module = name: sourceOf.${name} or (throw "docs.nix: self.modules.nixos.${name} nie istnieje");
 
-  hostSource =
-    name:
-    lib.findFirst (
-      source: source.path == "modules/hosts/${name}/default.nix"
-    ) (throw "docs.nix: host ${name} nie ma modules/hosts/${name}/default.nix") checkedSources;
   # Moduły hosta: odwołania z jego default.nix i, rekurencyjnie, z plików
   # modułów, do których się odwołuje.
   closure =
@@ -78,7 +73,7 @@ let
     lib.sort lib.lessThan (
       map (entry: entry.key) (
         builtins.genericClosure {
-          startSet = map (key: { inherit key; }) (hostSource name).refs;
+          startSet = map (key: { inherit key; }) (module name).refs;
           operator = { key }: map (ref: { key = ref; }) (module key).refs;
         }
       )
@@ -93,14 +88,11 @@ let
   # `<nazwa>` poza kodem GitHub bierze za znacznik HTML i go usuwa.
   escapeTags =
     text:
-    lib.concatStringsSep "`" (
-      lib.imap0 (i: part: if lib.mod i 2 == 0 then lib.replaceStrings [ "<" ] [ "\\<" ] part else part) (
-        lib.splitString "`" text
-      )
-    );
+    # Indeksy od 1 (imap1): części nieparzyste leżą poza backtickami.
+    lib.concatImapStringsSep "`" (
+      i: part: if lib.mod i 2 == 1 then lib.replaceStrings [ "<" ] [ "\\<" ] part else part
+    ) (lib.splitString "`" text);
   describe = text: if text == "" then "*(no header comment)*" else escapeTags text;
-  # Katalog modułu względem modules/: grupa w spisie.
-  group = path: lib.concatStringsSep "/" (lib.init (lib.tail (lib.splitString "/" path)));
   nodeId = lib.replaceStrings [ "-" ] [ "_" ];
 
   hostsPage = lib.concatStrings (
@@ -110,20 +102,16 @@ let
       "Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixosConfigurations.<name>` and the target of its `update` aliases.\n\n"
       "| Host | Platform | CI build on `v*` tags | Modules |\n|---|---|---|---|\n"
     ]
-    ++ map (
-      name:
-      let
-        host = config.hosts.${name};
-      in
+    ++ lib.mapAttrsToList (
+      name: host:
       "| [${code name}](#${name}) | ${code host.system} | ${
         if host.buildOnTags then "yes" else "no (PR, manual)"
       } | ${toString (lib.length (closure name))} |\n"
-    ) hostNames
+    ) config.hosts
     ++ map (
       name:
       let
-        source = hostSource name;
-        direct = source.refs;
+        source = module name;
         # Krawędzie każdego modułu hosta, który importuje inne (agregaty,
         # moduł sprzętu, base-agenix → base-secrets).
         nested = lib.filter (ref: ref != name && (module ref).refs != [ ]) (closure name);
@@ -135,7 +123,7 @@ let
           "```mermaid\nflowchart LR\n"
           "  host_${nodeId name}([${name}])\n"
         ]
-        ++ map (ref: "  host_${nodeId name} --> ${nodeId ref}[${ref}]\n") (lib.remove name direct)
+        ++ map (ref: "  host_${nodeId name} --> ${nodeId ref}[${ref}]\n") (lib.remove name source.refs)
         ++ lib.unique (
           lib.concatMap (
             importer: map (ref: "  ${nodeId importer} --> ${nodeId ref}[${ref}]\n") (module importer).refs
@@ -156,7 +144,7 @@ let
     ++ lib.mapAttrsToList (
       dir: grouped:
       lib.concatStrings (
-        [ "\n## ${if dir == "" then "modules/" else "modules/${dir}/"}\n\n" ]
+        [ "\n## ${dir}/\n\n" ]
         ++ map (
           source:
           let
@@ -172,7 +160,7 @@ let
           ]
         ) grouped
       )
-    ) (lib.groupBy (source: group source.path) checkedSources)
+    ) (lib.groupBy (source: dirOf source.path) checkedSources)
   );
 
   docList =

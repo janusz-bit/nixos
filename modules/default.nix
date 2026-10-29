@@ -71,18 +71,14 @@
         gitleaks.enable = true;
         nixfmt.enable = true;
         statix.enable = true;
-        deadnix = {
-          enable = true;
-          settings.noLambdaPatternNames = true;
-        };
+        deadnix.enable = true;
+        deadnix.settings.noLambdaPatternNames = true;
         sync-github-actions = generatorHook "sync-github-actions";
         sync-docs = generatorHook "sync-docs";
       };
 
       devShells.default = pkgs.mkShell {
-        shellHook = ''
-          ${config.pre-commit.installationScript}
-        '';
+        shellHook = config.pre-commit.installationScript;
 
         packages = config.pre-commit.settings.enabledPackages ++ [
           # jq: .claude/hooks/post-edit.sh parsuje nim JSON hooka Claude Code.

@@ -15,9 +15,7 @@
       pre-commit.settings.hooks.nixfmt.enable = true;
 
       devShells.default = pkgs.mkShell {
-        shellHook = ''
-          ${config.pre-commit.shellHook}
-        '';
+        inherit (config.pre-commit) shellHook;
 
         # add packages to use in shell here
         packages = config.pre-commit.settings.enabledPackages;

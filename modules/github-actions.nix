@@ -46,15 +46,13 @@ in
         {
           name = "Install Nix";
           uses = actions.installNix;
-          with_ = {
-            extra_nix_config = ''
-              experimental-features = nix-command flakes
-              access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-              extra-substituters = ${customTop.cachix.url}
-              extra-trusted-public-keys = ${customTop.cachix.pubKey}
-              build-fallback = true
-            '';
-          };
+          with_.extra_nix_config = ''
+            experimental-features = nix-command flakes
+            access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
+            extra-substituters = ${customTop.cachix.url}
+            extra-trusted-public-keys = ${customTop.cachix.pubKey}
+            build-fallback = true
+          '';
         }
         {
           name = "Setup Cachix";
@@ -85,17 +83,12 @@ in
           inherit name runName;
           # Least privilege: buildy tylko czytają repo.
           permissions.contents = "read";
-          concurrency = {
-            group = "build-${name}-\${{ github.ref }}";
-            cancelInProgress = false;
-          };
+          concurrency.group = "build-${name}-\${{ github.ref }}";
           on = {
-            push =
-              if tags || onMaster then
-                lib.optionalAttrs tags { tags = [ "v*" ]; }
-                // lib.optionalAttrs onMaster { branches = [ "master" ]; }
-              else
-                null;
+            push = lib.mkIf (tags || onMaster) {
+              tags = lib.mkIf tags [ "v*" ];
+              branches = lib.mkIf onMaster [ "master" ];
+            };
             pullRequest.branches = [ "master" ];
             workflowDispatch = { };
           };
@@ -118,13 +111,13 @@ in
           name = "sync-github-actions";
           runtimeInputs = [ pkgs.coreutils ];
           text = ''
-            WORKFLOWS_DIR="${config.githubActions.workflowsDir}"
-            echo "Syncing workflows from $WORKFLOWS_DIR to .github/workflows/..."
+            workflows=${lib.escapeShellArg config.githubActions.workflowsDir}
+            echo "Syncing workflows from $workflows to .github/workflows/..."
             mkdir -p .github/workflows
             # Usun stare workflowy, ktore nie sa juz generowane (np. po refactorze),
             # zeby nie zostaly osierocone pliki w .github/workflows/.
             find .github/workflows -name '*.yml' -delete
-            cp -f "$WORKFLOWS_DIR"/*.yml .github/workflows/
+            cp -f "$workflows"/*.yml .github/workflows/
             chmod +w .github/workflows/*.yml
             echo "Done! Workflows are now in sync."
           '';
@@ -172,10 +165,7 @@ in
               on.workflowDispatch = { };
               permissions.contents = "write";
               # Ręcznie odpalany: dwa równoległe buildy kernela nie mają sensu.
-              concurrency = {
-                group = "cachyos-kernel-update";
-                cancelInProgress = false;
-              };
+              concurrency.group = "cachyos-kernel-update";
               jobs.update-and-build = {
                 runsOn = archToRunner.x86_64-linux;
                 steps = baseSteps ++ [
