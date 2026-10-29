@@ -57,18 +57,15 @@
       # w dwóch źródłach kończy ewaluację, zamiast po cichu zastąpić skill.
       skillsIn =
         pack:
-        lib.mapAttrs
-          (name: _: {
-            source = "${pack.source}/${name}";
-            agents = lib.attrNames skillDirs;
-            packages = [ ];
-            python = false;
-          })
-          (
-            lib.filterAttrs (
-              name: type: type == "directory" && builtins.pathExists "${pack.source}/${name}/SKILL.md"
-            ) (builtins.readDir pack.source)
-          );
+        let
+          isSkill = name: type: type == "directory" && builtins.pathExists "${pack.source}/${name}/SKILL.md";
+        in
+        lib.mapAttrs (name: _: {
+          source = "${pack.source}/${name}";
+          agents = lib.attrNames skillDirs;
+          packages = [ ];
+          python = false;
+        }) (lib.filterAttrs isSkill (builtins.readDir pack.source));
 
       skills =
         lib.foldl' lib.attrsets.unionOfDisjoint (lib.filterAttrs (_: skill: skill.enable) cfg.skills)
@@ -114,10 +111,7 @@
 
       # Providerzy z co najmniej jednym modelem agenta, każdy z jego modelami.
       providersOf =
-        agent: toProvider:
-        let
-          models = modelsOf agent;
-        in
+        toProvider: models:
         lib.genAttrs (lib.unique (lib.mapAttrsToList (_: model: model.provider) models)) (
           name: toProvider (providerNamed name) (lib.filterAttrs (_: model: model.provider == name) models)
         );
@@ -135,14 +129,12 @@
 
       primeModel =
         model:
-        {
-          inherit (model) id;
+        lib.filterAttrs (_: value: value != null) {
+          inherit (model) id name cost;
+          contextWindow = model.context;
+          maxTokens = model.output;
         }
-        // lib.optionalAttrs (model.name != null) { inherit (model) name; }
         // lib.optionalAttrs (model.input != [ "text" ]) { inherit (model) input; }
-        // lib.optionalAttrs (model.context != null) { contextWindow = model.context; }
-        // lib.optionalAttrs (model.output != null) { maxTokens = model.output; }
-        // lib.optionalAttrs (model.cost != null) { inherit (model) cost; }
         // lib.optionalAttrs (model.reasoning != null) (
           {
             reasoning = true;
@@ -194,35 +186,32 @@
         }
         // lib.optionalAttrs (provider.name != null) { inherit (provider) name; };
 
-      opencodeProviders = providersOf "opencode" opencodeProvider;
+      opencodeProviders = providersOf opencodeProvider (modelsOf "opencode");
 
-      modelNames =
-        predicate: models: lib.concatStringsSep ", " (lib.attrNames (lib.filterAttrs predicate models));
+      modelsWhere = agent: predicate: lib.attrNames (lib.filterAttrs (_: predicate) (modelsOf agent));
+      opencodeWithoutLimits = modelsWhere "opencode" (
+        model: model.context == null || model.output == null
+      );
+      primeWithoutApiKey = modelsWhere "prime-agent" (
+        model: (providerNamed model.provider).apiKey == null
+      );
     in
     {
       assertions = [
         {
-          assertion = lib.all (model: model.context != null && model.output != null) (
-            lib.attrValues (modelsOf "opencode")
-          );
-          message = "ai.models: opencode2 wymaga context i output, brakuje ich w: ${
-            modelNames (_: model: model.context == null || model.output == null) (modelsOf "opencode")
-          }.";
+          assertion = opencodeWithoutLimits == [ ];
+          message = "ai.models: opencode2 wymaga context i output, brakuje ich w: ${lib.concatStringsSep ", " opencodeWithoutLimits}.";
         }
         {
-          assertion = lib.all (model: (providerNamed model.provider).apiKey != null) (
-            lib.attrValues (modelsOf "prime-agent")
-          );
-          message = "ai.providers: Prime Agent wymaga apiKey providera, brakuje go dla modeli: ${
-            modelNames (_: model: (providerNamed model.provider).apiKey == null) (modelsOf "prime-agent")
-          }.";
+          assertion = primeWithoutApiKey == [ ];
+          message = "ai.providers: Prime Agent wymaga apiKey providera, brakuje go dla modeli: ${lib.concatStringsSep ", " primeWithoutApiKey}.";
         }
       ];
 
       environment = {
         etc = skillLinks // {
           "prime-agent/models.json".text =
-            builtins.toJSON { providers = providersOf "prime-agent" primeProvider; } + "\n";
+            builtins.toJSON { providers = providersOf primeProvider (modelsOf "prime-agent"); } + "\n";
 
           "opencode/opencode.json" = lib.mkIf (opencodeProviders != { }) {
             text = builtins.toJSON { providers = opencodeProviders; };

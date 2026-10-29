@@ -65,7 +65,15 @@ _: {
           };
         };
       };
-      localBaseUrl = "http://127.0.0.1:${toString bonsai.port}/v1";
+      # Lokalne serwery na GPU (bonsai-serve, Strata) na wspólnym porcie. Schemat
+      # Prime wymaga klucza; serwer uruchomiony bez klucza (llama.cpp bez
+      # --api-key, Strata z --no-api-key) go ignoruje. Oba oddają tok myślenia
+      # w reasoning_content.
+      localProvider = name: apiKey: {
+        inherit name apiKey;
+        baseUrl = "http://127.0.0.1:${toString bonsai.port}/v1";
+        reasoningField = "reasoning_content";
+      };
 
       # Pomiary na tym laptopie (RTX 5060 Laptop, 8 GB VRAM; 2026-10-21/22,
       # b10787, llama serve):
@@ -160,25 +168,12 @@ _: {
           baseUrl = "https://openrouter.ai/api/v1";
           apiKey = "OPENROUTER_API_KEY";
         };
-        llamacpp = {
-          name = "llama.cpp (local)";
-          baseUrl = localBaseUrl;
-          # Schemat Prime wymaga klucza; serwer bez --api-key go ignoruje.
-          apiKey = "llamacpp";
-          # llama-server oddaje tok myślenia w reasoning_content.
-          reasoningField = "reasoning_content";
-        };
+        llamacpp = localProvider "llama.cpp (local)" "llamacpp";
         # Serwer `strata launch --family coder --model IQ1_M --context 128k
         # --kv q4_0 --no-api-key` (desktop-ai), ten sam port co bonsai-serve.
         # Nie przez `strata connect opencode --write`: pisze format opencode
         # v1 (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
-        strata = {
-          name = "Strata (local)";
-          baseUrl = localBaseUrl;
-          # Schemat Prime wymaga klucza; serwer bez klucza go ignoruje.
-          apiKey = "strata";
-          reasoningField = "reasoning_content";
-        };
+        strata = localProvider "Strata (local)" "strata";
       };
 
       ai.models = {

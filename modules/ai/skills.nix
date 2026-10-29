@@ -44,14 +44,13 @@
 
       nixosSystemHostFacts =
         let
-          inherit (config.system.nixos) release;
           nixLdLibs = lib.concatMapStringsSep ", " lib.getName config.programs.nix-ld.libraries;
           fact = cond: text: lib.optionalString cond "- ${text}\n";
         in
         "\n## This host\n\n"
         + "Generated from the flake at build time (`modules/ai/skills.nix`).\n\n"
         + fact true "Hostname `${config.networking.hostName}`, flake output `nixosConfigurations.${config.customBot.flakeTarget}`, platform `${pkgs.stdenv.hostPlatform.system}`."
-        + fact true "NixOS ${release}, `system.stateVersion = \"${config.system.stateVersion}\"` (never change it), kernel ${config.boot.kernelPackages.kernel.version}."
+        + fact true "NixOS ${config.system.nixos.release}, `system.stateVersion = \"${config.system.stateVersion}\"` (never change it), kernel ${config.boot.kernelPackages.kernel.version}."
         + fact true "Main interactive user: `${user}`."
         + fact config.programs.nix-ld.enable "nix-ld libraries (all a prebuilt binary can find): ${nixLdLibs}."
         + fact config.services.desktopManager.plasma6.enable "Desktop: KDE Plasma 6 on Wayland, no X server (Xwayland only)."
