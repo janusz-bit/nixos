@@ -1,19 +1,15 @@
-if [[ $# -ne 1 || ! "$1" =~ ^[A-Za-z_][A-Za-z0-9_-]*$ ]]; then
-  echo "Usage: package-import <top-level nixpkgs attribute>" >&2
+fail() {
+  echo "$*" >&2
   exit 1
-fi
+}
+
+[[ $# -eq 1 && "$1" =~ ^[A-Za-z_][A-Za-z0-9_-]*$ ]] || fail "Usage: package-import <top-level nixpkgs attribute>"
 name=$1
 cd "$(git rev-parse --show-toplevel)"
 registry=modules/packages/packages.nix
 dest=modules/packages/_$name
-if [[ ! -f flake.nix || ! -f "$registry" ]]; then
-  echo "Run package-import from the NixOS configuration repository." >&2
-  exit 1
-fi
-if [[ -e "$dest" ]]; then
-  echo "$dest already exists." >&2
-  exit 1
-fi
+[[ -f flake.nix && -f "$registry" ]] || fail "Run package-import from the NixOS configuration repository."
+[[ ! -e "$dest" ]] || fail "$dest already exists."
 
 # --inputs-from: nixpkgs przypięty w flake.lock (ten sam, którego
 # używają hosty), nie wpis z rejestru. legacyPackages flake'a nixpkgs
@@ -32,14 +28,8 @@ file=${position%:*}
 dir=$(dirname "$file")
 entry=$(basename "$file")
 relative_dir=${dir#"$(cut -d/ -f1-4 <<<"$file")"/}
-if [[ "$relative_dir" == pkgs/top-level ]]; then
-  echo "$name is defined inline in pkgs/top-level; there is no directory to copy." >&2
-  exit 1
-fi
-if [[ "$entry" != default.nix && -e "$dir/default.nix" ]]; then
-  echo "$relative_dir has both $entry and default.nix; copy it by hand." >&2
-  exit 1
-fi
+[[ "$relative_dir" != pkgs/top-level ]] || fail "$name is defined inline in pkgs/top-level; there is no directory to copy."
+[[ "$entry" == default.nix || ! -e "$dir/default.nix" ]] || fail "$relative_dir has both $entry and default.nix; copy it by hand."
 
 # Wpis alfabetycznie w bloku localPackages; awk opiera się na jego
 # wcięciach w packages.nix.
@@ -52,26 +42,19 @@ registered=$(awk -v name="$name" '
   /^  \};$/ { inside = 0 }
   { print }
   END { exit !done }
-' "$registry") || {
-  echo "No localPackages block found in $registry." >&2
-  exit 1
-}
+' "$registry") || fail "No localPackages block found in $registry."
 
 cp -r "$dir" "$dest"
 # Kopia ze store jest tylko do odczytu.
 chmod -R u+w "$dest"
-if [[ "$entry" != default.nix ]]; then
-  mv "$dest/$entry" "$dest/default.nix"
-fi
+[[ "$entry" == default.nix ]] || mv "$dest/$entry" "$dest/default.nix"
 printf '%s\n' "$registered" >"$registry"
 # Flake widzi tylko pliki śledzone przez git.
 git add -- "$dest"
 echo "Copied $relative_dir to $dest and registered $name in $registry."
 
-if ! local_drv=$(nix eval --raw ".#$name.drvPath"); then
-  echo "$dest does not evaluate. Fix it, or undo: git rm -rf -- $dest and remove $name from $registry." >&2
-  exit 1
-fi
+local_drv=$(nix eval --raw ".#$name.drvPath") ||
+  fail "$dest does not evaluate. Fix it, or undo: git rm -rf -- $dest and remove $name from $registry."
 if [[ "$local_drv" == "$upstream_drv" ]]; then
   echo "Same derivation as nixpkgs: $local_drv"
 else

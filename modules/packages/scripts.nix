@@ -16,32 +16,27 @@
 #   <atrybut>` albo ręcznie).
 #
 # Sprawdzenie: `nix build --no-link .#flake-update .#repo-sync .#flake-release
-# .#package-import` (flake-update i package-import przechodzą shellcheck).
+# .#package-import` (każdy przechodzi przy tym shellcheck).
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
+    let
+      script =
+        name: runtimeInputs:
+        pkgs.writeShellApplication {
+          inherit name runtimeInputs;
+          text = builtins.readFile ./_scripts/${name}.sh;
+        };
+    in
     {
-      packages = {
-        flake-update = pkgs.writeShellApplication {
-          name = "flake-update";
-          runtimeInputs = [ pkgs.nix-update ];
-          text = builtins.readFile ./_scripts/flake-update.sh;
-        };
-
-        repo-sync = pkgs.writeShellScriptBin "repo-sync" (builtins.readFile ./_scripts/repo-sync.sh);
-
-        flake-release = pkgs.writeShellScriptBin "flake-release" (
-          builtins.readFile ./_scripts/flake-release.sh
-        );
-
-        package-import = pkgs.writeShellApplication {
-          name = "package-import";
-          runtimeInputs = with pkgs; [
-            coreutils
-            gawk
-          ];
-          text = builtins.readFile ./_scripts/package-import.sh;
-        };
+      packages = lib.mapAttrs script {
+        flake-update = [ pkgs.nix-update ];
+        repo-sync = [ ];
+        flake-release = [ pkgs.gnugrep ];
+        package-import = with pkgs; [
+          coreutils
+          gawk
+        ];
       };
     };
 }

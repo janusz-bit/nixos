@@ -18,4 +18,3 @@ if command -v nixfmt >/dev/null && ! out=$(nixfmt "$file" 2>&1); then
   printf 'nixfmt %s:\n%s\n' "$file" "$out" >&2
   exit 2
 fi
-exit 0

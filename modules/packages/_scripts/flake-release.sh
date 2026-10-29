@@ -1,5 +1,3 @@
-set -euo pipefail
-
 fail() {
   echo "flake-release: $*" >&2
   exit 1
@@ -17,27 +15,15 @@ git fetch --tags origin
 git merge-base --is-ancestor origin/master HEAD || fail "Local master is behind or diverged from origin/master."
 
 # Najwyższy osiągalny tag wydania; ignoruj tagi innych projektów.
-latest_tag=""
-while IFS= read -r tag; do
-  if [[ "$tag" =~ ^v[0-9]+(\.[0-9]+){0,2}$ ]]; then
-    latest_tag="$tag"
-    break
-  fi
-done < <(git tag --merged HEAD --list 'v[0-9]*' --sort=-version:refname)
+latest_tag=$(git tag --merged HEAD --list 'v[0-9]*' --sort=-version:refname |
+  grep -m1 -E '^v[0-9]+(\.[0-9]+){0,2}$' || true)
 
 if [[ -z "$latest_tag" ]]; then
   new_tag="v1"
 else
-  latest_num="${latest_tag#v}"
-  if [[ "$latest_num" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    IFS='.' read -r major minor patch <<< "$latest_num"
-    new_tag="v$major.$minor.$((10#$patch + 1))"
-  elif [[ "$latest_num" =~ ^[0-9]+\.[0-9]+$ ]]; then
-    IFS='.' read -r major minor <<< "$latest_num"
-    new_tag="v$major.$((10#$minor + 1))"
-  else
-    new_tag="v$((10#$latest_num + 1))"
-  fi
+  # Podbija ostatni człon numeru: v7 -> v8, v1.2 -> v1.3, v1.2.3 -> v1.2.4.
+  last=${latest_tag##*[v.]}
+  new_tag="${latest_tag%"$last"}$((10#$last + 1))"
 fi
 
 git show-ref --verify --quiet "refs/tags/$new_tag" && fail "Tag $new_tag already exists."
@@ -53,7 +39,6 @@ fi
 [[ -z "$(git tag --points-at HEAD --list 'v[0-9]*')" ]] || fail "HEAD already has a release tag."
 
 git tag "$new_tag"
-if ! git push --atomic origin "HEAD:refs/heads/$branch" "refs/tags/$new_tag:refs/tags/$new_tag"; then
+git push --atomic origin "HEAD:refs/heads/$branch" "refs/tags/$new_tag:refs/tags/$new_tag" ||
   fail "Push failed; $new_tag remains local for inspection and retry."
-fi
 echo "Release $new_tag pushed successfully!"

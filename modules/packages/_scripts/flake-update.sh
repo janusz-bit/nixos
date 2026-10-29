@@ -1,12 +1,11 @@
+fail() {
+  echo "$*" >&2
+  exit 1
+}
+
 cd "$(git rev-parse --show-toplevel)"
-if [[ ! -f flake.nix || ! -f modules/packages/_waywallen/default.nix ]]; then
-  echo "Run flake-update from the NixOS configuration repository." >&2
-  exit 1
-fi
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "Commit or stash existing changes before running flake-update." >&2
-  exit 1
-fi
+[[ -f flake.nix && -f modules/packages/_waywallen/default.nix ]] || fail "Run flake-update from the NixOS configuration repository."
+[[ -z "$(git status --porcelain)" ]] || fail "Commit or stash existing changes before running flake-update."
 
 echo "Updating flake inputs..."
 nix flake update
@@ -34,11 +33,7 @@ nix run .#sync-github-actions
 nix run .#sync-docs
 
 git add -A -- flake.lock .github/workflows docs/reference \
-  modules/packages/_bootdev-cli/default.nix \
-  modules/packages/_helium/default.nix \
-  modules/packages/_strata/default.nix \
-  modules/packages/_waywallen/default.nix \
-  modules/packages/_waywallen-kde-plugin/default.nix
+  modules/packages/_{bootdev-cli,helium,strata,waywallen,waywallen-kde-plugin}/default.nix
 if git diff --cached --quiet; then
   echo "Everything is already up to date."
 else
