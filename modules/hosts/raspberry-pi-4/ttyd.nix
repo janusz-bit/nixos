@@ -63,9 +63,7 @@ _: {
         writeable = true;
         # `login` zakłada sesje użytkowników, więc musi działać jako root.
         user = "root";
-        entrypoint = [
-          (lib.getExe' pkgs.shadow "login")
-        ];
+        entrypoint = [ (lib.getExe' pkgs.shadow "login") ];
         # Obrazki (Sixel, iTerm2 IIP) w xterm.js; tmux przepuszcza Sixel
         # (terminal-features w base/shell.nix).
         clientOptions.enableSixel = "true";

@@ -17,7 +17,6 @@ _: {
           server = {
             ROOT_URL = "https://git.${config.customTop.domain}/";
             HTTP_ADDR = "127.0.0.1";
-            HTTP_PORT = 3000;
             START_SSH_SERVER = false;
             # Klonowanie przez SSH idzie przez ssh.<domena> (git.<domena> tunel
             # podaje tylko jako HTTP); jawny `gitea@` wygrywa z `User root`

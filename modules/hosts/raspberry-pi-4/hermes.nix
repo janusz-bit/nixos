@@ -26,10 +26,7 @@
 # Sprawdzenie: `systemctl status hermes-agent`, `journalctl -u hermes-agent -b`,
 # `hermes plugins list`; aktywacja:
 # `nix build -L .#checks.aarch64-linux.hermes-activation` (kvm).
-{
-  inputs,
-  ...
-}:
+{ inputs, ... }:
 {
   flake.modules.nixos.rpi-hermes =
     {
@@ -210,8 +207,6 @@
             config.age.secrets.hermes-env.path
             config.age.secrets.llmgateway-api-key.path
           ];
-          restart = "always";
-          restartSec = 5;
 
           extraPlugins = [
             claudeSubscriptionPlugin
@@ -230,13 +225,11 @@
             python311
           ];
 
-          mcpServers = {
-            # Pakiet z nixpkgs zamiast `uvx mcp-nixos` (niepinowany PyPI w runtime).
-            nixos = {
-              command = lib.getExe pkgs.mcp-nixos;
-              connect_timeout = 30;
-              timeout = 60;
-            };
+          # Pakiet z nixpkgs zamiast `uvx mcp-nixos` (niepinowany PyPI w runtime).
+          mcpServers.nixos = {
+            command = lib.getExe pkgs.mcp-nixos;
+            connect_timeout = 30;
+            timeout = 60;
           };
         };
 
@@ -268,21 +261,19 @@
           ExecStart = lib.mkForce (lib.getExe ollamaServe);
         };
 
-        hermes-agent.serviceConfig = {
-          # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie
-          # blokują start (temporary-fixes.md nr 3). Rekord hosta (gateway-locks
-          # w $XDG_STATE_HOME) przeżywa też twardy reset: jego PID trafia potem
-          # na inny proces, a bramka czeka na niego bez końca. Bez „+”: katalog
-          # należy do hermes, więc rm działa jako użytkownik usługi niezależnie
-          # od właściciela pliku.
-          ExecStartPre =
-            let
-              hostLocks = "${cfg.stateDir}/.local/state/hermes/gateway-locks";
-            in
-            lib.mkBefore [
-              "${pkgs.coreutils}/bin/rm -f ${hermesHome}/gateway.lock ${hermesHome}/gateway.pid ${hermesHome}/gateway_state.json ${hostLocks}/host-gateway.json ${hostLocks}/host-gateway.token"
-            ];
-        };
+        # Nieaktualne pliki blokady/stanu bramki po przerwanym procesie
+        # blokują start (temporary-fixes.md nr 3). Rekord hosta (gateway-locks
+        # w $XDG_STATE_HOME) przeżywa też twardy reset: jego PID trafia potem
+        # na inny proces, a bramka czeka na niego bez końca. Bez „+”: katalog
+        # należy do hermes, więc rm działa jako użytkownik usługi niezależnie
+        # od właściciela pliku.
+        hermes-agent.serviceConfig.ExecStartPre =
+          let
+            hostLocks = "${cfg.stateDir}/.local/state/hermes/gateway-locks";
+          in
+          lib.mkBefore [
+            "${pkgs.coreutils}/bin/rm -f ${hermesHome}/gateway.lock ${hermesHome}/gateway.pid ${hermesHome}/gateway_state.json ${hostLocks}/host-gateway.json ${hostLocks}/host-gateway.token"
+          ];
       };
     };
 }

@@ -52,7 +52,6 @@
 
           config.dbtype = "pgsql";
 
-          configureRedis = true;
           maxUploadSize = "2G";
 
           # Domyślne max_children=120 × ~55 MB = 6,6 GB przy 4 GB RAM: pod
