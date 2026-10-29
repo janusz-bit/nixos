@@ -25,28 +25,22 @@ _: {
         "v /home/.snapshots 0750 root root -"
       ];
 
-      services.snapper = {
-        snapshotInterval = "hourly";
-        cleanupInterval = "1d";
-        configs = {
-          root = commonConfig // {
-            SUBVOLUME = "/";
-            TIMELINE_LIMIT_HOURLY = 5;
-            TIMELINE_LIMIT_WEEKLY = 2;
-            TIMELINE_LIMIT_MONTHLY = 0;
-          };
-          home = commonConfig // {
-            SUBVOLUME = "/home";
-            TIMELINE_LIMIT_HOURLY = 10;
-            TIMELINE_LIMIT_WEEKLY = 4;
-            TIMELINE_LIMIT_MONTHLY = 3;
-          };
+      services.snapper.configs = {
+        root = commonConfig // {
+          SUBVOLUME = "/";
+          TIMELINE_LIMIT_HOURLY = 5;
+          TIMELINE_LIMIT_WEEKLY = 2;
+          TIMELINE_LIMIT_MONTHLY = 0;
+        };
+        home = commonConfig // {
+          SUBVOLUME = "/home";
+          TIMELINE_LIMIT_HOURLY = 10;
+          TIMELINE_LIMIT_WEEKLY = 4;
+          TIMELINE_LIMIT_MONTHLY = 3;
         };
       };
 
-      environment.systemPackages = with pkgs; [
-        snapper
-        snapper-gui
-      ];
+      # CLI snapper instaluje sam moduł services.snapper.
+      environment.systemPackages = [ pkgs.snapper-gui ];
     };
 }

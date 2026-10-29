@@ -17,8 +17,8 @@
       imports = [
         self.modules.nixos.hardware-lenovo
         self.modules.nixos.hardware-x86-64-v3
+        # Importuje też common-gpu-intel (sterowniki VA-API/OpenCL iGPU).
         inputs.nixos-hardware.nixosModules.common-cpu-intel
-        inputs.nixos-hardware.nixosModules.common-gpu-intel
         inputs.nixos-hardware.nixosModules.common-gpu-nvidia
         inputs.nixos-hardware.nixosModules.common-pc-laptop
         inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
@@ -47,11 +47,9 @@
           enable32Bit = true;
         };
         nvidia = {
-          modesetting.enable = true;
           powerManagement.enable = true;
           powerManagement.finegrained = lib.mkDefault true;
           open = true;
-          nvidiaSettings = true;
           # Dynamic Boost (nvidia-powerd) przesuwa budżet mocy z CPU na GPU
           # w grach GPU-bound; bez demona GPU nie dostaje watów wliczonych
           # w maksymalne TGP (`nvidia-smi -q -d POWER` pod obciążeniem: Current
@@ -61,10 +59,8 @@
           package = config.boot.kernelPackages.nvidiaPackages.latest;
           # Tryb offload i polecenie nvidia-offload włącza common-gpu-nvidia
           # (nixos-hardware).
-          prime = {
-            intelBusId = "PCI:0:2:0";
-            nvidiaBusId = "PCI:1:0:0";
-          };
+          prime.intelBusId = "PCI:0:2:0";
+          prime.nvidiaBusId = "PCI:1:0:0";
         };
       };
     };

@@ -19,16 +19,12 @@ in
   flake.modules.nixos.nixos-disko = _: {
     imports = [ inputs.disko.nixosModules.default ];
 
-    boot = {
-      supportedFilesystems = [ "btrfs" ];
-      # Hibernacja na zaszyfrowany swap z układu niżej (resumeDevice sam
-      # dodaje parametr resume=).
-      resumeDevice = "/dev/mapper/swap";
-    };
+    # Hibernacja na zaszyfrowany swap z układu niżej (resumeDevice sam
+    # dodaje parametr resume=).
+    boot.resumeDevice = "/dev/mapper/swap";
     services.btrfs.autoScrub.enable = true;
 
     disko.devices.disk.main = {
-      type = "disk";
       # Stabilna ścieżka: numeracja nvme0/nvme1 zmienia się między bootami, a
       # drugi dysk (Micron 1 TB) to Windows — install-system robi destroy.
       device = "/dev/disk/by-id/nvme-WD_BLACK_SN850X_4000GB_244363800090";
