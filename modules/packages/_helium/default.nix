@@ -39,7 +39,6 @@
   fetchurl,
   bintools,
   makeWrapper,
-  patchelf,
   nix-update-script,
   versionCheckHook,
 
@@ -121,13 +120,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src =
     let
-      arch =
-        {
-          x86_64-linux = "x86_64";
-          aarch64-linux = "arm64";
-        }
-        .${stdenvNoCC.hostPlatform.system}
-          or (throw "helium: unsupported system ${stdenvNoCC.hostPlatform.system}");
+      arch = if stdenvNoCC.hostPlatform.isAarch64 then "arm64" else "x86_64";
     in
     fetchurl {
       url = "https://github.com/imputnet/helium-linux/releases/download/${finalAttrs.version}/helium-${finalAttrs.version}-${arch}_linux.tar.xz";
@@ -139,10 +132,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         .${arch};
     };
 
-  nativeBuildInputs = [
-    makeWrapper
-    patchelf
-  ];
+  nativeBuildInputs = [ makeWrapper ];
 
   # Setup hooki wypełniają $XDG_ICON_DIRS i $GSETTINGS_SCHEMAS_PATH dla
   # wrappera; bez schematów GTK przerywa proces przy dialogach (np. wydruku).

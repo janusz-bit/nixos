@@ -20,7 +20,6 @@
   stdenvNoCC,
   fetchurl,
   makeWrapper,
-  patchelf,
   bintools, # readelf — offset payloadu squashfs w AppImage
   squashfsTools,
   unzip,
@@ -138,12 +137,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   dontBuild = true;
   # binarki z releasu mają zostać dokładnie takie, jak wydał je upstream
   dontFixup = true;
-  dontStrip = true;
 
   nativeBuildInputs = [
     bintools
     makeWrapper
-    patchelf
     squashfsTools
     unzip
   ];

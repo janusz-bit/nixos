@@ -46,7 +46,6 @@ buildGoModule (finalAttrs: {
   '';
 
   nativeInstallCheckInputs = [ versionCheckHook ];
-  versionCheckProgram = "${placeholder "out"}/bin/bootdev";
   doInstallCheck = true;
 
   passthru.updateScript = nix-update-script { };

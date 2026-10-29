@@ -89,8 +89,7 @@ let
     ];
     text = ''
       app=@app@
-      STRATA_INSTALL_DIR=''${STRATA_INSTALL_DIR:-''${XDG_DATA_HOME:-$HOME/.local/share}/strata/install}
-      export STRATA_INSTALL_DIR
+      export STRATA_INSTALL_DIR=''${STRATA_INSTALL_DIR:-''${XDG_DATA_HOME:-$HOME/.local/share}/strata/install}
       export STRATA_COMPONENTS_DIR="$app/components"
       export STRATA_UPDATE_FEED="$app/no-update-feed"
       export STRATA_CONTROL_INSTALL=1
@@ -112,10 +111,7 @@ let
       for config in "$STRATA_INSTALL_DIR"/strata-*.json; do
         [ -f "$config" ] || continue
         while IFS= read -r path; do
-          if [ ! -e "$path" ]; then
-            rm -- "$config"
-            break
-          fi
+          [ -e "$path" ] || { rm -- "$config"; break; }
         done < <(grep -oE '/nix/store/[^/"]+' "$config" | sort -u)
       done
 
@@ -169,12 +165,10 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     app=$out/share/strata
-    mkdir -p $app/docs $app/bench/prompts $app/ref
-    cp -r strata.py strata_control strata_cli serve tools data setup.py \
-      requirements.txt requirements-monitor.txt $app/
-    cp docs/MANAGEMENT_PROTOCOL.md docs/TERMINAL_LAUNCH.md $app/docs/
-    cp -r bench/prompts/standard-v1 $app/bench/prompts/
-    cp ref/load.py $app/ref/
+    mkdir -p $app
+    cp -r --parents strata.py strata_control strata_cli serve tools data setup.py \
+      requirements.txt requirements-monitor.txt docs/MANAGEMENT_PROTOCOL.md \
+      docs/TERMINAL_LAUNCH.md bench/prompts/standard-v1 ref/load.py $app/
     # `strata install` szuka setup.py w STRATA_INSTALL_DIR, a tu katalog
     # instalacji (dane użytkownika) jest oddzielony od aplikacji w store;
     # `strata launch` uruchamia setup.py z aplikacji, więc install robi to samo.
@@ -202,8 +196,7 @@ stdenv.mkDerivation (finalAttrs: {
           --arg sha256 "$(sha256sum "$file" | cut -d ' ' -f 1)" \
           --argjson bytes "$(stat -c %s "$file")" \
           '{ $path, $sha256, $bytes }'
-      done | jq -s . > $TMPDIR/files.json
-      jq --slurpfile files $TMPDIR/files.json '.files = $files[0] | .signature = null' \
+      done | jq --slurpfile files /dev/stdin '.files = $files | .signature = null' \
         engine-component.json > $TMPDIR/engine-component.json
     )
     mv $TMPDIR/engine-component.json $engine/engine-component.json
