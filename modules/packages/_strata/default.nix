@@ -175,6 +175,12 @@ stdenv.mkDerivation (finalAttrs: {
     cp docs/MANAGEMENT_PROTOCOL.md docs/TERMINAL_LAUNCH.md $app/docs/
     cp -r bench/prompts/standard-v1 $app/bench/prompts/
     cp ref/load.py $app/ref/
+    # `strata install` szuka setup.py w STRATA_INSTALL_DIR, a tu katalog
+    # instalacji (dane użytkownika) jest oddzielony od aplikacji w store;
+    # `strata launch` uruchamia setup.py z aplikacji, więc install robi to samo.
+    substituteInPlace $app/strata_cli/cli.py --replace-fail \
+      'installer = Path(os.environ.get("STRATA_INSTALL_DIR") or ROOT) / "setup.py"' \
+      'installer = ROOT / "setup.py"'
     sed -n 's/^[[:space:]]*project([^)]*VERSION[[:space:]]*\([0-9][0-9.]*\).*/\1/p' CMakeLists.txt \
       | head -n 1 > $app/VERSION
     test -s $app/VERSION
