@@ -20,6 +20,10 @@
     # Loguje WYŁĄCZNIE na konto hermes RPi z localhost, z wymuszonym poleceniem
     # hermes-notify-receive (modules/claude-notify/); prywatny w hermes-notify-key.age.
     hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
+    # Tunel Hermesa z RPi: loguje WYŁĄCZNIE na konto hermes-llm laptopa (bez
+    # powłoki), tylko przekierowanie do 127.0.0.1:8080 (modules/hosts/laptop-llm.nix);
+    # prywatny w hermes-llm-key.age.
+    hermes-llm = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKQy5thFkH4g3VD6V5Wi11rjw7Z9l6U74czp6633qeoZ hermes-llm";
   };
   # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts.
   sshHostKeys = {

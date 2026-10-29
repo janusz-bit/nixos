@@ -40,6 +40,8 @@ in
   "hermes-matrix.age" = mkSecret allHosts;
   # Prywatny klucz SSH claude-notify (modules/claude-notify/default.nix).
   "hermes-notify-key.age" = mkSecret allHosts;
+  # Prywatny klucz SSH tunelu Hermesa do LLM laptopa (modules/hosts/laptop-llm.nix).
+  "hermes-llm-key.age" = mkSecret allHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
   # Format env z nazwami sekretów CI github:janusz-bit/brulion:
   # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,

@@ -33,6 +33,7 @@
         self.modules.nixos.base-lockdown
         self.modules.nixos.nixos-ai
         self.modules.nixos.nixos-remote-agent
+        self.modules.nixos.nixos-laptop-llm
         self.modules.nixos.nixos-claude-notify
       ];
 
