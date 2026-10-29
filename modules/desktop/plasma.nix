@@ -8,7 +8,6 @@ _: {
     services = {
       displayManager.sddm = {
         enable = true;
-        wayland.enable = true;
         autoNumlock = true;
       };
       desktopManager.plasma6.enable = true;

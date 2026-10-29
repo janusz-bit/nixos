@@ -7,13 +7,10 @@
 # `id` nie pokazuje grupy podman.
 _: {
   flake.modules.nixos.desktop-podman = _: {
-    virtualisation = {
-      containers.enable = true;
-      podman = {
-        enable = true;
-        dockerCompat = true;
-        defaultNetwork.settings.dns_enabled = true;
-      };
+    virtualisation.podman = {
+      enable = true;
+      dockerCompat = true;
+      defaultNetwork.settings.dns_enabled = true;
     };
   };
 }

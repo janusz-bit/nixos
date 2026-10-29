@@ -69,7 +69,6 @@ _: {
     # po restarcie (restartIfChanged = false).
     zramSwap = {
       enable = true;
-      algorithm = "zstd";
       priority = 100;
       memoryPercent = 100;
     };
