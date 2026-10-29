@@ -244,6 +244,16 @@ na hoście bez base-lockdown lista nic nie robi.
 - Default: `[ ]`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
+### `customBot.tailnetAddress`
+
+Adres hosta w tailnecie (headscale), na którym nginx słucha
+vhostów dostępnych tylko z tailnetu; null = host bez tailnetu.
+Ustawia go rpi-tailnet.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
 ### `customBot.triliumMcpUrl`
 
 Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla

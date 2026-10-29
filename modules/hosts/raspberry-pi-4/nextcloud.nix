@@ -1,10 +1,13 @@
-# Nextcloud 35 pod domeną główną (customTop.domain): PostgreSQL i Redis
+# Nextcloud 35 pod nextcloud.<domena> (customTop.domain): PostgreSQL i Redis
 # lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny
-# wyłącznie przez Cloudflare Tunnel (cloudflared → nginx :80).
+# wyłącznie z tailnetu (tailnet.nix: nginx na adresie tailnetu, HTTPS z
+# Let's Encrypt przez DNS-01, nazwa tylko w MagicDNS headscale). Nie ma go
+# w Cloudflare Tunnel, w LAN-ie ani w internecie, a publiczne linki do
+# udostępniania plików nie działają. Aplikacje mobilne wymagają włączonego
+# klienta tailnetu.
 #
-# Dostęp z LAN-u celowo odcięty: nginx słucha na :80 tylko na localhost
-# (defaultListenAddresses w network.nix) i nie ma mDNS (avahi). Ten vhost
-# serwuje też /.well-known/matrix/client (matrix.nix).
+# Domena główna zostaje w tunelu tylko dla /.well-known/matrix/client
+# (matrix.nix), na własnym vhoście bez Nextcloudu.
 #
 # nixpkgs instaluje bez admina (`occ maintenance:install --disable-admin-user`):
 # po świeżej instalacji `sudo nextcloud-occ user:add <nazwa>` i
@@ -27,7 +30,8 @@
     }:
     {
       # PHP2Shell (CVE-2026-109618, CVE-2026-109619): nieuwierzytelnione RCE
-      # w PHP, poprawione w 8.4.27; Nextcloud jest wystawiony do internetu.
+      # w PHP, poprawione w 8.4.27; tailnet ogranicza dostęp do urządzeń
+      # z kluczem, ale nie zastępuje poprawki.
       assertions = [
         {
           assertion = lib.versionAtLeast config.services.nextcloud.phpPackage.version "8.4.27";
@@ -38,7 +42,8 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = config.customTop.domain;
+          hostName = "nextcloud.${config.customTop.domain}";
+          https = true;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
           package = pkgs.nextcloud35;
@@ -67,28 +72,21 @@
 
           phpOptions."opcache.interned_strings_buffer" = "16";
 
-          # Za tunelem (TLS w Cloudflare, HTTP z localhost):
-          # - overwriteprotocol: inaczej linki http:// (psuło logowanie
-          #   z aplikacji mobilnej);
-          # - overwrite.cli.url: occ, cron i maile nie znają publicznego adresu
-          #   (inaczej linki na localhost);
-          # - trusted_proxies: ruch z tunelu przychodzi z pętli zwrotnej, a jej
-          #   zaufanie każe brać adres klienta z X-Forwarded-For, więc logi
-          #   i ochrona przed brute force widzą prawdziwe IP, nie 127.0.0.1.
+          # occ, cron i maile nie znają adresu nginxa (inaczej linki na
+          # localhost).
           settings = {
             maintenance_window_start = 1;
-            overwriteprotocol = "https";
-            "overwrite.cli.url" = "https://${config.customTop.domain}";
-            trusted_proxies = [
-              "127.0.0.1"
-              "::1"
-            ];
+            "overwrite.cli.url" = "https://${config.services.nextcloud.hostName}";
           };
         };
 
-        nginx.virtualHosts.${config.customTop.domain}.extraConfig = ''
-          add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
-        '';
+        nginx.virtualHosts.${config.services.nextcloud.hostName} = {
+          listenAddresses = [ config.customBot.tailnetAddress ];
+          forceSSL = true;
+          enableACME = true;
+          # Certyfikat przez DNS-01 (tailnet.nix), nie przez webroot.
+          acmeRoot = null;
+        };
 
         postgresql.settings = {
           shared_buffers = "128MB";

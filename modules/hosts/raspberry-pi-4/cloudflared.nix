@@ -1,13 +1,15 @@
 # Cloudflare Tunnel `raspberry-pi-4`: jedyna droga z internetu do usług RPi
-# (Nextcloud, ttyd, SSH, Gitea, Matrix); nieznane nazwy hostów dostają 404.
-# Mapa (ingress niżej): <domena> → nginx :80 (Nextcloud),
+# (ttyd, SSH, Gitea, Matrix, headscale); nieznane nazwy hostów dostają 404.
+# Mapa (ingress niżej): <domena> → nginx :80 (tylko Matrix well-known),
 # ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
-# git. → :3000 (Gitea), matrix. → :6167 (continuwuity).
+# git. → :3000 (Gitea), matrix. → :6167 (continuwuity),
+# hs. → :8085 (headscale). Nextcloud i t3code są poza tunelem, tylko w
+# tailnecie (tailnet.nix).
 #
 # Usługi WWW nie mają portów otwartych w firewallu, a TLS kończy się
 # w Cloudflare. Ruch z tunelu dochodzi do usług z 127.0.0.1/::1, więc adres
 # klienta widać tylko w nagłówkach X-Forwarded-For/CF-Connecting-IP
-# (Nextcloud trusted_proxies, limit żądań ttyd), a sshd widzi logowania przez
+# (limit żądań ttyd), a sshd widzi logowania przez
 # ssh.<domena> jako lokalne (`cloudflared access ssh` po stronie klienta,
 # base-ssh).
 #
@@ -34,7 +36,8 @@ _: {
 
       # lockdown (base-lockdown) zostawia tunel, bo niesie ssh.<domena>
       # (zatrzymany odciąłby też sesję, z której go włączono), i zatrzymuje
-      # jego backendy HTTP: nginx (Nextcloud, ttyd), Gitea i continuwuity.
+      # jego backendy HTTP: nginx (ttyd, Matrix well-known), Gitea i
+      # continuwuity (headscale zatrzymuje tailnet.nix).
       customBot.lockdownServices = [
         "nginx"
         "gitea"
@@ -51,16 +54,10 @@ _: {
           credentialsFile = config.age.secrets.cloudflared-tunnel.path;
           default = "http_status:404";
           ingress = {
-            # Domyślne connectTimeout 30 s zrywało uploady zdjęć ("stream
-            # canceled by remote"); 300 s daje PHP-FPM czas przy presji pamięci.
-            ${domain} = {
-              service = localHttp 80;
-              originRequest = {
-                connectTimeout = "300s";
-                keepAliveConnections = 10;
-                keepAliveTimeout = "2m";
-              };
-            };
+            # Vhost domeny głównej serwuje tylko /.well-known/matrix/client
+            # (matrix.nix).
+            ${domain} = localHttp 80;
+            "hs.${domain}" = localHttp config.services.headscale.port;
             # nginx z Basic Auth przed ttyd (ttyd.nix).
             "ttyd.${domain}" = localHttp 8083;
             "ssh.${domain}" = "ssh://localhost:22";

@@ -60,6 +60,15 @@ in
             Trilium na 37840.
           '';
         };
+        tailnetAddress = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = ''
+            Adres hosta w tailnecie (headscale), na którym nginx słucha
+            vhostów dostępnych tylko z tailnetu; null = host bez tailnetu.
+            Ustawia go rpi-tailnet.
+          '';
+        };
         lockdownServices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [ ];

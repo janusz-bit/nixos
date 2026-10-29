@@ -74,10 +74,9 @@ _: {
           };
         };
 
-        # server_name to domena główna, którą serwuje Nextcloud: delegacja
-        # klientów na matrix.${domain}. Dokładne `=` ma pierwszeństwo przed
-        # `^~ /.well-known` z modułu nextcloud. Odpowiedź i nagłówek CORS daje
-        # continuwuity — własny add_header w lokacji skasowałby nagłówki
+        # server_name to domena główna, na której nginx ma tylko ten vhost:
+        # delegacja klientów na matrix.${domain}. Odpowiedź i nagłówek CORS
+        # daje continuwuity — własny add_header w lokacji skasowałby nagłówki
         # bezpieczeństwa vhosta (gixy: add_header_redefinition).
         services.nginx.virtualHosts.${domain}.locations."= /.well-known/matrix/client".proxyPass = localUrl;
       }
