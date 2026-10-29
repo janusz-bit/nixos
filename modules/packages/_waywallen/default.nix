@@ -197,9 +197,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # wrapper odtwarza env z AppRun + biblioteki, których nie ma w bundlu
     makeWrapper $out/usr/bin/waywallen $out/bin/waywallen \
       --prefix LD_LIBRARY_PATH : "$out/usr/lib" \
-      --prefix LD_LIBRARY_PATH : "${
-        lib.makeLibraryPath (deps ++ [ "${addDriverRunpath.driverLink}/lib" ])
-      }" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath (deps ++ [ addDriverRunpath.driverLink ])}" \
       --prefix QT_PLUGIN_PATH : "$out/usr/plugins" \
       --prefix QML2_IMPORT_PATH : "$out/usr/qml" \
       --prefix QML_IMPORT_PATH : "$out/usr/qml"
