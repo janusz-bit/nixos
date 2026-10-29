@@ -109,7 +109,10 @@ in
 
         sync-github-actions = pkgs.writeShellApplication {
           name = "sync-github-actions";
-          runtimeInputs = [ pkgs.coreutils ];
+          runtimeInputs = [
+            pkgs.coreutils
+            pkgs.findutils
+          ];
           text = ''
             workflows=${lib.escapeShellArg config.githubActions.workflowsDir}
             echo "Syncing workflows from $workflows to .github/workflows/..."
