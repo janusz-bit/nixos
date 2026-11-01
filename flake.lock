@@ -27,11 +27,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793490797,
-        "narHash": "sha256-ws6/4/VsWQCOCPXATie0bj4Lqlf+AEAeLh6vuFB/14o=",
+        "lastModified": 1793535472,
+        "narHash": "sha256-QFBf/QT6JPVkLc/UuxOkfau+gKdzIb3Fc5Bd1HEblWg=",
         "owner": "janusz-bit",
         "repo": "brulion",
-        "rev": "cb962359d29547adb76d1fc8a060a662976dbb26",
+        "rev": "3ab28be54b5944767a429b16db9613a314b05579",
         "type": "github"
       },
       "original": {
