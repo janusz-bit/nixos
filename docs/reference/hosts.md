@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 39 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -32,6 +32,7 @@ flowchart LR
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_laptop_llm[nixos-laptop-llm]
   host_nixos --> nixos_claude_notify[nixos-claude-notify]
+  host_nixos --> nixos_tailnet[nixos-tailnet]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
   ai --> ai_models[ai-models]
@@ -126,6 +127,7 @@ flowchart LR
 - `nixos-laptop-llm` — [hosts/laptop-llm.nix](../../modules/hosts/laptop-llm.nix)
 - `nixos-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
+- `nixos-tailnet` — [hosts/nixos/tailnet.nix](../../modules/hosts/nixos/tailnet.nix)
 
 ## raspberry-pi-4
 
