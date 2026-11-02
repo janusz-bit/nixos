@@ -274,6 +274,26 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   potem usunąć `phpPackage` i, jeśli nic innego go nie używa, input
   `nixpkgs-unstable-small` (`nix flake lock`) — asercja zostaje.
 
+### 13. Lutris — środowisko FHS bez `gtk2` (broken w nixpkgs)
+
+- **Od:** 2026-11-02.
+- **Plik:** `modules/gaming/launchers.nix` (`lutrisWithoutGtk2`).
+- **Objaw:** `nixos-rebuild` kończy się `Refusing to evaluate package
+  'gtk+-2.24.33' ... broken` (ślad: `man-db` → `lutris-fhsenv-rootfs`).
+- **Przyczyna:** `pkgs/by-name/lu/lutris/package.nix` ma `gtk2` na sztywno
+  w `multiPkgs`, a gtk2 jest oznaczone jako broken
+  (https://github.com/NixOS/nixpkgs/issues/410814, usunięcie przed NixOS 27.05).
+  Tego samego `gtk2` ciągnął `zulu8` w `prismlauncher`; `zulu8` usunięto z
+  `jdks` (Minecraft sprzed 1.17 wymaga Javy 8 — dodać inne JDK 8, np.
+  `temurin-bin-8`, jeśli będzie potrzebne).
+- **Obejście:** `lutris.override` owija `buildFHSEnv` i odfiltrowuje z
+  `multiPkgs` pakiety o `pname == "gtk+"`. Gry/instalatory wymagające 32-bitowego
+  gtk2 przez Lutris mogą przestać działać.
+- **Kiedy usunąć:** gdy nixpkgs usunie `gtk2` z `lutris` (lub zwykły
+  `pkgs.lutris` znów się ewaluuje). Sprawdzenie: podmienić
+  `lutrisWithoutGtk2` na `lutris` i `nix eval --raw
+  .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

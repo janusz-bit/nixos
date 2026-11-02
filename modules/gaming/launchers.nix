@@ -2,7 +2,22 @@
 # (Minecraft) i ProtonUp-Qt (wersje Protona/Wine dla launcherów).
 _: {
   flake.modules.nixos.gaming-launchers =
-    { pkgs, ... }:
+    { lib, pkgs, ... }:
+    let
+      # Środowisko FHS lutrisa ma gtk2 na sztywno w multiPkgs, a gtk2 jest
+      # w nixpkgs oznaczone jako broken (temporary-fixes.md, wpis 13).
+      # Porównanie po pname, bo == na derivation wymusiłoby outPath i błąd.
+      lutrisWithoutGtk2 = pkgs.lutris.override {
+        buildFHSEnv =
+          args:
+          pkgs.buildFHSEnv (
+            args
+            // {
+              multiPkgs = fhsPkgs: lib.filter (pkg: (pkg.pname or "") != "gtk+") (args.multiPkgs fhsPkgs);
+            }
+          );
+      };
+    in
     {
       environment.systemPackages = with pkgs; [
         heroic
@@ -12,12 +27,11 @@ _: {
           additionalPrograms = [ ffmpeg ];
           jdks = [
             graalvmPackages.graalvm-ce
-            zulu8
             zulu17
             zulu
           ];
         })
-        lutris
+        lutrisWithoutGtk2
       ];
     };
 }
