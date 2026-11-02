@@ -1,4 +1,4 @@
-# T3 Code (pingdotgg/t3code, pakiet z nixpkgs): webowy interfejs do agentów
+# T3 Code (pingdotgg/t3code, pakiet z flake llm-agents): webowy interfejs do agentów
 # kodujących (Claude Code, Codex, OpenCode), dostępny wyłącznie z tailnetu:
 # https://t3.<domena> -> nginx na adresie tailnetu RPi (tailnet.nix) -> t3
 # na 127.0.0.1:3773.
@@ -20,7 +20,8 @@
 #
 # Sprawdzenie: `systemctl status t3code`, `journalctl -u t3code -b`,
 # `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3773/` (200).
-_: {
+{ inputs, ... }:
+{
   flake.modules.nixos.rpi-t3code =
     {
       config,
@@ -31,11 +32,12 @@ _: {
     let
       port = 3773;
       home = "/var/lib/t3code";
+      t3code = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code;
     in
     {
       customBot.lockdownServices = [ "t3code" ];
 
-      environment.systemPackages = [ pkgs.t3code ];
+      environment.systemPackages = [ t3code ];
 
       users = {
         users.t3code = {
@@ -62,7 +64,7 @@ _: {
           T3CODE_HOME = home;
         };
         serviceConfig = {
-          ExecStart = "${lib.getExe' pkgs.t3code "t3"} serve --mode web --host 127.0.0.1 --port ${toString port} --no-browser";
+          ExecStart = "${lib.getExe' t3code "t3"} serve --mode web --host 127.0.0.1 --port ${toString port} --no-browser";
           User = "t3code";
           Group = "t3code";
           StateDirectory = "t3code";
