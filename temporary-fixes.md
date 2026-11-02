@@ -187,7 +187,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `journalctl --user -u kde-baloo.service -b` nie może mieć `Extractor
   crashed`.
 
-### 9. llama.cpp (fork PrismML) — testy niezgodne z flagami nixpkgs
+### 9. llama.cpp (fork PrismML) — testy niezgodne z flagami budowania
 
 - **Od:** 2026-10-20.
 - **Plik:** `modules/packages/_llama-cpp-prism/default.nix` (`postPatch` — dwa
@@ -203,8 +203,7 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `test-barrier` przez `if (NOT GGML_BACKEND_DL)`), drugi nie woła
   `llama_backend_init()` — ta sama klasa błędu, którą upstream naprawił
   w `test-llama-archs` (ggml-org/llama.cpp#30034). Asercja qwen35 i brak
-  metadanych dspark to błędy forka w kodzie grafu/testów. `test-save-load-state`
-  dodano po wersji nixpkgs, dla której pisano `disabledTests`.
+  metadanych dspark to błędy forka w kodzie grafu/testów.
 - **Obejście:** `test-dfly-fusion` pod `if (NOT GGML_BACKEND_DL)` (jak
   mainline), `llama_backend_init()` w `test-kv-mean-center`, reszta w
   `disabledTests`.
