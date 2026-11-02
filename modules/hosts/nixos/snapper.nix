@@ -1,6 +1,7 @@
 # Snapper na laptopie: godzinowe snapshoty timeline podwolumenów btrfs / i
 # /home (układ z disko.nix), sprzątane codziennie według limitów retencji;
-# customBot.defaultUser obsługuje je bez roota (ALLOW_USERS), też w snapper-gui.
+# customBot.defaultUser obsługuje je z CLI bez roota (ALLOW_USERS), a GUI to
+# btrfs-assistant (startuje przez pkexec, pyta o hasło).
 #
 # Sprawdzenie: `snapper -c root list`, `snapper -c home list`,
 # `systemctl status snapper-timeline.timer snapper-cleanup.timer`.
@@ -41,6 +42,8 @@ _: {
       };
 
       # CLI snapper instaluje sam moduł services.snapper.
-      environment.systemPackages = [ pkgs.snapper-gui ];
+      # Nie snapper-gui: porzucony kod wymaga pkg_resources, którego nie ma już w
+      # setuptools >= 82, więc pada przy starcie.
+      environment.systemPackages = [ pkgs.btrfs-assistant ];
     };
 }
