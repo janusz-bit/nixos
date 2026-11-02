@@ -52,6 +52,7 @@
           # tylko pod aliasem llama-prism (ai/models.nix).
           (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
           unsloth-desktop
+          inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
         ]
         # Strata ma tylko silnik CUDA (pakiet z wydania, _strata).
         ++ lib.optional config.hardware.nvidia.enabled strata;
