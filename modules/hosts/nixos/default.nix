@@ -19,7 +19,6 @@
     { config, ... }:
     let
       user = config.customBot.defaultUser;
-      inherit (config.customTop) keys;
     in
     {
       imports = [
@@ -36,6 +35,7 @@
         self.modules.nixos.nixos-remote-agent
         self.modules.nixos.nixos-laptop-llm
         self.modules.nixos.nixos-claude-notify
+        self.modules.nixos.nixos-tailnet
       ];
 
       system.stateVersion = "25.11";
@@ -55,13 +55,6 @@
           extraGroups = [
             "networkmanager"
             "wheel"
-          ];
-          # Klucze użytkownika (także przez RPi jako jump host, base/ssh.nix);
-          # kluczy hostów, w tym RPi, tu nie ma — RPi loguje się wyłącznie
-          # jako claude-remote.
-          openssh.authorizedKeys.keys = [
-            keys.users.janusz-bit
-            keys.users.phone
           ];
         };
         root.initialPassword = "root";

@@ -35,6 +35,12 @@ in
   # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
   # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
   "hermes-matrix.age" = toAllHosts;
+  # Klucz preautoryzacji RPi w headscale (modules/hosts/raspberry-pi-4/tailnet.nix):
+  # surowy klucz z `headscale preauthkeys create`.
+  "headscale-authkey.age" = toAllHosts;
+  # Token Cloudflare do certyfikatów ACME usług tailnetu (tailnet.nix):
+  # sam token (Zone / DNS / Edit), bez nazwy zmiennej.
+  "acme-cloudflare.age" = toAllHosts;
   # Prywatny klucz SSH claude-notify (modules/claude-notify/default.nix).
   "hermes-notify-key.age" = toAllHosts;
   # Prywatny klucz SSH tunelu Hermesa do LLM laptopa (modules/hosts/laptop-llm.nix).
