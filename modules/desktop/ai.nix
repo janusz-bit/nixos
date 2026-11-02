@@ -52,7 +52,6 @@
           # tylko pod aliasem llama-prism (ai/models.nix).
           (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
           unsloth-desktop
-          cc-switch
         ]
         # Strata ma tylko silnik CUDA (pakiet z wydania, _strata).
         ++ lib.optional config.hardware.nvidia.enabled strata;
