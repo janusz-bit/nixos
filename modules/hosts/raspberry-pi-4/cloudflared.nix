@@ -3,7 +3,7 @@
 # Mapa (ingress niżej): <domena> → nginx :80 (tylko Matrix well-known),
 # ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
 # git. → :3000 (Gitea), matrix. → :6167 (continuwuity),
-# hs. → :8085 (headscale). Nextcloud i t3code są poza tunelem, tylko w
+# hs. → :8085 (headscale). Nextcloud jest poza tunelem, tylko w
 # tailnecie (tailnet.nix).
 #
 # Usługi WWW nie mają portów otwartych w firewallu, a TLS kończy się

@@ -1,9 +1,9 @@
 # Własny tailnet RPi: serwer koordynacyjny headscale (hs.<domena> przez
 # Cloudflare Tunnel, cloudflared.nix), RPi jako jego węzeł (tailscaled)
-# i HTTPS dla usług dostępnych tylko z tailnetu (Nextcloud, t3code).
+# i HTTPS dla usług dostępnych tylko z tailnetu (Nextcloud).
 #
 # Usługa tailnetu to vhost nginx z `listenAddresses = [ tailnetAddress ]`
-# (nextcloud.nix, t3code.nix). Ten moduł dla każdego takiego vhosta:
+# (nextcloud.nix). Ten moduł dla każdego takiego vhosta:
 # - dopisuje rekord A do MagicDNS (`dns.extra_records`), więc nazwa
 #   <usługa>.<domena> rozwiązuje się tylko u klientów tailnetu i publiczny
 #   DNS nie zna jej wcale;
@@ -68,7 +68,7 @@ _: {
         customBot.tailnetAddress = "100.64.0.1";
 
         # headscale: sieć dochodzi do niego tunelem, tailscaled trzyma łączność
-        # wychodzącą z tailnetem, t3code (t3code.nix) wystawia nginx.
+        # wychodzącą z tailnetem.
         customBot.lockdownServices = [
           "headscale"
           "tailscaled"
