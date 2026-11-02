@@ -1,10 +1,9 @@
 # Nextcloud 35 pod nextcloud.<domena> (customTop.domain): PostgreSQL i Redis
-# lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; dostępny
-# wyłącznie z tailnetu (tailnet.nix: nginx na adresie tailnetu, HTTPS z
-# Let's Encrypt przez DNS-01, nazwa tylko w MagicDNS headscale). Nie ma go
-# w Cloudflare Tunnel, w LAN-ie ani w internecie, a publiczne linki do
-# udostępniania plików nie działają. Aplikacje mobilne wymagają włączonego
-# klienta tailnetu.
+# lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; wystawiony do
+# internetu przez Cloudflare Tunnel (cloudflared.nix): TLS kończy się
+# w Cloudflare, a nginx słucha tylko na localhost. Nextcloud jest
+# uwierzytelnianą aplikacją PHP w internecie, więc poprawki PHP (asercja
+# niżej) i aktualizacje pakietu mają pierwszeństwo.
 #
 # Domena główna zostaje w tunelu tylko dla /.well-known/matrix/client
 # (matrix.nix), na własnym vhoście bez Nextcloudu.
@@ -30,8 +29,7 @@
     }:
     {
       # PHP2Shell (CVE-2026-109618, CVE-2026-109619): nieuwierzytelnione RCE
-      # w PHP, poprawione w 8.4.27; tailnet ogranicza dostęp do urządzeń
-      # z kluczem, ale nie zastępuje poprawki.
+      # w PHP, poprawione w 8.4.27; Nextcloud jest dostępny z internetu.
       assertions = [
         {
           assertion = lib.versionAtLeast config.services.nextcloud.phpPackage.version "8.4.27";
@@ -76,16 +74,15 @@
           # localhost).
           settings = {
             maintenance_window_start = 1;
+            # Tunel dochodzi z localhost: bez tego Nextcloud widzi każdego
+            # klienta jako 127.0.0.1 i ma jeden wspólny limit prób logowania;
+            # z zaufanym proxy bierze adres z X-Forwarded-For od Cloudflare.
+            trusted_proxies = [
+              "127.0.0.1"
+              "::1"
+            ];
             "overwrite.cli.url" = "https://${config.services.nextcloud.hostName}";
           };
-        };
-
-        nginx.virtualHosts.${config.services.nextcloud.hostName} = {
-          listenAddresses = [ config.customBot.tailnetAddress ];
-          forceSSL = true;
-          enableACME = true;
-          # Certyfikat przez DNS-01 (tailnet.nix), nie przez webroot.
-          acmeRoot = null;
         };
 
         postgresql.settings = {
