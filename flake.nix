@@ -18,6 +18,11 @@
     # patche kernela są pod własny nixpkgs tego wejścia.
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    # Vendorowy kernel RPi4 (hardware/raspberry-pi-4) z gotowego cache
+    # nixos-raspberrypi zamiast kompilacji kernela z nixos-hardware. NIE
+    # ustawiać follows: cache ma kernel zbudowany własnym nixpkgs tego wejścia.
+    # Gałąź develop: main stoi na starszym kernelu niż nixos-hardware.
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/develop";
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
@@ -51,9 +56,11 @@
   nixConfig = {
     extra-substituters = [
       "https://janusz-bit.cachix.org"
+      "https://nixos-raspberrypi.cachix.org"
     ];
     extra-trusted-public-keys = [
       "janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo="
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
     ];
   };
 

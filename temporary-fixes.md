@@ -293,6 +293,22 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `lutrisWithoutGtk2` na `lutris` i `nix eval --raw
   .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath`.
 
+### 14. Kernel RPi4 z nixos-raspberrypi — `kernelFile` i `deviceTree.enable` podane ręcznie
+
+- **Od:** 2026-11-04.
+- **Plik:** `modules/hardware/raspberry-pi-4/default.nix`
+  (`system.boot.loader.kernelFile = "Image"`, `hardware.deviceTree.enable = true`).
+- **Objaw:** bez nich ewaluacja `raspberry-pi-4` pada na
+  `attribute 'buildDTBs' missing` i `attribute 'target' missing`.
+- **Przyczyna:** kernel z cache nixos-raspberrypi jest zbudowany nixpkgs-em
+  tego wejścia (`nixos-26.05`), którego `buildLinux` nie ma jeszcze passthru
+  `target` i `buildDTBs`; nixpkgs hosta (unstable) bierze z nich wartości
+  domyślne obu opcji. Kernel buduje `Image` i `dtbs/` tak jak wcześniej.
+- **Kiedy usunąć:** gdy nixos-raspberrypi przejdzie na nixpkgs z tymi
+  atrybutami (26.11). Sprawdzenie:
+  `nix eval .#nixosConfigurations.raspberry-pi-4.config.boot.kernelPackages.kernel.buildDTBs`
+  zwraca `true` — wtedy usunąć obie linie i ewaluacja musi przejść.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte
