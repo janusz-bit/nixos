@@ -35,7 +35,6 @@
         self.modules.nixos.nixos-remote-agent
         self.modules.nixos.nixos-laptop-llm
         self.modules.nixos.nixos-claude-notify
-        self.modules.nixos.nixos-tailnet
       ];
 
       system.stateVersion = "25.11";

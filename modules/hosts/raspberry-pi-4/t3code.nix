@@ -1,13 +1,6 @@
 # T3 Code (pingdotgg/t3code, pakiet z flake llm-agents): webowy interfejs do agentów
-# kodujących (Claude Code, Codex, OpenCode), dostępny wyłącznie z tailnetu
-# Tailscale (tailnet.nix): https://raspberry-pi-4.<tailnet>.ts.net ->
-# `tailscale serve` -> t3 na 127.0.0.1:3773. Nie ma go w Cloudflare Tunnel.
-#
-# `tailscale serve` kończy TLS w tailscaled certyfikatem *.ts.net od
-# Tailscale i przekazuje ruch, także WebSockety, bez nginx i ACME. Jego
-# konfiguracja żyje w stanie tailscaled; unit t3code-tailscale-serve nakłada
-# ją przy starcie i czyści przy zatrzymaniu, więc nie zostaje po usunięciu
-# modułu.
+# kodujących (Claude Code, Codex, OpenCode). t3 słucha tylko na
+# 127.0.0.1:3773: nie ma go w Cloudflare Tunnel, w LAN-ie ani w internecie.
 #
 # Serwer to agent z powłoką, więc działa jako osobny użytkownik t3code: bez
 # sudo, bez grup, bez sekretów i bez dostępu do /var/lib innych usług, z
@@ -24,19 +17,12 @@
 # Pamięć: serwer Node plus agent to kilkaset MB przy 4 GB RAM RPi, razem
 # z Nextcloudem i Hermesem; w razie presji pamięci zatrzymaj `t3code`.
 #
-# Sprawdzenie: `systemctl status t3code t3code-tailscale-serve`,
-# `tailscale serve status`,
-# `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3773/` (200),
-# z laptopa w tailnecie `curl -I https://raspberry-pi-4.<tailnet>.ts.net`.
+# Sprawdzenie: `systemctl status t3code`, `journalctl -u t3code -b`,
+# `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3773/` (200).
 { inputs, ... }:
 {
   flake.modules.nixos.rpi-t3code =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { lib, pkgs, ... }:
     let
       port = 3773;
       home = "/var/lib/t3code";
@@ -89,33 +75,5 @@
           RestrictSUIDSGID = true;
         };
       };
-
-      systemd.services.t3code-tailscale-serve =
-        let
-          tailscale = lib.getExe config.services.tailscale.package;
-        in
-        {
-          description = "T3 Code w tailnecie (tailscale serve)";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "tailscaled.service" ];
-          wants = [ "tailscaled.service" ];
-          # `serve` zawodzi, dopóki węzeł nie jest zalogowany (jednorazowe
-          # `tailscale up`, tailnet.nix) i po starcie, zanim tailscaled
-          # połączy się z tailnetem: ponawia bez limitu startów.
-          startLimitIntervalSec = 0;
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = "${tailscale} serve --bg --yes --https=443 http://127.0.0.1:${toString port}";
-            # "-": przy wyłączaniu po `lockdown on` tailscaled już nie działa.
-            ExecStop = "-${tailscale} serve reset";
-            Restart = "on-failure";
-            RestartSec = "30s";
-            # Gdy w tailnecie brakuje HTTPS Certificates, `serve` wypisuje adres
-            # do ich włączenia i może na nie czekać; oneshot bez limitu
-            # zablokowałby przełączenie systemu.
-            TimeoutStartSec = "1min";
-          };
-        };
     };
 }
