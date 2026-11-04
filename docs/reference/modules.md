@@ -48,7 +48,7 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[desktop/obs.nix](../../modules/desktop/obs.nix)** (`desktop-obs`) · hosts: `nixos` — OBS Studio z wtyczkami (przechwytywanie Wayland/PipeWire/Vulkan, usuwanie tła). Z NVIDIĄ wariant CUDA (koder NVENC, akceleracja usuwania tła); bez niej zwykły pakiet, bo pakietów CUDA nie ma w cache.nixos.org i budują się lokalnie (cudaCapabilities ustawia moduł sprzętu).
 - **[desktop/plasma.nix](../../modules/desktop/plasma.nix)** (`desktop-plasma`) · hosts: `nixos` — Sesja graficzna: Plasma 6 na Waylandzie z SDDM, bez serwera X (XWayland uruchamia KWin, a xkb z desktop/locale.nix działa bez services.xserver.enable). KWallet przez PAM konfiguruje moduł plasma6.
 - **[desktop/podman.nix](../../modules/desktop/podman.nix)** (`desktop-podman`) · hosts: `nixos` — Podman do kontenerów rootless: polecenie `docker` jako alias (dockerCompat) i DNS w domyślnej sieci dla podman-compose.
-- **[desktop/printing.nix](../../modules/desktop/printing.nix)** (`desktop-printing`) · hosts: `nixos` — Drukowanie przez CUPS; splix to sterownik drukarek Samsung (SPL).
+- **[desktop/printing.nix](../../modules/desktop/printing.nix)** (`desktop-printing`) · hosts: `nixos` — Drukowanie przez CUPS. Sterowniki: splix (drukarki Samsung, protokół SPL) i brlaser (Brother; zawiera wpis HL-L1232W, używany przy podłączeniu USB).
 - **[desktop/tuning.nix](../../modules/desktop/tuning.nix)** (`desktop-tuning`) · hosts: `nixos` — Strojenie pamięci i systemd wzorowane na CachyOS (CachyOS-Settings e27ea45, 2026-10-04): zRAM zstd na cały RAM bez zswap, swappiness/page-cluster, limity dirty, THP max_ptes_none 409, SysRq, bez watchdoga NMI, stop jednostek 10 s, oomd.
 
 ## modules/gaming/
