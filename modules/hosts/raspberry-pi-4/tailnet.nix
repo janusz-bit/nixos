@@ -32,11 +32,12 @@
 #   (git add, update) tailscaled-autoconnect loguje RPi do tailnetu.
 # Telefon i laptop: Tailscale z `--login-server=https://hs.<domena>`, potem
 # `sudo headscale nodes register --user <ID> --key <klucz z klienta>`.
-# Token Cloudflare do ACME: Zone / DNS / Edit dla strefy <domena>,
-#   cd modules/_secrets && agenix -e acme-cloudflare.age   (sam token).
+# Token Cloudflare do ACME: Zone / DNS / Edit i Zone / Zone / Read dla strefy
+# <domena>, cd modules/_secrets && agenix -e acme-cloudflare.age (sam token).
 #
 # Sprawdzenie: `systemctl status headscale tailscaled`, `tailscale status`,
-# `sudo headscale nodes list`, `systemctl status acme-nextcloud.<domena>`,
+# `sudo headscale nodes list`, `systemctl status acme-order-renew-nextcloud.<domena>`
+# (acme-nextcloud.<domena> tworzy tylko samopodpisany certyfikat zastępczy),
 # z klienta tailnetu `curl -I https://nextcloud.<domena>`.
 _: {
   flake.modules.nixos.rpi-tailnet =
@@ -108,6 +109,13 @@ _: {
           defaults = {
             inherit (config.customTop) email;
             dnsProvider = "cloudflare";
+            # Lego czeka na rekord TXT u serwerów autorytatywnych strefy i u
+            # resolverów z /etc/resolv.conf (router z DHCP). Router trzyma
+            # NXDOMAIN dla _acme-challenge.<nazwa> przez minimum z SOA
+            # Cloudflare (1800 s), a lego czeka 2 min, więc zamówienie zawsze
+            # kończyło się "time limit exceeded". Let's Encrypt pyta serwery
+            # autorytatywne, więc wystarcza sprawdzenie u nich.
+            extraLegoFlags = [ "--dns.propagation.disable-rns" ];
           };
         };
       }
