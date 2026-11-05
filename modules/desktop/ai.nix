@@ -4,7 +4,7 @@
 # (base/agenix.nix).
 #
 # Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII).
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.modules.nixos.desktop-ai =
     {
@@ -51,7 +51,7 @@
           # Fork PrismML (Bonsai) ma te same nazwy binarek, więc nie jest w PATH,
           # tylko pod aliasem llama-prism (ai/models.nix).
           (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
-          unsloth-desktop
+          self.packages.${system}.unsloth-desktop
           inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
         ]
         # Strata ma tylko silnik CUDA (pakiet z wydania, _strata).
