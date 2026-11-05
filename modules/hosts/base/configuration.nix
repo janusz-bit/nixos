@@ -1,10 +1,16 @@
 # Wspólne środowisko każdego hosta: narzędzia CLI (Nix, agenty, diagnostyka),
-# edytor micro, nix-ld dla obcych binarek (uv, pip), comma z bazą
-# nix-index, direnv i DNS Quad9. Powłoka: shell.nix, Nix: nix.nix.
+# edytor micro, nix-ld dla obcych binarek (uv, pip), /etc/ssl/cert.pem dla
+# Pythona z uv, comma z bazą nix-index, direnv i DNS Quad9. Powłoka:
+# shell.nix, Nix: nix.nix.
 { inputs, ... }:
 {
   flake.modules.nixos.base-configuration =
-    { lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       imports = [ inputs.nix-index-database.nixosModules.default ];
 
@@ -40,6 +46,11 @@
         };
         # uv instaluje narzędzia do ~/.local/bin.
         localBinInPath = true;
+        # Python z uv (python-build-standalone, np. venv Unsloth Studio) szuka
+        # CA w domyślnym pliku OpenSSL /etc/ssl/cert.pem, a NixOS daje tylko
+        # /etc/ssl/certs/ca-certificates.crt (bez katalogu z hashami), więc
+        # każde HTTPS kończy się CERTIFICATE_VERIFY_FAILED.
+        etc."ssl/cert.pem".source = config.security.pki.caBundle;
       };
 
       programs = {
