@@ -4,8 +4,11 @@
 # ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
 # git. → :3000 (Gitea), matrix. → :6167 (continuwuity),
 # nextcloud. → nginx :80 (vhost Nextcloudu). Każda nowa nazwa potrzebuje
-# też trasy DNS tunelu (Public hostname w panelu Zero Trust), bo ingress
-# jej nie tworzy.
+# też rekordu DNS, bo ingress go nie tworzy. Tunel jest zarządzany lokalnie
+# (ingress tutaj, plik poświadczeń), więc panel Zero Trust nie dodaje mu
+# nazw; robi to jednorazowo na laptopie `cloudflared tunnel login`, potem
+# `cloudflared tunnel route dns raspberry-pi-4 <nazwa>.<domena>` (CNAME
+# z proxy na tunel).
 #
 # Usługi WWW nie mają portów otwartych w firewallu, a TLS kończy się
 # w Cloudflare. Ruch z tunelu dochodzi do usług z 127.0.0.1/::1, więc adres
