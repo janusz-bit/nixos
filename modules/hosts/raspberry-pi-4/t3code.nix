@@ -17,7 +17,9 @@
 #   journala, który czyta też hermes (systemd-journal). Telemetria wyłączona.
 #
 # Jednorazowo: zalogować RPi do Tailscale (nagłówek hosts/tailscale.nix),
-# logowanie agenta: `sudo -u t3code -H claude auth login`. Parowanie urządzenia: `t3code pair`
+# włączenie Serve w tailnecie linkiem z `journalctl -u t3code-tailnet` (bez
+# niego port 443 z tailnetu nie odpowiada), logowanie agenta:
+# `sudo -u t3code -H claude auth login`. Parowanie urządzenia: `t3code pair`
 # (link https w tailnecie + QR, ważny 5 min); pozostałe polecenia `t3`
 # na koncie usługi: `t3code <polecenie>`, np. `t3code auth session list`.
 # Po usunięciu modułu konfiguracja Serve zostaje w stanie tailscaled:
@@ -183,8 +185,9 @@
             ${tailscale} wait
             ${tailscale} serve --bg --yes --https=443 http://127.0.0.1:${toString port}
           '';
-          # Serve czeka na HTTPS Certificates w panelu Tailscale albo kończy
-          # się błędem; ponowienie zastosuje je po włączeniu.
+          # Gdy Serve nie jest włączony w tailnecie, `tailscale serve` czeka
+          # i wypisuje link do włączenia (journalctl -u t3code-tailnet); po
+          # włączeniu kończy sam. Restart na wypadek innego błędu.
           serviceConfig = {
             Restart = "on-failure";
             RestartSec = "1min";
