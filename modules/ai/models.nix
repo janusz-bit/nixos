@@ -40,6 +40,11 @@ _: {
         # kompakcji z context minus bufor, nie minus output, więc ta wartość
         # nie zmniejsza kontekstu na wejście (także w wariancie MTP).
         output = 32768;
+        # Budżet myślenia jednego żądania (kroku agenta) i tekst, który serwer
+        # wstawia przed </think> po jego wyczerpaniu (pomiar w komentarzu
+        # przy bonsaiServe). Bez znaków nowej linii, bo trafia do aliasu.
+        reasoningBudget = 4096;
+        reasoningBudgetMessage = " I have thought about this long enough. Now I will act: write the code and run it to check it, instead of reasoning further.";
         # Serwer startuje z --mmproj (projekcja wizyjna), więc model rozumie obrazy.
         input = [
           "text"
@@ -112,12 +117,30 @@ _: {
       #   zapętlają się łatwiej). Karta modelu zaleca 0 z myśleniem i 1.5 bez,
       #   Qwen 0-2 na niekończące się powtórzenia (wyższe grozi mieszaniem
       #   języków). llama.cpp liczy karę tylko w oknie --repeat-last-n (64
-      #   tokeny), więc powtarzane identyfikatory w kodzie prawie jej nie
-      #   odczuwają; żądanie z presence_penalty ją nadpisuje;
+      #   tokeny), a kod powtarza tokeny gęsto: na sesjach opencode2 kara
+      #   zmienia najbardziej prawdopodobny token w 1,4% tokenów kodu
+      #   zapisywanego do plików i w 2,9% poleceń shella (symulacja samplera
+      #   na logitach teacher-forced, 2026-11-03); w agencie nie widać od tego
+      #   błędów. Żądanie z presence_penalty ją nadpisuje;
+      # - --reasoning-budget (bonsai.reasoningBudget) z komunikatem: w agencie
+      #   model myśli za długo (90% wyjścia to myślenie, kroki do 28 tys.
+      #   tokenów, ręczne śledzenie kodu zamiast uruchomienia testów).
+      #   opencode2 run, 12 zadań Aider Polyglot (Python), wariant MTP, te flagi,
+      #   2026-11-03: bez budżetu kod poprawny 12/12, ale w 20 min 10/12,
+      #   razem 136 min i 265 tys. tokenów, raz kompakcja opencode2 zużyła swój
+      #   limit 16000 tokenów na myślenie i zerwała sesję; z 4096: 12/12,
+      #   75 min (czas przeliczony na prędkość bez budżetu; laptop grzała
+      #   wtedy równoległa kompilacja), 168 tys. tokenów, najdłuższy krok
+      #   5,7 tys., kompakcje bez błędów (zwolnił 1 z 12 zadań: 597 -> 832 s).
+      #   Dopisek w prompcie systemowym („weryfikuj uruchamiając, nie myśl
+      #   długo”) dał mniej: 12/12, 100 min, 234 tys. tokenów. Budżet
+      #   utnie też długie rozumowanie poza agentem (np. trudna matematyka);
+      #   żądanie z thinking_budget_tokens (-1 = bez limitu) go nadpisuje;
       # - pozostały sampling z GGUF (temp 1.0, top-k 20, top-p 0.95; min-p 0.05
       #   to domyślne llama.cpp i zalecenie karty), --jinja domyślne.
       # Grupy flag (także serverFlags) dzieli się na spacjach, więc wartości
-      # (nazwy plików .gguf) nie mogą zawierać spacji.
+      # (nazwy plików .gguf) nie mogą zawierać spacji; komunikat budżetu idzie
+      # osobnym argumentem.
       bonsaiServe =
         variant:
         lib.escapeShellArgs (
@@ -128,9 +151,14 @@ _: {
               "--port ${toString bonsai.port} -c ${toString variant.context} -n ${toString bonsai.output}"
               "-np 1 -ngl 99 -ctk q4_0 -ctv q4_0 -ub 256 --presence-penalty 1.0"
               "--reasoning-effort medium --reasoning-effort-allow xhigh,medium,low --cors-origins localhost"
+              "--reasoning-budget ${toString bonsai.reasoningBudget}"
             ]
             ++ variant.serverFlags
           )
+          ++ [
+            "--reasoning-budget-message"
+            bonsai.reasoningBudgetMessage
+          ]
         );
 
       enabledBonsai = lib.filterAttrs (name: _: config.ai.models.${name}.enable) bonsai.variants;
