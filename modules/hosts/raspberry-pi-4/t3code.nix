@@ -2,17 +2,11 @@
 # z przeglądarki wyłącznie w tailnecie: Tailscale Serve wystawia
 # https://<RPi>.<tailnet>.ts.net (certyfikat Tailscale) i przekazuje ruch do
 # `t3 serve` na 127.0.0.1:3773, które działa na koncie systemowym t3code bez
-# grup, sudo i sekretów. Tailscale (hostowany serwer koordynacji) łączy się
-# wychodząco, więc działa za CGNAT, gdzie headscale za tunelem Cloudflare nie
-# może (AGENTS.md).
+# grup, sudo i sekretów. Sam Tailscale (logowanie, ustawienia, firewall)
+# jest w hosts/tailscale.nix (rpi-tailscale).
 #
 # Granica zaufania: sesja T3 to powłoka, pliki i agenci na koncie t3code.
-# - Tailnet dociera tylko do HTTPS Serve: --netfilter-mode=nodivert, bo
-#   domyślne `on` wstawia na początek INPUT `-i tailscale0 -j ACCEPT`, z którym
-#   tailnet omijałby nixos-fw (także SSH tylko z LAN-u). Porty Serve obsługuje
-#   netstack w procesie tailscaled, więc nixos-fw ich nie blokuje.
-#   --accept-dns=false: MagicDNS przejąłby DNS całego hosta, a lockdown, który
-#   zatrzymuje tailscaled, odciąłby wtedy DNS cloudflared.
+# - Z tailnetu dociera tylko HTTPS Serve (netfilter nodivert, rpi-tailscale).
 # - Konta lokalne (hermes i usługi z internetu) nie docierają do T3: do
 #   127.0.0.1:3773 łączy się tylko root (proxy tailscaled) i t3code (reguła
 #   iptables owner), a połączenia na własne adresy tailnetu (lokalny listener
@@ -22,19 +16,15 @@
 #   token parowania właściciela (5 min); LogFilterPatterns nie wpuszcza go do
 #   journala, który czyta też hermes (systemd-journal). Telemetria wyłączona.
 #
-# Jednorazowo na RPi: `sudo tailscale up --accept-dns=false --netfilter-mode=nodivert`
-# (pierwsze logowanie nadpisuje ustawienia domyślnymi, jednostka t3code-tailnet
-# i tak przywraca je zaraz po nim), w panelu Tailscale wyłączyć wygasanie klucza
-# RPi i włączyć MagicDNS + HTTPS Certificates; logowanie agenta:
-# `sudo -u t3code -H claude auth login`. Parowanie urządzenia: `t3code pair`
+# Jednorazowo: zalogować RPi do Tailscale (nagłówek hosts/tailscale.nix),
+# logowanie agenta: `sudo -u t3code -H claude auth login`. Parowanie urządzenia: `t3code pair`
 # (link https w tailnecie + QR, ważny 5 min); pozostałe polecenia `t3`
 # na koncie usługi: `t3code <polecenie>`, np. `t3code auth session list`.
 # Po usunięciu modułu konfiguracja Serve zostaje w stanie tailscaled:
 # `sudo tailscale serve reset`.
 #
-# Sprawdzenie: `systemctl status t3code t3code-tailnet tailscaled`,
-# `tailscale serve status`, `sudo iptables -S nixos-fw | head -3` (bez ts-input),
-# `curl -sI http://127.0.0.1:3773` jako nixos (odrzucone), z urządzenia
+# Sprawdzenie: `systemctl status t3code t3code-tailnet`,
+# `tailscale serve status`, `curl -sI http://127.0.0.1:3773` jako nixos (odrzucone), z urządzenia
 # w tailnecie https://<RPi>.<tailnet>.ts.net.
 { inputs, ... }:
 {
@@ -58,11 +48,6 @@
           codex
         ];
       };
-
-      tailscaleSetFlags = [
-        "--accept-dns=false"
-        "--netfilter-mode=nodivert"
-      ];
 
       # Firewall przy reloadzie czyści tylko własne łańcuchy, nie OUTPUT, więc
       # przed dodaniem reguła jest usuwana, żeby się nie mnożyła.
@@ -125,7 +110,12 @@
       };
     in
     {
-      services.tailscale.enable = true;
+      assertions = [
+        {
+          assertion = config.services.tailscale.enable;
+          message = "rpi-t3code: T3 jest dostępny tylko przez Tailscale Serve; zaimportuj rpi-tailscale.";
+        }
+      ];
 
       users = {
         users.${user} = {
@@ -181,17 +171,16 @@
           };
         };
 
-        # Po zalogowaniu (tailscale wait czeka na Running) wymusza ustawienia
-        # z nagłówka i Serve: https://<RPi>.<tailnet>.ts.net -> T3. BindsTo
-        # z After: przy lockdown (tailscaled pominięty) też się nie uruchamia.
+        # Po zalogowaniu (tailscale wait czeka na Running) Serve:
+        # https://<RPi>.<tailnet>.ts.net -> T3. BindsTo z After i typ simple
+        # z tego samego powodu co tailscale-prefs (hosts/tailscale.nix).
         t3code-tailnet = {
-          description = "Tailscale: ustawienia i Serve dla T3 Code";
+          description = "Tailscale Serve dla T3 Code";
           wantedBy = [ "tailscaled.service" ];
           bindsTo = [ "tailscaled.service" ];
           after = [ "tailscaled.service" ];
           script = ''
             ${tailscale} wait
-            ${tailscale} set ${lib.escapeShellArgs tailscaleSetFlags}
             ${tailscale} serve --bg --yes --https=443 http://127.0.0.1:${toString port}
           '';
           # Serve czeka na HTTPS Certificates w panelu Tailscale albo kończy
@@ -211,10 +200,7 @@
         extraStopCommands = lib.concatMapStringsSep "\n" deleteRule outputRules;
       };
 
-      # Obie łączą się z internetem same (koordynacja Tailscale, API modeli).
-      customBot.lockdownServices = [
-        "tailscaled"
-        user
-      ];
+      # Agenci łączą się z internetem sami (API modeli).
+      customBot.lockdownServices = [ user ];
     };
 }
