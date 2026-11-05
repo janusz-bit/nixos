@@ -58,12 +58,17 @@ _: {
             context = 98304;
             serverFlags = [ ];
           };
-          # Ten sam trzon z głowicą MTP Qwen 3.8 (plik lean z HF
-          # sudoingx/Ternary-Bonsai-2-27B-PTQ1_0-MTP-GGUF): szybciej, ale głowica
-          # i kontekst draftu zabierają VRAM na kontekst (pomiary przy bonsaiServe).
+          # Ten sam trzon z głowicą MTP: szybciej, ale głowica i kontekst draftu
+          # zabierają VRAM na kontekst (pomiary przy bonsaiServe). Plik zrobiony
+          # lokalnie (~/workspace/bonsai-tools: gguf_graft.py, gguf_requant.py):
+          # trzon lean z HF sudoingx/Ternary-Bonsai-2-27B-PTQ1_0-MTP-GGUF bajt
+          # w bajt, głowica ProCreations/Ternary-Bonsai-2-27B-MTP r3 (uczona na
+          # ternarnym trzonie) przekwantowana Q8_0 -> Q6_K. Wobec głowicy Qwen
+          # z pliku lean: +2,2% t/s i akceptacja draftu 0,724 zamiast 0,693
+          # przy tym samym rozmiarze (2026-11-03).
           ternary-bonsai-2-27b-mtp = {
             alias = "bonsai-serve-mtp";
-            model = "Ternary-Bonsai-2-27B-PTQ1_0-mtp-lean.gguf";
+            model = "Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations-r3-q6k.gguf";
             name = "Ternary Bonsai 2 27B PTQ1_0 MTP (local)";
             context = 49152;
             serverFlags = [ "--spec-type draft-mtp --spec-draft-n-max 1" ];
