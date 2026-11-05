@@ -17,8 +17,7 @@
 # - CLI (hermes, hermes-acp, hermes-agent) to opakowania hermesCli przez
 #   `sudo -u hermes`: HERMES_HOME (pluginy, .env, config.yaml, polecenia
 #   serwerów MCP) jest zapisywalny przez agenta, więc binarka uruchomiona jako
-#   root lub nixos wykonałaby jego kod. modules/claude-notify/ bierze opakowanie
-#   z services.hermes-agent.cliWrapper.
+#   root lub nixos wykonałaby jego kod.
 #
 # Logowanie Claude jednorazowo, na koncie usługi:
 # `sudo -u hermes -H claude auth login`.
@@ -125,14 +124,6 @@
         (import ./_hermes-agent/nixos-module.nix {
           inputs.self = inputs.hermes-agent;
         }).flake.nixosModules.default
-        {
-          options.services.hermes-agent.cliWrapper = lib.mkOption {
-            type = lib.types.package;
-            readOnly = true;
-            internal = true;
-            description = "Opakowanie `hermes` (hermesCli): jako konto usługi uruchamia binarkę wprost, innym kontom przez sudo -u.";
-          };
-        }
       ];
 
       age.secrets = {
@@ -145,7 +136,6 @@
           enable = true;
           # CLI przez opakowania hermesCli (niżej), nie globalne HERMES_HOME.
           addToSystemPackages = false;
-          cliWrapper = hermesCli "hermes";
           extraDependencyGroups = [
             "all"
             "messaging"

@@ -17,9 +17,6 @@
     # claude-remote laptopa (remote-agent.nix), nigdy w authorized_keys
     # głównego użytkownika ani roota.
     claude-rpi = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBm08oKyzMIfuwdh0a6xb4zArEJPL6bOpej5IgY1xs/U claude@raspberry-pi-4";
-    # Loguje WYŁĄCZNIE na konto hermes RPi z localhost, z wymuszonym poleceniem
-    # hermes-notify-receive (modules/claude-notify/); prywatny w hermes-notify-key.age.
-    hermes-notify = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOsvMowvhSGbJUEW5iGtzbG8+gbWCsW87+3BhPKJXz9E hermes-notify";
     # Tunel Hermesa z RPi: loguje WYŁĄCZNIE na konto hermes-llm laptopa (bez
     # powłoki), tylko przekierowanie do 127.0.0.1:8080 (modules/hosts/laptop-llm.nix);
     # prywatny w hermes-llm-key.age.

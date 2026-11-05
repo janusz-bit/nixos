@@ -27,10 +27,6 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 - **[checks/lockdown.nix](../../modules/checks/lockdown.nix)** — Test VM lockdown (modules/hosts/base/lockdown.nix): `lockdown on` zamyka port otwarty w firewallu i zatrzymuje usługę z customBot.lockdownServices, a SSH zostaje osiągalny z drugiej maszyny (także gdy openFirewall wpisał 22 do allowedTCPPorts). Stan przeżywa reload firewalla, ponowny start multi-user.target (to robi switch-to-configuration) i reboot; `lockdown off` przywraca port i usługę.
 - **[checks/tuning.nix](../../modules/checks/tuning.nix)** — Test VM strojenia z modules/desktop/tuning.nix na tym samym kernelu CachyOS co host nixos: sprawdza, czy ustawienia zostały zastosowane (wartości oczekiwane bierze z konfiguracji hosta, więc rozjazd host ↔ moduł też oblewa test), a dla zmian przejętych z CachyOS mierzy efekt.
 
-## modules/claude-notify/
-
-- **[claude-notify/default.nix](../../modules/claude-notify/default.nix)** (`rpi-claude-notify`, `nixos-claude-notify`) · hosts: `raspberry-pi-4`, `nixos` — claude-notify: powiadomienia Claude Code do DM na Matrixie przez Hermesa.
-
 ## modules/desktop/
 
 - **[desktop/ai.nix](../../modules/desktop/ai.nix)** (`desktop-ai`) · hosts: `nixos` — Narzędzia AI stacji roboczej: lokalna Ollama, llama.cpp i Strata, agenty kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes Desktop oraz alias claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).

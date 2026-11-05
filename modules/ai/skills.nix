@@ -88,13 +88,6 @@
           agents = [ "prime-agent" ];
           python = true;
         };
-        # Część integracji claude-notify z hookami Claude Code; włącza ją
-        # moduł claude-notify tam, gdzie wdrożył klucz (program skilla zależy
-        # od hosta, więc pakiet powstaje tam, nie w packages).
-        hermes-notify = {
-          source = "${self}/modules/skills/hermes-notify";
-          agents = [ "claude-code" ];
-        };
       };
 
       ai.skillPacks = {

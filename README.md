@@ -28,7 +28,6 @@ modules/
                           plus opt-in user secrets, fail2ban, LAN-only SSH and lockdown
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
   hosts/remote-agent.nix  laptop-run: feature linking two hosts
-  claude-notify/          Claude Code notifications to Matrix (laptop and RPi)
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, post-install
@@ -68,9 +67,7 @@ files, add them and commit again. CI evaluates every host on each push to
   enrollment). Details: `modules/installer/install.nix`.
 - **Raspberry Pi**: `nix build .#raspberry-pi-4-sd-image`, write the image
   to the SSD/SD card and boot. Clone this repository to `/etc/nixos` (owned
-  by the default user), register the keys as in step 4 of "Adding a host",
-  and afterwards run `update` on the laptop as well: its `claude-notify`
-  pins the RPi's SSH host key.
+  by the default user) and register the keys as in step 4 of "Adding a host".
 - **WSL**: install the NixOS-WSL distribution, clone this repository to
   `/etc/nixos` and run `sudo nixos-rebuild switch --flake /etc/nixos#wsl`.
 

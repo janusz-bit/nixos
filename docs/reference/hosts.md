@@ -6,8 +6,8 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 39 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 38 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -31,7 +31,6 @@ flowchart LR
   host_nixos --> nixos_ai[nixos-ai]
   host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_laptop_llm[nixos-laptop-llm]
-  host_nixos --> nixos_claude_notify[nixos-claude-notify]
   host_nixos --> nixos_tailscale[nixos-tailscale]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
@@ -122,7 +121,6 @@ flowchart LR
 - `nixos` — [hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)
 - `nixos-ai` — [hosts/nixos/ai.nix](../../modules/hosts/nixos/ai.nix)
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
-- `nixos-claude-notify` — [claude-notify/default.nix](../../modules/claude-notify/default.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
 - `nixos-laptop-llm` — [hosts/laptop-llm.nix](../../modules/hosts/laptop-llm.nix)
 - `nixos-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
@@ -153,7 +151,6 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_hermes[rpi-hermes]
   host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
   host_raspberry_pi_4 --> rpi_ttyd[rpi-ttyd]
-  host_raspberry_pi_4 --> rpi_claude_notify[rpi-claude-notify]
   host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
   host_raspberry_pi_4 --> rpi_laptop_llm[rpi-laptop-llm]
   host_raspberry_pi_4 --> rpi_tailscale[rpi-tailscale]
@@ -200,7 +197,6 @@ flowchart LR
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
 - `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
-- `rpi-claude-notify` — [claude-notify/default.nix](../../modules/claude-notify/default.nix)
 - `rpi-cloudflared` — [hosts/raspberry-pi-4/cloudflared.nix](../../modules/hosts/raspberry-pi-4/cloudflared.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
 - `rpi-hermes` — [hosts/raspberry-pi-4/hermes.nix](../../modules/hosts/raspberry-pi-4/hermes.nix)

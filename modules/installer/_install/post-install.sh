@@ -58,8 +58,8 @@ ssh_key() {
   # reinstalacji jest nowy.
   if set_key "sshHostKeys.$host" "$host_key"; then
     echo "Klucz hosta sshd nowy albo zmieniony: po wpisaniu, commicie i pushu zrób"
-    echo "update na hostach, które go przypinają (nixos przypina raspberry-pi-4:"
-    echo "claude-notify; raspberry-pi-4 przypina nixos: laptop-run)."
+    echo "update na hostach, które go przypinają (raspberry-pi-4 przypina nixos:"
+    echo "laptop-run, laptop-llm)."
   fi
 
   if ! set_key "hosts.$host" "$root_key root@$host"; then
