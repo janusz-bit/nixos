@@ -1,12 +1,11 @@
-# Nextcloud 35 pod nextcloud.<domena> (customTop.domain): PostgreSQL i Redis
+# Nextcloud 35 pod domeną główną (customTop.domain): PostgreSQL i Redis
 # lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; wystawiony do
 # internetu przez Cloudflare Tunnel (cloudflared.nix): TLS kończy się
 # w Cloudflare, a nginx słucha tylko na localhost. Nextcloud jest
 # uwierzytelnianą aplikacją PHP w internecie, więc poprawki PHP (asercja
 # niżej) i aktualizacje pakietu mają pierwszeństwo.
 #
-# Domena główna zostaje w tunelu tylko dla /.well-known/matrix/client
-# (matrix.nix), na własnym vhoście bez Nextcloudu.
+# Ten vhost serwuje też /.well-known/matrix/client (matrix.nix).
 #
 # nixpkgs instaluje bez admina (`occ maintenance:install --disable-admin-user`):
 # po świeżej instalacji `sudo nextcloud-occ user:add <nazwa>` i
@@ -40,7 +39,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = "nextcloud.${config.customTop.domain}";
+          hostName = config.customTop.domain;
           https = true;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.

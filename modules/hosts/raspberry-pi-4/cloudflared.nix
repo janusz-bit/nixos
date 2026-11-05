@@ -1,10 +1,9 @@
 # Cloudflare Tunnel `raspberry-pi-4`: jedyna droga z internetu do usług RPi
 # (ttyd, SSH, Gitea, Matrix, Nextcloud); nieznane nazwy hostów dostają 404.
-# Mapa (ingress niżej): <domena> → nginx :80 (tylko Matrix well-known),
+# Mapa (ingress niżej): <domena> → nginx :80 (Nextcloud i Matrix well-known),
 # ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
-# git. → :3000 (Gitea), matrix. → :6167 (continuwuity),
-# nextcloud. → nginx :80 (vhost Nextcloudu). Każda nowa nazwa potrzebuje
-# też rekordu DNS, bo ingress go nie tworzy. Tunel jest zarządzany lokalnie
+# git. → :3000 (Gitea), matrix. → :6167 (continuwuity). Każda nowa nazwa
+# potrzebuje też rekordu DNS, bo ingress go nie tworzy. Tunel jest zarządzany lokalnie
 # (ingress tutaj, plik poświadczeń), więc panel Zero Trust nie dodaje mu
 # nazw; robi to jednorazowo na laptopie `cloudflared tunnel login`, potem
 # `cloudflared tunnel route dns raspberry-pi-4 <nazwa>.<domena>` (CNAME
@@ -40,8 +39,8 @@ _: {
 
       # lockdown (base-lockdown) zostawia tunel, bo niesie ssh.<domena>
       # (zatrzymany odciąłby też sesję, z której go włączono), i zatrzymuje
-      # jego backendy HTTP: nginx (ttyd, Matrix well-known), Gitea i
-      # continuwuity.
+      # jego backendy HTTP: nginx (Nextcloud, ttyd, Matrix well-known), Gitea
+      # i continuwuity.
       customBot.lockdownServices = [
         "nginx"
         "gitea"
@@ -58,10 +57,17 @@ _: {
           credentialsFile = config.age.secrets.cloudflared-tunnel.path;
           default = "http_status:404";
           ingress = {
-            # Vhost domeny głównej serwuje tylko /.well-known/matrix/client
-            # (matrix.nix).
-            ${domain} = localHttp 80;
-            "nextcloud.${domain}" = localHttp 80;
+            # Nextcloud (z /.well-known/matrix/client, matrix.nix). Domyślne
+            # connectTimeout 30 s zrywało uploady zdjęć ("stream canceled by
+            # remote"); 300 s daje PHP-FPM czas przy presji pamięci.
+            ${domain} = {
+              service = localHttp 80;
+              originRequest = {
+                connectTimeout = "300s";
+                keepAliveConnections = 10;
+                keepAliveTimeout = "2m";
+              };
+            };
             # nginx z Basic Auth przed ttyd (ttyd.nix).
             "ttyd.${domain}" = localHttp 8083;
             "ssh.${domain}" = "ssh://localhost:22";
