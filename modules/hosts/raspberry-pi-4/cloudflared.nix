@@ -1,11 +1,11 @@
 # Cloudflare Tunnel `raspberry-pi-4`: jedyna droga z internetu do usług RPi
-# (ttyd, SSH, Gitea, Matrix, Nextcloud, T3 Code); nieznane nazwy hostów
-# dostają 404. Mapa (ingress niżej): <domena> → nginx :80 (tylko Matrix
-# well-known), ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
+# (ttyd, SSH, Gitea, Matrix, Nextcloud); nieznane nazwy hostów dostają 404.
+# Mapa (ingress niżej): <domena> → nginx :80 (tylko Matrix well-known),
+# ttyd. → nginx :8083 (Basic Auth przed ttyd), ssh. → :22,
 # git. → :3000 (Gitea), matrix. → :6167 (continuwuity),
-# nextcloud. → nginx :80 (vhost Nextcloudu), t3. → :3773 (t3, parowanie
-# t3code.nix). Każda nowa nazwa potrzebuje też trasy DNS tunelu (Public
-# hostname w panelu Zero Trust), bo ingress jej nie tworzy.
+# nextcloud. → nginx :80 (vhost Nextcloudu). Każda nowa nazwa potrzebuje
+# też trasy DNS tunelu (Public hostname w panelu Zero Trust), bo ingress
+# jej nie tworzy.
 #
 # Usługi WWW nie mają portów otwartych w firewallu, a TLS kończy się
 # w Cloudflare. Ruch z tunelu dochodzi do usług z 127.0.0.1/::1, więc adres
@@ -62,11 +62,6 @@ _: {
             # nginx z Basic Auth przed ttyd (ttyd.nix).
             "ttyd.${domain}" = localHttp 8083;
             "ssh.${domain}" = "ssh://localhost:22";
-            # t3 bez Cloudflare Access (aplikacja mobilna nie przejdzie jego
-            # logowania); każde urządzenie musi się sparować (t3code.nix).
-            # Adres wprost, bo t3 słucha tylko na 127.0.0.1, a localhost może
-            # najpierw wskazać ::1.
-            "t3.${domain}" = "http://127.0.0.1:3773";
             "git.${domain}" = localHttp config.services.gitea.settings.server.HTTP_PORT;
             "matrix.${domain}" = localHttp (
               builtins.head config.services.matrix-continuwuity.settings.global.port
