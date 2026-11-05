@@ -7,7 +7,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 37 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 38 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -154,6 +154,7 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_claude_notify[rpi-claude-notify]
   host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
   host_raspberry_pi_4 --> rpi_laptop_llm[rpi-laptop-llm]
+  host_raspberry_pi_4 --> rpi_t3code[rpi-t3code]
   host_raspberry_pi_4 --> rpi_ai[rpi-ai]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
@@ -207,6 +208,7 @@ flowchart LR
 - `rpi-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `rpi-resources` — [hosts/raspberry-pi-4/resources.nix](../../modules/hosts/raspberry-pi-4/resources.nix)
 - `rpi-ssh` — [hosts/raspberry-pi-4/ssh.nix](../../modules/hosts/raspberry-pi-4/ssh.nix)
+- `rpi-t3code` — [hosts/raspberry-pi-4/t3code.nix](../../modules/hosts/raspberry-pi-4/t3code.nix)
 - `rpi-tools` — [hosts/raspberry-pi-4/tools.nix](../../modules/hosts/raspberry-pi-4/tools.nix)
 - `rpi-ttyd` — [hosts/raspberry-pi-4/ttyd.nix](../../modules/hosts/raspberry-pi-4/ttyd.nix)
 
