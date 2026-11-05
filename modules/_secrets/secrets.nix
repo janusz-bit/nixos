@@ -42,4 +42,6 @@ in
   # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,
   # QT_ANDROID_KEYSTORE_KEY_PASS, QT_ANDROID_KEYSTORE_ALIAS.
   "brulion-android-keystore.age" = toAllHosts;
+  # Kopia zapasowa klucza podpisywania F-Droid Brulionu, na żaden host nie trafia.
+  "brulion-fdroid-key.age" = toAllHosts;
 }
