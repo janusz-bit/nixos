@@ -9,7 +9,7 @@
 # customTop w NixOS to wartość opcji flake-parts customTop (typy i opisy
 # w modules/options.nix), żeby moduły NixOS czytały ją z `config.customTop`.
 # Moduł base-options importuje każda konfiguracja NixOS z modułami, które ją
-# czytają (hosty przez base, ISO instalatora wprost).
+# czytają (hosty przez base).
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customBot`
 # i `nix eval --json .#nixosConfigurations.wsl.config.customTop.lan`.

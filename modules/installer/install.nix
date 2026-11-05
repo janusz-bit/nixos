@@ -1,22 +1,16 @@
-# Instalacja hosta nixos: install-system (z live ISO, z siecią),
-# install-system-offline (wbudowany w ISO z iso.nix) i post-install (kroki
-# na nowym systemie).
+# Instalacja hosta nixos: install-system (z live ISO, z siecią) i post-install
+# (kroki na nowym systemie).
 #
 # Paczki:
 #   install-system          z live ISO: `nix run github:janusz-bit/nixos` albo
 #                           `nix run .` z klonu (packages.default; na stockowym
 #                           ISO: `nix --extra-experimental-features
 #                           'nix-command flakes' run …`) — potrzebuje sieci
-#   install-system-offline  ten sam skrypt wbudowany w ISO z iso.nix — bez sieci
 #   post-install            kroki po instalacji, na nowym systemie
 #
 # install-system instaluje host `nixos` z rewizji flake'a, z której go
 # uruchomiono (self), na dysk z `--disk` albo wybrany z listy (Enter = dysk
-# z disko.nix). Online: `nixos-install --flake`, /etc/nixos = klon origin.
-# Offline: `nixos-install --system <toplevel>` (bez ewaluacji i cache); tekst
-# skryptu odwołuje się do toplevelu, więc całe domknięcie trafia do squashfs
-# ISO, a /etc/nixos dostaje źródła self jako repo bez wspólnej historii
-# z GitHubem.
+# z disko.nix): `nixos-install --flake`, /etc/nixos = klon origin.
 #
 # Klucze nie są potrzebne: klucze sbctl generuje limine-install
 # (secureBoot.autoGenerateKeys, firmware nietknięty), a klucz agenix i wpisanie
@@ -29,8 +23,7 @@
   perSystem =
     { pkgs, lib, ... }:
     let
-      # Host instalowany przez install-system; iso.nix zakłada ten sam
-      # (platforma x86_64-linux, helpLine).
+      # Host instalowany przez install-system.
       installHost = "nixos";
       host = self.nixosConfigurations.${installHost};
       inherit (host) config;
@@ -39,11 +32,11 @@
       place = config.customTop.repository.path;
       user = config.customBot.defaultUser;
       configuredDisk = config.disko.devices.disk.main.device;
-      # Skrypt disko zbudowany z góry (bez ewaluacji w trakcie instalacji, więc
-      # też offline) dla dowiązania, które install-system tuż przed formatowaniem
-      # ustawia na wybrany dysk: disk-deactivate robi realpath, a
-      # sgdisk/blkid/partprobe przyjmują dowiązania. Zainstalowany system jest ten
-      # sam, bo fileSystems i LUKS wskazują /dev/disk/by-partlabel/disk-main-*.
+      # Skrypt disko zbudowany z góry (bez ewaluacji w trakcie instalacji) dla
+      # dowiązania, które install-system tuż przed formatowaniem ustawia na
+      # wybrany dysk: disk-deactivate robi realpath, a sgdisk/blkid/partprobe
+      # przyjmują dowiązania. Zainstalowany system jest ten sam, bo fileSystems
+      # i LUKS wskazują /dev/disk/by-partlabel/disk-main-*.
       diskLink = "/run/install-system/disk";
       disko =
         (host.extendModules {
@@ -52,64 +45,34 @@
       rev = self.rev or self.dirtyRev or "bez rewizji";
       sw = "/nix/var/nix/profiles/system/sw/bin";
 
-      mkInstallSystem =
-        { offline }:
+      installSystem =
         let
           usage = ''
             Użycie: install-system [--disk URZĄDZENIE]
 
-            Instaluje host nixos (rewizja ${rev}${lib.optionalString offline ", wbudowana w ISO — bez sieci"}).
+            Instaluje host nixos (rewizja ${rev}).
             CAŁY wybrany dysk zostanie wyczyszczony.
 
               --disk URZĄDZENIE  dysk docelowy, np. /dev/disk/by-id/nvme-…; bez tej opcji
                                  wybór z listy (Enter = ${configuredDisk} z disko.nix)
           '';
-          # Repo dla /etc/nixos w "$work/repo", przed czyszczeniem dysku.
-          prepareRepo =
-            if offline then
-              ''
-                cp -r ${self} "$work/repo"
-                chmod -R u+w "$work/repo"
-                git -C "$work/repo" init -q -b master
-                git -C "$work/repo" remote add origin ${lib.escapeShellArg url}
-                # Śledzenie origin/master od razu (git pull/push, repo-sync) — zadziała po fetch.
-                git -C "$work/repo" config branch.master.remote origin
-                git -C "$work/repo" config branch.master.merge refs/heads/master
-                git -C "$work/repo" add -A
-                git -C "$work/repo" -c user.name=install-system -c user.email=install-system@localhost \
-                  commit -q -m "install-system (offline): rewizja ${rev}"
-              ''
-            else
-              # Klon przy okazji sprawdza dostęp do sieci, zanim dysk zostanie wyczyszczony.
-              ''
-                git clone ${lib.escapeShellArg url} "$work/repo"
-                origin_rev="$(git -C "$work/repo" rev-parse HEAD)"
-                if [[ "$origin_rev" != ${lib.escapeShellArg (self.rev or "")} ]]; then
-                  echo "UWAGA: instalowana jest rewizja ${rev}, a $place dostanie origin ($origin_rev)."
-                fi
-              '';
-          nixosInstall =
-            if offline then
-              # substituters "": domknięcie jest w store ISO (nixos-install dokłada
-              # go jako auto?trusted=1) — bez tego nix odpytuje cache.nixos.org
-              # i bez sieci wypisuje ostrzeżenia z ponowieniami.
-              ''
-                nixos-install --root "$mnt" --system ${config.system.build.toplevel} \
-                  --no-root-passwd --no-channel-copy --option substituters ""
-              ''
-            else
-              # accept-flake-config: własny cachix z nixConfig, jedyny cache, który
-              # może mieć kernel CachyOS (CI cachyos-kernel-update); bez niego
-              # kernel kompiluje się lokalnie.
-              ''
-                nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#${installHost}"} \
-                  --no-root-passwd --option accept-flake-config true
-              '';
-          repoNote = lib.optionalString offline ''
-            echo "- $place: źródła rewizji ${rev} bez historii z GitHuba (origin ustawiony)."
-            echo "  Po podłączeniu do sieci, przed post-install:"
-            echo "  git -C $place fetch origin && git -C $place reset --hard origin/master"
+          # Repo dla /etc/nixos w "$work/repo", przed czyszczeniem dysku. Klon przy
+          # okazji sprawdza dostęp do sieci, zanim dysk zostanie wyczyszczony.
+          prepareRepo = ''
+            git clone ${lib.escapeShellArg url} "$work/repo"
+            origin_rev="$(git -C "$work/repo" rev-parse HEAD)"
+            if [[ "$origin_rev" != ${lib.escapeShellArg (self.rev or "")} ]]; then
+              echo "UWAGA: instalowana jest rewizja ${rev}, a $place dostanie origin ($origin_rev)."
+            fi
           '';
+          nixosInstall =
+            # accept-flake-config: własny cachix z nixConfig, jedyny cache, który
+            # może mieć kernel CachyOS (CI cachyos-kernel-update); bez niego
+            # kernel kompiluje się lokalnie.
+            ''
+              nixos-install --root "$mnt" --flake ${lib.escapeShellArg "${self}#${installHost}"} \
+                --no-root-passwd --option accept-flake-config true
+            '';
         in
         pkgs.writeShellApplication {
           name = "install-system";
@@ -260,7 +223,6 @@
               echo "  (modules/hosts/nixos/disko.nix) — system działa i bez tego, ale install-system"
               echo "  proponuje dysk z disko.nix."
             fi
-            ${repoNote}
             echo "- Po uruchomieniu nowego systemu, z siecią: nix run $place#post-install"
             echo "  (klucz SSH roota dla agenix, potem Secure Boot)."
           '';
@@ -276,10 +238,7 @@
     in
     {
       packages = {
-        install-system = mkInstallSystem { offline = false; };
-        # Tylko dla ISO (iso.nix): `nix run` tej paczki ściągnąłby całe
-        # domknięcie systemu (~50 GiB) do RAM live ISO.
-        install-system-offline = mkInstallSystem { offline = true; };
+        install-system = installSystem;
 
         post-install = pkgs.writeShellApplication {
           name = "post-install";

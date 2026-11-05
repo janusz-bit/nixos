@@ -31,7 +31,7 @@ modules/
   claude-notify/          Claude Code notifications to Matrix (laptop and RPi)
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
-  installer/              install-system, offline installer ISO, post-install
+  installer/              install-system, post-install
   packages/               local packages (overlay local-packages), maintenance scripts (_scripts/)
   skills/                 AI agent skills (Prime Agent, Claude Code, Codex, opencode)
   checks/                 NixOS VM tests
@@ -63,9 +63,7 @@ files, add them and commit again. CI evaluates every host on each push to
 
 - **Laptop (`nixos`)** from any NixOS live ISO, with network:
   `sudo nix --extra-experimental-features 'nix-command flakes' run github:janusz-bit/nixos -- [--disk /dev/disk/by-id/…]`.
-  Fully offline: build the installer ISO with
-  `nix build .#packages.x86_64-linux.nixos-iso`, boot it and run
-  `install-system`. The whole target disk is wiped. After the first boot:
+  The whole target disk is wiped. After the first boot:
   `nix run /etc/nixos#post-install` (root SSH key for agenix, then Secure Boot
   enrollment). Details: `modules/installer/install.nix`.
 - **Raspberry Pi**: `nix build .#raspberry-pi-4-sd-image`, write the image
@@ -145,7 +143,7 @@ automatically.
    sudo nixos-enter --root /mnt -- passwd <user>
    ```
 
-   `install-system` and the ISO automate exactly this for the host named by
+   `install-system` automates exactly this for the host named by
    `installHost` in `modules/installer/install.nix`.
 4. **Secrets.** After the first boot, `nix run /etc/nixos#post-install ssh`
    creates the root key and prints the `hosts.<name>` / `sshHostKeys.<name>`

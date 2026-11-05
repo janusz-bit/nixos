@@ -1,5 +1,5 @@
 # Generator workflowów GitHub Actions (github-actions-nix): build toplevelu
-# każdego hosta z rejestru, obrazy (SD RPi, ISO instalatora), ewaluacja
+# każdego hosta z rejestru, obraz SD RPi, ewaluacja
 # wszystkich hostów, lint (pre-commit) i ręczna aktualizacja kernela CachyOS.
 #
 # .github/workflows/*.yml to wynik tego pliku: `nix run .#sync-github-actions`
@@ -71,9 +71,9 @@ in
           buildTarget ? "nixosConfigurations.${name}.config.system.build.toplevel",
           runName ? "Build ${name} by @\${{ github.actor }}",
           command ? "nix build \".#${buildTarget}\" --show-trace --accept-flake-config",
-          # false: buildy 3-5 h (host nixos, ISO z całym jego closure) padają
-          # głównie na infrastrukturze CI (cache.nixos.org, limity
-          # api.github.com), więc ruszają tylko przy PR i ręcznie, nie przy v*.
+          # false: buildy 3-5 h (host nixos) padają głównie na infrastrukturze
+          # CI (cache.nixos.org, limity api.github.com), więc ruszają tylko przy
+          # PR i ręcznie, nie przy v*.
           tags ? true,
           # Tanie sprawdzenia także na każdy push do master (commity trafiają
           # tam wprost).
@@ -139,11 +139,6 @@ in
               raspberry-pi-4-sd-image = {
                 arch = "aarch64-linux";
                 buildTarget = "packages.aarch64-linux.raspberry-pi-4-sd-image";
-              };
-              nixos-iso = {
-                arch = "x86_64-linux";
-                buildTarget = "packages.x86_64-linux.nixos-iso";
-                tags = false;
               };
               eval = {
                 arch = "x86_64-linux";
