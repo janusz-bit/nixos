@@ -23,9 +23,17 @@ buildFHSEnv (
       dontStrip = true;
       dontPatchELF = true;
 
+      # Instalator linkuje ~/.local/bin/unsloth do CLI w venv. ~/.local/bin jest
+      # w PATH przed /run/current-system/sw/bin, więc taki link przesłoniłby
+      # polecenie unsloth z tej paczki, a bez FHS Python z uv nie znajduje CA
+      # (CERTIFICATE_VERIFY_FAILED). Aplikacja uruchamia backend bezpośrednio
+      # z venv, a `unsloth studio update` uruchamia pobrany instalator tylko
+      # z --shortcuts-only, który kończy się przed tym miejscem.
       installPhase = ''
         runHook preInstall
         dpkg-deb -x $src $out
+        substituteInPlace $out/usr/lib/Unsloth/install.sh \
+          --replace-fail 'ln -sfn "$VENV_DIR/bin/unsloth" "$_shim_path"' 'rm -f "$_shim_path"'
         runHook postInstall
       '';
 
@@ -37,19 +45,6 @@ buildFHSEnv (
         sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
       };
     };
-  in
-  {
-    pname = "unsloth-desktop";
-    version = "0.1.915-beta";
-
-    # version i src sa atrybutami pakietu, a nie wewnetrznej derywacji:
-    # tylko wtedy nix-update znajduje ich pozycje i podmienia wersje oraz hash.
-    src = fetchurl {
-      url = "https://github.com/unslothai/unsloth/releases/download/v${finalAttrs.version}/Unsloth-Desktop-Ubuntu.deb";
-      hash = "sha256-q8t2YxLKOkc7FwWSv2lfykVmZC6XIZqd6sStTm5h4I0=";
-    };
-
-    includeClosures = true;
 
     targetPkgs =
       pkgs: with pkgs; [
@@ -68,6 +63,8 @@ buildFHSEnv (
         pciutils
       ];
 
+    # Python z uv (python-build-standalone) w venv szuka CA w /etc/ssl/cert.pem,
+    # którego NixOS nie ma.
     profile = ''
       export SSL_CERT_FILE="${cacert}/etc/ssl/certs/ca-bundle.crt"
       export GIO_EXTRA_MODULES="${glib-networking}/lib/gio/modules:$GIO_EXTRA_MODULES"
@@ -75,9 +72,34 @@ buildFHSEnv (
       export CC=gcc
     '';
 
+    # CLI z venv (`unsloth studio setup`, `unsloth studio -p 8888`) w tym samym
+    # środowisku co aplikacja.
+    unsloth-cli = buildFHSEnv {
+      pname = "unsloth";
+      inherit (finalAttrs) version;
+      inherit targetPkgs profile;
+      includeClosures = true;
+      runScript = ''"$HOME/.unsloth/studio/unsloth_studio/bin/unsloth"'';
+    };
+  in
+  {
+    pname = "unsloth-desktop";
+    version = "0.1.915-beta";
+
+    # version i src sa atrybutami pakietu, a nie wewnetrznej derywacji:
+    # tylko wtedy nix-update znajduje ich pozycje i podmienia wersje oraz hash.
+    src = fetchurl {
+      url = "https://github.com/unslothai/unsloth/releases/download/v${finalAttrs.version}/Unsloth-Desktop-Ubuntu.deb";
+      hash = "sha256-q8t2YxLKOkc7FwWSv2lfykVmZC6XIZqd6sStTm5h4I0=";
+    };
+
+    includeClosures = true;
+    inherit targetPkgs profile;
+
     runScript = "${unsloth-desktop-unwrapped}/usr/bin/unsloth-studio";
 
     extraInstallCommands = ''
+      ln -s ${lib.getExe unsloth-cli} $out/bin/unsloth
       install -Dm644 ${unsloth-desktop-unwrapped}/usr/share/applications/Unsloth.desktop \
         $out/share/applications/unsloth-desktop.desktop
       substituteInPlace $out/share/applications/unsloth-desktop.desktop \
@@ -87,7 +109,7 @@ buildFHSEnv (
     '';
 
     passthru = {
-      inherit unsloth-desktop-unwrapped;
+      inherit unsloth-desktop-unwrapped unsloth-cli;
       # Upstream oznacza wszystkie wydania sufiksem -beta, a nix-update
       # pomija takie wersje bez --version=unstable.
       updateScript = nix-update-script { extraArgs = [ "--version=unstable" ]; };
@@ -108,7 +130,9 @@ buildFHSEnv (
         The app manages its own runtime in ~/.unsloth/studio: on first run it
         bootstraps a uv venv, installs the unsloth PyPI backend and PyTorch
         (CUDA wheels selected by GPU), and downloads prebuilt llama.cpp binaries.
-        These runtime components are not part of this package.
+        These runtime components are not part of this package. The `unsloth`
+        command runs the CLI from that venv in the same FHS environment; the
+        bundled installer no longer links it into ~/.local/bin.
 
         Note: the in-app self-updater cannot replace the read-only store binary;
         update by rebuilding this package.
