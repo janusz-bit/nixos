@@ -40,6 +40,7 @@
         self.modules.nixos.rpi-claude-notify
         self.modules.nixos.rpi-remote-agent
         self.modules.nixos.rpi-laptop-llm
+        self.modules.nixos.rpi-t3code
         self.modules.nixos.rpi-ai
       ];
 
