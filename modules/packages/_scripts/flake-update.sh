@@ -28,12 +28,15 @@ echo "Updating strata..."
 # w modules/packages/_strata/default.nix (SHA256SUMS.txt i setup.py wydania);
 # nix-update podbija tylko version i src.
 nix-update -F strata
+echo "Updating unsloth-desktop..."
+# Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.
+nix-update --system x86_64-linux -F unsloth-desktop --version=unstable
 echo "Syncing GitHub Actions workflows and docs from the updated flake..."
 nix run .#sync-github-actions
 nix run .#sync-docs
 
 git add -A -- flake.lock .github/workflows docs/reference \
-  modules/packages/_{bootdev-cli,helium,strata,waywallen,waywallen-kde-plugin}/default.nix
+  modules/packages/_{bootdev-cli,helium,strata,unsloth-desktop,waywallen,waywallen-kde-plugin}/default.nix
 if git diff --cached --quiet; then
   echo "Everything is already up to date."
 else

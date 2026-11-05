@@ -16,6 +16,7 @@ let
     helium = pkgs.callPackage ./_helium { };
     llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
     strata = pkgs.callPackage ./_strata { };
+    unsloth-desktop = pkgs.callPackage ./_unsloth-desktop { };
     waywallen = pkgs.callPackage ./_waywallen { };
     waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };
   };
