@@ -1,9 +1,9 @@
 # Skille i modele agentów AI na laptopie: skille własne (w tym obscura z jej
 # programem, nixos-system z faktami o hoście i brulion z brulion-cli), paczki
-# Qt Development Skills i tstack, lokalny Trilium dla Prime Agenta oraz
-# lokalne modele na GPU — Ternary Bonsai 2 27B (aliasy bonsai-serve
-# i bonsai-serve-mtp) i Qwen3.8 Flash-Next Coder z serwera Strata. Tylko
-# wybór; definicje są w modules/ai/.
+# Qt Development Skills, tstack i frontend-design, lokalny Trilium dla Prime
+# Agenta oraz lokalne modele na GPU — Ternary Bonsai 2 27B (aliasy
+# bonsai-serve i bonsai-serve-mtp) i Qwen3.8 Flash-Next Coder z serwera
+# Strata. Tylko wybór; definicje są w modules/ai/.
 _: {
   flake.modules.nixos.nixos-ai = _: {
     ai = {
@@ -16,6 +16,7 @@ _: {
       };
       skillPacks = {
         qt-agent-skills.enable = true;
+        frontend-design.enable = true;
         tstack.enable = true;
       };
       models = {

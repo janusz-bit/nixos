@@ -1,7 +1,8 @@
 # Katalog skilli agentów AI: które skille repozytorium zna (ai.skills) i skąd
 # pochodzą paczki skilli z wejść flake'a (ai.skillPacks; Qt Development Skills
-# z wejścia qt-agent-skills i tstack, czyli prowadzenie PR przez review i CI
-# do merge'a przez gh). Same skille leżą w modules/skills/<nazwa>/ (SKILL.md +
+# z wejścia qt-agent-skills, tstack, czyli prowadzenie PR przez review i CI
+# do merge'a przez gh, i frontend-design z oficjalnego marketplace'u pluginów
+# Claude Code). Same skille leżą w modules/skills/<nazwa>/ (SKILL.md +
 # references/; skill pythonowy też src/ i pyproject.toml); tu tylko wpisy, bez
 # włączania: host wybiera je w swoim ai.nix, a ai-harness linkuje wybrane do
 # agentów.
@@ -93,6 +94,7 @@
       ai.skillPacks = {
         qt-agent-skills.source = "${inputs.qt-agent-skills}/skills";
         tstack.source = "${inputs.tstack}/skills";
+        frontend-design.source = "${inputs.claude-plugins-official}/plugins/frontend-design/skills";
       };
 
       # Bez Trilium na hoście (customBot.triliumMcpUrl) skill nie ma serwera

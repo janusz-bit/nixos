@@ -48,6 +48,11 @@
     # flake = false z tego samego powodu co qt-agent-skills.
     tstack.url = "github:t3dotgg/tstack";
     tstack.flake = false;
+    # Oficjalny marketplace pluginów Claude Code; ai.skillPacks bierze z niego
+    # tylko katalog skilli pluginu frontend-design. flake = false z tego
+    # samego powodu co qt-agent-skills.
+    claude-plugins-official.url = "github:anthropics/claude-plugins-official";
+    claude-plugins-official.flake = false;
   };
 
   # Jedyna lista cache: hosty (customTop.nixConfig), CI i pierwszy rebuild
