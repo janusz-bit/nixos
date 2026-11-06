@@ -3,8 +3,9 @@
 # claude-usage z limitami subskrypcji Claude), paczki
 # Qt Development Skills, tstack i frontend-design, lokalny Trilium dla Prime
 # Agenta oraz lokalne modele na GPU — Ternary Bonsai 2 27B (aliasy
-# bonsai-serve i bonsai-serve-mtp) i Qwen3.8 Flash-Next Coder z serwera
-# Strata. Tylko wybór; definicje są w modules/ai/.
+# bonsai-serve i bonsai-serve-mtp) i Qwen3.8 Flash-Next (Coder IQ1_M
+# i Gyro-M) z serwera Strata, Gyro-M jako domyślny model opencode2. Tylko
+# wybór; definicje są w modules/ai/.
 _: {
   flake.modules.nixos.nixos-ai = _: {
     ai = {
@@ -25,7 +26,29 @@ _: {
         ternary-bonsai-2-27b.enable = true;
         ternary-bonsai-2-27b-mtp.enable = true;
         qwen3-8-flash-next-coder-iq1_m.enable = true;
+        qwen3-8-flash-next-gyro-gyro-m.enable = true;
       };
+      # Odpowiednik v2 tego, co `strata connect opencode` zapisuje w formacie
+      # v1 (opencode2 sam tłumaczy v1 tak samo: small_model -> agents.title,
+      # autoupdate -> update).
+      opencode.settings =
+        let
+          gyroM = "strata/qwen3-8-flash-next-gyro-gyro-m";
+        in
+        {
+          model = gyroM;
+          agents.title.model = gyroM;
+          update = "disable";
+          share = "disabled";
+          # Strata liczy bufor 60548 tokenów dla okna 128K (kompakcja przy 52%
+          # limitu wejścia). Bufor jest wspólny dla wszystkich modeli, a liczba
+          # przekracza okno bonsai-serve-mtp (49152), więc jako ułamek okna:
+          # 46% z 131072 to prawie ten sam próg.
+          compaction = {
+            auto = true;
+            buffer = "46%";
+          };
+        };
     };
   };
 }

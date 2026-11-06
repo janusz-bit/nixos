@@ -187,6 +187,9 @@
         // lib.optionalAttrs (provider.name != null) { inherit (provider) name; };
 
       opencodeProviders = providersOf opencodeProvider (modelsOf "opencode");
+      opencodeConfig =
+        cfg.opencode.settings
+        // lib.optionalAttrs (opencodeProviders != { }) { providers = opencodeProviders; };
 
       modelsWhere = agent: predicate: lib.attrNames (lib.filterAttrs (_: predicate) (modelsOf agent));
       opencodeWithoutLimits = modelsWhere "opencode" (
@@ -213,8 +216,8 @@
           "prime-agent/models.json".text =
             builtins.toJSON { providers = providersOf primeProvider (modelsOf "prime-agent"); } + "\n";
 
-          "opencode/opencode.json" = lib.mkIf (opencodeProviders != { }) {
-            text = builtins.toJSON { providers = opencodeProviders; };
+          "opencode/opencode.json" = lib.mkIf (opencodeConfig != { }) {
+            text = builtins.toJSON opencodeConfig;
           };
         };
 

@@ -89,6 +89,17 @@ _: {
           );
         };
 
+        opencode.settings = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+          description = ''
+            opencode2: pozostałe pola zarządzanego opencode.json w schemacie v2
+            (np. model, agents, compaction, share, update), nie v1 z `strata
+            connect opencode` (provider, small_model, autoupdate). Pole
+            providers buduje ai-harness z włączonych ai.models.
+          '';
+        };
+
         providers = lib.mkOption {
           default = { };
           description = "Serwery zgodne z API OpenAI, z których korzystają modele.";

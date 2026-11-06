@@ -4,8 +4,8 @@
 # Ollama (także modele chmurowe przez nią), Ollama Cloud i OpenRouter. Lokalne
 # na GPU: Ternary Bonsai 2 27B (fork llama.cpp od PrismML; warianty zwykły
 # i z głowicą MTP, serwer uruchamiają aliasy bonsai-serve i bonsai-serve-mtp,
-# a llama-prism daje pozostałe polecenia forka) i Qwen3.8-Flash-Next Coder
-# z serwera Strata (tylko NVIDIA).
+# a llama-prism daje pozostałe polecenia forka) i Qwen3.8-Flash-Next (Coder
+# IQ1_M i Gyro-M) z serwera Strata (tylko NVIDIA).
 #
 # Klucze API wstrzykują wrappery fish z agenix (base/agenix.nix); tu są tylko
 # nazwy zmiennych env.
@@ -171,6 +171,33 @@ _: {
       # Model z myśleniem i obrazem na wejściu (u modeli Ollamy sprawdź
       # w `ollama show <model>`, sekcja Capabilities). Schemat prime-agenta zna
       # tylko input "text" i "image" — "video" odrzuca walidator.
+      # Model serwera Strata (desktop-ai); oba modele obsługuje ten sam serwer
+      # (serve/), więc różnią się tylko id i nazwą.
+      strataModel = id: name: {
+        provider = "strata";
+        inherit id name;
+        # Obrazy czyta strata-vision na CPU (domyślne --vision przy <24 GB).
+        input = [
+          "text"
+          "image"
+        ];
+        context = 131072;
+        # Ponad OUTPUT_CAP = 4096, z którym Strata testuje swoje konfiguracje
+        # agentów; 1/8 okna jak output_cap w strata_cli/launch/harness.py.
+        output = 16384;
+        # Poziomy, które serwer przyjmuje (EFFORT w serve/frontend.py; high
+        # działa jak xhigh); "none" wyłącza myślenie, jak w forku PrismML.
+        reasoning = {
+          efforts = [
+            "low"
+            "medium"
+            "high"
+            "xhigh"
+          ];
+          offEffort = "none";
+        };
+      };
+
       visionReasoningModel = provider: id: {
         inherit provider id;
         agents = [ "prime-agent" ];
@@ -203,7 +230,8 @@ _: {
         };
         llamacpp = localProvider "llama.cpp (local)" "llamacpp";
         # Serwer `strata launch --family coder --model IQ1_M --context 128k
-        # --kv q4_0 --no-api-key` (desktop-ai), ten sam port co bonsai-serve.
+        # --kv q4_0 --no-api-key` albo `--family gyro` (desktop-ai), ten sam
+        # port co bonsai-serve.
         # Nie przez `strata connect opencode --write`: pisze format opencode
         # v1 (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
         strata = localProvider "Strata (local)" "strata";
@@ -233,36 +261,14 @@ _: {
             };
           };
 
-        qwen3-8-flash-next-coder-iq1_m = {
-          provider = "strata";
-          id = "qwen3.8-flash-next-coder-iq1_m";
-          name = "Qwen3.8-Flash-Next Coder IQ1_M (local)";
-          # Obrazy czyta strata-vision na CPU (domyślne --vision przy <24 GB).
-          input = [
-            "text"
-            "image"
-          ];
-          # Przy 128K domyślne KV int8 (1931 MiB) nie zostawia w 8 GB VRAM
-          # miejsca na cache ekspertów ani bufory prefillu; q4_0 mieści się na
-          # styk (2026-10-26: 131 MiB wolnego po starcie, 55 MiB w trakcie
-          # odpowiedzi, 26,7 tok/s). Bez klucza serwer i tak odrzuca strony
-          # z przeglądarki (sprawdza Host i Origin).
-          context = 131072;
-          # Ponad OUTPUT_CAP = 4096, z którym Strata testuje swoje
-          # konfiguracje agentów (strata_cli/launch/harness.py).
-          output = 16384;
-          # Poziomy, które serwer przyjmuje (EFFORT w serve/frontend.py; high
-          # działa jak xhigh); "none" wyłącza myślenie, jak w forku PrismML.
-          reasoning = {
-            efforts = [
-              "low"
-              "medium"
-              "high"
-              "xhigh"
-            ];
-            offEffort = "none";
-          };
-        };
+        # Przy 128K domyślne KV int8 (1931 MiB) nie zostawia w 8 GB VRAM
+        # miejsca na cache ekspertów ani bufory prefillu; q4_0 mieści się na
+        # styk (2026-10-26: 131 MiB wolnego po starcie, 55 MiB w trakcie
+        # odpowiedzi, 26,7 tok/s). Bez klucza serwer i tak odrzuca strony
+        # z przeglądarki (sprawdza Host i Origin).
+        qwen3-8-flash-next-coder-iq1_m = strataModel "qwen3.8-flash-next-coder-iq1_m" "Qwen3.8-Flash-Next Coder IQ1_M (local)";
+        # Gyro-M TQ2_0: jeden plik GGUF z tablicą n-gramów (pack gyro-gyro-m).
+        qwen3-8-flash-next-gyro-gyro-m = strataModel "qwen3.8-flash-next-gyro-gyro-m" "Qwen3.8-Flash-Next Gyro-M TQ2_0 (local)";
       }
       # Poziomy Prime Agenta mapują się na off/medium/xhigh; offEffort "none"
       # wyłącza myślenie (tools/server/server-common.cpp forka). Domyślne compat
@@ -294,12 +300,9 @@ _: {
         // lib.mapAttrs' (_: variant: lib.nameValuePair variant.alias (bonsaiServe variant)) enabledBonsai
       );
 
-      assertions = [
-        {
-          assertion =
-            !config.ai.models.qwen3-8-flash-next-coder-iq1_m.enable || config.hardware.nvidia.enabled;
-          message = "ai.models.qwen3-8-flash-next-coder-iq1_m: Strata ma tylko silnik CUDA, a host nie ma sterownika NVIDIA.";
-        }
-      ];
+      assertions = lib.mapAttrsToList (name: model: {
+        assertion = !(model.enable && model.provider == "strata") || config.hardware.nvidia.enabled;
+        message = "ai.models.${name}: Strata ma tylko silnik CUDA, a host nie ma sterownika NVIDIA.";
+      }) config.ai.models;
     };
 }

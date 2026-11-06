@@ -414,6 +414,17 @@ Prime Agent: wartość effort, która wyłącza myślenie (razem z efforts).
 - Default: `null`
 - Declared in: [ai/options.nix](../../modules/ai/options.nix)
 
+### `ai.opencode.settings`
+
+opencode2: pozostałe pola zarządzanego opencode.json w schemacie v2
+(np. model, agents, compaction, share, update), nie v1 z `strata
+connect opencode` (provider, small_model, autoupdate). Pole
+providers buduje ai-harness z włączonych ai.models.
+
+- Type: attribute set of anything
+- Default: `{ }`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
 ### `ai.providers`
 
 Serwery zgodne z API OpenAI, z których korzystają modele.
