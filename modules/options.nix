@@ -37,12 +37,20 @@ in
           domain = strOption ''
             Domena właściciela: server_name Matrixa (identyfikatory
             @<konto>:<domena>, niezmienny po założeniu bazy continuwuity).
-            Same usługi RPi są w tailnecie (tailnet).
+            Same usługi RPi są w tailnecie (tailnet.domain).
           '';
-          tailnet = strOption ''
-            Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
-            https://<host>.<tailnet>:<port> (customBot.tailscaleServe).
-          '';
+          tailnet = {
+            domain = strOption ''
+              Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
+              https://<host>.<domain>:<port> (customBot.tailscaleServe).
+            '';
+            laptop = strOption ''
+              Adres tailnetu laptopa (`tailscale ip -4` na laptopie): RPi nie
+              ma MagicDNS (--accept-dns=false), więc nazwę laptopa dostaje
+              z networking.hosts (hosts/t3code-laptop.nix). Stały, dopóki
+              laptop nie zostanie usunięty z tailnetu i zalogowany od nowa.
+            '';
+          };
 
           repository = {
             name = strOption "Nazwa repozytorium na GitHubie.";

@@ -10,6 +10,10 @@
 #   SSH tylko z LAN-u). Tailnet dociera więc tylko do portów Serve, które
 #   obsługuje netstack w procesie tailscaled, i do portów otwartych w nixos-fw
 #   na tailscale0 (SSH RPi); resztę blokuje nixos-fw.
+# - Konta lokalne nie omijają uwierzytelnienia usługi innym wejściem: przy
+#   customBot.tailscaleServe.<port>.users z jej portem łączą się lokalnie tylko
+#   root (proxy tailscaled) i te konta, a połączenia na własne adresy tailnetu
+#   (lokalny listener Serve, idzie przez lo) są odrzucane.
 # - DNS: laptop ma systemd-resolved, więc MagicDNS dostaje tylko domenę tailnetu
 #   (split DNS na łączu tailscale0), a nazwy *.ts.net rozwiązują się tylko przez
 #   niego. RPi: --accept-dns=false, bo bez resolved MagicDNS przejąłby DNS
@@ -42,9 +46,58 @@ let
     let
       tailscale = lib.getExe config.services.tailscale.package;
       serve = config.customBot.tailscaleServe;
+
+      # Firewall przy reloadzie czyści tylko własne łańcuchy, nie OUTPUT, więc
+      # przed dodaniem reguła jest usuwana, żeby się nie mnożyła. Bez `-d`:
+      # usługa słuchająca na 0.0.0.0 (T3 desktop) jest lokalnie osiągalna
+      # także pod adresem LAN, który też idzie przez lo.
+      ownerRules = lib.concatLists (
+        lib.mapAttrsToList (
+          _:
+          { port, users }:
+          lib.optionals (users != null) (
+            map
+              (cmd: {
+                inherit cmd;
+                rule = lib.concatStringsSep " " (
+                  [ "OUTPUT -o lo -p tcp --dport ${toString port} -m owner ! --uid-owner root" ]
+                  ++ map (user: "-m owner ! --uid-owner ${user}") users
+                  ++ [ "-j REJECT" ]
+                );
+              })
+              [
+                "iptables"
+                "ip6tables"
+              ]
+          )
+        ) serve
+      );
+      # Lokalny listener Serve (własne adresy tailnetu 100.64.0.0/10 i
+      # fd7a:115c:a1e0::/48, idą przez lo) łączy się z usługą jako root, więc
+      # omijałby reguły owner.
+      outputRules = ownerRules ++ [
+        {
+          cmd = "iptables";
+          rule = "OUTPUT -o lo -d 100.64.0.0/10 -j REJECT";
+        }
+        {
+          cmd = "ip6tables";
+          rule = "OUTPUT -o lo -d fd7a:115c:a1e0::/48 -j REJECT";
+        }
+      ];
+      deleteRule = { cmd, rule }: "${cmd} -D ${rule} 2>/dev/null || true";
+      appendRule = { cmd, rule }: "${cmd} -A ${rule}";
     in
     {
       services.tailscale.enable = true;
+
+      networking.firewall = lib.mkIf (serve != { }) {
+        extraCommands = lib.concatMapStringsSep "\n" (rule: ''
+          ${deleteRule rule}
+          ${appendRule rule}
+        '') outputRules;
+        extraStopCommands = lib.concatMapStringsSep "\n" deleteRule outputRules;
+      };
 
       # BindsTo z After: przy lockdown (tailscaled pominięty) też się nie
       # uruchamiają. Typ simple, bo `tailscale wait` czeka do zalogowania,
@@ -87,8 +140,9 @@ let
           ''
           + lib.concatLines (
             lib.mapAttrsToList (
-              port: target:
-              "${tailscale} serve --bg --yes --https=${lib.escapeShellArg port} ${lib.escapeShellArg target}"
+              httpsPort:
+              { port, ... }:
+              "${tailscale} serve --bg --yes --https=${lib.escapeShellArg httpsPort} http://127.0.0.1:${toString port}"
             ) serve
           );
           serviceConfig = {

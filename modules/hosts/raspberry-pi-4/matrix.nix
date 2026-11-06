@@ -76,12 +76,12 @@ _: {
             # (pierwszy start); kolejne: `!admin users create-user …` w #admins.
             allow_federation = false;
             trusted_servers = [ ];
-            well_known.client = "https://${config.networking.hostName}.${config.customTop.tailnet}:${toString servePort}";
+            well_known.client = "https://${config.networking.hostName}.${config.customTop.tailnet.domain}:${toString servePort}";
           };
         };
 
         customBot = {
-          tailscaleServe.${toString servePort} = localUrl;
+          tailscaleServe.${toString servePort}.port = builtins.head continuwuity.port;
           lockdownServices = [ "continuwuity" ];
         };
       }

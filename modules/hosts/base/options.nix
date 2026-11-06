@@ -74,17 +74,40 @@ in
           '';
         };
         tailscaleServe = lib.mkOption {
-          type = lib.types.attrsOf lib.types.str;
+          type = lib.types.attrsOf (
+            lib.types.submodule {
+              options = {
+                port = lib.mkOption {
+                  type = lib.types.port;
+                  description = "Port usługi HTTP na 127.0.0.1.";
+                };
+                users = lib.mkOption {
+                  type = lib.types.nullOr (lib.types.listOf lib.types.str);
+                  default = null;
+                  description = ''
+                    Konta, które oprócz roota (proxy tailscaled) łączą się
+                    lokalnie z portem usługi; pozostałe dostają odmowę (reguła
+                    iptables owner). null = bez ograniczenia, gdy usługa sama
+                    uwierzytelnia każde połączenie.
+                  '';
+                };
+              };
+            }
+          );
           default = { };
           example = {
-            "443" = "http://127.0.0.1:3773";
+            "443" = {
+              port = 3773;
+              users = [ "t3code" ];
+            };
           };
           description = ''
             Tailscale Serve: port HTTPS pod nazwą MagicDNS hosta
-            (https://<host>.<customTop.tailnet>:<port>) → adres lokalnej
-            usługi. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
+            (https://<host>.<customTop.tailnet.domain>:<port>) → usługa HTTP na
+            127.0.0.1. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
             każdym zalogowaniu dokładnie tę mapę. Dopisuje ją moduł usługi; ten
-            sam port z dwóch modułów kończy ewaluację błędem.
+            sam port z dwóch modułów z różnymi wartościami kończy ewaluację
+            błędem.
           '';
         };
       };

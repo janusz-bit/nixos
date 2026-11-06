@@ -9,8 +9,8 @@
 # - Z tailnetu dociera tylko HTTPS Serve (netfilter nodivert, rpi-tailscale).
 # - Konta lokalne (hermes i pozostałe usługi) nie docierają do T3: do
 #   127.0.0.1:3773 łączy się tylko root (proxy tailscaled) i t3code (reguła
-#   iptables owner), a połączenia na własne adresy tailnetu (lokalny listener
-#   Serve) są odrzucane. Bez operatora tailscaled dla t3code: operator mógłby
+#   iptables owner z customBot.tailscaleServe.users), a połączenia na własne
+#   adresy tailnetu (lokalny listener Serve) są odrzucane (hosts/tailscale.nix). Bez operatora tailscaled dla t3code: operator mógłby
 #   włączyć Funnel, czyli wystawić T3 do internetu.
 # - Uwierzytelnia sam T3 (parowanie, sesje). `t3 serve` wypisuje przy starcie
 #   token parowania właściciela (5 min); LogFilterPatterns nie wpuszcza go do
@@ -46,26 +46,6 @@
           codex
         ];
       };
-
-      # Firewall przy reloadzie czyści tylko własne łańcuchy, nie OUTPUT, więc
-      # przed dodaniem reguła jest usuwana, żeby się nie mnożyła.
-      outputRules = [
-        {
-          cmd = "iptables";
-          rule = "OUTPUT -o lo -p tcp -d 127.0.0.1 --dport ${toString port} -m owner ! --uid-owner root -m owner ! --uid-owner ${user} -j REJECT";
-        }
-        # Własne adresy tailnetu (100.64.0.0/10, fd7a:115c:a1e0::/48) idą przez lo.
-        {
-          cmd = "iptables";
-          rule = "OUTPUT -o lo -d 100.64.0.0/10 -j REJECT";
-        }
-        {
-          cmd = "ip6tables";
-          rule = "OUTPUT -o lo -d fd7a:115c:a1e0::/48 -j REJECT";
-        }
-      ];
-      deleteRule = { cmd, rule }: "${cmd} -D ${rule} 2>/dev/null || true";
-      appendRule = { cmd, rule }: "${cmd} -A ${rule}";
 
       t3codeCli = pkgs.writeShellApplication {
         name = "t3code";
@@ -163,18 +143,13 @@
         };
       };
 
-      networking.firewall = {
-        extraCommands = lib.concatMapStringsSep "\n" (rule: ''
-          ${deleteRule rule}
-          ${appendRule rule}
-        '') outputRules;
-        extraStopCommands = lib.concatMapStringsSep "\n" deleteRule outputRules;
-      };
-
       customBot = {
         # https://<RPi>.<tailnet> (domyślny port HTTPS): pod tym adresem
         # są już sparowane urządzenia.
-        tailscaleServe."443" = "http://127.0.0.1:${toString port}";
+        tailscaleServe."443" = {
+          inherit port;
+          users = [ user ];
+        };
         # Agenci łączą się z internetem sami (API modeli).
         lockdownServices = [ user ];
       };

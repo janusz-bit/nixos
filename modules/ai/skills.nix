@@ -63,7 +63,7 @@
             "Hermes Agent runs as the unprivileged account `hermes` (no sudo, no `wheel`); its state `${config.services.hermes-agent.stateDir}` is shared with `${user}` through the `hermes` group. Run its CLI only through the `hermes` wrapper — never the package binary as root or `${user}` (`modules/hosts/raspberry-pi-4/hermes.nix`)."
         +
           fact (config.customBot.tailscaleServe != { })
-            "Server: web services listen on localhost and are published only to the tailnet through Tailscale Serve (`customBot.tailscaleServe`: HTTPS port -> local URL, `tailscale serve status`); sshd accepts the home LAN and `tailscale0`."
+            "Server: web services listen on localhost and are published only to the tailnet through Tailscale Serve (`customBot.tailscaleServe`: tailnet HTTPS port -> 127.0.0.1 port, `tailscale serve status`); sshd accepts the home LAN and `tailscale0`."
         + fact pkgs.stdenv.hostPlatform.isAarch64 "Low-power ARM board (`nix.settings.max-jobs = ${toString config.nix.settings.max-jobs}`): avoid local builds and heavy evaluations here."
         +
           fact (config.programs.ssh.knownHosts ? laptop)

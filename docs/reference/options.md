@@ -58,7 +58,7 @@ Adres własnego cache.
 
 Domena właściciela: server_name Matrixa (identyfikatory
 @\<konto>:\<domena>, niezmienny po założeniu bazy continuwuity).
-Same usługi RPi są w tailnecie (tailnet).
+Same usługi RPi są w tailnecie (tailnet.domain).
 
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
@@ -186,10 +186,20 @@ kopiuje do store tylko użyty plik.
 - Type: absolute path
 - Declared in: [options.nix](../../modules/options.nix)
 
-### `customTop.tailnet`
+### `customTop.tailnet.domain`
 
 Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
-https://\<host>.\<tailnet>:\<port> (customBot.tailscaleServe).
+https://\<host>.\<domain>:\<port> (customBot.tailscaleServe).
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.tailnet.laptop`
+
+Adres tailnetu laptopa (`tailscale ip -4` na laptopie): RPi nie
+ma MagicDNS (--accept-dns=false), więc nazwę laptopa dostaje
+z networking.hosts (hosts/t3code-laptop.nix). Stały, dopóki
+laptop nie zostanie usunięty z tailnetu i zalogowany od nowa.
 
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
@@ -256,13 +266,32 @@ na hoście bez base-lockdown lista nic nie robi.
 ### `customBot.tailscaleServe`
 
 Tailscale Serve: port HTTPS pod nazwą MagicDNS hosta
-(https://\<host>.\<customTop.tailnet>:\<port>) → adres lokalnej
-usługi. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
+(https://\<host>.\<customTop.tailnet.domain>:\<port>) → usługa HTTP na
+127.0.0.1. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
 każdym zalogowaniu dokładnie tę mapę. Dopisuje ją moduł usługi; ten
-sam port z dwóch modułów kończy ewaluację błędem.
+sam port z dwóch modułów z różnymi wartościami kończy ewaluację
+błędem.
 
-- Type: attribute set of string
+- Type: attribute set of (submodule)
 - Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe.<name>.port`
+
+Port usługi HTTP na 127.0.0.1.
+
+- Type: 16 bit unsigned integer; between 0 and 65535 (both inclusive)
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe.<name>.users`
+
+Konta, które oprócz roota (proxy tailscaled) łączą się
+lokalnie z portem usługi; pozostałe dostają odmowę (reguła
+iptables owner). null = bez ograniczenia, gdy usługa sama
+uwierzytelnia każde połączenie.
+
+- Type: null or (list of string)
+- Default: `null`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
 ### `customBot.triliumMcpUrl`

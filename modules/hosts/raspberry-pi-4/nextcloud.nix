@@ -41,7 +41,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = "${config.networking.hostName}.${config.customTop.tailnet}";
+          hostName = "${config.networking.hostName}.${config.customTop.tailnet.domain}";
           https = true;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
@@ -97,7 +97,7 @@
       };
 
       customBot = {
-        tailscaleServe.${toString servePort} = "http://127.0.0.1:80";
+        tailscaleServe.${toString servePort}.port = 80;
         # Jedyny vhost nginx: lockdown zatrzymuje go z Nextcloudem.
         lockdownServices = [ "nginx" ];
       };

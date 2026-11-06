@@ -20,7 +20,10 @@
     owner = "janusz-bit";
     email = "janusz-bit@proton.me";
     domain = "janusz-bit.com";
-    tailnet = "tail1ea20e.ts.net";
+    tailnet = {
+      domain = "tail1ea20e.ts.net";
+      laptop = "100.108.227.25";
+    };
     repository = {
       name = "nixos";
       path = "/etc/nixos";

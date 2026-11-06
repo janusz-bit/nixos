@@ -9,7 +9,7 @@ _: {
   flake.modules.nixos.rpi-gitea =
     { config, ... }:
     let
-      host = "${config.networking.hostName}.${config.customTop.tailnet}";
+      host = "${config.networking.hostName}.${config.customTop.tailnet.domain}";
       servePort = 3000;
     in
     {
@@ -30,8 +30,7 @@ _: {
       };
 
       customBot = {
-        tailscaleServe.${toString servePort} =
-          "http://127.0.0.1:${toString config.services.gitea.settings.server.HTTP_PORT}";
+        tailscaleServe.${toString servePort}.port = config.services.gitea.settings.server.HTTP_PORT;
         lockdownServices = [ "gitea" ];
       };
     };
