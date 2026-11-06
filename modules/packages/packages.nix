@@ -15,6 +15,7 @@ let
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
     llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
+    opencharts = pkgs.callPackage ./_opencharts { };
     strata = pkgs.callPackage ./_strata { };
     unsloth-desktop = pkgs.callPackage ./_unsloth-desktop { };
     waywallen = pkgs.callPackage ./_waywallen { };
