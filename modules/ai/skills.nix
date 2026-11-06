@@ -83,6 +83,22 @@
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
         };
+        # Czyta token OAuth Claude Code (~/.claude/.credentials.json), więc ma
+        # sens tylko na koncie zalogowanym do subskrypcji Claude; inni agenci
+        # też mogą go wołać, bo limity są wspólne dla całego konta.
+        claude-usage = {
+          source = "${self}/modules/skills/claude-usage";
+          packages = [
+            (pkgs.writeShellApplication {
+              name = "claude-usage";
+              runtimeInputs = with pkgs; [
+                curl
+                jq
+              ];
+              text = builtins.readFile ./_claude-usage/claude-usage.sh;
+            })
+          ];
+        };
         # Skill pythonowy działa w kernelu IPython Prime Agenta.
         trilium-notes = {
           source = "${self}/modules/skills/trilium-notes";
