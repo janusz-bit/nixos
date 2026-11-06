@@ -9,9 +9,11 @@
 # - RPi: nowe połączenia przez tailscale0 otwiera tylko t3code (reguła
 #   iptables owner); hermes (treści z internetu), usługi WWW i konto główne
 #   RPi dostają odmowę.
-# - Polityka tailnetu (panel Tailscale, Access controls): tag:rpi dochodzi
-#   tylko do TCP 443 laptopa; reszta laptopa (sshd tylko z LAN-u) zostaje
-#   zamknięta dla RPi.
+# - Polityka tailnetu (panel Tailscale) celowo nie zawęża ruchu: każde
+#   urządzenie łączy się z każdym. Granicę trzymają hosty: z RPi wychodzi
+#   tylko t3code (wyżej), a laptop przyjmuje z tailnetu tylko porty Serve
+#   i porty otwarte globalnie w nixos-fw (netfilter nodivert); sshd laptopa
+#   tylko z LAN-u.
 # - Laptop: z portem T3 desktop (słucha na 0.0.0.0, firewall go nie otwiera)
 #   łączy się lokalnie tylko root (proxy tailscaled) i konto główne;
 #   claude-remote, hermes-llm i strata, konta używane z RPi, dostają odmowę
@@ -21,12 +23,9 @@
 # Ryzyko resztkowe: root albo konto t3code na RPi steruje sesjami T3 laptopa
 # z poziomem dostępu z parowania.
 #
-# Jednorazowo: w polityce tailnetu obok istniejącego grantu dla członków
-#   "hosts": { "laptop": "<customTop.tailnet.laptop>" },
-#   "grants": [ …, { "src": ["tag:rpi"], "dst": ["laptop"], "ip": ["tcp:443"] } ]
-# potem w T3 na RPi dodać środowisko https://nixos.<tailnet> i sparować je
-# kodem z T3 laptopa. Wycofanie: usunąć grant (T3 zostaje sparowany, ale nie
-# dochodzi).
+# Jednorazowo: w T3 na RPi dodać środowisko https://nixos.<tailnet>
+# i sparować je kodem z T3 laptopa. Wycofanie: usunąć sparowane środowisko
+# w T3 laptopa.
 #
 # Sprawdzenie: na RPi `sudo -u t3code curl -sI https://nixos.<tailnet>`
 # (odpowiada) i `curl -sI https://nixos.<tailnet>` jako nixos (odmowa),
