@@ -1,6 +1,12 @@
 # Prywatny serwer Matrix continuwuity jako kanał rozmów i powiadomień
-# Hermesa: server_name = domena główna, klienci przez matrix.<domena> w tunelu,
-# bez federacji i otwartej rejestracji; Hermes łączy się lokalnie kontem bota.
+# Hermesa: server_name = domena główna, klienci w tailnecie przez
+# https://<RPi>.<tailnet>:8448 (Tailscale Serve), bez federacji i otwartej
+# rejestracji; Hermes łączy się lokalnie kontem bota.
+#
+# Domena nie wskazuje na RPi, więc klient (Element) nie znajdzie serwera po
+# @<konto>:<domena>: adres serwera wpisuje się przy logowaniu ręcznie.
+# server_name zostaje domeną, bo continuwuity wiąże z nim bazę (zmiana =
+# nowa baza i nowe konta).
 #
 # Hermes odpowiada tylko kontu właściciela (MATRIX_ALLOWED_USERS): w DM
 # zawsze, w pokojach z innymi osobami tylko na @wzmiankę (domyślne
@@ -11,6 +17,7 @@
 # wycisza, Hermes startuje po continuwuity i zatrzymuje się przed nim).
 #
 # Sprawdzenie: `systemctl status continuwuity`,
+# `curl -s https://<RPi>.<tailnet>:8448/_matrix/client/versions` z tailnetu,
 # `curl -s http://127.0.0.1:6167/_matrix/client/versions`,
 # `journalctl -u hermes-agent -b | grep -i matrix`.
 _: {
@@ -19,9 +26,9 @@ _: {
     let
       inherit (config.customTop) domain;
       continuwuity = config.services.matrix-continuwuity.settings.global;
-      # Adres lokalny z pominięciem tunelu: łączy się nim Hermes, a nginx
-      # proxuje na niego .well-known.
+      # Adres lokalny z pominięciem Serve: łączy się nim Hermes.
       localUrl = "http://127.0.0.1:${toString (builtins.head continuwuity.port)}";
+      servePort = 8448;
 
       # Jedyne konto, które może rozmawiać z Hermesem. Zakładasz je jako
       # pierwsze — dostaje admina serwera.
@@ -40,8 +47,8 @@ _: {
         # DM z ownerId. Nie przez /sethome — w trybie zarządzanym (Nix)
         # Hermes nie zapisuje config.yaml, więc wybór zginąłby po restarcie.
         MATRIX_HOME_ROOM = "!dTrQicK0YGC8YxepExnDhhmVWD9O2u3QRiTwj4YaY20";
-        # TLS klientów kończy się w Cloudflare, więc treść rozmów chroni
-        # dopiero E2EE. `required`: bez działającego szyfrowania adapter nie
+        # Treść rozmów chroni E2EE, nie tylko TLS Serve (serwer widziałby ją
+        # jawnie). `required`: bez działającego szyfrowania adapter nie
         # startuje, zamiast po cichu przejść na tekst jawny.
         MATRIX_E2EE_MODE = "required";
         # Przy pierwszym połączeniu Hermes zakłada cross-signing konta bota
@@ -69,17 +76,14 @@ _: {
             # (pierwszy start); kolejne: `!admin users create-user …` w #admins.
             allow_federation = false;
             trusted_servers = [ ];
-            # Klienci (Element) przez tunel (cloudflared.nix).
-            well_known.client = "https://matrix.${domain}";
+            well_known.client = "https://${config.networking.hostName}.${config.customTop.tailnet}:${toString servePort}";
           };
         };
 
-        # server_name to domena główna, którą serwuje Nextcloud: delegacja
-        # klientów na matrix.${domain}. Dokładne `=` ma pierwszeństwo przed
-        # `^~ /.well-known` z modułu nextcloud. Odpowiedź i nagłówek CORS daje
-        # continuwuity — własny add_header w lokacji skasowałby nagłówki
-        # bezpieczeństwa vhosta (gixy: add_header_redefinition).
-        services.nginx.virtualHosts.${domain}.locations."= /.well-known/matrix/client".proxyPass = localUrl;
+        customBot = {
+          tailscaleServe.${toString servePort} = localUrl;
+          lockdownServices = [ "continuwuity" ];
+        };
       }
 
       (lib.mkIf hasSecret {

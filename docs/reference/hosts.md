@@ -7,7 +7,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 38 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -129,7 +129,7 @@ flowchart LR
 
 ## raspberry-pi-4
 
-Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB), usługi wystawione wyłącznie przez Cloudflare Tunnel (cloudflared.nix). Tu: wpis rejestru, stateVersion, konto i lista modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
+Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB), usługi dostępne spoza domowego LAN-u wyłącznie w tailnecie (Tailscale Serve, hosts/tailscale.nix). Tu: wpis rejestru, stateVersion, konto i lista modułów hosta; płytka i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base, bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
 
 ```mermaid
 flowchart LR
@@ -145,12 +145,10 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_network[rpi-network]
   host_raspberry_pi_4 --> rpi_ssh[rpi-ssh]
   host_raspberry_pi_4 --> rpi_tools[rpi-tools]
-  host_raspberry_pi_4 --> rpi_cloudflared[rpi-cloudflared]
   host_raspberry_pi_4 --> rpi_nextcloud[rpi-nextcloud]
   host_raspberry_pi_4 --> rpi_gitea[rpi-gitea]
   host_raspberry_pi_4 --> rpi_hermes[rpi-hermes]
   host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
-  host_raspberry_pi_4 --> rpi_ttyd[rpi-ttyd]
   host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
   host_raspberry_pi_4 --> rpi_laptop_llm[rpi-laptop-llm]
   host_raspberry_pi_4 --> rpi_tailscale[rpi-tailscale]
@@ -197,7 +195,6 @@ flowchart LR
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
 - `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
-- `rpi-cloudflared` — [hosts/raspberry-pi-4/cloudflared.nix](../../modules/hosts/raspberry-pi-4/cloudflared.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
 - `rpi-hermes` — [hosts/raspberry-pi-4/hermes.nix](../../modules/hosts/raspberry-pi-4/hermes.nix)
 - `rpi-laptop-llm` — [hosts/laptop-llm.nix](../../modules/hosts/laptop-llm.nix)
@@ -210,7 +207,6 @@ flowchart LR
 - `rpi-t3code` — [hosts/raspberry-pi-4/t3code.nix](../../modules/hosts/raspberry-pi-4/t3code.nix)
 - `rpi-tailscale` — [hosts/tailscale.nix](../../modules/hosts/tailscale.nix)
 - `rpi-tools` — [hosts/raspberry-pi-4/tools.nix](../../modules/hosts/raspberry-pi-4/tools.nix)
-- `rpi-ttyd` — [hosts/raspberry-pi-4/ttyd.nix](../../modules/hosts/raspberry-pi-4/ttyd.nix)
 
 ## wsl
 

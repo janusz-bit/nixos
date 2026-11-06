@@ -2,12 +2,12 @@
 # z przeglądarki wyłącznie w tailnecie: Tailscale Serve wystawia
 # https://<RPi>.<tailnet>.ts.net (certyfikat Tailscale) i przekazuje ruch do
 # `t3 serve` na 127.0.0.1:3773, które działa na koncie systemowym t3code bez
-# grup, sudo i sekretów. Sam Tailscale (logowanie, ustawienia, firewall)
-# jest w hosts/tailscale.nix (rpi-tailscale).
+# grup, sudo i sekretów. Sam Tailscale (logowanie, ustawienia, firewall,
+# jednostka tailscale-serve) jest w hosts/tailscale.nix (rpi-tailscale).
 #
 # Granica zaufania: sesja T3 to powłoka, pliki i agenci na koncie t3code.
 # - Z tailnetu dociera tylko HTTPS Serve (netfilter nodivert, rpi-tailscale).
-# - Konta lokalne (hermes i usługi z internetu) nie docierają do T3: do
+# - Konta lokalne (hermes i pozostałe usługi) nie docierają do T3: do
 #   127.0.0.1:3773 łączy się tylko root (proxy tailscaled) i t3code (reguła
 #   iptables owner), a połączenia na własne adresy tailnetu (lokalny listener
 #   Serve) są odrzucane. Bez operatora tailscaled dla t3code: operator mógłby
@@ -16,16 +16,13 @@
 #   token parowania właściciela (5 min); LogFilterPatterns nie wpuszcza go do
 #   journala, który czyta też hermes (systemd-journal). Telemetria wyłączona.
 #
-# Jednorazowo: zalogować RPi do Tailscale (nagłówek hosts/tailscale.nix),
-# włączenie Serve w tailnecie linkiem z `journalctl -u t3code-tailnet` (bez
-# niego port 443 z tailnetu nie odpowiada), logowanie agenta:
+# Jednorazowo: zalogować RPi do Tailscale i włączyć Serve (nagłówek
+# hosts/tailscale.nix), logowanie agenta:
 # `sudo -u t3code -H claude auth login`. Parowanie urządzenia: `t3code pair`
 # (link https w tailnecie + QR, ważny 5 min); pozostałe polecenia `t3`
 # na koncie usługi: `t3code <polecenie>`, np. `t3code auth session list`.
-# Po usunięciu modułu konfiguracja Serve zostaje w stanie tailscaled:
-# `sudo tailscale serve reset`.
 #
-# Sprawdzenie: `systemctl status t3code t3code-tailnet`,
+# Sprawdzenie: `systemctl status t3code tailscale-serve`,
 # `tailscale serve status`, `curl -sI http://127.0.0.1:3773` jako nixos (odrzucone), z urządzenia
 # w tailnecie https://<RPi>.<tailnet>.ts.net.
 { inputs, ... }:
@@ -41,7 +38,6 @@
       user = "t3code";
       home = "/var/lib/${user}";
       port = 3773;
-      tailscale = lib.getExe config.services.tailscale.package;
 
       t3code = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code.override {
         # Te same CLI agentów co Hermes i tools.nix zamiast kopii z llm-agents.
@@ -112,13 +108,6 @@
       };
     in
     {
-      assertions = [
-        {
-          assertion = config.services.tailscale.enable;
-          message = "rpi-t3code: T3 jest dostępny tylko przez Tailscale Serve; zaimportuj rpi-tailscale.";
-        }
-      ];
-
       users = {
         users.${user} = {
           isSystemUser = true;
@@ -172,27 +161,6 @@
             ];
           };
         };
-
-        # Po zalogowaniu (tailscale wait czeka na Running) Serve:
-        # https://<RPi>.<tailnet>.ts.net -> T3. BindsTo z After i typ simple
-        # z tego samego powodu co tailscale-prefs (hosts/tailscale.nix).
-        t3code-tailnet = {
-          description = "Tailscale Serve dla T3 Code";
-          wantedBy = [ "tailscaled.service" ];
-          bindsTo = [ "tailscaled.service" ];
-          after = [ "tailscaled.service" ];
-          script = ''
-            ${tailscale} wait
-            ${tailscale} serve --bg --yes --https=443 http://127.0.0.1:${toString port}
-          '';
-          # Gdy Serve nie jest włączony w tailnecie, `tailscale serve` czeka
-          # i wypisuje link do włączenia (journalctl -u t3code-tailnet); po
-          # włączeniu kończy sam. Restart na wypadek innego błędu.
-          serviceConfig = {
-            Restart = "on-failure";
-            RestartSec = "1min";
-          };
-        };
       };
 
       networking.firewall = {
@@ -203,7 +171,12 @@
         extraStopCommands = lib.concatMapStringsSep "\n" deleteRule outputRules;
       };
 
-      # Agenci łączą się z internetem sami (API modeli).
-      customBot.lockdownServices = [ user ];
+      customBot = {
+        # https://<RPi>.<tailnet> (domyślny port HTTPS): pod tym adresem
+        # są już sparowane urządzenia.
+        tailscaleServe."443" = "http://127.0.0.1:${toString port}";
+        # Agenci łączą się z internetem sami (API modeli).
+        lockdownServices = [ user ];
+      };
     };
 }

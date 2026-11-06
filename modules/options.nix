@@ -1,5 +1,5 @@
 # Deklaracja opcji customTop: stałe tego repozytorium i jego właściciela
-# (konto GitHub, e-mail, domena, konta użytkowników, język i strefa czasowa,
+# (konto GitHub, e-mail, domena, tailnet, konta użytkowników, język i strefa czasowa,
 # domowy LAN, cache binarne, sekrety i klucze publiczne) jako opcja tylko do
 # odczytu `config.customTop`, w modułach flake-parts i NixOS. Wartości są
 # w modules/args.nix.
@@ -35,8 +35,13 @@ in
           owner = strOption "Konto GitHub, zarazem autor commitów (git user.name).";
           email = strOption "E-mail autora commitów (git user.email).";
           domain = strOption ''
-            Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą
-            domeną, reszta usług RPi pod <usługa>.<domena> (cloudflared.nix).
+            Domena właściciela: server_name Matrixa (identyfikatory
+            @<konto>:<domena>, niezmienny po założeniu bazy continuwuity).
+            Same usługi RPi są w tailnecie (tailnet).
+          '';
+          tailnet = strOption ''
+            Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
+            https://<host>.<tailnet>:<port> (customBot.tailscaleServe).
           '';
 
           repository = {

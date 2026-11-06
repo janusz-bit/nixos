@@ -1,8 +1,8 @@
 # Sieć RPi: NetworkManager z kablem i zapasowym Wi-Fi (profil home-wifi
 # z sekretu wifi.age, timer home-wifi-reconnect podnosi go, gdy NM go
 # zablokuje), domena regulacyjna PL. Usługi WWW słuchają na localhost
-# i wychodzą tylko tunelem (cloudflared.nix); firewall wpuszcza jedynie SSH
-# z domowego LAN-u (base-ssh-lan).
+# i są dostępne tylko w tailnecie przez Tailscale Serve; firewall wpuszcza
+# jedynie SSH z domowego LAN-u (base-ssh-lan) i z tailnetu (rpi-ssh).
 #
 # Sprawdzenie: `nmcli connection show`, `iw reg get`,
 # `journalctl -u home-wifi-reconnect -b`.
@@ -41,9 +41,9 @@ _: {
       {
         networking.networkmanager.enable = true;
 
-        # Vhosty nginx bez własnego `listen` (Nextcloud z /.well-known Matrixa)
-        # słuchają tylko na localhost, skąd bierze je tunel (cloudflared →
-        # localhost:80); domyślne 0.0.0.0:80 chroniłby jedynie firewall.
+        # Vhosty nginx bez własnego `listen` (Nextcloud) słuchają tylko na
+        # localhost, skąd bierze je Tailscale Serve; domyślne 0.0.0.0:80
+        # chroniłby jedynie firewall.
         services.nginx = {
           defaultListenAddresses = [
             "127.0.0.1"
@@ -85,7 +85,7 @@ _: {
               mode = "infrastructure";
               ssid = "$WIFI_SSID";
               # 2 = wyłączone. Oszczędzanie energii brcmfmac na RPi daje
-              # skoki opóźnień i zrywa połączenia (tunel, SSH).
+              # skoki opóźnień i zrywa połączenia (tailnet, SSH).
               powersave = 2;
             };
             wifi-security = {

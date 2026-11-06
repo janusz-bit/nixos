@@ -4,9 +4,23 @@
 { inputs, ... }:
 {
   flake.modules.nixos.base-configuration =
-    { lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       imports = [ inputs.nix-index-database.nixosModules.default ];
+
+      # Tu, nie w base-options: generator docs/reference ewaluuje base-options
+      # bez reszty NixOS, gdzie nie ma opcji assertions.
+      assertions = [
+        {
+          assertion = config.customBot.tailscaleServe == { } || config.services.tailscale.enable;
+          message = "customBot.tailscaleServe (porty ${lib.concatStringsSep ", " (lib.attrNames config.customBot.tailscaleServe)}) działa tylko z Tailscale: zaimportuj moduł tailscale hosta (hosts/tailscale.nix).";
+        }
+      ];
 
       # mkDefault: na WSL resolv.conf generuje Windows (modules/hosts/wsl/default.nix).
       networking.nameservers = lib.mkDefault [

@@ -1,13 +1,17 @@
-# Gitea pod git.<domena>: SQLite (lekka baza dla RPi), HTTP tylko na
-# 127.0.0.1:3000 przez Cloudflare Tunnel, bez rejestracji. Git po SSH
-# obsługuje systemowy sshd (wbudowany serwer SSH Gitei wyłączony), pod
-# adresem gitea@ssh.<domena>.
+# Gitea w tailnecie pod https://<RPi>.<tailnet>:3000: SQLite (lekka baza dla
+# RPi), HTTP tylko na 127.0.0.1:3000 za Tailscale Serve, bez rejestracji.
+# Git po SSH obsługuje systemowy sshd (wbudowany serwer SSH Gitei wyłączony)
+# przez tailscale0: gitea@<RPi>.<tailnet>.
 #
 # Sprawdzenie: `systemctl status gitea`,
 # `curl -s http://127.0.0.1:3000/api/v1/version`.
 _: {
   flake.modules.nixos.rpi-gitea =
     { config, ... }:
+    let
+      host = "${config.networking.hostName}.${config.customTop.tailnet}";
+      servePort = 3000;
+    in
     {
       services.gitea = {
         enable = true;
@@ -15,17 +19,20 @@ _: {
 
         settings = {
           server = {
-            ROOT_URL = "https://git.${config.customTop.domain}/";
+            ROOT_URL = "https://${host}:${toString servePort}/";
             HTTP_ADDR = "127.0.0.1";
             START_SSH_SERVER = false;
-            # Klonowanie przez SSH idzie przez ssh.<domena> (git.<domena> tunel
-            # podaje tylko jako HTTP); jawny `gitea@` wygrywa z `User root`
-            # z bloku `Host ssh.*` w base-ssh.
-            SSH_DOMAIN = "ssh.${config.customTop.domain}";
+            SSH_DOMAIN = host;
           };
           service.DISABLE_REGISTRATION = true;
           session.COOKIE_SECURE = true;
         };
+      };
+
+      customBot = {
+        tailscaleServe.${toString servePort} =
+          "http://127.0.0.1:${toString config.services.gitea.settings.server.HTTP_PORT}";
+        lockdownServices = [ "gitea" ];
       };
     };
 }

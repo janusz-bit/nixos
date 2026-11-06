@@ -56,8 +56,9 @@ Adres własnego cache.
 
 ### `customTop.domain`
 
-Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą
-domeną, reszta usług RPi pod \<usługa>.\<domena> (cloudflared.nix).
+Domena właściciela: server_name Matrixa (identyfikatory
+@\<konto>:\<domena>, niezmienny po założeniu bazy continuwuity).
+Same usługi RPi są w tailnecie (tailnet).
 
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
@@ -185,6 +186,14 @@ kopiuje do store tylko użyty plik.
 - Type: absolute path
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.tailnet`
+
+Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
+https://\<host>.\<tailnet>:\<port> (customBot.tailscaleServe).
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.users.default`
 
 Główne konto pozostałych hostów (domyślne customBot.defaultUser).
@@ -236,12 +245,24 @@ Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr
 Usługi systemd (nazwy bez .service), które `lockdown on`
 zatrzymuje i blokuje do `lockdown off` (base-lockdown): te, do
 których sieć dochodzi inaczej niż przez port otwarty w firewallu
-(tunel, własne połączenia wychodzące, radio). Porty z
+(Tailscale Serve, własne połączenia wychodzące, radio). Porty z
 networking.firewall lockdown zamyka sam. Dopisuje je moduł usługi;
 na hoście bez base-lockdown lista nic nie robi.
 
 - Type: list of string
 - Default: `[ ]`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe`
+
+Tailscale Serve: port HTTPS pod nazwą MagicDNS hosta
+(https://\<host>.\<customTop.tailnet>:\<port>) → adres lokalnej
+usługi. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
+każdym zalogowaniu dokładnie tę mapę. Dopisuje ją moduł usługi; ten
+sam port z dwóch modułów kończy ewaluację błędem.
+
+- Type: attribute set of string
+- Default: `{ }`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
 ### `customBot.triliumMcpUrl`

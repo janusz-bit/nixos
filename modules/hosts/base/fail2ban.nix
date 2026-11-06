@@ -4,8 +4,8 @@
 # dopisuje customTop.lan.subnet u siebie.
 _: {
   flake.modules.nixos.base-fail2ban = _: {
-    # Loopback (127.0.0.1/8, ::1 przy networking.enableIPv6; m.in. SSH przez
-    # tunel cloudflared) moduł nixpkgs dopisuje do ignoreip sam.
+    # Loopback (127.0.0.1/8, ::1 przy networking.enableIPv6) moduł nixpkgs
+    # dopisuje do ignoreip sam.
     services.fail2ban = {
       enable = true;
       maxretry = 5;

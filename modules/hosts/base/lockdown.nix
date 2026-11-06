@@ -8,11 +8,11 @@
 #   i portów przypiętych do interfejsu) dostają na początku łańcucha nixos-fw
 #   regułę odrzucającą; to obejmuje też programy użytkownika (Steam Remote
 #   Play) i usługi słuchające tylko na tych portach (avahi, cups-browsed);
-# - usługi, do których sieć dochodzi inaczej (tunel Cloudflare, własne
+# - usługi, do których sieć dochodzi inaczej (Tailscale Serve, własne
 #   połączenia wychodzące, radio), zatrzymuje systemd; każda z nich dopisuje
 #   się do customBot.lockdownServices w swoim module.
-# SSH zostaje: sshd, a na RPi także cloudflared, bo tunel niesie ssh.<domena>
-# (jego backendy HTTP stoją, więc pozostałe nazwy dostają 502).
+# SSH zostaje: sshd, a na RPi także tailscaled, bo tailnet niesie SSH
+# (backendy Serve stoją, więc pozostałe porty tailnetu dostają 502).
 #
 # Stan trzyma plik flagi, nie same jednostki. switch-to-configuration
 # uruchamia ponownie aktywne targety, a boot multi-user.target, więc `update`
