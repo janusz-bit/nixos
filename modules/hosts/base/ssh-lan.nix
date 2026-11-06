@@ -1,7 +1,7 @@
 # SSH tylko z domowego LAN-u (customTop.lan.subnet): reguła iptables zamiast
 # openFirewall. Laptop nie przyjmuje SSH w obcych sieciach, a port 22 nie jest
 # otwarty przez IPv6, gdzie router może nie filtrować ruchu przychodzącego.
-# Tunelu Cloudflare (sshd przez localhost) to nie dotyczy.
+# RPi otwiera port 22 także na tailscale0 (rpi-ssh).
 #
 # Sprawdzenie: `sudo iptables -S nixos-fw | grep 'dport 22'` (tylko z LAN-u)
 # i `sudo ip6tables -S nixos-fw | grep -c 'dport 22'` (0).

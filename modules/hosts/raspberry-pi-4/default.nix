@@ -1,5 +1,6 @@
 # Host raspberry-pi-4: domowy serwer (RPi 4B, 4 GB RAM, dysk SSD po USB),
-# usługi wystawione wyłącznie przez Cloudflare Tunnel (cloudflared.nix).
+# usługi dostępne spoza domowego LAN-u wyłącznie w tailnecie (Tailscale Serve,
+# hosts/tailscale.nix).
 # Tu: wpis rejestru, stateVersion, konto i lista modułów hosta; płytka
 # i wentylator: modules/hardware/raspberry-pi-4/. Agregat importuje też base,
 # bo obraz SD (sd-image.nix) składa go poza rejestrem hostów.
@@ -31,16 +32,15 @@
         self.modules.nixos.rpi-network
         self.modules.nixos.rpi-ssh
         self.modules.nixos.rpi-tools
-        self.modules.nixos.rpi-cloudflared
         self.modules.nixos.rpi-nextcloud
         self.modules.nixos.rpi-gitea
         self.modules.nixos.rpi-hermes
         self.modules.nixos.rpi-matrix
-        self.modules.nixos.rpi-ttyd
         self.modules.nixos.rpi-remote-agent
         self.modules.nixos.rpi-laptop-llm
         self.modules.nixos.rpi-tailscale
         self.modules.nixos.rpi-t3code
+        self.modules.nixos.rpi-t3code-laptop
         self.modules.nixos.rpi-ai
       ];
 

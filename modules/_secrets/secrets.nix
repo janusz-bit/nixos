@@ -19,7 +19,6 @@ in
   "trilium-etapi.age" = toAllHosts;
   "nextcloud-adminpass.age" = toAllHosts;
   "GITHUB_TOKEN.age" = toAllHosts;
-  "cloudflared-tunnel.age" = toAllHosts;
   "cachix-authtoken-token.age" = toAllHosts;
   "ollama-api-key.age" = toAllHosts;
   "google-api-key.age" = toAllHosts;
@@ -28,8 +27,6 @@ in
   "open-webui-keys.age" = toAllHosts;
   "llmgateway-api-key.age" = toAllHosts;
   "openrouter-api-key.age" = toAllHosts;
-  # Hasło Basic Auth ttyd (nginx) — osobne, NIE hasło admina Nextcloud.
-  "ttyd-password.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
   # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):

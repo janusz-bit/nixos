@@ -260,8 +260,9 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
 - **Pliki:** `flake.nix` (input `nixpkgs-unstable-small` = `nixos-unstable-small`),
   `modules/hosts/raspberry-pi-4/nextcloud.nix` (`services.nextcloud.phpPackage`).
 - **Objaw:** `phpfpm-nextcloud` działa na PHP 8.4.26, podatnym na PHP2Shell
-  (CVE-2026-109618, CVE-2026-109619: nieuwierzytelnione RCE), a Nextcloud jest
-  wystawiony do internetu przez Cloudflare Tunnel.
+  (CVE-2026-109618, CVE-2026-109619: nieuwierzytelnione RCE), a Nextcloud był
+  wtedy wystawiony do internetu przez Cloudflare Tunnel (dziś tylko w
+  tailnecie, gdzie odpowiada każdemu urządzeniu przed zalogowaniem).
 - **Przyczyna:** poprawka (php 8.4.26 -> 8.4.27,
   https://github.com/NixOS/nixpkgs/pull/576853, merge c53532a938) jest w
   `nixos-unstable-small`, ale jeszcze nie w `nixos-unstable`, z którego

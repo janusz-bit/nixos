@@ -3,8 +3,9 @@
 # i buildów x86_64 (krok 3 weryfikacji z AGENTS.md), które na RPi trwają
 # minuty albo są niewykonalne.
 #
-# Granica zaufania: laptop ma roota na RPi, a RPi jest wystawione do internetu
-# (tunel: Nextcloud, ttyd, Hermes). Klucz z RPi NIE loguje więc na konto
+# Granica zaufania: laptop ma roota na RPi, a RPi przetwarza treści
+# z internetu (Hermes: poczta, WWW) i obsługuje cały tailnet (Nextcloud,
+# Gitea, Matrix, T3). Klucz z RPi NIE loguje więc na konto
 # główne laptopa (sekrety agenix, ~/.ssh z kluczem roota RPi, wheel → podsłuch
 # hasła sudo), tylko na osobne konto claude-remote:
 # - własna grupa główna (nie `users`), żadnych grup dodatkowych (wheel, kvm,

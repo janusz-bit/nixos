@@ -9,7 +9,7 @@
 #
 # Fork: poza tym plikiem trzeba zmienić nixConfig i wejście brulion we
 # flake.nix, _secrets/keys.nix i wszystkie pliki .age, MATRIX_HOME_ROOM
-# (hosts/raspberry-pi-4/matrix.nix), tunel w cloudflared.nix, dysk i wpis
+# (hosts/raspberry-pi-4/matrix.nix), dysk i wpis
 # Windows laptopa (hosts/nixos/disko.nix, boot.nix) oraz modules/hardware/.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customTop.lan`
@@ -20,6 +20,10 @@
     owner = "janusz-bit";
     email = "janusz-bit@proton.me";
     domain = "janusz-bit.com";
+    tailnet = {
+      domain = "tail1ea20e.ts.net";
+      laptop = "100.108.227.25";
+    };
     repository = {
       name = "nixos";
       path = "/etc/nixos";

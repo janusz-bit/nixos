@@ -1,20 +1,17 @@
 # SSH na każdym hoście: sshd tylko z kluczami, root domyślnie bez logowania,
-# agent GnuPG, ssh-askpass oraz wpis `Host ssh.*` w ssh_config, przez który
-# `ssh ssh.<domena>` loguje się jako root na RPi przez Cloudflare Access.
+# agent GnuPG i ssh-askpass.
 #
 # Wartości z mkDefault nadpisuje raspberry-pi-4: dopuszcza roota kluczem
-# ("prohibit-password", to jego ścieżka administracyjna przez tunel) i
-# wyłącza ssh-askpass (headless, x11-ssh-askpass ciągnie zależności X11).
-# Laptop i RPi zawężają dodatkowo port 22 do domowego LAN-u (base-ssh-lan).
+# ("prohibit-password", to jego ścieżka administracyjna) i wyłącza
+# ssh-askpass (headless, x11-ssh-askpass ciągnie zależności X11).
+# Laptop i RPi zawężają dodatkowo port 22 do domowego LAN-u (base-ssh-lan),
+# RPi otwiera go też w tailnecie (rpi-ssh).
 #
-# Sprawdzenie: `sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'`;
-# `ssh -G ssh.<domena> | grep -E '^(user|proxycommand) '`.
+# Sprawdzenie: `sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'`.
 _: {
   flake.modules.nixos.base-ssh =
-    { lib, pkgs, ... }:
+    { lib, ... }:
     {
-      environment.systemPackages = [ pkgs.cloudflared ];
-
       services.openssh = {
         enable = true;
         settings = {
@@ -25,14 +22,7 @@ _: {
       };
 
       programs = {
-        ssh = {
-          enableAskPassword = lib.mkDefault true;
-          extraConfig = ''
-            Host ssh.*
-              User root
-              ProxyCommand cloudflared access ssh --hostname %h
-          '';
-        };
+        ssh.enableAskPassword = lib.mkDefault true;
         gnupg.agent.enable = true;
       };
     };

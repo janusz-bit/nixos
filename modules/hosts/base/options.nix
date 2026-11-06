@@ -1,7 +1,8 @@
 # Opcje customBot: ustawienia zależne od hosta (cel aliasów update/push,
 # fastfetch w powitaniu fish, główny użytkownik, endpoint MCP Trilium, usługi
-# zatrzymywane przez lockdown). flakeTarget (bez wartości domyślnej) ustawia
-# rejestr hostów i sd-image.nix, lockdownServices moduły usług, a resztę host
+# zatrzymywane przez lockdown, porty Tailscale Serve). flakeTarget (bez
+# wartości domyślnej) ustawia rejestr hostów i sd-image.nix, lockdownServices
+# i tailscaleServe moduły usług, a resztę host
 # nadpisuje w swoim default.nix. Skille i modele agentów to osobne opcje ai.*
 # (modules/ai/). Do tego opcja tylko do odczytu customTop:
 # stałe repozytorium z modules/args.nix dla modułów NixOS.
@@ -67,9 +68,46 @@ in
             Usługi systemd (nazwy bez .service), które `lockdown on`
             zatrzymuje i blokuje do `lockdown off` (base-lockdown): te, do
             których sieć dochodzi inaczej niż przez port otwarty w firewallu
-            (tunel, własne połączenia wychodzące, radio). Porty z
+            (Tailscale Serve, własne połączenia wychodzące, radio). Porty z
             networking.firewall lockdown zamyka sam. Dopisuje je moduł usługi;
             na hoście bez base-lockdown lista nic nie robi.
+          '';
+        };
+        tailscaleServe = lib.mkOption {
+          type = lib.types.attrsOf (
+            lib.types.submodule {
+              options = {
+                port = lib.mkOption {
+                  type = lib.types.port;
+                  description = "Port usługi HTTP na 127.0.0.1.";
+                };
+                users = lib.mkOption {
+                  type = lib.types.nullOr (lib.types.listOf lib.types.str);
+                  default = null;
+                  description = ''
+                    Konta, które oprócz roota (proxy tailscaled) łączą się
+                    lokalnie z portem usługi; pozostałe dostają odmowę (reguła
+                    iptables owner). null = bez ograniczenia, gdy usługa sama
+                    uwierzytelnia każde połączenie.
+                  '';
+                };
+              };
+            }
+          );
+          default = { };
+          example = {
+            "443" = {
+              port = 3773;
+              users = [ "t3code" ];
+            };
+          };
+          description = ''
+            Tailscale Serve: port HTTPS pod nazwą MagicDNS hosta
+            (https://<host>.<customTop.tailnet.domain>:<port>) → usługa HTTP na
+            127.0.0.1. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
+            każdym zalogowaniu dokładnie tę mapę. Dopisuje ją moduł usługi; ten
+            sam port z dwóch modułów z różnymi wartościami kończy ewaluację
+            błędem.
           '';
         };
       };

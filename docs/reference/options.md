@@ -56,8 +56,9 @@ Adres własnego cache.
 
 ### `customTop.domain`
 
-Strefa w Cloudflare: Nextcloud i server_name Matrixa pod samą
-domeną, reszta usług RPi pod \<usługa>.\<domena> (cloudflared.nix).
+Domena właściciela: server_name Matrixa (identyfikatory
+@\<konto>:\<domena>, niezmienny po założeniu bazy continuwuity).
+Same usługi RPi są w tailnecie (tailnet.domain).
 
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
@@ -185,6 +186,24 @@ kopiuje do store tylko użyty plik.
 - Type: absolute path
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.tailnet.domain`
+
+Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
+https://\<host>.\<domain>:\<port> (customBot.tailscaleServe).
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.tailnet.laptop`
+
+Adres tailnetu laptopa (`tailscale ip -4` na laptopie): RPi nie
+ma MagicDNS (--accept-dns=false), więc nazwę laptopa dostaje
+z networking.hosts (hosts/t3code-laptop.nix). Stały, dopóki
+laptop nie zostanie usunięty z tailnetu i zalogowany od nowa.
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.users.default`
 
 Główne konto pozostałych hostów (domyślne customBot.defaultUser).
@@ -236,12 +255,43 @@ Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr
 Usługi systemd (nazwy bez .service), które `lockdown on`
 zatrzymuje i blokuje do `lockdown off` (base-lockdown): te, do
 których sieć dochodzi inaczej niż przez port otwarty w firewallu
-(tunel, własne połączenia wychodzące, radio). Porty z
+(Tailscale Serve, własne połączenia wychodzące, radio). Porty z
 networking.firewall lockdown zamyka sam. Dopisuje je moduł usługi;
 na hoście bez base-lockdown lista nic nie robi.
 
 - Type: list of string
 - Default: `[ ]`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe`
+
+Tailscale Serve: port HTTPS pod nazwą MagicDNS hosta
+(https://\<host>.\<customTop.tailnet.domain>:\<port>) → usługa HTTP na
+127.0.0.1. Jednostka tailscale-serve (hosts/tailscale.nix) ustawia po
+każdym zalogowaniu dokładnie tę mapę. Dopisuje ją moduł usługi; ten
+sam port z dwóch modułów z różnymi wartościami kończy ewaluację
+błędem.
+
+- Type: attribute set of (submodule)
+- Default: `{ }`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe.<name>.port`
+
+Port usługi HTTP na 127.0.0.1.
+
+- Type: 16 bit unsigned integer; between 0 and 65535 (both inclusive)
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
+
+### `customBot.tailscaleServe.<name>.users`
+
+Konta, które oprócz roota (proxy tailscaled) łączą się
+lokalnie z portem usługi; pozostałe dostają odmowę (reguła
+iptables owner). null = bez ograniczenia, gdy usługa sama
+uwierzytelnia każde połączenie.
+
+- Type: null or (list of string)
+- Default: `null`
 - Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
 ### `customBot.triliumMcpUrl`

@@ -1,11 +1,8 @@
-# Nextcloud 35 pod domeną główną (customTop.domain): PostgreSQL i Redis
-# lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi; wystawiony do
-# internetu przez Cloudflare Tunnel (cloudflared.nix): TLS kończy się
-# w Cloudflare, a nginx słucha tylko na localhost. Nextcloud jest
-# uwierzytelnianą aplikacją PHP w internecie, więc poprawki PHP (asercja
-# niżej) i aktualizacje pakietu mają pierwszeństwo.
-#
-# Ten vhost serwuje też /.well-known/matrix/client (matrix.nix).
+# Nextcloud 35 w tailnecie pod https://<RPi>.<tailnet>:8443: PostgreSQL
+# i Redis lokalnie, PHP-FPM i PostgreSQL dostrojone do 4 GB RAM RPi. Tailscale
+# Serve (customBot.tailscaleServe) kończy TLS certyfikatem Tailscale
+# i przekazuje ruch do nginx, który słucha tylko na localhost. Klienci
+# (aplikacja desktopowa, telefon) muszą być w tailnecie.
 #
 # nixpkgs instaluje bez admina (`occ maintenance:install --disable-admin-user`):
 # po świeżej instalacji `sudo nextcloud-occ user:add <nazwa>` i
@@ -16,6 +13,7 @@
 # pilnuje, żeby żadna zmiana nie wróciła do PHP < 8.4.27.
 #
 # Sprawdzenie: `systemctl status phpfpm-nextcloud`, `sudo nextcloud-occ status`,
+# `curl -sI https://<RPi>.<tailnet>:8443/status.php` z urządzenia w tailnecie,
 # `sudo nextcloud-occ config:system:get trusted_proxies`.
 { inputs, ... }:
 {
@@ -26,9 +24,13 @@
       pkgs,
       ...
     }:
+    let
+      servePort = 8443;
+    in
     {
       # PHP2Shell (CVE-2026-109618, CVE-2026-109619): nieuwierzytelnione RCE
-      # w PHP, poprawione w 8.4.27; Nextcloud jest dostępny z internetu.
+      # w PHP, poprawione w 8.4.27; Nextcloud odpowiada każdemu urządzeniu
+      # w tailnecie przed zalogowaniem.
       assertions = [
         {
           assertion = lib.versionAtLeast config.services.nextcloud.phpPackage.version "8.4.27";
@@ -39,7 +41,7 @@
       services = {
         nextcloud = {
           enable = true;
-          hostName = config.customTop.domain;
+          hostName = "${config.networking.hostName}.${config.customTop.tailnet.domain}";
           https = true;
           # Upgrade o jedną wersję główną naraz (34 → 35); nextcloud-setup
           # uruchamia `occ upgrade` przy pierwszym starcie nowej wersji.
@@ -70,17 +72,19 @@
           phpOptions."opcache.interned_strings_buffer" = "16";
 
           # occ, cron i maile nie znają adresu nginxa (inaczej linki na
-          # localhost).
+          # localhost). Żądania przeglądarek niosą port w nagłówku Host
+          # (Serve go nie zmienia), więc linki z nich mają go same.
           settings = {
             maintenance_window_start = 1;
-            # Tunel dochodzi z localhost: bez tego Nextcloud widzi każdego
-            # klienta jako 127.0.0.1 i ma jeden wspólny limit prób logowania;
-            # z zaufanym proxy bierze adres z X-Forwarded-For od Cloudflare.
+            # Serve łączy się z nginx z localhost: bez tego Nextcloud widzi
+            # każdego klienta jako 127.0.0.1 i ma jeden wspólny limit prób
+            # logowania; z zaufanym proxy bierze adres tailnetu z
+            # X-Forwarded-For od tailscaled.
             trusted_proxies = [
               "127.0.0.1"
               "::1"
             ];
-            "overwrite.cli.url" = "https://${config.services.nextcloud.hostName}";
+            "overwrite.cli.url" = "https://${config.services.nextcloud.hostName}:${toString servePort}";
           };
         };
 
@@ -90,6 +94,12 @@
           maintenance_work_mem = "32MB";
           effective_cache_size = "256MB";
         };
+      };
+
+      customBot = {
+        tailscaleServe.${toString servePort}.port = 80;
+        # Jedyny vhost nginx: lockdown zatrzymuje go z Nextcloudem.
+        lockdownServices = [ "nginx" ];
       };
     };
 }

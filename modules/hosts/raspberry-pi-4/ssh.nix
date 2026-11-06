@@ -1,9 +1,12 @@
-# Dostęp SSH do RPi. Bazowe ustawienia (tylko klucze) daje base-ssh.
-# Logowanie roota kluczem zostaje — to ścieżka administracyjna przez tunel
-# Cloudflare (`ssh ssh.<domena>`, `Host ssh.*` → `User root` w base-ssh).
+# Dostęp SSH do RPi z domowego LAN-u (base-ssh-lan) i z tailnetu: port sshd
+# otwarty na tailscale0, do którego dochodzą tylko urządzenia tailnetu
+# (netfilter nodivert, hosts/tailscale.nix). Bazowe ustawienia (tylko klucze)
+# daje base-ssh. Logowanie roota kluczem zostaje — to ścieżka
+# administracyjna (`ssh root@raspberry-pi-4`, MagicDNS).
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.raspberry-pi-4.config.users.users.nixos.openssh.authorizedKeys.keys`
-# (i `…users.users.root…`) — tylko klucze wymienione niżej.
+# (i `…users.users.root…`) — tylko klucze wymienione niżej;
+# `sudo iptables -S nixos-fw | grep tailscale0`.
 _: {
   flake.modules.nixos.rpi-ssh =
     { config, ... }:
@@ -12,6 +15,10 @@ _: {
     in
     {
       services.openssh.settings.PermitRootLogin = "prohibit-password";
+      # Port na interfejsie, nie globalny: lockdown go nie zamyka (SSH zostaje),
+      # a obce sieci go nie widzą.
+      networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts =
+        config.services.openssh.ports;
       # Headless: bez x11-ssh-askpass (zależności X11).
       programs.ssh.enableAskPassword = false;
 
@@ -27,8 +34,7 @@ _: {
           keys.hosts.raspberry-pi-4
           keys.users.phone
         ];
-        # Klucz głównego użytkownika laptopa: `ssh ssh.<domena>` loguje jako
-        # root (tunel).
+        # Klucz głównego użytkownika laptopa: `ssh root@raspberry-pi-4`.
         root.openssh.authorizedKeys.keys = [ keys.users.janusz-bit ];
       };
     };
