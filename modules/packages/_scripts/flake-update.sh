@@ -28,6 +28,10 @@ echo "Updating strata..."
 # w modules/packages/_strata/default.nix (SHA256SUMS.txt i setup.py wydania);
 # nix-update podbija tylko version i src.
 nix-update -F strata
+echo "Updating rea-agents..."
+# Tarball npm nie ma lockfile'a: nix-update generuje package-lock.json
+# z package.json nowej wersji.
+nix-update -F rea-agents --generate-lockfile
 echo "Updating unsloth-desktop..."
 # Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.
 nix-update --system x86_64-linux -F unsloth-desktop --version=unstable
@@ -39,7 +43,8 @@ nix run .#sync-github-actions
 nix run .#sync-docs
 
 git add -A -- flake.lock .github/workflows docs/reference \
-  modules/packages/_{bootdev-cli,helium,opencharts,strata,unsloth-desktop,waywallen,waywallen-kde-plugin}/default.nix
+  modules/packages/_{bootdev-cli,helium,opencharts,strata,unsloth-desktop,waywallen,waywallen-kde-plugin}/default.nix \
+  modules/packages/_rea-agents/{default.nix,package-lock.json}
 if git diff --cached --quiet; then
   echo "Everything is already up to date."
 else

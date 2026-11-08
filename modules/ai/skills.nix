@@ -85,6 +85,13 @@
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
         };
+        # Skill z pakietu rea-agents, razem z CLI `rea`, które opisuje, więc
+        # zawsze pasuje do jego wersji. Serwera MCP nie rejestruje (`rea setup
+        # --client <agent>`).
+        reverse-engineer-anything = {
+          source = "${pkgs.rea-agents}/lib/node_modules/rea-agents/skills/reverse-engineer-anything";
+          packages = [ pkgs.rea-agents ];
+        };
         # Czyta token OAuth Claude Code (~/.claude/.credentials.json), więc ma
         # sens tylko na koncie zalogowanym do subskrypcji Claude; inni agenci
         # też mogą go wołać, bo limity są wspólne dla całego konta.

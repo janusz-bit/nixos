@@ -1,6 +1,7 @@
 # Skille i modele agentów AI na laptopie: skille własne (w tym obscura z jej
-# programem, nixos-system z faktami o hoście, brulion z brulion-cli i
-# claude-usage z limitami subskrypcji Claude), paczki
+# programem, nixos-system z faktami o hoście, brulion z brulion-cli,
+# claude-usage z limitami subskrypcji Claude i reverse-engineer-anything
+# z CLI rea do reverse engineeringu), paczki
 # Qt Development Skills, tstack i frontend-design, lokalny Trilium dla Prime
 # Agenta oraz lokalne modele na GPU — Ternary Bonsai 2 27B (aliasy
 # bonsai-serve i bonsai-serve-mtp) i Qwen3.8 Flash-Next (Coder IQ1_M
@@ -15,6 +16,7 @@ _: {
         claude-usage.enable = true;
         nixos-system.enable = true;
         obscura.enable = true;
+        reverse-engineer-anything.enable = true;
         trilium-notes.enable = true;
       };
       skillPacks = {
