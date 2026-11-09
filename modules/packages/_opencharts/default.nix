@@ -50,7 +50,7 @@ let
 in
 buildNpmPackage (finalAttrs: {
   pname = "opencharts";
-  version = "0.3.0-unstable-2026-10-13";
+  version = "0-unstable-2026-10-14";
 
   # Upstream nie taguje wydań; flake-update podbija przez --version=branch.
   src = fetchFromGitHub {
