@@ -22,11 +22,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       arch = stdenvNoCC.hostPlatform.parsed.cpu.name;
     in
     fetchurl {
-      url = "https://github.com/waywallen/waywallen-display/releases/download/v${finalAttrs.version}/waywallen-kde-${finalAttrs.version}-${arch}-embed.zip";
+      url = "https://github.com/waywallen/waywallen-display/releases/download/v${finalAttrs.version}/waywallen-kde-${finalAttrs.version}-${arch}.zip";
       hash =
         {
-          aarch64 = "sha256-nccbfL/bByW/zvks0fZBQEkYdCZ8ZBP/YUwPM40iXPw=";
-          x86_64 = "sha256-0NF/c2rufatamD9CA50l1IMCgJO1j6h4bcxAi2O4qaE=";
+          aarch64 = "sha256-c7YUMjAwto/KHwCv3gjnM6TkUCyfA+NpEP+qpyPSZyA=";
+          x86_64 = "sha256-+YZHswHRbAD3Ea3H3L+MptI/I3+tGDXxORYHmtnAMs4=";
         }
         .${arch};
     };
