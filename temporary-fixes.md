@@ -310,6 +310,27 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nix eval .#nixosConfigurations.raspberry-pi-4.config.boot.kernelPackages.kernel.buildDTBs`
   zwraca `true` — wtedy usunąć obie linie i ewaluacja musi przejść.
 
+### 15. Pakiety Rust bez bibliotek systemowych (`cargoUseSystemLibs`)
+
+- **Od:** 2026-11-10.
+- **Plik:** `modules/packages/cargo-system-libs.nix` (overlay
+  `cargo-system-libs` w `base-nix`).
+- **Objaw:** `obscura` i `ark` (kernel R w `jupyter-all`) padają w
+  build-skrypcie `zstd-sys` (`Can't probe for zstd in pkg-config`), `codex`
+  w `aws-lc-sys` (`AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed
+  AWS-LC`); brak ich w cache, bo w nixpkgs `f4a03c0` nie budują się wcale.
+- **Przyczyna:** `cargo-setup-hook` w nixpkgs ustawia domyślnie
+  `cargoUseSystemLibs` (m.in. `ZSTD_SYS_USE_PKG_CONFIG=1`,
+  `AWS_LC_SYS_USE_SYSTEM=1`), a te pakiety nie mają bibliotek w
+  `buildInputs`. W nixpkgs master naprawione dla `ark` ("ark: use system
+  zstd") i `codex` (aws-lc, oniguruma, sqlite, zstd); `obscura` jeszcze nie.
+- **Obejście:** overlay dopisuje te same biblioteki do `buildInputs`.
+- **Kiedy usunąć:** gdy przypięty nixpkgs ma `zstd`/`aws-lc` w
+  `buildInputs` wszystkich trzech pakietów
+  (`pkgs/by-name/{ar/ark,co/codex,ob/obscura}/package.nix`). Sprawdzenie:
+  usunąć overlay z `base-nix` i `nix build --no-link
+  .#nixosConfigurations.nixos.pkgs.{obscura,ark,codex}` musi przejść.
+
 ## Zamknięte
 
 - **`PREEMPT_LAZY n` dla kernela RPi4 (`argsOverride`)** — zamknięte

@@ -15,7 +15,10 @@
     {
       nixpkgs = {
         config.allowUnfree = true;
-        overlays = [ self.overlays.local-packages ];
+        overlays = [
+          self.overlays.local-packages
+          self.overlays.cargo-system-libs
+        ];
       };
 
       nix = {
