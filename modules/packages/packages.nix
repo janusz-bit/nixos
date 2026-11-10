@@ -14,7 +14,6 @@ let
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
-    llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
     opencharts = pkgs.callPackage ./_opencharts { };
     rea-agents = pkgs.callPackage ./_rea-agents { };
     strata = pkgs.callPackage ./_strata { };

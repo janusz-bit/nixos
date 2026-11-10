@@ -16,7 +16,7 @@
 #   załadowanie. Proxy kończy się po 15 min bez połączeń, a strata-hermes
 #   (StopWhenUnneeded) razem z nim, co oddaje VRAM i RAM.
 # - Przed startem strata-hermes sprawdza dGPU: Strata wypełnia VRAM cache'em
-#   ekspertów (prawie całe 8 GB), więc przy grze, bonsai-serve albo ręcznej
+#   ekspertów (prawie całe 8 GB), więc przy grze albo ręcznej
 #   Stracie odmawia. Wants=, nie Requires=: nieudany start Straty przy Requires= zostawiłby
 #   połączenie w kolejce gniazda, systemd ponawiałby start w pętli aż do
 #   trigger-limit-hit i gniazdo przestałoby przyjmować żądania. Tu proxy rusza
@@ -59,8 +59,7 @@
 _:
 let
   user = "hermes-llm";
-  # Port tunelu, ten sam po obu stronach; inny niż 8080 ręcznej Straty
-  # i bonsai-serve.
+  # Port tunelu, ten sam po obu stronach; inny niż 8080 ręcznej Straty.
   port = 8090;
   target = "127.0.0.1:${toString port}";
   proxySandbox = {

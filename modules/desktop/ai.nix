@@ -48,8 +48,6 @@
           antigravity-cli
           inputs.hermes-agent.packages.${system}.desktop
           inputs.llm-agents.packages.${system}.opencode2
-          # Fork PrismML (Bonsai) ma te same nazwy binarek, więc nie jest w PATH,
-          # tylko pod aliasem llama-prism (ai/models.nix).
           (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
           self.packages.${system}.unsloth-desktop
           inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
