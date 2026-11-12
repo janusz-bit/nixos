@@ -307,6 +307,41 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   usunąć overlay z `base-nix` i `nix build --no-link
   .#nixosConfigurations.nixos.pkgs.{obscura,ark,codex}` musi przejść.
 
+### 16. RTD3 dGPU NVIDIA na Linuksie 7.3 — ponowne sondowanie w initrd
+
+- **Od:** 2026-11-12.
+- **Plik:** `modules/hardware/LOQ-15IRX10/default.nix`
+  (`boot.initrd.systemd.services.nvidia-reprobe`).
+- **Objaw:** od przejścia na kernel 7.3.1 i sterownik 615.78.08 (generacja
+  270, pierwszy rozruch 2026-11-05) `/proc/driver/nvidia/gpus/0000:01:00.0/power` pokazuje
+  `Runtime D3 status: Not supported`, a `runtime_suspended_time` dGPU stoi
+  na 0 przez cały czas pracy (stale D0, P8, ok. 4 W według `nvidia-smi`).
+  W dmesgu nie ma żadnego błędu.
+- **Przyczyna:** Linux 7.3 (32750c77e811, "fs: start all kthreads in
+  nullfs") daje kthreadom pusty korzeń. Przy ładowaniu modułu sterownik
+  sonduje GPU w kthreadzie `nv-probe-<bdf>`, więc `filp_open()` na
+  `/sys/bus/pci/devices/<bdf>/config` w `nv_get_pci_sysfs_config()` dostaje
+  ENOENT, `nv_dynamic_power_available()` zwraca false i
+  `rm_init_dynamic_power_management()` wyłącza RTD3 komunikatem tylko na
+  poziomie NOTICE.
+  https://github.com/NVIDIA/open-gpu-kernel-modules/issues/1507 (NVIDIA:
+  wewnętrzny bug 7039712), poprawka w
+  https://github.com/NVIDIA/open-gpu-kernel-modules/pull/1512 i w
+  https://github.com/CachyOS/kernel-patches/pull/191.
+- **Obejście:** jednostka initrd po `systemd-modules-load` robi unbind/bind
+  każdego GPU sterownika `nvidia`. Bind z sysfs sonduje synchronicznie
+  w kontekście procesu, więc plik się otwiera. Initrd, bo moduł `nvidia`
+  ładuje tam facter, a nic jeszcze nie używa GPU. Asercja pilnuje, żeby
+  moduł nie zniknął z initrd. Łatka sterownika byłaby czystsza, ale moduł
+  budowany od nowa wymaga `kernel.dev`, którego nie ma w żadnym cache
+  (kompilacja kernela).
+- **Kiedy usunąć:** gdy sterownik z `nvidiaPackages.latest` inputu
+  `nix-cachyos-kernel` otwiera plik przez `userspace_init_fs` (issue 1507
+  zamknięte) albo sonduje bez kthreada. Sprawdzenie: usunąć jednostkę,
+  przebudować, po restarcie
+  `grep 'Runtime D3' /proc/driver/nvidia/gpus/0000:01:00.0/power` musi dać
+  `Enabled (fine-grained)`.
+
 ## Zamknięte
 
 - **llama.cpp (fork PrismML) — testy niezgodne z flagami budowania (wpis 9)**
