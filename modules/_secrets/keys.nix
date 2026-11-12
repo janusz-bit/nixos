@@ -13,10 +13,6 @@
     janusz-bit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdlN9e5I4IQy6Re4Z4+BFopT6ypB3nNXzdj4XeTDewO janusz-bit@proton.me";
     # Telefon (Linux Terminal na Androidzie): tylko SSH na RPi.
     phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG4dg51Pg4rlE4CaiHaHUovkCIgAuJuEqkDsEMAU8ut4 root@debian";
-    # Claude Code na RPi (~/.ssh/id_ed25519_laptop): loguje WYŁĄCZNIE na konto
-    # claude-remote laptopa (remote-agent.nix), nigdy w authorized_keys
-    # głównego użytkownika ani roota.
-    claude-rpi = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBm08oKyzMIfuwdh0a6xb4zArEJPL6bOpej5IgY1xs/U claude@raspberry-pi-4";
     # Tunel Hermesa z RPi: loguje WYŁĄCZNIE na konto hermes-llm laptopa (bez
     # powłoki), tylko przekierowanie do 127.0.0.1:8080 (modules/hosts/laptop-llm.nix);
     # prywatny w hermes-llm-key.age.

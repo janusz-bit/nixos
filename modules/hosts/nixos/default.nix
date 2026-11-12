@@ -32,7 +32,6 @@
         self.modules.nixos.base-fail2ban
         self.modules.nixos.base-lockdown
         self.modules.nixos.nixos-ai
-        self.modules.nixos.nixos-remote-agent
         self.modules.nixos.nixos-laptop-llm
         self.modules.nixos.nixos-tailscale
         self.modules.nixos.nixos-t3code-laptop

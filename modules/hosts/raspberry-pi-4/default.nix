@@ -36,7 +36,6 @@
         self.modules.nixos.rpi-gitea
         self.modules.nixos.rpi-hermes
         self.modules.nixos.rpi-matrix
-        self.modules.nixos.rpi-remote-agent
         self.modules.nixos.rpi-laptop-llm
         self.modules.nixos.rpi-tailscale
         self.modules.nixos.rpi-t3code

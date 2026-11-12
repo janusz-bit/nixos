@@ -6,8 +6,8 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 37 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -29,7 +29,6 @@ flowchart LR
   host_nixos --> base_fail2ban[base-fail2ban]
   host_nixos --> base_lockdown[base-lockdown]
   host_nixos --> nixos_ai[nixos-ai]
-  host_nixos --> nixos_remote_agent[nixos-remote-agent]
   host_nixos --> nixos_laptop_llm[nixos-laptop-llm]
   host_nixos --> nixos_tailscale[nixos-tailscale]
   host_nixos --> nixos_t3code_laptop[nixos-t3code-laptop]
@@ -124,7 +123,6 @@ flowchart LR
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
 - `nixos-laptop-llm` — [hosts/laptop-llm.nix](../../modules/hosts/laptop-llm.nix)
-- `nixos-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
 - `nixos-t3code-laptop` — [hosts/t3code-laptop.nix](../../modules/hosts/t3code-laptop.nix)
 - `nixos-tailscale` — [hosts/tailscale.nix](../../modules/hosts/tailscale.nix)
@@ -151,7 +149,6 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_gitea[rpi-gitea]
   host_raspberry_pi_4 --> rpi_hermes[rpi-hermes]
   host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
-  host_raspberry_pi_4 --> rpi_remote_agent[rpi-remote-agent]
   host_raspberry_pi_4 --> rpi_laptop_llm[rpi-laptop-llm]
   host_raspberry_pi_4 --> rpi_tailscale[rpi-tailscale]
   host_raspberry_pi_4 --> rpi_t3code[rpi-t3code]
@@ -204,7 +201,6 @@ flowchart LR
 - `rpi-matrix` — [hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)
 - `rpi-network` — [hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)
 - `rpi-nextcloud` — [hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)
-- `rpi-remote-agent` — [hosts/remote-agent.nix](../../modules/hosts/remote-agent.nix)
 - `rpi-resources` — [hosts/raspberry-pi-4/resources.nix](../../modules/hosts/raspberry-pi-4/resources.nix)
 - `rpi-ssh` — [hosts/raspberry-pi-4/ssh.nix](../../modules/hosts/raspberry-pi-4/ssh.nix)
 - `rpi-t3code` — [hosts/raspberry-pi-4/t3code.nix](../../modules/hosts/raspberry-pi-4/t3code.nix)

@@ -80,7 +80,7 @@ Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts) z modules/_secr
 
 ### `customTop.lan.laptop`
 
-Adres, pod którym RPi łączy się z laptopem (`ssh laptop`; RPi nie
+Adres, pod którym RPi łączy się z laptopem (tunel laptop-llm; RPi nie
 ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
 
 - Type: string

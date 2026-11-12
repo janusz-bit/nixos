@@ -5,7 +5,7 @@
 # nie ma MagicDNS (rpi-tailscale).
 #
 # Granica zaufania: sesja T3 laptopa to powłoka i agenci na koncie głównym
-# laptopa, czyli znacznie więcej niż claude-remote i hermes-llm. Dlatego wąsko:
+# laptopa, czyli znacznie więcej niż hermes-llm. Dlatego wąsko:
 # - RPi: nowe połączenia przez tailscale0 otwiera tylko t3code (reguła
 #   iptables owner); hermes (treści z internetu), usługi WWW i konto główne
 #   RPi dostają odmowę.
@@ -16,7 +16,7 @@
 #   tylko z LAN-u.
 # - Laptop: z portem T3 desktop (słucha na 0.0.0.0, firewall go nie otwiera)
 #   łączy się lokalnie tylko root (proxy tailscaled) i konto główne;
-#   claude-remote, hermes-llm i strata, konta używane z RPi, dostają odmowę
+#   hermes-llm i strata, konta używane z RPi, dostają odmowę
 #   (customBot.tailscaleServe.users).
 # - Uwierzytelnia sam T3 (parowanie środowisk); poziom dostępu RPi wybiera się
 #   przy parowaniu (approval-required: każdą zmianę zatwierdza się ręcznie).

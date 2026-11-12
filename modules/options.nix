@@ -89,7 +89,7 @@ in
               RPi jej nie banuje.
             '';
             laptop = strOption ''
-              Adres, pod którym RPi łączy się z laptopem (`ssh laptop`; RPi nie
+              Adres, pod którym RPi łączy się z laptopem (tunel laptop-llm; RPi nie
               ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
             '';
           };

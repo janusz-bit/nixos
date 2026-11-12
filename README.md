@@ -27,7 +27,7 @@ modules/
   hosts/base/             what every host gets (nix, shell, ssh, git, update aliases),
                           plus opt-in user secrets, fail2ban, LAN-only SSH and lockdown
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
-  hosts/remote-agent.nix  laptop-run: feature linking two hosts
+  hosts/laptop-llm.nix    local LLM for Hermes: feature linking two hosts
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, post-install
@@ -156,5 +156,5 @@ in `modules/hosts/nixos/disko.nix` (or choose it when `install-system` asks),
 drop the Windows entry from `boot.nix` if there is none, install, then run
 `post-install`. It replaces both the root key and the SSH host key in
 `keys.nix` (after confirmation); re-encrypt the secrets on the RPi and run
-`update` there so `laptop-run` trusts the new host key. Change `customTop.lan.laptop` in
+`update` there so `laptop-llm` trusts the new host key. Change `customTop.lan.laptop` in
 `modules/args.nix` if the LAN address changes.

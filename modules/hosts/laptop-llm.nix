@@ -36,7 +36,7 @@
 #   usługi wystawione do internetu (Nextcloud, Gitea, Matrix) nie dostają tej
 #   drogi. Klucz prywatny (hermes-llm-key.age) czyta tylko root; połączenie
 #   (DynamicUser) dostaje go przez LoadCredential.
-# Ryzyko resztkowe: każde konto laptopa (także claude-remote) może przez
+# Ryzyko resztkowe: każde konto laptopa (także hermes-llm) może przez
 # 127.0.0.1:8090 uruchomić Stratę; kontrola dGPU chroni przed tym gry.
 #
 # Jednorazowo (Strata nie pobiera niczego w jednostce): `strata-hermes-setup`
