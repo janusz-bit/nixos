@@ -35,5 +35,15 @@ _: {
       [Keyboard]
       NumLock=0
     '';
+
+    # ~/workspace to repozytoria z buildami: w godzinę zmieniało się tam ok.
+    # 1900 plików, więc Baloo co ok. 5 s uruchamiał ekstraktor treści (journal
+    # kde-baloo), a reszta $HOME prawie się nie zmienia. Kod przeszukuje się
+    # rg/IDE. KConfig rozwija $HOME ([$e]); lista wykluczeń z Ustawień
+    # systemowych (~/.config/baloofilerc) zastępuje tę.
+    environment.etc."xdg/baloofilerc".text = ''
+      [General]
+      exclude folders[$e]=$HOME/workspace/
+    '';
   };
 }
