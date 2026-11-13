@@ -7,14 +7,15 @@
 #
 # Granica zaufania: sesja T3 to powłoka, pliki i agenci na koncie t3code.
 # - Z tailnetu dociera tylko HTTPS Serve (netfilter nodivert, rpi-tailscale).
-# - Konta lokalne (hermes i pozostałe usługi) nie docierają do T3: do
+# - Konta lokalne (pozostałe usługi, konto główne) nie docierają do T3: do
 #   127.0.0.1:3773 łączy się tylko root (proxy tailscaled) i t3code (reguła
 #   iptables owner z customBot.tailscaleServe.users), a połączenia na własne
 #   adresy tailnetu (lokalny listener Serve) są odrzucane (hosts/tailscale.nix). Bez operatora tailscaled dla t3code: operator mógłby
 #   włączyć Funnel, czyli wystawić T3 do internetu.
 # - Uwierzytelnia sam T3 (parowanie, sesje). `t3 serve` wypisuje przy starcie
 #   token parowania właściciela (5 min); LogFilterPatterns nie wpuszcza go do
-#   journala, który czyta też hermes (systemd-journal). Telemetria wyłączona.
+#   journala, który czytają też inne konta (grupy wheel i systemd-journal).
+#   Telemetria wyłączona.
 #
 # Jednorazowo: zalogować RPi do Tailscale i włączyć Serve (nagłówek
 # hosts/tailscale.nix), logowanie agenta:
@@ -40,7 +41,7 @@
       port = 3773;
 
       t3code = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code.override {
-        # Te same CLI agentów co Hermes i tools.nix zamiast kopii z llm-agents.
+        # Te same CLI agentów co tools.nix zamiast kopii z llm-agents.
         providerPackages = with pkgs; [
           claude-code
           codex

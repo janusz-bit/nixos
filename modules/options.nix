@@ -1,5 +1,5 @@
 # Deklaracja opcji customTop: stałe tego repozytorium i jego właściciela
-# (konto GitHub, e-mail, domena, tailnet, konta użytkowników, język i strefa czasowa,
+# (konto GitHub, e-mail, tailnet, konta użytkowników, język i strefa czasowa,
 # domowy LAN, cache binarne, sekrety i klucze publiczne) jako opcja tylko do
 # odczytu `config.customTop`, w modułach flake-parts i NixOS. Wartości są
 # w modules/args.nix.
@@ -34,11 +34,6 @@ in
         options = {
           owner = strOption "Konto GitHub, zarazem autor commitów (git user.name).";
           email = strOption "E-mail autora commitów (git user.email).";
-          domain = strOption ''
-            Domena właściciela: server_name Matrixa (identyfikatory
-            @<konto>:<domena>, niezmienny po założeniu bazy continuwuity).
-            Same usługi RPi są w tailnecie (tailnet.domain).
-          '';
           tailnet = {
             domain = strOption ''
               Sufiks MagicDNS tailnetu (Tailscale): usługi RPi są pod
@@ -72,7 +67,6 @@ in
           users = {
             laptop = strOption "Główne konto laptopa (jego customBot.defaultUser).";
             default = strOption "Główne konto pozostałych hostów (domyślne customBot.defaultUser).";
-            matrix = strOption "Konto Matrix (@<nazwa>:<domena>), jedyne, któremu odpowiada Hermes.";
           };
 
           locale = {
@@ -83,16 +77,10 @@ in
             wifiRegdom = strOption "Domena regulacyjna Wi-Fi (cfg80211.ieee80211_regdom).";
           };
 
-          lan = {
-            subnet = strOption ''
-              Domowy LAN: SSH laptopa i RPi tylko z tej podsieci, fail2ban na
-              RPi jej nie banuje.
-            '';
-            laptop = strOption ''
-              Adres, pod którym RPi łączy się z laptopem (tunel laptop-llm; RPi nie
-              ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
-            '';
-          };
+          lan.subnet = strOption ''
+            Domowy LAN: SSH laptopa i RPi tylko z tej podsieci, fail2ban na
+            RPi jej nie banuje.
+          '';
 
           nixConfig = lib.mkOption {
             type = lib.types.attrsOf (lib.types.listOf lib.types.str);
@@ -133,7 +121,7 @@ in
           };
           keys = lib.mkOption {
             type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
-            description = "Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts) z modules/_secrets/keys.nix.";
+            description = "Klucze publiczne (odbiorcy agenix, authorized_keys) z modules/_secrets/keys.nix.";
           };
         };
       }

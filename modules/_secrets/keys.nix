@@ -1,6 +1,6 @@
-# Publiczne klucze SSH: odbiorcy agenix (secrets.nix), authorized_keys
-# i known_hosts. Samodzielne wyrażenie bez argumentów, bo czytają je też
-# agenix CLI i `post-install ssh` (podmienia tekst kluczy w tym pliku).
+# Publiczne klucze SSH: odbiorcy agenix (secrets.nix) i authorized_keys.
+# Samodzielne wyrażenie bez argumentów, bo czytają je też agenix CLI
+# i `post-install ssh` (podmienia tekst kluczy w tym pliku).
 {
   hosts = {
     # /root/.ssh/id_ed25519 hostów (age.identityPaths)
@@ -13,14 +13,5 @@
     janusz-bit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdlN9e5I4IQy6Re4Z4+BFopT6ypB3nNXzdj4XeTDewO janusz-bit@proton.me";
     # Telefon (Linux Terminal na Androidzie): tylko SSH na RPi.
     phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG4dg51Pg4rlE4CaiHaHUovkCIgAuJuEqkDsEMAU8ut4 root@debian";
-    # Tunel Hermesa z RPi: loguje WYŁĄCZNIE na konto hermes-llm laptopa (bez
-    # powłoki), tylko przekierowanie do 127.0.0.1:8080 (modules/hosts/laptop-llm.nix);
-    # prywatny w hermes-llm-key.age.
-    hermes-llm = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKQy5thFkH4g3VD6V5Wi11rjw7Z9l6U74czp6633qeoZ hermes-llm";
-  };
-  # Klucze hostów sshd (/etc/ssh/ssh_host_ed25519_key.pub) dla known_hosts.
-  sshHostKeys = {
-    nixos = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9RxUTc2ub3uQDGc06/ZBdCRlkOhPJBEPHB5vJihakc";
-    raspberry-pi-4 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE5Lo9UunQr/9leQHTC776Qsg0g46Zy2Ku3B19WeML5i";
   };
 }

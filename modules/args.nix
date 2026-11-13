@@ -8,9 +8,8 @@
 # CLI, a `post-install ssh` podmienia w nim tekst kluczy).
 #
 # Fork: poza tym plikiem trzeba zmienić nixConfig i wejście brulion we
-# flake.nix, _secrets/keys.nix i wszystkie pliki .age, MATRIX_HOME_ROOM
-# (hosts/raspberry-pi-4/matrix.nix), dysk i wpis
-# Windows laptopa (hosts/nixos/disko.nix, boot.nix) oraz modules/hardware/.
+# flake.nix, _secrets/keys.nix i wszystkie pliki .age, dysk i wpis Windows
+# laptopa (hosts/nixos/disko.nix, boot.nix) oraz modules/hardware/.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.wsl.config.customTop.lan`
 # oraz `nix eval --json .#nixosConfigurations.wsl.config.nix.settings.extra-substituters`
@@ -19,7 +18,6 @@
   config.customTop = {
     owner = "janusz-bit";
     email = "janusz-bit@proton.me";
-    domain = "janusz-bit.com";
     tailnet = {
       domain = "tail1ea20e.ts.net";
       laptop = "100.108.227.25";
@@ -31,7 +29,6 @@
     users = {
       laptop = "dinosaur";
       default = "nixos";
-      matrix = "janusz";
     };
     locale = {
       timeZone = "Europe/Warsaw";
@@ -40,10 +37,7 @@
       xkbLayout = "pl";
       wifiRegdom = "PL";
     };
-    lan = {
-      subnet = "192.168.100.0/24";
-      laptop = "192.168.100.14";
-    };
+    lan.subnet = "192.168.100.0/24";
     inherit (import ../flake.nix) nixConfig;
     cachix.name = "janusz-bit";
     secretsDir = ./_secrets;
