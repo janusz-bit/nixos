@@ -5,9 +5,9 @@
 #
 # Źródłem jest tarball z rejestru npm, nie tag z GitHuba: zawiera gotowe dist/
 # i skills/, a build ze źródeł idzie przez turbo i artefakty innych platform.
-# Tarball nie ma lockfile'a, więc package-lock.json obok jest generowany
-# z jego package.json (`nix-update --generate-lockfile`) — te same wersje
-# zależności, które dostaje `npx rea-agents`.
+# Od 6.9.0 tarball zawiera npm-shrinkwrap.json, z którego buildNpmPackage
+# (fetchNpmDeps i npmConfigHook) bierze zależności — te same wersje, które
+# dostaje `npx rea-agents`.
 #
 # Node 26: package.json wymaga ^22.23.4 || ^24.22.1 || >=26.12.1, nodejs (24)
 # z nixpkgs jest starszy, a analiza baz SQLite potrzebuje 24.15+ albo 26.
@@ -35,18 +35,14 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "rea-agents";
-  version = "6.8.0";
+  version = "6.9.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/rea-agents/-/rea-agents-${finalAttrs.version}.tgz";
-    hash = "sha256-jVQux2qcs1BYS2CmycCIcG/4EtW7WwlMIMlbbcJWmLs=";
+    hash = "sha256-MiM4oVBeJVdwKhYBLn1Gq9tXKWQdmJOGYnYt+/t5Jio=";
   };
 
-  postPatch = ''
-    cp ${./package-lock.json} package-lock.json
-  '';
-
-  npmDepsHash = "sha256-RS2KmrKpJa+qvWXz0X5gnmAgrahlIwr1jNNS9YaOz5c=";
+  npmDepsHash = "sha256-6hRmFRsPY6U5O0tpwA3mAUZIic5cO+M/kAs326Q3lNI=";
 
   nodejs = nodejs_26;
 
@@ -69,7 +65,7 @@ buildNpmPackage (finalAttrs: {
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 
-  passthru.updateScript = nix-update-script { extraArgs = [ "--generate-lockfile" ]; };
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Reverse engineer anything with agents, from app behavior down to native binaries";

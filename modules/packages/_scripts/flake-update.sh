@@ -61,10 +61,8 @@ old=$(version_of strata)
 nix-update -F strata
 commit_package strata "$old"
 echo "Updating rea-agents..."
-# Tarball npm nie ma lockfile'a: nix-update generuje package-lock.json
-# z package.json nowej wersji.
 old=$(version_of rea-agents)
-nix-update -F rea-agents --generate-lockfile
+nix-update -F rea-agents
 commit_package rea-agents "$old"
 echo "Updating unsloth-desktop..."
 # Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.
