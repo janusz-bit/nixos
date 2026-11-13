@@ -9,6 +9,13 @@
   flake.modules.nixos.rpi-sd-image = _: {
     imports = [ "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix" ];
     sdImage.compressImage = false;
+
+    # Profil instalatora (profiles/base.nix z sd-image-aarch64) włącza ZFS,
+    # którego host nie używa. Moduł ZFS to drugi pakiet modułów obok kernela,
+    # a przy więcej niż jednym aggregateModules scala certyfikaty kmodigest
+    # i wymaga modules.cer; kernel z nixos-raspberrypi (nixpkgs 26.05) go nie
+    # ma, więc budowa obrazu padała na `cp: cannot stat …/modules.cer`.
+    boot.supportedFilesystems.zfs = false;
   };
 
   perSystem = _: {
