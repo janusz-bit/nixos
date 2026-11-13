@@ -127,7 +127,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       hash =
         {
           x86_64 = "sha256-iPPFOiNxguhyrDBhzIwSnnWuy86Erq2DQiXYEDCWwlQ=";
-          arm64 = "sha256-Zyo+nVge36QUSS6hJlKqvfAucAuOieK1WZQZxw0B3EQ=";
+          arm64 = "sha256-shm+E3Rbq0/H9wBqlSTPZ/mfw2zS5vlFIRejn+6G1Ak=";
         }
         .${arch};
     };
