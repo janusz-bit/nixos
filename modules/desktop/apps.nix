@@ -16,6 +16,7 @@ _: {
         vlc
         alacritty
         libreoffice-qt
+        onlyoffice-desktopeditors
         kdePackages.qrca
         # Dynamiczne tapety (także Wallpaper Engine); pakiety lokalne (local-packages).
         waywallen
