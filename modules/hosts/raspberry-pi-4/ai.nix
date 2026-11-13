@@ -3,7 +3,6 @@
 _: {
   flake.modules.nixos.rpi-ai = _: {
     ai.skills = {
-      ai-tutor.enable = true;
       nixos-system.enable = true;
       obscura.enable = true;
     };

@@ -10,7 +10,6 @@ _: {
   flake.modules.nixos.nixos-ai = _: {
     ai = {
       skills = {
-        ai-tutor.enable = true;
         brulion.enable = true;
         claude-usage.enable = true;
         nixos-system.enable = true;

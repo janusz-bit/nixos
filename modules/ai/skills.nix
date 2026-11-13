@@ -65,7 +65,6 @@
     in
     {
       ai.skills = {
-        ai-tutor.source = "${self}/modules/skills/ai-tutor";
         nixos-system.source = nixosSystemSkill;
         # Skill dostarcza sam Brulion w pakiecie, razem z brulion-cli, który
         # opisuje, więc zawsze pasuje do wersji CLI w systemie. Ten sam pakiet
