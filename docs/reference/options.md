@@ -54,15 +54,6 @@ Adres własnego cache.
 - Default: `"https://${cachix.name}.cachix.org"`
 - Declared in: [options.nix](../../modules/options.nix)
 
-### `customTop.domain`
-
-Domena właściciela: server_name Matrixa (identyfikatory
-@\<konto>:\<domena>, niezmienny po założeniu bazy continuwuity).
-Same usługi RPi są w tailnecie (tailnet.domain).
-
-- Type: string
-- Declared in: [options.nix](../../modules/options.nix)
-
 ### `customTop.email`
 
 E-mail autora commitów (git user.email).
@@ -72,18 +63,10 @@ E-mail autora commitów (git user.email).
 
 ### `customTop.keys`
 
-Klucze publiczne (odbiorcy agenix, authorized_keys, known_hosts) z modules/_secrets/keys.nix.
+Klucze publiczne (odbiorcy agenix, authorized_keys) z modules/_secrets/keys.nix.
 
 - Type: attribute set of attribute set of string
 - Default: `{ }`
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.lan.laptop`
-
-Adres, pod którym RPi łączy się z laptopem (tunel laptop-llm; RPi nie
-ma mDNS) — po zmianie w routerze popraw go w modules/args.nix.
-
-- Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.lan.subnet`
@@ -214,13 +197,6 @@ Główne konto pozostałych hostów (domyślne customBot.defaultUser).
 ### `customTop.users.laptop`
 
 Główne konto laptopa (jego customBot.defaultUser).
-
-- Type: string
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.users.matrix`
-
-Konto Matrix (@\<nazwa>:\<domena>), jedyne, któremu odpowiada Hermes.
 
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)

@@ -10,9 +10,7 @@
 # - Prime Agent: /etc/ai-skills (lista skills w base/prime-agent.nix),
 # - Claude Code: /etc/claude-code/.claude/skills, skille zarządzane
 #   (`claude --debug`: „Loading skills from: managed=…”); wyłączenie per
-#   proces: CLAUDE_CODE_DISABLE_POLICY_SKILLS=1. `claude -p` Hermesa na RPi
-#   (claudeSubscriptionPlugin) skilli nie użyje: plugin uruchamia go
-#   z `--tools ''` i `--disable-slash-commands`,
+#   proces: CLAUDE_CODE_DISABLE_POLICY_SKILLS=1,
 # - Codex: /etc/codex/skills (scope ADMIN; Codex wchodzi w symlinki
 #   katalogów),
 # - opencode2: skanuje skills/ każdego katalogu konfiguracji, także
@@ -227,9 +225,9 @@
       };
 
       # Drop-in na skille runtime — zapisywalny tylko przez defaultUsera
-      # (on i jego Prime Agent dodają skille bez sudo). Wcześniej 0775
-      # root:users: na RPi agent hermes (grupa users) mógł podrzucić skill
-      # ładowany automatycznie przez prime-agenta użytkownika nixos.
+      # (on i jego Prime Agent dodają skille bez sudo). Nie 0775 root:users:
+      # każde konto z grupy users mogłoby podrzucić skill ładowany
+      # automatycznie przez prime-agenta głównego użytkownika.
       systemd.tmpfiles.rules = lib.optional (skills != { }) "d /etc/ai 0755 ${user} root - -";
     };
 }

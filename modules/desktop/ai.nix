@@ -1,7 +1,6 @@
 # Narzędzia AI stacji roboczej: lokalna Ollama, llama.cpp i Strata, agenty
-# kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT i Hermes
-# Desktop oraz alias claude-nixos. Klucze API wstrzykują wrappery fish
-# (base/agenix.nix).
+# kodujące (Codex, Claude Code, opencode, Antigravity), ChatGPT oraz alias
+# claude-nixos. Klucze API wstrzykują wrappery fish (base/agenix.nix).
 #
 # Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII).
 { inputs, self, ... }:
@@ -46,7 +45,6 @@
           (python3.withPackages (python-pkgs: [ python-pkgs.pip ]))
           antigravity-ide-fhs
           antigravity-cli
-          inputs.hermes-agent.packages.${system}.desktop
           inputs.llm-agents.packages.${system}.opencode2
           (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
           self.packages.${system}.unsloth-desktop

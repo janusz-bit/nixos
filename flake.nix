@@ -31,7 +31,6 @@
     git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
     github-actions-nix.url = "github:synapdeck/github-actions-nix";
     github-actions-nix.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-agent.url = "github:NousResearch/hermes-agent";
     # Bez follows: pakiety llm-agents są budowane pod własny nixpkgs (cache
     # numtide nie jest używany, więc kompilują się lokalnie).
     llm-agents.url = "github:numtide/llm-agents.nix";

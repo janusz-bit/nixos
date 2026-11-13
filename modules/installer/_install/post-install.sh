@@ -36,7 +36,7 @@ set_key() {
 }
 
 ssh_key() {
-  local key=/root/.ssh/id_ed25519 host host_key root_key
+  local key=/root/.ssh/id_ed25519 host root_key
   # Nazwa z działającego systemu, nie z flake'a: post-install może
   # ruszyć na dowolnym hoście, a wpisy keys.nix są per host.
   host="$(uname -n)"
@@ -51,16 +51,7 @@ ssh_key() {
   fi
 
   # Poza `if`: błąd odczytu klucza przerywa skrypt (errexit, pipefail).
-  host_key="$(cut -d' ' -f1-2 /etc/ssh/ssh_host_ed25519_key.pub)"
   root_key="$(ssh-keygen -y -f "$key" | cut -d' ' -f1-2)"
-
-  # Klucz hosta sshd przypinają known_hosts innych hostów; po
-  # reinstalacji jest nowy.
-  if set_key "sshHostKeys.$host" "$host_key"; then
-    echo "Klucz hosta sshd nowy albo zmieniony: po wpisaniu, commicie i pushu zrób"
-    echo "update na hostach, które go przypinają (raspberry-pi-4 przypina nixos:"
-    echo "laptop-llm)."
-  fi
 
   if ! set_key "hosts.$host" "$root_key root@$host"; then
     echo "Klucz roota jest już odbiorcą sekretów (hosts.$host) — agenix odszyfruje je przy update-local."

@@ -22,18 +22,12 @@ in
   "cachix-authtoken-token.age" = toAllHosts;
   "ollama-api-key.age" = toAllHosts;
   "google-api-key.age" = toAllHosts;
-  "hermes-env.age" = toAllHosts;
   "opencode.age" = toAllHosts;
   "open-webui-keys.age" = toAllHosts;
   "llmgateway-api-key.age" = toAllHosts;
   "openrouter-api-key.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
-  # Token bota Hermesa na Matrixie (modules/hosts/raspberry-pi-4/matrix.nix):
-  # MATRIX_ACCESS_TOKEN=…, opcjonalnie MATRIX_RECOVERY_KEY=…
-  "hermes-matrix.age" = toAllHosts;
-  # Prywatny klucz SSH tunelu Hermesa do LLM laptopa (modules/hosts/laptop-llm.nix).
-  "hermes-llm-key.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
   # Format env z nazwami sekretów CI github:janusz-bit/brulion:
   # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,

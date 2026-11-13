@@ -7,7 +7,7 @@ no Home Manager, secrets with [agenix](https://github.com/ryantm/agenix)).
 | Host | Machine | Role |
 |---|---|---|
 | `nixos` | Lenovo LOQ 15IRX10 laptop (x86_64, NVIDIA PRIME) | workstation: Plasma 6, development, AI tools, games |
-| `raspberry-pi-4` | Raspberry Pi 4B (aarch64) | home server, services only in the tailnet (Tailscale Serve): Nextcloud, Gitea, Matrix, T3 Code, Hermes Agent |
+| `raspberry-pi-4` | Raspberry Pi 4B (aarch64) | home server, services only in the tailnet (Tailscale Serve): Nextcloud, Gitea, T3 Code |
 | `wsl` | NixOS-WSL on Windows (x86_64) | command-line environment |
 
 **Where to read next**
@@ -27,7 +27,7 @@ modules/
   hosts/base/             what every host gets (nix, shell, ssh, git, update aliases),
                           plus opt-in user secrets, fail2ban, LAN-only SSH and lockdown
   hosts/<host>/           what makes a machine itself: identity, disk, boot, host-only services
-  hosts/laptop-llm.nix    local LLM for Hermes: feature linking two hosts
+  hosts/t3code-laptop.nix T3 Code sessions from the RPi: feature linking two hosts
   desktop/  gaming/       workstation features any desktop host can import
   hardware/<machine>/     drivers, firmware quirks, facter report of one machine
   installer/              install-system, post-install
@@ -143,9 +143,9 @@ automatically.
    `install-system` automates exactly this for the host named by
    `installHost` in `modules/installer/install.nix`.
 4. **Secrets.** After the first boot, `nix run /etc/nixos#post-install ssh`
-   creates the root key and prints the `hosts.<name>` / `sshHostKeys.<name>`
-   lines for `modules/_secrets/keys.nix` (an existing, different entry is
-   replaced only after you confirm). Add the host to the recipients in
+   creates the root key and prints the `hosts.<name>` line for
+   `modules/_secrets/keys.nix` (an existing, different entry is replaced
+   only after you confirm). Add the host to the recipients in
    `modules/_secrets/secrets.nix`, re-encrypt on a host that can already
    decrypt (`cd modules/_secrets && sudo agenix -r -i /root/.ssh/id_ed25519`),
    commit, push and run `update` on the new host.
@@ -154,7 +154,5 @@ automatically.
 replace `hardware-LOQ-15IRX10` with the new `hardware-<machine>`, set the new disk
 in `modules/hosts/nixos/disko.nix` (or choose it when `install-system` asks),
 drop the Windows entry from `boot.nix` if there is none, install, then run
-`post-install`. It replaces both the root key and the SSH host key in
-`keys.nix` (after confirmation); re-encrypt the secrets on the RPi and run
-`update` there so `laptop-llm` trusts the new host key. Change `customTop.lan.laptop` in
-`modules/args.nix` if the LAN address changes.
+`post-install`. It replaces the root key in `keys.nix` (after confirmation);
+re-encrypt the secrets on the RPi.

@@ -34,49 +34,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nvidia_uvm` przed udevem). Sprawdzenie: usunąć regułę, przebudować,
   po restarcie `cat .../power/control` musi dać `auto`.
 
-### 2. Kopia modułu NixOS hermes-agent (aktywacja bez zapisów roota)
-
-- **Od:** 2026-10-07.
-- **Pliki:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
-  (kopia `nix/nixosModules.nix` z NousResearch/hermes-agent @ 848fc0ad, MIT),
-  import w `modules/hosts/raspberry-pi-4/hermes.nix`, test
-  `checks.<system>.hermes-activation`.
-- **Przyczyna:** aktywacja upstreamu (przy każdym switch i boot) robi jako root
-  `mkdir -p` + `chown`/`chmod` na `stateDir/{.hermes,home,workspace}` i
-  podkatalogach, `install`/merge `config.yaml` i `.env` — w katalogach, których
-  właścicielem jest agent (2770 hermes). Symlink podłożony przez agenta
-  (np. `/var/lib/hermes/home -> /etc`) daje mu roota przy najbliższej
-  aktywacji. Kontrola negatywna testu na module upstream: `/target-home`
-  root → `hermes:hermes 750`.
-- **Obejście:** root zakłada tylko `stateDir`; resztę aktywacji wykonuje
-  `setpriv --reuid=hermes … --no-new-privs`. Wpisy `HERMES_HOME` innych
-  właścicieli (stare uruchomienia CLI jako root/nixos) przejmuje kopią jako
-  hermes; oryginalne katalogi zostają jako `.foreign-<nazwa>` do ręcznego
-  usunięcia. Tryb kontenerowy wyłączony asercją.
-- **Kiedy usunąć:** gdy upstream przestanie pisać jako root w `stateDir`
-  (zgłosić upstream). Do tego czasu przy każdym `nix flake update hermes-agent`
-  nałożyć diff upstreamowego `nix/nixosModules.nix` na kopię (procedura
-  w nagłówku pliku) i uruchomić `hermes-activation`.
-
-### 3. hermes-agent — kasowanie `gateway.lock`/`gateway.pid`/`gateway_state.json`
-
-- **Od:** przed 2026-10 (wcześniej bez wpisu).
-- **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`ExecStartPre`, jako
-  użytkownik usługi).
-- **Przyczyna:** pliki blokady/stanu pozostałe po przerwanym procesie albo
-  utworzone przez sesję interaktywną blokowały start bramki (PermissionError).
-  Od 2026-10-14 także rekord hosta
-  `/var/lib/hermes/.local/state/hermes/gateway-locks/host-gateway.{json,token}`:
-  po twardym resecie RPi zapisany PID (1501) z czasem startu w taktach od
-  rozruchu (tolerancja 2 s) trafił na cloudflared o tym samym PID i czasie,
-  więc `host_attach` uznawał go za żywą bramkę i usługa restartowała się
-  bez końca (exit 75, „has not published its served set yet”). Rekord nie
-  zawiera `boot_id`.
-- **Kiedy usunąć:** gdy hermes sam wykrywa nieaktualne blokady (pid nie żyje,
-  rekord z innego rozruchu) — sprawdzić: usunąć `ExecStartPre`, `kill -9`
-  bramki, Restart musi wstać; rekord hosta z PID i `start_time` procesu
-  z bieżącego rozruchu nie może blokować startu.
-
 ### 4. Zed — Vulkan tylko z ICD Intela (`VK_LOADER_DRIVERS_SELECT`)
 
 - **Od:** 2026-10-10.
@@ -103,24 +60,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   przebudować, przy uśpionym dGPU uruchomić `zeditor ~/projekt; sleep 2;
   cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status` — musi zostać
   `suspended`.
-
-### 5. hermes-agent — pakiet językowy `hermes-lang-pl` bez `requires_hermes`
-
-- **Od:** 2026-10-11.
-- **Plik:** `modules/hosts/raspberry-pi-4/hermes.nix` (`polishLanguagePack`:
-  `applyPatches` + `substituteInPlace --replace-fail` na `plugin.yaml`).
-- **Objaw:** `Plugin 'hermes-lang-pl' skipped: requires hermes >=0.22, running
-  0.0.0` — mimo `plugins.enabled` interfejs zostaje po angielsku.
-- **Przyczyna:** `nix/packages.nix` w NousResearch/hermes-agent nie przekazuje
-  `version` do `nix/hermes-agent.nix` (domyślnie `"0.0.0"`, a `pyproject.toml`
-  na `main` też ma `0.0.0`; prawdziwy numer jest tylko na tagach wydań, np.
-  v2026.9.24 = 0.21.5), więc stempel instalacji ma `baseVersion = "0.0.0"`
-  i loader pomija każdy plugin z `requires_hermes` (poza `model-provider`).
-  Przypięty `main` (0a374d16, po 0.21.5) ma już `provides_locales`;
-  `hermes plugins validate` przechodzi.
-- **Kiedy usunąć:** gdy pakiet Nix Hermesa stempluje prawdziwą wersję `>=0.22`
-  (zgłosić upstream). Sprawdzenie: usunąć `postPatch`, przebudować, w
-  `journalctl -u hermes-agent -b` nie może być `hermes-lang-pl' skipped`.
 
 ### 6. Deadlock, Dead by Daylight — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
 
@@ -209,26 +148,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   Sprawdzenie: `nix flake metadata --json | jq '.locks.nodes[.locks.nodes[.locks.nodes.root.inputs."nix-cachyos-kernel"].inputs.nixpkgs].locked.lastModified'`
   ≥ 1791856909 (2026-10-13), potem usunąć overlay i `nix build` toplevelu
   `nixos` musi przejść.
-
-### 11. hermes-agent — HERMES_HOME 2750 zamiast 2770
-
-- **Od:** 2026-10-22.
-- **Plik:** `modules/hosts/raspberry-pi-4/_hermes-agent/nixos-module.nix`
-  (zmiana 4 w nagłówku: reguła tmpfiles i `chmod` w aktywacji), test
-  `checks.<system>.hermes-activation`.
-- **Objaw:** od 2026-10-21 zadania cron w trybie agenta kończą się
-  `GatewayUnavailableError: Gateway inaccessible: unsafe_control_permissions
-  (/var/lib/hermes/.hermes has mode 2770, writable by another user …)`.
-- **Przyczyna:** upstreamowy moduł NixOS (`nix/nixosModules.nix`) ustawia
-  HERMES_HOME na 2770, a upstreamowa bramka
-  (`hermes_cli/gateway_runtime_discovery.py`, `home_mode_unsafe`) odrzuca
-  HERMES_HOME zapisywalny dla grupy, gdy grupa nie jest prywatną grupą
-  właściciela. Grupa `hermes` ma członka `nixos`.
-- **Obejście:** HERMES_HOME 2750 (setgid zostaje); `stateDir`,
-  `workingDirectory` i podkatalogi `stateSubdirs` nadal 2770.
-- **Kiedy usunąć:** gdy upstream poprawi moduł (HERMES_HOME bez zapisu grupy)
-  albo test `home_mode_unsafe` (zaakceptuje grupę współdzieloną); wtedy usunąć
-  zmianę 4 z kopii modułu.
 
 ### 12. Nextcloud — PHP z inputu `nixpkgs-unstable-small` (PHP2Shell)
 
@@ -332,6 +251,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   musi podbić wersję i hash.
 
 ## Zamknięte
+
+- **hermes-agent — kopia modułu NixOS, kasowanie blokad bramki, pakiet
+  `hermes-lang-pl` bez `requires_hermes`, HERMES_HOME 2750 (wpisy 2, 3, 5
+  i 11)** — zamknięte 2026-11-13. Hermes Agent usunięto z repo (moduł
+  `rpi-hermes` z kopią `_hermes-agent/` i pluginami, test
+  `hermes-activation`, wejście `hermes-agent`), więc obejścia zniknęły razem
+  z nim.
 
 - **llama.cpp (fork PrismML) — testy niezgodne z flagami budowania (wpis 9)**
   — zamknięte 2026-11-10. Modele Ternary Bonsai i fork PrismML usunięto

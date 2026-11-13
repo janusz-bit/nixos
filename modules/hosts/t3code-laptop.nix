@@ -5,19 +5,17 @@
 # nie ma MagicDNS (rpi-tailscale).
 #
 # Granica zaufania: sesja T3 laptopa to powłoka i agenci na koncie głównym
-# laptopa, czyli znacznie więcej niż hermes-llm. Dlatego wąsko:
+# laptopa. Dlatego wąsko:
 # - RPi: nowe połączenia przez tailscale0 otwiera tylko t3code (reguła
-#   iptables owner); hermes (treści z internetu), usługi WWW i konto główne
-#   RPi dostają odmowę.
+#   iptables owner); usługi WWW i konto główne RPi dostają odmowę.
 # - Polityka tailnetu (panel Tailscale) celowo nie zawęża ruchu: każde
 #   urządzenie łączy się z każdym. Granicę trzymają hosty: z RPi wychodzi
 #   tylko t3code (wyżej), a laptop przyjmuje z tailnetu tylko porty Serve
 #   i porty otwarte globalnie w nixos-fw (netfilter nodivert); sshd laptopa
 #   tylko z LAN-u.
 # - Laptop: z portem T3 desktop (słucha na 0.0.0.0, firewall go nie otwiera)
-#   łączy się lokalnie tylko root (proxy tailscaled) i konto główne;
-#   hermes-llm i strata, konta używane z RPi, dostają odmowę
-#   (customBot.tailscaleServe.users).
+#   łączy się lokalnie tylko root (proxy tailscaled) i konto główne; inne
+#   konta dostają odmowę (customBot.tailscaleServe.users).
 # - Uwierzytelnia sam T3 (parowanie środowisk); poziom dostępu RPi wybiera się
 #   przy parowaniu (approval-required: każdą zmianę zatwierdza się ręcznie).
 # Ryzyko resztkowe: root albo konto t3code na RPi steruje sesjami T3 laptopa
