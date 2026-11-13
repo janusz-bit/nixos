@@ -6,7 +6,7 @@
 # Sprawdzenie: `nix develop -c pre-commit run --all-files`; to samo w CI:
 # `nix build .#checks.x86_64-linux.pre-commit` (oblewa nieaktualne pliki
 # generowane).
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   systems = [
     "x86_64-linux"
@@ -58,10 +58,12 @@
       # allowUnfree jak na hostach (base-nix): domyślne pkgs flake-parts to
       # legacyPackages nixpkgs, które odmawia ewaluacji pakietów niewolnych,
       # więc packages.<system> (pakiety lokalne, package-import, nix-update)
-      # nie mogłyby zawierać np. pakietów CUDA.
+      # nie mogłyby zawierać np. pakietów CUDA. Overlay nix-update jak
+      # w base-nix, bo flake-update bierze nix-update z tych pkgs.
       _module.args.pkgs = import inputs.nixpkgs {
         inherit system;
         config.allowUnfree = true;
+        overlays = [ self.overlays.nix-update-flake-archive ];
       };
 
       formatter = pkgs.nixfmt-tree;

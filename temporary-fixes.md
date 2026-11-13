@@ -307,6 +307,30 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   usunąć overlay z `base-nix` i `nix build --no-link
   .#nixosConfigurations.nixos.pkgs.{obscura,ark,codex}` musi przejść.
 
+### 16. nix-update — kopia flake'a przez `nix flake archive` (Nix 2.35)
+
+- **Od:** 2026-11-13.
+- **Plik:** `modules/packages/nix-update-flake-archive.nix` (overlay
+  `nix-update-flake-archive` w `base-nix` i w `pkgs` perSystem,
+  `modules/default.nix`).
+- **Objaw:** `flake-update` (i ręczne `nix-update -F <pakiet>`) podbija
+  wersję, po czym prefetch hasha albo `--generate-lockfile` pada z
+  `error: opening file "/nix/store/…-source": No such file or directory`
+  (pierwszy raz przy `rea-agents` 6.8.0 -> 6.9.0).
+- **Przyczyna:** nix-update 1.16.0 (`get_flake_store_path` w
+  `nix_update/options.py`) bierze ścieżkę flake'a z `nix flake metadata
+  --json` i ewaluuje ją `builtins.getFlake`. Nix 2.35 (`pkgs.nix` w nixpkgs
+  od bumpu 2026-11-13) zwraca tam ścieżkę bez kopiowania drzewa do sklepu;
+  2.34 je kopiował. Upstream master (Mic92/nix-update) wciąż używa
+  `metadata`, issue jeszcze nie ma.
+- **Obejście:** łatka zamienia `metadata` na `archive` (kopiuje drzewo,
+  zwraca to samo pole `path`; ~1 s zamiast ~0,04 s na wywołanie).
+- **Kiedy usunąć:** gdy przypięty nix-update przestanie brać ścieżkę z
+  `nix flake metadata` (`--replace-fail` oblewa wtedy build). Sprawdzenie:
+  usunąć overlay i w czystym klonie z pakietem mającym nową wersję
+  `nix run .#nixosConfigurations.nixos.pkgs.nix-update -- -F <pakiet>`
+  musi podbić wersję i hash.
+
 ## Zamknięte
 
 - **llama.cpp (fork PrismML) — testy niezgodne z flagami budowania (wpis 9)**
