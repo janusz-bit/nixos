@@ -30,7 +30,7 @@
 # w setup.py i linkowany do katalogu instalacji, jak
 # w docker/entrypoint.sh — inaczej setup pobrałby zip.
 #
-# Aktualizacja: `nix-update -F strata` (flake-update robi to samo) podbija
+# Aktualizacja: `nix-update --commit -F strata` (flake-update robi to samo) podbija
 # version i src. Silnik ma własną numerację, a jego asset leży tylko
 # w wydaniu, które go wydało, więc engineTag i engineVersion podbija się
 # RĘCZNIE z SHA256SUMS.txt wydania (potem `nix-update -F strata

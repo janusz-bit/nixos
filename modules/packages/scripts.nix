@@ -12,8 +12,8 @@
 #   modules/packages/_<atrybut>/, dopisuje go do localPackages i sprawdza, że
 #   daje tę samą derywację co nixpkgs; pliki zostają w indeksie bez commita.
 #   Od tej chwili overlay podmienia nim pakiet z nixpkgs, więc aktualizacje
-#   nixpkgs go nie ruszają: podbija się go lokalnie (`nix-update -F
-#   <atrybut>` albo ręcznie).
+#   nixpkgs go nie ruszają: podbija się go lokalnie (`nix-update --commit
+#   -F <atrybut>` albo ręcznie).
 #
 # Sprawdzenie: `nix build --no-link .#flake-update .#repo-sync .#flake-release
 # .#package-import` (każdy przechodzi przy tym shellcheck).
