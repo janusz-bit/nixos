@@ -50,17 +50,17 @@ let
 in
 buildNpmPackage (finalAttrs: {
   pname = "opencharts";
-  version = "0-unstable-2026-10-14";
+  version = "0-unstable-2026-11-10";
 
   # Upstream nie taguje wydań; flake-update podbija przez --version=branch.
   src = fetchFromGitHub {
     owner = "dylanpersonguy";
     repo = "OpenCharts";
-    rev = "0a29be0eb3881b20a2d980779e56c87d3e011863";
-    hash = "sha256-+yIg3yEdhGd9YVzZl7dZWdkXzgeAmjkbFZRU2GGDhTU=";
+    rev = "399e27538d8150796571dbdecbe920a54b771de4";
+    hash = "sha256-D99PuhHzdqhbvswvRsaQCLo8em1yYxtYMCmiM43f1dk=";
   };
 
-  npmDepsHash = "sha256-hL0hd8OwcvsN7DD08i9LKneXsvqFqQvktrdnc9PIKdk=";
+  npmDepsHash = "sha256-W+iD2wraSixzdNYeYsKhAZ3Ji2+6bpTH6B9fsmkKDsE=";
 
   nativeBuildInputs = [
     makeWrapper
