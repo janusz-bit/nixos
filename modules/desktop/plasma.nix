@@ -21,15 +21,6 @@ _: {
       merkuro = false;
     };
 
-    # Tymczasowe (temporary-fixes.md nr 8, KDE bug 524392): kde-baloo startuje
-    # przed importem WAYLAND_DISPLAY/DISPLAY i ekstraktor (QGuiApplication)
-    # abortuje; offscreen nie potrzebuje ekranu (KIdleTime nie widzi
-    # aktywności, indeksuje wolniej).
-    systemd.user.services.kde-baloo = {
-      overrideStrategy = "asDropin";
-      environment.QT_QPA_PLATFORM = "offscreen";
-    };
-
     # Num Lock w sesji Plasmy (0 = włącz); domyślne KDE czyta z /etc/xdg, nie z /etc.
     environment.etc."xdg/kcminputrc".text = ''
       [Keyboard]

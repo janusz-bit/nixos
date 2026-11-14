@@ -101,31 +101,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
   i sprawdzić `systemctl status pwm-fan`.
 
-### 8. Baloo — `QT_QPA_PLATFORM=offscreen` dla `kde-baloo.service`
-
-- **Od:** 2026-10-20.
-- **Plik:** `modules/desktop/plasma.nix` (`systemd.user.services.kde-baloo`).
-- **Objaw:** po zalogowaniu `baloo_file_extractor` abortuje (SIGABRT,
-  coredump) z `Failed to create wl_display (No such file or directory)` i
-  `could not connect to display`; `baloo_file` loguje `Extractor crashed`.
-- **Przyczyna:** `kde-baloo.service` startuje z `plasma-workspace.target`,
-  zanim startplasma zaimportuje `WAYLAND_DISPLAY`/`DISPLAY` do
-  `systemd --user`. `baloo_file` ma w `/proc/<pid>/environ` tylko
-  `XDG_SESSION_TYPE=wayland` (bez obu zmiennych), a jego dzieci dziedziczą to
-  środowisko. Qt bierze domyślny socket `wayland-0`, podczas gdy KWin tworzy
-  `wayland-1`; fallback xcb nie ma `DISPLAY`. KDE bug 524392,
-  https://invent.kde.org/frameworks/baloo/-/merge_requests/331 opóźnia start,
-  ale na razie wpada w cykl kolejności jednostek.
-- **Obejście:** drop-in `QT_QPA_PLATFORM=offscreen` — ekstraktor nie potrzebuje
-  okna. Skutek uboczny: `KIdleTime` nie znajduje pollera, więc Baloo uznaje
-  system za zajęty i indeksuje treść wolniej.
-- **Kiedy usunąć:** gdy upstream opóźni start `kde-baloo.service` do czasu
-  importu środowiska (baloo MR 331). Sprawdzenie: usunąć wpis, przebudować,
-  po zalogowaniu `tr '\0' '\n' < /proc/$(pgrep -x baloo_file)/environ` musi
-  zawierać `WAYLAND_DISPLAY` i `DISPLAY`, a
-  `journalctl --user -u kde-baloo.service -b` nie może mieć `Extractor
-  crashed`.
-
 ### 14. Kernel RPi4 z nixos-raspberrypi — `kernelFile` i `deviceTree.enable` podane ręcznie
 
 - **Od:** 2026-11-04.
@@ -189,6 +164,12 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   (ac9af266, 2026-11-13) zawiera 6bd7526: moduły kernela 7.3.4 mają
   `modules.cer`, a nvidia-open 615.78.08 `*.ko.cer`. Drugi overlay
   w `modules/desktop/kernel.nix` usunięto.
+
+- **Baloo — `QT_QPA_PLATFORM=offscreen` (wpis 8)** — zamknięte 2026-11-14.
+  baloo 6.31.0 ma MR 331 (`After=graphical-session.target`) i poprawkę cyklu
+  (`After=plasma-workspace.target`); `baloo_file` startuje już z
+  `WAYLAND_DISPLAY` i `DISPLAY` w środowisku. Drop-in `kde-baloo`
+  w `modules/desktop/plasma.nix` usunięto.
 
 
 - **hermes-agent — kopia modułu NixOS, kasowanie blokad bramki, pakiet
