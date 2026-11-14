@@ -6,21 +6,11 @@
 #
 # Sprawdzenie: `uname -r` kończy się na -cachyos.
 { inputs, ... }:
-let
-  cachyosNixpkgs = inputs.nix-cachyos-kernel.inputs.nixpkgs.legacyPackages;
-in
 {
   flake.modules.nixos.desktop-kernel =
     { pkgs, ... }:
     {
-      nixpkgs.overlays = [
-        inputs.nix-cachyos-kernel.overlays.pinned
-        # Tymczasowe (temporary-fixes.md nr 10): aggregateModules z nixpkgs
-        # hosta (od 6bd7526) wymaga modules.cer i *.ko.cer, których kernel
-        # i nvidia z overlays.pinned nie mają; drzewo składa więc nixpkgs, które
-        # je zbudowało.
-        (final: _: { inherit (cachyosNixpkgs.${final.stdenv.hostPlatform.system}) aggregateModules; })
-      ];
+      nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
       boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-lto-x86_64-v3;
     };
 }
