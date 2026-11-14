@@ -70,8 +70,9 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `GPIO.setup` pada, więc usługa `pwm-fan` nie startuje.
 - **Przyczyna:** rpi-lgpio czyta rewizję z
   `/proc/device-tree/system/linux,revision` albo z pola `Revision`
-  w `/proc/cpuinfo`; na kernelu 6.18 z nixos-hardware nie ma ani węzła
-  `system/` w device tree, ani tego pola.
+  w `/proc/cpuinfo`; na kernelu 6.18 (najpierw z nixos-hardware, od
+  2026-11-04 vendorowy z nixos-raspberrypi) nie ma ani węzła `system/`
+  w device tree, ani tego pola (sprawdzone 2026-11-14 na 6.18.59).
 - **Kiedy usunąć:** gdy na RPi
   `ls /proc/device-tree/system/linux,revision` albo
   `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
