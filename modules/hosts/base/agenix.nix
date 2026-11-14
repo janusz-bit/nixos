@@ -47,6 +47,15 @@
           );
         }
         {
+          name = "pi";
+          description = "pi z kluczami API z agenix";
+          # Zmienne z apiKeyEnv providerów w models.json (ai-harness).
+          vars = [
+            (envFromSecret "OLLAMA_API_KEY" "ollama-api-key")
+            (envFromSecret "OPENROUTER_API_KEY" "openrouter-api-key")
+          ];
+        }
+        {
           name = "opencode";
           description = "opencode z kluczami API z agenix";
           vars = [

@@ -1,6 +1,6 @@
 # Katalog modeli agentów AI: serwery (ai.providers) i modele (ai.models), które
 # repozytorium zna, bez włączania ich: host wybiera je w swoim ai.nix, a ai-harness
-# zapisuje wybrane w konfiguracji Prime Agenta i opencode2. Zdalne: lokalna
+# zapisuje wybrane w konfiguracji Prime Agenta, Pi i opencode2. Zdalne: lokalna
 # Ollama (także modele chmurowe przez nią), Ollama Cloud i OpenRouter. Lokalne
 # na GPU: Qwen3.8-Flash-Next (Coder IQ1_M i Gyro-M) z serwera Strata (tylko
 # NVIDIA).
@@ -21,8 +21,8 @@ _: {
     }:
     let
       # Model z myśleniem i obrazem na wejściu (u modeli Ollamy sprawdź
-      # w `ollama show <model>`, sekcja Capabilities). Schemat prime-agenta zna
-      # tylko input "text" i "image" — "video" odrzuca walidator.
+      # w `ollama show <model>`, sekcja Capabilities). Schemat models.json Prime
+      # Agenta i Pi zna tylko input "text" i "image" — "video" odrzuca walidator.
       # Model serwera Strata (desktop-ai); oba modele obsługuje ten sam serwer
       # (serve/), więc różnią się tylko id i nazwą.
       strataModel = id: name: {
@@ -52,7 +52,10 @@ _: {
 
       visionReasoningModel = provider: id: {
         inherit provider id;
-        agents = [ "prime-agent" ];
+        agents = [
+          "prime-agent"
+          "pi"
+        ];
         reasoning = { };
         input = [
           "text"
@@ -64,8 +67,7 @@ _: {
       ai.providers = {
         ollama = {
           baseUrl = "http://localhost:11434/v1";
-          # Literał, nie nazwa zmiennej: lokalny Ollama ignoruje klucz, ale
-          # schemat go wymaga.
+          # Lokalny Ollama ignoruje klucz, ale schemat go wymaga.
           apiKey = "ollama";
           compat = {
             supportsDeveloperRole = false;
@@ -74,15 +76,15 @@ _: {
         };
         ollama-cloud = {
           baseUrl = "https://ollama.com/v1";
-          apiKey = "OLLAMA_API_KEY";
+          apiKeyEnv = "OLLAMA_API_KEY";
         };
         openrouter = {
           baseUrl = "https://openrouter.ai/api/v1";
-          apiKey = "OPENROUTER_API_KEY";
+          apiKeyEnv = "OPENROUTER_API_KEY";
         };
         # Serwer `strata launch --family coder --model IQ1_M --context 128k
         # --kv q4_0 --no-api-key` albo `--family gyro` (desktop-ai) na domyślnym
-        # porcie 8080. Schemat Prime wymaga klucza; Strata z --no-api-key go
+        # porcie 8080. Prime Agent i Pi wymagają klucza; Strata z --no-api-key go
         # ignoruje. Tok myślenia oddaje w reasoning_content.
         # Nie przez `strata connect opencode --write`: pisze format opencode
         # v1 (provider/npm) i zastąpiłby symlink na ten plik zwykłym plikiem.
@@ -98,7 +100,10 @@ _: {
         ollama-ornith-35b = {
           provider = "ollama";
           id = "ornith:35b";
-          agents = [ "prime-agent" ];
+          agents = [
+            "prime-agent"
+            "pi"
+          ];
         };
         ollama-kimi-k3-cloud = visionReasoningModel "ollama" "kimi-k3:cloud";
         ollama-cloud-deepseek-v4-1-flash = visionReasoningModel "ollama-cloud" "deepseek-v4.1-flash:cloud";

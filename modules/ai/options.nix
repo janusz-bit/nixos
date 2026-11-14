@@ -1,12 +1,12 @@
 # Opcje ai.*: neutralny opis skilli i modeli, które mają dostać agenci kodujący
-# hosta (Prime Agent, Claude Code, Codex, opencode2). Host tylko włącza to, co
+# hosta (Prime Agent, Pi, Claude Code, Codex, opencode2). Host tylko włącza to, co
 # chce (`ai.skills.obscura.enable = true;`, `ai.models.<model>.enable = true;`,
 # pliki ai.nix hostów), a definicje skilli i modeli (ai-skills, ai-models) oraz
 # ich przełożenie na konfigurację każdego agenta (ai-harness) są w modules/ai/.
 #
 # Skill to katalog z SKILL.md, paczka skilli (skillPacks) to katalog takich
 # katalogów z wejścia flake'a. Provider i model opisują serwer zgodny z API
-# OpenAI i jego modele; do Prime Agenta i opencode2 trafiają tylko włączone
+# OpenAI i jego modele; do Prime Agenta, Pi i opencode2 trafiają tylko włączone
 # modele (pole agents), a provider dopiero z pierwszym takim modelem.
 #
 # Sprawdzenie: `nix eval --json .#nixosConfigurations.nixos.config.ai.models --apply 'ms: builtins.filter (n: ms.${n}.enable) (builtins.attrNames ms)'`
@@ -17,12 +17,14 @@ _: {
     let
       skillAgents = [
         "prime-agent"
+        "pi"
         "claude-code"
         "codex"
         "opencode"
       ];
       modelAgents = [
         "prime-agent"
+        "pi"
         "opencode"
       ];
 
@@ -115,20 +117,28 @@ _: {
                   default = null;
                   description = "Nazwa w interfejsie opencode2.";
                 };
+                apiKeyEnv = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = ''
+                    Prime Agent i Pi: nazwa zmiennej env z kluczem (wartość
+                    wstrzykuje wrapper z agenix, nigdy nie trafia do /nix/store);
+                    ma pierwszeństwo przed apiKey.
+                  '';
+                };
                 apiKey = lib.mkOption {
                   type = lib.types.nullOr lib.types.str;
                   default = null;
                   description = ''
-                    Prime Agent: nazwa zmiennej env z kluczem (wartość wstrzykuje
-                    wrapper z agenix, nigdy nie trafia do /nix/store) albo literał
-                    dla serwera, który klucza nie sprawdza; wymagane dla
-                    providera z modelem Prime Agenta.
+                    Prime Agent i Pi: klucz literalny dla serwera, który klucza
+                    nie sprawdza. Provider z modelem jednego z nich potrzebuje
+                    apiKeyEnv albo apiKey.
                   '';
                 };
                 compat = lib.mkOption {
                   type = lib.types.attrsOf lib.types.anything;
                   default = { };
-                  description = "Prime Agent: flagi compat providera (schemat models.json).";
+                  description = "Prime Agent i Pi: flagi compat providera (schemat models.json).";
                 };
                 reasoningField = lib.mkOption {
                   type = lib.types.nullOr lib.types.str;
@@ -175,7 +185,7 @@ _: {
                       ]
                     );
                     default = [ "text" ];
-                    description = "Rodzaje wejścia; Prime Agent zna tylko text i image.";
+                    description = "Rodzaje wejścia; Prime Agent i Pi znają tylko text i image.";
                   };
                   context = lib.mkOption {
                     type = lib.types.nullOr lib.types.ints.positive;
@@ -196,12 +206,12 @@ _: {
                           efforts = lib.mkOption {
                             type = lib.types.listOf lib.types.str;
                             default = [ ];
-                            description = "Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime Agent mapuje poziomy o tych nazwach na siebie, resztę wyłącza.";
+                            description = "Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime Agent i Pi mapują poziomy o tych nazwach na siebie, resztę wyłączają.";
                           };
                           offEffort = lib.mkOption {
                             type = lib.types.nullOr lib.types.str;
                             default = null;
-                            description = "Prime Agent: wartość effort, która wyłącza myślenie (razem z efforts).";
+                            description = "Prime Agent i Pi: wartość effort, która wyłącza myślenie (razem z efforts).";
                           };
                         };
                       }
@@ -210,7 +220,7 @@ _: {
                   cost = lib.mkOption {
                     type = lib.types.nullOr (lib.types.attrsOf lib.types.number);
                     default = null;
-                    description = "Prime Agent: cennik (input, output, cacheRead, cacheWrite) w USD za 1M tokenów.";
+                    description = "Prime Agent i Pi: cennik (input, output, cacheRead, cacheWrite) w USD za 1M tokenów.";
                   };
                 };
               }

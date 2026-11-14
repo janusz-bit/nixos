@@ -295,9 +295,10 @@ Modele znane konfiguracji; do agentów trafiają włączone.
 
 Agenci, którzy widzą model.
 
-- Type: list of (one of "prime-agent", "opencode")
+- Type: list of (one of "prime-agent", "pi", "opencode")
 - Default: `[
   "prime-agent"
+  "pi"
   "opencode"
 ]`
 - Declared in: [ai/options.nix](../../modules/ai/options.nix)
@@ -312,7 +313,7 @@ Okno kontekstu w tokenach; wymagane dla opencode2.
 
 ### `ai.models.<name>.cost`
 
-Prime Agent: cennik (input, output, cacheRead, cacheWrite) w USD za 1M tokenów.
+Prime Agent i Pi: cennik (input, output, cacheRead, cacheWrite) w USD za 1M tokenów.
 
 - Type: null or (attribute set of (signed integer or floating point number))
 - Default: `null`
@@ -335,7 +336,7 @@ Identyfikator modelu wysyłany do API.
 
 ### `ai.models.<name>.input`
 
-Rodzaje wejścia; Prime Agent zna tylko text i image.
+Rodzaje wejścia; Prime Agent i Pi znają tylko text i image.
 
 - Type: list of (one of "text", "image")
 - Default: `[
@@ -376,7 +377,7 @@ Model z myśleniem (null: bez).
 
 ### `ai.models.<name>.reasoning.efforts`
 
-Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime Agent mapuje poziomy o tych nazwach na siebie, resztę wyłącza.
+Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime Agent i Pi mapują poziomy o tych nazwach na siebie, resztę wyłączają.
 
 - Type: list of string
 - Default: `[ ]`
@@ -384,7 +385,7 @@ Poziomy effort, które serwer przyjmuje (puste: agent nie dostaje listy). Prime 
 
 ### `ai.models.<name>.reasoning.offEffort`
 
-Prime Agent: wartość effort, która wyłącza myślenie (razem z efforts).
+Prime Agent i Pi: wartość effort, która wyłącza myślenie (razem z efforts).
 
 - Type: null or string
 - Default: `null`
@@ -411,10 +412,19 @@ Serwery zgodne z API OpenAI, z których korzystają modele.
 
 ### `ai.providers.<name>.apiKey`
 
-Prime Agent: nazwa zmiennej env z kluczem (wartość wstrzykuje
-wrapper z agenix, nigdy nie trafia do /nix/store) albo literał
-dla serwera, który klucza nie sprawdza; wymagane dla
-providera z modelem Prime Agenta.
+Prime Agent i Pi: klucz literalny dla serwera, który klucza
+nie sprawdza. Provider z modelem jednego z nich potrzebuje
+apiKeyEnv albo apiKey.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [ai/options.nix](../../modules/ai/options.nix)
+
+### `ai.providers.<name>.apiKeyEnv`
+
+Prime Agent i Pi: nazwa zmiennej env z kluczem (wartość
+wstrzykuje wrapper z agenix, nigdy nie trafia do /nix/store);
+ma pierwszeństwo przed apiKey.
 
 - Type: null or string
 - Default: `null`
@@ -429,7 +439,7 @@ Adres API (z /v1).
 
 ### `ai.providers.<name>.compat`
 
-Prime Agent: flagi compat providera (schemat models.json).
+Prime Agent i Pi: flagi compat providera (schemat models.json).
 
 - Type: attribute set of anything
 - Default: `{ }`
@@ -486,9 +496,10 @@ Skille (katalog z SKILL.md) znane konfiguracji; do agentów trafiają włączone
 
 Agenci, którzy dostają skill; węższa lista dla skilla, który działa tylko w jednym (kernel Pythona Prime Agenta, hooki Claude Code).
 
-- Type: list of (one of "prime-agent", "claude-code", "codex", "opencode")
+- Type: list of (one of "prime-agent", "pi", "claude-code", "codex", "opencode")
 - Default: `[
   "prime-agent"
+  "pi"
   "claude-code"
   "codex"
   "opencode"

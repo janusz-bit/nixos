@@ -1,13 +1,15 @@
 # Import skilli i modeli do agentów kodujących: z wybranych w ai.skills,
 # ai.skillPacks i ai.models (opcje: ai-options, definicje: ai-skills
-# i ai-models, wybór: ai.nix hosta) buduje konfigurację Prime Agenta (models.json),
-# opencode2 (zarządzany /etc/opencode/opencode.json) oraz katalogi skilli
+# i ai-models, wybór: ai.nix hosta) buduje konfigurację Prime Agenta i Pi
+# (models.json), opencode2 (zarządzany /etc/opencode/opencode.json) oraz katalogi skilli
 # systemowych każdego agenta, dla każdego użytkownika hosta, bez Home Managera
 # i bez plików w $HOME. Host niczego tu nie ustawia.
 #
 # Katalogi skilli (względem /etc), w których agent szuka skilli systemowych bez
 # konfiguracji użytkownika; wpis <katalog>/<nazwa> to symlink do katalogu skilla:
 # - Prime Agent: /etc/ai-skills (lista skills w base/prime-agent.nix),
+# - Pi: /etc/pi/skills, link ~/.pi/agent/skills z desktop-ai (Pi wchodzi
+#   w symlinki skilli),
 # - Claude Code: /etc/claude-code/.claude/skills, skille zarządzane
 #   (`claude --debug`: „Loading skills from: managed=…”); wyłączenie per
 #   proces: CLAUDE_CODE_DISABLE_POLICY_SKILLS=1,
@@ -29,7 +31,7 @@
 # pozostaje źródłem prawdy.
 #
 # Sprawdzenie: `nix eval --raw .#nixosConfigurations.<host>.config.environment.etc.\"prime-agent/models.json\".text`
-# (na laptopie też \"opencode/opencode.json\") i wyniki ze skills.nix.
+# (też \"pi/models.json\", na laptopie \"opencode/opencode.json\") i wyniki ze skills.nix.
 { inputs, ... }:
 {
   flake.modules.nixos.ai-harness =
@@ -45,6 +47,7 @@
 
       skillDirs = {
         prime-agent = "ai-skills";
+        pi = "pi/skills";
         claude-code = "claude-code/.claude/skills";
         codex = "codex/skills";
         opencode = "opencode/skills";
@@ -114,8 +117,9 @@
           name: toProvider (providerNamed name) (lib.filterAttrs (_: model: model.provider == name) models)
         );
 
-      # Poziomy myślenia Prime Agenta; poziom, którego serwer nie przyjmuje,
-      # dostaje null (Prime dobiera najbliższy).
+      # Prime Agent i Pi mają ten sam schemat models.json. Poziomy myślenia;
+      # poziom, którego serwer nie przyjmuje, dostaje null (agent dobiera
+      # najbliższy).
       primeLevels = [
         "minimal"
         "low"
@@ -144,14 +148,21 @@
           }
         );
 
+      # envKey: zapis klucza ze zmiennej env — Prime Agent bierze samą nazwę,
+      # Pi szablon "$NAZWA" (goła nazwa byłaby dla Pi literałem).
       primeProvider =
-        provider: models:
+        envKey: provider: models:
         {
-          inherit (provider) baseUrl apiKey;
+          inherit (provider) baseUrl;
+          apiKey = if provider.apiKeyEnv != null then envKey provider.apiKeyEnv else provider.apiKey;
           api = "openai-completions";
           models = lib.mapAttrsToList (_: primeModel) models;
         }
         // lib.optionalAttrs (provider.compat != { }) { inherit (provider) compat; };
+
+      modelsJson =
+        agent: envKey:
+        builtins.toJSON { providers = providersOf (primeProvider envKey) (modelsOf agent); } + "\n";
 
       opencodeModel =
         provider: model:
@@ -193,9 +204,16 @@
       opencodeWithoutLimits = modelsWhere "opencode" (
         model: model.context == null || model.output == null
       );
-      primeWithoutApiKey = modelsWhere "prime-agent" (
-        model: (providerNamed model.provider).apiKey == null
-      );
+      withoutApiKey =
+        agent:
+        modelsWhere agent (
+          model:
+          let
+            provider = providerNamed model.provider;
+          in
+          provider.apiKeyEnv == null && provider.apiKey == null
+        );
+      modelsWithoutApiKey = lib.unique (withoutApiKey "prime-agent" ++ withoutApiKey "pi");
     in
     {
       assertions = [
@@ -204,15 +222,15 @@
           message = "ai.models: opencode2 wymaga context i output, brakuje ich w: ${lib.concatStringsSep ", " opencodeWithoutLimits}.";
         }
         {
-          assertion = primeWithoutApiKey == [ ];
-          message = "ai.providers: Prime Agent wymaga apiKey providera, brakuje go dla modeli: ${lib.concatStringsSep ", " primeWithoutApiKey}.";
+          assertion = modelsWithoutApiKey == [ ];
+          message = "ai.providers: Prime Agent i Pi wymagają apiKeyEnv albo apiKey providera, brakuje go dla modeli: ${lib.concatStringsSep ", " modelsWithoutApiKey}.";
         }
       ];
 
       environment = {
         etc = skillLinks // {
-          "prime-agent/models.json".text =
-            builtins.toJSON { providers = providersOf primeProvider (modelsOf "prime-agent"); } + "\n";
+          "prime-agent/models.json".text = modelsJson "prime-agent" lib.id;
+          "pi/models.json".text = modelsJson "pi" (name: "$" + name);
 
           "opencode/opencode.json" = lib.mkIf (opencodeConfig != { }) {
             text = builtins.toJSON opencodeConfig;
