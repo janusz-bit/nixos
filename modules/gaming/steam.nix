@@ -2,6 +2,11 @@
 # zgodności, protontricks, Remote Play, NTSYNC w kernelu i warstwa Vulkan
 # low-latency-layer. GameMode i zmienne uruchamiania gier: gaming/gamemode.nix.
 #
+# Grom, które Valve mapuje na Proton Experimental (priorytet 100, np. Deadlock),
+# Proton-CachyOS trzeba wybrać w Steamie (Właściwości → Zgodność): domyślne
+# narzędzie stąd ma priorytet 75, a wybór dla gry (250) Steam trzyma
+# w config.vdf i nadpisuje przy wyjściu, więc flake go nie ustawi.
+#
 # Sprawdzenie: Steam → Ustawienia → Zgodność widzi „Proton-CachyOS x86-64-v3”;
 # `ls -l /dev/ntsync`.
 { inputs, ... }:

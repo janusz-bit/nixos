@@ -8,7 +8,6 @@
       self.modules.nixos.gaming-gamemode
       self.modules.nixos.gaming-launchers
       self.modules.nixos.gaming-dbd
-      self.modules.nixos.gaming-deadlock
     ];
   };
 }

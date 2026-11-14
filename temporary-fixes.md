@@ -61,30 +61,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status` — musi zostać
   `suspended`.
 
-### 6. Deadlock, Dead by Daylight — DXVK bez `VK_NV_raw_access_chains` (Xid 109)
-
-- **Od:** 2026-10-12.
-- **Pliki:** `modules/gaming/deadlock.nix` (`deadlockrun`) i
-  `modules/gaming/dbd.nix` (`dbdrun`, od 2026-10-12, zapobiegawczo: DBD
-  z `-dx11` renderuje przez DXVK; zawiasu w DBD nie zaobserwowano) —
-  `DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"`.
-- **Objaw:** na NVIDIA 610/615 (tu 615.71.09, RTX 5060) Deadlock w trybie DX11
-  zawiesza się w walce: obraz stoi, dźwięk gra, w `journalctl -k`
-  `NVRM: Xid … 109 … CTX SWITCH TIMEOUT`.
-- **Przyczyna:** shadery DXVK z `VK_NV_raw_access_chains` przy nakładających
-  się odczytach buforów. Fix w DXVK: PR 5958 (merge 081ee5c, 2026-10-10), nie
-  ma go w proton-cachyos 11.0.20260703, którego używa gra (DXVK
-  v3.0.2-2-g0ff9cd3, opcja domyślnie włączona), ani w Proton Experimental
-  11.0-20261001 (DXVK v3.1.1-47-g68530156).
-  https://github.com/doitsujin/dxvk/pull/5958 ,
-  https://github.com/ValveSoftware/Proton/issues/8020
-- **Kiedy usunąć:** gdy proton-cachyos ma DXVK zawierające 081ee5c
-  (`cat "$(nix eval --raw .#nixosConfigurations.nixos.pkgs.proton-cachyos_x86_64_v3)"/files/lib/wine/dxvk/version`,
-  potem `gh api repos/doitsujin/dxvk/compare/081ee5c...<hash>` musi dać
-  `ahead`/`identical`). Wtedy `deadlockrun` = sam `gamemoderun`: usunąć
-  moduł i w Launch Options wrócić do `gamemoderun %command%`; z `dbdrun`
-  usunąć tylko `DXVK_CONFIG`.
-
 ### 7. Wentylator RPi — `RPI_LGPIO_REVISION` podane ręcznie
 
 - **Od:** przed 2026-10 (przeniesione do tego rejestru 2026-10-14).
@@ -171,6 +147,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `WAYLAND_DISPLAY` i `DISPLAY` w środowisku. Drop-in `kde-baloo`
   w `modules/desktop/plasma.nix` usunięto.
 
+- **DXVK bez `VK_NV_raw_access_chains` w Deadlocku i DBD (wpis 6)** —
+  zamknięte 2026-11-14. proton-cachyos 11.0.20261015 ma DXVK
+  v3.1.1-97-ga78a467, które zawiera 081ee5c (`gh api
+  repos/doitsujin/dxvk/compare/081ee5c...a78a467` = `ahead`). Usunięto moduł
+  `gaming-deadlock` (`deadlockrun`; Launch Options Deadlocka:
+  `gamemoderun %command%`) i `DXVK_CONFIG` z `dbdrun`; uwaga o wymuszaniu
+  Proton-CachyOS dla gry jest teraz w `modules/gaming/steam.nix`.
 
 - **hermes-agent — kopia modułu NixOS, kasowanie blokad bramki, pakiet
   `hermes-lang-pl` bez `requires_hermes`, HERMES_HOME 2750 (wpisy 2, 3, 5

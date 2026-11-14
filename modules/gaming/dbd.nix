@@ -6,26 +6,21 @@
 # ścieżką (https://forums.developer.nvidia.com/t/directx12-performance-is-terrible-on-linux/303207 ,
 # nadal otwarte); -dx11 przełącza grę na DXVK, przez które dobrze działa tu
 # Deadlock. dGPU wybiera GAMEMODERUNEXEC (gaming/gamemode.nix). Wrapper, a nie
-# zmienne sesji: -dx11 i zmienne niżej mają dotyczyć tylko tej gry.
+# zmienne sesji: -dx11 i zmienna niżej mają dotyczyć tylko tej gry.
 #
 # Sprawdzenie: Launch Options `PROTON_LOG=1 dbdrun %command%`, w ~/steam-381210.log
-# "D3D11InternalCreateDevice: Using feature level" i
-# "dxvk.enableNvRawAccessChains = False"; po meczu `journalctl -k | grep Xid`
-# puste. A/B z DX12: `gamemoderun %command%`.
+# "D3D11InternalCreateDevice: Using feature level"; po meczu
+# `journalctl -k | grep Xid` puste. A/B z DX12: `gamemoderun %command%`.
 _: {
   flake.modules.nixos.gaming-dbd =
     { lib, pkgs, ... }:
     let
-      # DXVK_CONFIG tymczasowo (temporary-fixes.md nr 6): w DX11 renderuje DXVK,
-      # więc grozi to samo zawieszenie GPU co w Deadlocku (Xid 109), a zawieszony
-      # mecz to rozłączenie i kara w matchmakingu.
       # __GL_SHADER_DISK_CACHE_SKIP_CLEANUP: sterownik NVIDII nie przycina cache
       # shaderów (także Vulkan) po przekroczeniu limitu rozmiaru, więc
       # skompilowane pipeline'y zostają między sesjami.
       dbdrun = pkgs.writeShellApplication {
         name = "dbdrun";
         text = ''
-          export DXVK_CONFIG="dxvk.enableNvRawAccessChains=False"
           export __GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1
           exec ${lib.getExe' pkgs.gamemode "gamemoderun"} "$@" -dx11
         '';

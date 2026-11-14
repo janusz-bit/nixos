@@ -48,9 +48,8 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/gaming/
 
 - **[gaming/dbd.nix](../../modules/gaming/dbd.nix)** (`gaming-dbd`) · hosts: `nixos` — Dead by Daylight (appid 381210): wrapper na gamemoderun uruchamiający grę w DX11; Launch Options: `dbdrun %command%`, bez -dx12 (dwa wymuszone RHI to błąd UE5).
-- **[gaming/deadlock.nix](../../modules/gaming/deadlock.nix)** (`gaming-deadlock`) · hosts: `nixos` — Deadlock (appid 1422450): wrapper na gamemoderun; Launch Options: `deadlockrun %command%`.
 - **[gaming/default.nix](../../modules/gaming/default.nix)** (`gaming`) · hosts: `nixos` — Gry na stacji roboczej: Steam z Protonem, GameMode, launchery i wrappery per gra. Proton-CachyOS jest w wariancie x86-64-v3 (procesor z AVX2).
-- **[gaming/gamemode.nix](../../modules/gaming/gamemode.nix)** (`gaming-gamemode`) · hosts: `nixos` — GameMode na czas gry: renice procesów gry, profil power-profiles-daemon "performance" i zmienne uruchamiania (GAMEMODERUNEXEC) — na hybrydzie NVIDIA PRIME gra idzie na dGPU. Wrappery per gra (dbdrun, deadlockrun) wołają gamemoderun, więc dziedziczą to samo.
+- **[gaming/gamemode.nix](../../modules/gaming/gamemode.nix)** (`gaming-gamemode`) · hosts: `nixos` — GameMode na czas gry: renice procesów gry, profil power-profiles-daemon "performance" i zmienne uruchamiania (GAMEMODERUNEXEC) — na hybrydzie NVIDIA PRIME gra idzie na dGPU. Wrappery per gra (dbdrun) wołają gamemoderun, więc dziedziczą to samo.
 - **[gaming/launchers.nix](../../modules/gaming/launchers.nix)** (`gaming-launchers`) · hosts: `nixos` — Launchery gier spoza Steama: Heroic (Epic/GOG), Lutris, Prism Launcher (Minecraft) i ProtonUp-Qt (wersje Protona/Wine dla launcherów).
 - **[gaming/steam.nix](../../modules/gaming/steam.nix)** (`gaming-steam`) · hosts: `nixos` — Steam z Protonem: Proton-CachyOS (x86-64-v3, z Chaotic-Nyx) jako narzędzie zgodności, protontricks, Remote Play, NTSYNC w kernelu i warstwa Vulkan low-latency-layer. GameMode i zmienne uruchamiania gier: gaming/gamemode.nix.
 

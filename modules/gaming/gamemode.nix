@@ -1,7 +1,7 @@
 # GameMode na czas gry: renice procesów gry, profil power-profiles-daemon
 # "performance" i zmienne uruchamiania (GAMEMODERUNEXEC) — na hybrydzie
-# NVIDIA PRIME gra idzie na dGPU. Wrappery per gra (dbdrun, deadlockrun)
-# wołają gamemoderun, więc dziedziczą to samo.
+# NVIDIA PRIME gra idzie na dGPU. Wrappery per gra (dbdrun) wołają
+# gamemoderun, więc dziedziczą to samo.
 #
 # Bez ananicy-cpp (reguły CachyOS): przy cgroup v2 każda aplikacja ma własny
 # scope, a nice działa tylko w obrębie jednej cgroup (zmierzone: nice -4 vs +15
