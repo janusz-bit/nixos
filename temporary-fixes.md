@@ -205,27 +205,6 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nix eval .#nixosConfigurations.raspberry-pi-4.config.boot.kernelPackages.kernel.buildDTBs`
   zwraca `true` — wtedy usunąć obie linie i ewaluacja musi przejść.
 
-### 15. Pakiety Rust bez bibliotek systemowych (`cargoUseSystemLibs`)
-
-- **Od:** 2026-11-10.
-- **Plik:** `modules/packages/cargo-system-libs.nix` (overlay
-  `cargo-system-libs` w `base-nix`).
-- **Objaw:** `obscura` i `ark` (kernel R w `jupyter-all`) padają w
-  build-skrypcie `zstd-sys` (`Can't probe for zstd in pkg-config`), `codex`
-  w `aws-lc-sys` (`AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed
-  AWS-LC`); brak ich w cache, bo w nixpkgs `f4a03c0` nie budują się wcale.
-- **Przyczyna:** `cargo-setup-hook` w nixpkgs ustawia domyślnie
-  `cargoUseSystemLibs` (m.in. `ZSTD_SYS_USE_PKG_CONFIG=1`,
-  `AWS_LC_SYS_USE_SYSTEM=1`), a te pakiety nie mają bibliotek w
-  `buildInputs`. W nixpkgs master naprawione dla `ark` ("ark: use system
-  zstd") i `codex` (aws-lc, oniguruma, sqlite, zstd); `obscura` jeszcze nie.
-- **Obejście:** overlay dopisuje te same biblioteki do `buildInputs`.
-- **Kiedy usunąć:** gdy przypięty nixpkgs ma `zstd`/`aws-lc` w
-  `buildInputs` wszystkich trzech pakietów
-  (`pkgs/by-name/{ar/ark,co/codex,ob/obscura}/package.nix`). Sprawdzenie:
-  usunąć overlay z `base-nix` i `nix build --no-link
-  .#nixosConfigurations.nixos.pkgs.{obscura,ark,codex}` musi przejść.
-
 ### 16. nix-update — kopia flake'a przez `nix flake archive` (Nix 2.35)
 
 - **Od:** 2026-11-13.
@@ -251,6 +230,13 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   musi podbić wersję i hash.
 
 ## Zamknięte
+
+- **Rust bez bibliotek systemowych — overlay `cargo-system-libs` (wpis 15)**
+  — zamknięte 2026-11-14. Przypięty nixpkgs (d4f25a3) ma `zstd` w
+  `buildInputs` `ark` i `obscura` oraz `aws-lc`, `oniguruma`, `sqlite`,
+  `zstd` w `codex`, a Hydra zbudowała wszystkie trzy (są w cache.nixos.org).
+  Usunięto `modules/packages/cargo-system-libs.nix` i overlay z `base-nix`.
+
 
 - **hermes-agent — kopia modułu NixOS, kasowanie blokad bramki, pakiet
   `hermes-lang-pl` bez `requires_hermes`, HERMES_HOME 2750 (wpisy 2, 3, 5

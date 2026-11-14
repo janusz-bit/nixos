@@ -17,7 +17,6 @@
         config.allowUnfree = true;
         overlays = [
           self.overlays.local-packages
-          self.overlays.cargo-system-libs
           self.overlays.nix-update-flake-archive
         ];
       };

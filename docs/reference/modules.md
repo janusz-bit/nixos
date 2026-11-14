@@ -124,7 +124,6 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 
 ## modules/packages/
 
-- **[packages/cargo-system-libs.nix](../../modules/packages/cargo-system-libs.nix)** — Tymczasowy overlay cargo-system-libs: brakujące biblioteki systemowe dla pakietów Rust z nixpkgs, które przestały się budować po dodaniu `cargoUseSystemLibs` do cargo-setup-hook (temporary-fixes.md, wpis 15).
 - **[packages/nix-update-flake-archive.nix](../../modules/packages/nix-update-flake-archive.nix)** — Tymczasowy overlay nix-update-flake-archive: nix-update kopiuje lokalny flake do sklepu przez `nix flake archive` zamiast `nix flake metadata` (temporary-fixes.md, wpis 16).
 - **[packages/packages.nix](../../modules/packages/packages.nix)** — Pakiety lokalne (modules/packages/_\<nazwa>/): jedna lista eksportowana jako overlay local-packages (dla hostów, przez base-nix) i jako packages.\<system> (nix build, nix-update w flake-update).
 - **[packages/scripts.nix](../../modules/packages/scripts.nix)** — Skrypty utrzymania repo (packages.\<system>, `nix run .#<nazwa>`): flake-update (wejścia flake'a, pakiety lokalne, workflowy, commit), repo-sync (commit wszystkiego, rebase, push), flake-release (tag vN, push), package-import (kopia pakietu z przypiętego nixpkgs do modules/packages/).
