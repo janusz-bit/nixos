@@ -5,8 +5,9 @@
 # Qt Development Skills, tstack i frontend-design, lokalny Trilium dla Prime
 # Agenta oraz lokalne modele na GPU — Qwen3.8 Flash-Next (Coder IQ1_M
 # i Gyro-M) z serwera Strata, Gyro-M jako domyślny model opencode2. Tylko
-# wybór; definicje są w modules/ai/. Port Strata jest otwarty w tailnecie
-# (np. dla Brulionu na telefonie: http://nixos.<tailnet>:8080/v1).
+# wybór; definicje są w modules/ai/. Port Strata jest otwarty w tailnecie,
+# a nazwa laptopa w tailnecie dopuszczona przez Stratę (np. dla Brulionu na
+# telefonie: http://nixos.<tailnet>:8080/v1).
 #
 # Sprawdzenie: `sudo iptables -S nixos-fw | grep 8080`, z telefonu (Tailscale
 # włączony) w Brulionie Ustawienia -> Rozszerzenia -> Sprawdź.
@@ -20,6 +21,11 @@ _: {
       networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
         8080
       ];
+      # Bez klucza API Strata odrzuca (403, ochrona przed DNS rebinding) nazwy
+      # spoza localhost i nazwy komputera; adres IP przechodzi zawsze. Nazwę
+      # z tailnetu dopuszcza STRATA_ALLOWED_HOSTS, którą `strata launch`
+      # przekazuje serwerowi; działa w terminalu otwartym po aktywacji.
+      environment.variables.STRATA_ALLOWED_HOSTS = "${config.networking.hostName}.${config.customTop.tailnet.domain}";
 
       ai = {
         skills = {
