@@ -45,6 +45,17 @@ in
               z networking.hosts (hosts/t3code-laptop.nix). Stały, dopóki
               laptop nie zostanie usunięty z tailnetu i zalogowany od nowa.
             '';
+            phone = {
+              ipv4 = strOption ''
+                Adres IPv4 tailnetu telefonu (`tailscale ip -4 <telefon>`):
+                jedyne źródło, z którego tailnet dochodzi do sshd laptopa
+                (hosts/nixos/ssh.nix).
+              '';
+              ipv6 = strOption ''
+                Adres IPv6 tailnetu telefonu (`tailscale ip -6 <telefon>`);
+                MagicDNS zwraca też AAAA, więc klient SSH może wybrać IPv6.
+              '';
+            };
           };
 
           repository = {

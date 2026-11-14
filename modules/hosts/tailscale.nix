@@ -9,7 +9,8 @@
 #   INPUT `-i tailscale0 -j ACCEPT`, z którym tailnet omijałby nixos-fw (także
 #   SSH tylko z LAN-u). Tailnet dociera więc tylko do portów Serve, które
 #   obsługuje netstack w procesie tailscaled, i do portów otwartych w nixos-fw
-#   na tailscale0 (SSH RPi); resztę blokuje nixos-fw.
+#   na tailscale0 (SSH RPi, SSH laptopa tylko z telefonu); resztę blokuje
+#   nixos-fw.
 # - Konta lokalne nie omijają uwierzytelnienia usługi innym wejściem: przy
 #   customBot.tailscaleServe.<port>.users z jej portem łączą się lokalnie tylko
 #   root (proxy tailscaled) i te konta, a połączenia na własne adresy tailnetu

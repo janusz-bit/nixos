@@ -11,7 +11,8 @@
   users = {
     # ~/.ssh/id_ed25519 głównego użytkownika laptopa
     janusz-bit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdlN9e5I4IQy6Re4Z4+BFopT6ypB3nNXzdj4XeTDewO janusz-bit@proton.me";
-    # Telefon (Linux Terminal na Androidzie): tylko SSH na RPi.
+    # Telefon (Linux Terminal na Androidzie): SSH na RPi i, tylko z tailnetu,
+    # na laptopa (hosts/nixos/ssh.nix).
     phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG4dg51Pg4rlE4CaiHaHUovkCIgAuJuEqkDsEMAU8ut4 root@debian";
   };
 }

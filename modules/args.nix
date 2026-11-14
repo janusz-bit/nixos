@@ -21,6 +21,10 @@
     tailnet = {
       domain = "tail1ea20e.ts.net";
       laptop = "100.108.227.25";
+      phone = {
+        ipv4 = "100.98.93.11";
+        ipv6 = "fd7a:115c:a1e0::6432:5d0c";
+      };
     };
     repository = {
       name = "nixos";

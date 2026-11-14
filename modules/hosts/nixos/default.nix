@@ -27,6 +27,7 @@
         self.modules.nixos.nixos-snapper
         self.modules.nixos.base-agenix
         self.modules.nixos.base-ssh-lan
+        self.modules.nixos.nixos-ssh
         self.modules.nixos.desktop
         self.modules.nixos.gaming
         self.modules.nixos.base-fail2ban

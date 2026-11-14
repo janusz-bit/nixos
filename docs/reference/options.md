@@ -187,6 +187,23 @@ laptop nie zostanie usunięty z tailnetu i zalogowany od nowa.
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.tailnet.phone.ipv4`
+
+Adres IPv4 tailnetu telefonu (`tailscale ip -4 <telefon>`):
+jedyne źródło, z którego tailnet dochodzi do sshd laptopa
+(hosts/nixos/ssh.nix).
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.tailnet.phone.ipv6`
+
+Adres IPv6 tailnetu telefonu (`tailscale ip -6 <telefon>`);
+MagicDNS zwraca też AAAA, więc klient SSH może wybrać IPv6.
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.users.default`
 
 Główne konto pozostałych hostów (domyślne customBot.defaultUser).

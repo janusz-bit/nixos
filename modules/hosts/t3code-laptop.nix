@@ -12,7 +12,7 @@
 #   urządzenie łączy się z każdym. Granicę trzymają hosty: z RPi wychodzi
 #   tylko t3code (wyżej), a laptop przyjmuje z tailnetu tylko porty Serve
 #   i porty otwarte globalnie w nixos-fw (netfilter nodivert); sshd laptopa
-#   tylko z LAN-u.
+#   z LAN-u i z tailnetu tylko od telefonu (nixos-ssh).
 # - Laptop: z portem T3 desktop (słucha na 0.0.0.0, firewall go nie otwiera)
 #   łączy się lokalnie tylko root (proxy tailscaled) i konto główne; inne
 #   konta dostają odmowę (customBot.tailscaleServe.users).

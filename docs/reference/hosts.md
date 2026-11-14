@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 52 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 53 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 34 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -24,6 +24,7 @@ flowchart LR
   host_nixos --> nixos_snapper[nixos-snapper]
   host_nixos --> base_agenix[base-agenix]
   host_nixos --> base_ssh_lan[base-ssh-lan]
+  host_nixos --> nixos_ssh[nixos-ssh]
   host_nixos --> desktop[desktop]
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
@@ -120,6 +121,7 @@ flowchart LR
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
+- `nixos-ssh` — [hosts/nixos/ssh.nix](../../modules/hosts/nixos/ssh.nix)
 - `nixos-t3code-laptop` — [hosts/t3code-laptop.nix](../../modules/hosts/t3code-laptop.nix)
 - `nixos-tailscale` — [hosts/tailscale.nix](../../modules/hosts/tailscale.nix)
 

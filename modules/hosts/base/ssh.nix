@@ -5,7 +5,8 @@
 # ("prohibit-password", to jego ścieżka administracyjna) i wyłącza
 # ssh-askpass (headless, x11-ssh-askpass ciągnie zależności X11).
 # Laptop i RPi zawężają dodatkowo port 22 do domowego LAN-u (base-ssh-lan),
-# RPi otwiera go też w tailnecie (rpi-ssh).
+# RPi otwiera go też w tailnecie (rpi-ssh), laptop tylko dla telefonu
+# (nixos-ssh).
 #
 # Sprawdzenie: `sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'`.
 _: {
