@@ -61,8 +61,8 @@
 let
   # Tag wydania, które zawiera poniższy silnik: asset istnieje tylko tam, więc
   # nie wynika z `version` (nowszy Control działa ze starszym silnikiem).
-  engineTag = "v0.2.7";
-  engineVersion = "0.1.52";
+  engineTag = "v0.2.13";
+  engineVersion = "0.1.59";
 
   python = python3.withPackages (
     ps: with ps; [
@@ -135,7 +135,7 @@ stdenv.mkDerivation (finalAttrs: {
   # `nix-update -F strata --custom-dep engine`.
   engine = fetchurl {
     url = "https://github.com/Niko1221/Strata/releases/download/${engineTag}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
-    hash = "sha256-QXfBqP/Fm/ZgdAk7IqxV7Ud7y+hPi9EuN4sPEjbaVcc=";
+    hash = "sha256-QqsE+jIB5BvvX6wowF9cNckJQZ7JN9h5tQW/FRZ0JhA=";
   };
 
   llamaCpp = fetchFromGitHub {
