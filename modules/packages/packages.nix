@@ -15,7 +15,6 @@ let
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
     opencharts = pkgs.callPackage ./_opencharts { };
-    rea-agents = pkgs.callPackage ./_rea-agents { };
     strata = pkgs.callPackage ./_strata { };
     unsloth-desktop = pkgs.callPackage ./_unsloth-desktop { };
     waywallen = pkgs.callPackage ./_waywallen { };

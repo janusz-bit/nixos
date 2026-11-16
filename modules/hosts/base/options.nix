@@ -55,10 +55,9 @@ in
           type = lib.types.nullOr lib.types.str;
           default = null;
           description = ''
-            Endpoint MCP Trilium dla prime-agenta (settings.json) i skilla
-            trilium-notes (TRILIUM_MCP_URL); null = host bez Trilium: bez
-            serwera MCP, skilla i tokenu ETAPI. Laptop ustawia desktopowy
-            Trilium na 37840.
+            Endpoint MCP Trilium dla prime-agenta (settings.json); null = host
+            bez Trilium: bez serwera MCP i tokenu ETAPI. Laptop ustawia
+            desktopowy Trilium na 37840.
           '';
         };
         lockdownServices = lib.mkOption {

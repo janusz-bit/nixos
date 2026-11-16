@@ -45,8 +45,6 @@ echo "Updating strata..."
 # w modules/packages/_strata/default.nix (SHA256SUMS.txt i setup.py wydania);
 # nix-update podbija tylko version i src.
 nix-update --commit -F strata
-echo "Updating rea-agents..."
-nix-update --commit -F rea-agents
 echo "Updating unsloth-desktop..."
 # Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.
 nix-update --commit --system x86_64-linux -F unsloth-desktop --version=unstable

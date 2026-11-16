@@ -76,13 +76,6 @@
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
         };
-        # Skill z pakietu rea-agents, razem z CLI `rea`, które opisuje, więc
-        # zawsze pasuje do jego wersji. Serwera MCP nie rejestruje (`rea setup
-        # --client <agent>`).
-        reverse-engineer-anything = {
-          source = "${pkgs.rea-agents}/lib/node_modules/rea-agents/skills/reverse-engineer-anything";
-          packages = [ pkgs.rea-agents ];
-        };
         # Czyta token OAuth Claude Code (~/.claude/.credentials.json), więc ma
         # sens tylko na koncie zalogowanym do subskrypcji Claude; inni agenci
         # też mogą go wołać, bo limity są wspólne dla całego konta.
@@ -99,26 +92,11 @@
             })
           ];
         };
-        # Skill pythonowy działa w kernelu IPython Prime Agenta.
-        trilium-notes = {
-          source = "${self}/modules/skills/trilium-notes";
-          agents = [ "prime-agent" ];
-          python = true;
-        };
       };
 
       ai.skillPacks = {
         tstack.source = "${inputs.tstack}/skills";
         frontend-design.source = "${inputs.claude-plugins-official}/plugins/frontend-design/skills";
       };
-
-      # Bez Trilium na hoście (customBot.triliumMcpUrl) skill nie ma serwera
-      # MCP ani tokenu ETAPI.
-      assertions = [
-        {
-          assertion = !config.ai.skills.trilium-notes.enable || config.customBot.triliumMcpUrl != null;
-          message = "ai.skills.trilium-notes wymaga customBot.triliumMcpUrl (serwer MCP Trilium).";
-        }
-      ];
     };
 }

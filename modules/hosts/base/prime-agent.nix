@@ -52,8 +52,6 @@
           # nadpisuje settings, DO_NOT_TRACK=1 respektują też inne narzędzia.
           PRIME_AGENT_TELEMETRY = "0";
           DO_NOT_TRACK = "1";
-          # Skill trilium-notes — ten sam endpoint co mcpServers.
-          TRILIUM_MCP_URL = lib.mkIf (config.customBot.triliumMcpUrl != null) config.customBot.triliumMcpUrl;
         };
 
         etc."prime-agent/settings.json".text = builtins.toJSON settings + "\n";
