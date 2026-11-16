@@ -1,12 +1,12 @@
 # Skille i modele agentów AI na laptopie: skille własne (w tym obscura z jej
 # programem, nixos-system z faktami o hoście, brulion z brulion-cli,
 # claude-usage z limitami subskrypcji Claude i reverse-engineer-anything
-# z CLI rea do reverse engineeringu), paczki
-# Qt Development Skills, tstack i frontend-design, lokalny Trilium dla Prime
-# Agenta oraz lokalne modele na GPU — Qwen3.8 Flash-Next (Coder IQ1_M
-# i Gyro-M) z serwera Strata, Gyro-M jako domyślny model opencode2. Tylko
-# wybór; definicje są w modules/ai/. Port Strata jest otwarty w tailnecie
-# (np. dla Brulionu na telefonie: http://nixos.<tailnet>:8080/v1).
+# z CLI rea do reverse engineeringu), paczki tstack i frontend-design,
+# lokalny Trilium dla Prime Agenta oraz lokalne modele na GPU — Qwen3.8
+# Flash-Next (Coder IQ1_M i Gyro-M) z serwera Strata, Gyro-M jako domyślny
+# model opencode2. Tylko wybór; definicje są w modules/ai/. Port Strata jest
+# otwarty w tailnecie (np. dla Brulionu na telefonie:
+# http://nixos.<tailnet>:8080/v1).
 #
 # Sprawdzenie: `sudo iptables -S nixos-fw | grep 8080`, z telefonu (Tailscale
 # włączony) w Brulionie Ustawienia -> Rozszerzenia -> Sprawdź.
@@ -31,7 +31,6 @@ _: {
           trilium-notes.enable = true;
         };
         skillPacks = {
-          qt-agent-skills.enable = true;
           frontend-design.enable = true;
           tstack.enable = true;
         };

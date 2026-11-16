@@ -664,22 +664,6 @@
         "type": "github"
       }
     },
-    "qt-agent-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794230186,
-        "narHash": "sha256-C4QAfxT/7TXVHAJyGaqGEa0aIMfKU2/nLO2fnGsT2Oo=",
-        "owner": "TheQtCompanyRnD",
-        "repo": "agent-skills",
-        "rev": "062f7c9f0e16b7d2f66cd55e449a3ed85fba699e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "TheQtCompanyRnD",
-        "repo": "agent-skills",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -698,7 +682,6 @@
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
-        "qt-agent-skills": "qt-agent-skills",
         "tstack": "tstack"
       }
     },
