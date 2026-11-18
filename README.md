@@ -6,7 +6,7 @@ no Home Manager, secrets with [agenix](https://github.com/ryantm/agenix)).
 
 | Host | Machine | Role |
 |---|---|---|
-| `nixos` | Lenovo LOQ 15IRX10 laptop (x86_64, NVIDIA PRIME) | workstation: Plasma 6, development, AI tools, games |
+| `nixos` | Lenovo LOQ 15IRX10 laptop (x86_64, NVIDIA PRIME) | workstation: Plasma 6 and Niri with Noctalia, development, AI tools, games |
 | `raspberry-pi-4` | Raspberry Pi 4B (aarch64) | home server, services only in the tailnet (Tailscale Serve): Nextcloud, Gitea, T3 Code |
 | `wsl` | NixOS-WSL on Windows (x86_64) | command-line environment |
 

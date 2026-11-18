@@ -53,6 +53,7 @@
         + fact true "Main interactive user: `${user}`."
         + fact config.programs.nix-ld.enable "nix-ld libraries (all a prebuilt binary can find): ${nixLdLibs}."
         + fact config.services.desktopManager.plasma6.enable "Desktop: KDE Plasma 6 on Wayland, no X server (Xwayland only)."
+        + fact config.programs.niri.enable "Second session (chosen in SDDM): niri with the Noctalia shell (`noctalia msg --help`); its config `/etc/niri/config.kdl` comes from the flake, `~/.config/niri/config.kdl` overrides it."
         + fact config.hardware.nvidia.prime.offload.enableOffloadCmd "Hybrid GPU (NVIDIA PRIME offload): integrated GPU by default, `nvidia-offload <cmd>` runs a program on the NVIDIA dGPU."
         + fact config.virtualisation.podman.enable "Rootless podman${lib.optionalString config.virtualisation.podman.dockerCompat " (`docker` = podman wrapper)"}; no Docker daemon."
         + fact config.services.ollama.enable "Ollama listens on `${config.services.ollama.host}:${toString config.services.ollama.port}`."

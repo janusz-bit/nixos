@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 53 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 34 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -48,6 +48,7 @@ flowchart LR
   base --> base_ai[base-ai]
   base_agenix --> base_secrets[base-secrets]
   desktop --> desktop_plasma[desktop-plasma]
+  desktop --> desktop_noctalia[desktop-noctalia]
   desktop --> desktop_audio[desktop-audio]
   desktop --> desktop_connectivity[desktop-connectivity]
   desktop --> desktop_locale[desktop-locale]
@@ -103,6 +104,7 @@ flowchart LR
 - `desktop-devenv` — [desktop/devenv.nix](../../modules/desktop/devenv.nix)
 - `desktop-kernel` — [desktop/kernel.nix](../../modules/desktop/kernel.nix)
 - `desktop-locale` — [desktop/locale.nix](../../modules/desktop/locale.nix)
+- `desktop-noctalia` — [desktop/noctalia.nix](../../modules/desktop/noctalia.nix)
 - `desktop-obs` — [desktop/obs.nix](../../modules/desktop/obs.nix)
 - `desktop-plasma` — [desktop/plasma.nix](../../modules/desktop/plasma.nix)
 - `desktop-podman` — [desktop/podman.nix](../../modules/desktop/podman.nix)

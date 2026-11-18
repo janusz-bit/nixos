@@ -1,0 +1,57 @@
+// Sesja Niri z Noctalią: domyślna konfiguracja niri (spawn-at-startup
+// "noctalia" zamiast waybar), a po niej zalecenia Noctalii
+// (docs.noctalia.dev/noctalia/compositor-settings/niri/). Późniejsze binds
+// nadpisują te same klawisze z domyślnej konfiguracji.
+include "@out@/default.kdl"
+
+// Aplikacje KDE poza Plasmą: bez motywu platformy kde (plasma-integration)
+// nie czytają kdeglobals (Breeze, ikony, KColorScheme Noctalii), a bez
+// prefiksu menu ich „Otwórz za pomocą” jest puste (plasma-applications.menu).
+environment {
+    QT_QPA_PLATFORMTHEME "kde"
+    XDG_MENU_PREFIX "plasma-"
+}
+
+// Discord, Telegram i inne aplikacje Electron/Qt aktywują okno po kliknięciu
+// w zasobnik lub powiadomienie tokenem z nieważnym numerem seryjnym, który
+// niri domyślnie ignoruje.
+debug {
+    honor-xdg-activation-with-invalid-serial
+}
+
+window-rule {
+    geometry-corner-radius 20
+    clip-to-geometry true
+}
+
+window-rule {
+    match app-id="dev.noctalia.Noctalia"
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+// alacritty, fuzzel, swaylock, playerctl i brightnessctl z domyślnej
+// konfiguracji nie są zainstalowane; głośność i jasność przez Noctalię
+// pokazują też jej OSD.
+binds {
+    Mod+T hotkey-overlay-title="Open a Terminal: Konsole" { spawn "konsole"; }
+    Mod+D hotkey-overlay-title="Run an Application: Noctalia" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+S hotkey-overlay-title="Control Center: Noctalia" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
+    Mod+Shift+Comma hotkey-overlay-title="Noctalia Settings" { spawn "noctalia" "msg" "settings-toggle"; }
+    Alt+Tab { spawn "noctalia" "msg" "window-switcher" "hold"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: Noctalia" { spawn "noctalia" "msg" "session" "lock"; }
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
+    XF86AudioMute        allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
+
+    XF86AudioPlay allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+    XF86AudioStop allow-when-locked=true { spawn "noctalia" "msg" "media" "stop"; }
+    XF86AudioPrev allow-when-locked=true { spawn "noctalia" "msg" "media" "previous"; }
+    XF86AudioNext allow-when-locked=true { spawn "noctalia" "msg" "media" "next"; }
+
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }
+}

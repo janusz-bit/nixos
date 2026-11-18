@@ -6,6 +6,7 @@
   flake.modules.nixos.desktop = _: {
     imports = [
       self.modules.nixos.desktop-plasma
+      self.modules.nixos.desktop-noctalia
       self.modules.nixos.desktop-audio
       self.modules.nixos.desktop-connectivity
       self.modules.nixos.desktop-locale
