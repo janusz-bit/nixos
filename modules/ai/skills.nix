@@ -1,14 +1,9 @@
 # Katalog skilli agentów AI: które skille repozytorium zna (ai.skills) i skąd
-# pochodzą paczki skilli z wejść flake'a (ai.skillPacks; tstack, czyli
-# prowadzenie PR przez review i CI do merge'a przez gh, i frontend-design
+# pochodzą paczki skilli z wejść flake'a (ai.skillPacks; frontend-design
 # z oficjalnego marketplace'u pluginów Claude Code). Same skille leżą
 # w modules/skills/<nazwa>/ (SKILL.md + references/; skill pythonowy też src/
 # i pyproject.toml); tu tylko wpisy, bez włączania: host wybiera je w swoim
 # ai.nix, a ai-harness linkuje wybrane do agentów.
-#
-# pr-wait z babysit-pr woła python3 (desktop-ai), skille tstack także gh
-# (base-git); council i sol-loop potrzebują subagentów na modelach innych
-# dostawców.
 #
 # Nowy skill: katalog w modules/skills/, wpis w ai.skills niżej (agents, gdy
 # działa tylko w jednym agencie; python = true dla skilla pythonowego;
@@ -76,6 +71,8 @@
         # notify-phone instaluje moduł ntfy hosta (adres serwera i token
         # zależą od hosta), więc skill bez pakietów.
         notify-phone.source = "${self}/modules/skills/notify-phone";
+        # Woła tylko gh i git, które instaluje base-git.
+        merge-prs.source = "${self}/modules/skills/merge-prs";
         obscura = {
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
@@ -99,7 +96,6 @@
       };
 
       ai.skillPacks = {
-        tstack.source = "${inputs.tstack}/skills";
         frontend-design.source = "${inputs.claude-plugins-official}/plugins/frontend-design/skills";
       };
     };

@@ -1,8 +1,9 @@
 # Skille i modele agentów AI na laptopie: skille własne (w tym obscura z jej
 # programem, nixos-system z faktami o hoście, brulion z brulion-cli,
-# claude-usage z limitami subskrypcji Claude), paczki tstack
-# i frontend-design oraz lokalne modele na GPU — Qwen3.8 Flash-Next (Coder
-# IQ1_M i Gyro-M) z serwera Strata, Gyro-M jako domyślny model opencode2.
+# claude-usage z limitami subskrypcji Claude, merge-prs prowadzący PR-y do
+# merge'a), paczka frontend-design oraz lokalne modele na GPU — Qwen3.8
+# Flash-Next (Coder IQ1_M i Gyro-M) z serwera Strata, Gyro-M jako domyślny
+# model opencode2.
 # Tylko wybór; definicje są w modules/ai/. Port Strata jest otwarty
 # w tailnecie (np. dla Brulionu na telefonie: http://nixos.<tailnet>:8080/v1).
 #
@@ -23,13 +24,13 @@ _: {
         skills = {
           brulion.enable = true;
           claude-usage.enable = true;
+          merge-prs.enable = true;
           nixos-system.enable = true;
           notify-phone.enable = true;
           obscura.enable = true;
         };
         skillPacks = {
           frontend-design.enable = true;
-          tstack.enable = true;
         };
         models = {
           qwen3-8-flash-next-coder-iq1_m.enable = true;

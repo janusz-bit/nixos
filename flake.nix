@@ -34,14 +34,10 @@
     # Plasma (wtyczki motywów pasują).
     brulion.url = "github:janusz-bit/brulion?ref=release";
     brulion.inputs.nixpkgs.follows = "nixpkgs";
-    # Skille workflow PR Theo Browne'a (full-send, babysit-pr, council, ...).
-    # Wejście, nie pakiet lokalny: ai/harness.nix czyta nazwy skilli przez
-    # builtins.readDir przy ewaluacji, na wyniku fetchera byłoby to IFD.
-    tstack.url = "github:t3dotgg/tstack";
-    tstack.flake = false;
     # Oficjalny marketplace pluginów Claude Code; ai.skillPacks bierze z niego
-    # tylko katalog skilli pluginu frontend-design. flake = false z tego
-    # samego powodu co tstack.
+    # tylko katalog skilli pluginu frontend-design. Wejście, nie pakiet
+    # lokalny: ai/harness.nix czyta nazwy skilli przez builtins.readDir przy
+    # ewaluacji, na wyniku fetchera byłoby to IFD.
     claude-plugins-official.url = "github:anthropics/claude-plugins-official";
     claude-plugins-official.flake = false;
   };

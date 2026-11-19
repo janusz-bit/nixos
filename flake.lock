@@ -681,8 +681,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixos-wsl": "nixos-wsl",
-        "nixpkgs": "nixpkgs_6",
-        "tstack": "tstack"
+        "nixpkgs": "nixpkgs_6"
       }
     },
     "systems": {
@@ -718,22 +717,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "tstack": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794396782,
-        "narHash": "sha256-1N0fxvcM44NcGOZeYJiX/EAJuI9GoAj5rEXmu7mJc3w=",
-        "owner": "t3dotgg",
-        "repo": "tstack",
-        "rev": "11e37a74d0a6868c121cd0910ab2b3bd9873b92a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "t3dotgg",
-        "repo": "tstack",
         "type": "github"
       }
     }
