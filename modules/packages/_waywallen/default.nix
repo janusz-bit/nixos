@@ -110,7 +110,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "waywallen";
-  version = "0.6.0";
+  version = "0.6.1";
 
   oweSrc = fetchurl {
     url = "https://github.com/waywallen/open-wallpaper-engine/releases/download/v${oweVersion}/org.waywallen.open-wallpaper-engine-${oweVersion}-linux-${arch}.zip";
@@ -126,8 +126,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     url = "https://github.com/waywallen/waywallen/releases/download/v${finalAttrs.version}/waywallen-${finalAttrs.version}-${arch}.AppImage";
     hash =
       {
-        aarch64 = "sha256-NKyA08IRnTVJHc9YJhzOknRa92xLd/jNF3ZIpPS4G6Q=";
-        x86_64 = "sha256-0X4ZxnGrGWJpnqrfNIM9x1UVqL3G+nQoZJjgJVqzUf0=";
+        aarch64 = "sha256-PFfZi8kESIF90rlPdPu933esPBIQL6ByToPAQMET+sw=";
+        x86_64 = "sha256-3RxYx+rN7hKR/DrZsOC82GTWtf6xxQZbirFzeNF25i0=";
       }
       .${arch};
   };
