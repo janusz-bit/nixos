@@ -92,7 +92,9 @@ let
       };
 
       # Hook nigdy nie przerywa pracy agenta: bez tokenu (inne konto) albo
-      # bez łączności po prostu nic nie wysyła.
+      # bez łączności po prostu nic nie wysyła. NOTIFY_PHONE_CLAUDE_HOOKS=off
+      # wyłącza go dla usługi, która używa Claude Code jako modelu
+      # (rpi-picoclaw) i sama decyduje o powiadomieniach.
       claudeHook = pkgs.writeShellApplication {
         name = "notify-phone-claude-hook";
         runtimeInputs = [
@@ -100,6 +102,7 @@ let
           notifyPhone
         ];
         text = ''
+          [ "''${NOTIFY_PHONE_CLAUDE_HOOKS:-}" != off ] || exit 0
           host=${lib.escapeShellArg config.networking.hostName}
           input=$(cat)
           project=$(jq -r '.cwd // "" | split("/") | last // ""' <<<"$input")

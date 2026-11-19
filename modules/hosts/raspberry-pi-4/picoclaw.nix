@@ -1,15 +1,23 @@
 # Asystent picoclaw (llm-agents) na RPi: `picoclaw gateway` na koncie
 # systemowym picoclaw, rozmowa przez Matrix (bot @picoclaw na serwerze
 # rpi-matrix, odpowiada tylko właścicielowi @<customTop.users.laptop>),
-# model `:cloud` przez lokalną Ollamę (rpi-ollama), powiadomienia na telefon
-# przez `notify-phone` (ntfy, rpi-ntfy) i własne zadania cykliczne (narzędzie
-# cron picoclaw).
+# modelem jest Claude Code (provider claude-cli: każda tura to `claude -p`
+# z subskrypcji Claude), powiadomienia na telefon przez `notify-phone` (ntfy,
+# rpi-ntfy) i własne zadania cykliczne (narzędzie cron picoclaw).
 #
 # - Konfiguracja: config.json ze schematem 3 z Nixa (aktualny schemat nie jest
 #   migrowany ani zapisywany z powrotem), przy starcie uzupełniony w katalogu
 #   runtime o sesję bota i klucz bazy E2EE (_picoclaw/start.sh). Pamięć,
 #   sesje, plan zadań i pliki osobowości (AGENT.md, SOUL.md, USER.md) to stan
 #   agenta w /var/lib/picoclaw/workspace.
+# - Claude Code działa z --dangerously-skip-permissions w katalogu roboczym
+#   agenta, czyli ze swoimi narzędziami (Bash, Edit) bez pytania, w granicach
+#   konta picoclaw. Hooki telefonu Claude Code (rpi-ntfy) są w tej usłudze
+#   wyłączone: każda tura modelu to osobne `claude -p`, więc Stop wysyłałby
+#   powiadomienie po każdym kroku; o powiadomieniach decyduje picoclaw.
+# - Rozliczenie: Anthropic uznaje te wywołania za aplikację zewnętrzną i liczy
+#   je z płatnego extra usage konta, nie z limitów planu (bez niego API
+#   odpowiada 400 „Third-party apps now draw from your extra usage”).
 # - Konto bota zakłada picoclaw-matrix-register (_picoclaw/register.sh)
 #   tokenem rejestracji, którego sam gateway nie dostaje (poświadczenie tylko
 #   tej jednostki), więc agent nie założy kolejnych kont. Czeka (ponawia co
@@ -21,11 +29,13 @@
 #   działania nie jest przypięty.
 # - Granica zaufania: agent ma powłokę konta picoclaw (exec, cron) i pisze do
 #   niego tylko właściciel (allow_from). Konto nie ma grup, sudo ani sekretów
-#   poza tokenem ntfy (tylko publikacja, LoadCredential) i własną sesją
-#   Matrix; do portu ntfy dopuszcza je customBot.tailscaleServe.users.
+#   poza tokenem ntfy (tylko publikacja, LoadCredential), własną sesją
+#   Matrix i logowaniem Claude Code; do portu ntfy dopuszcza je
+#   customBot.tailscaleServe.users.
 #
-# Jednorazowo: konto właściciela na serwerze Matrix (nagłówek rpi-matrix),
-# potem w aplikacji rozmowa z @picoclaw:<RPi>.<tailnet> (bot sam dołącza
+# Jednorazowo: logowanie Claude Code na koncie usługi (`sudo -u picoclaw -H
+# claude auth login`), konto właściciela na serwerze Matrix (nagłówek
+# rpi-matrix), potem w aplikacji rozmowa z @picoclaw:<RPi>.<tailnet> (bot sam dołącza
 # po zaproszeniu).
 #
 # Sprawdzenie: `systemctl status picoclaw-matrix-register picoclaw.path
@@ -51,17 +61,21 @@
       matrix = config.services.matrix-continuwuity.settings.global;
       homeserver = "http://${lib.head matrix.address}:${toString (lib.head matrix.port)}";
 
-      model = config.ai.models.ollama-kimi-k3-cloud;
+      workspace = "${home}/workspace";
 
       configTemplate = (pkgs.formats.json { }).generate "picoclaw-config.json" {
         version = 3;
-        agents.defaults.model_name = model.id;
+        agents.defaults = {
+          inherit workspace;
+          model_name = "claude-code";
+        };
+        # Model `claude-code`: bez --model, czyli domyślny model konta Claude.
         model_list = [
           {
-            model_name = model.id;
-            provider = "ollama";
-            model = model.id;
-            api_base = config.ai.providers.${model.provider}.baseUrl;
+            model_name = "claude-code";
+            provider = "claude-cli";
+            model = "claude-code";
+            inherit workspace;
             enabled = true;
           }
         ];
@@ -159,16 +173,20 @@
           after = [
             "picoclaw-matrix-register.service"
             "continuwuity.service"
-            "ollama.service"
           ];
-          # Narzędzie exec agenta: programy systemu, w tym notify-phone.
-          path = [ "/run/current-system/sw" ];
+          # claude dla providera claude-cli; reszta systemu (w tym notify-phone)
+          # dla narzędzia exec agenta.
+          path = [
+            pkgs.claude-code
+            "/run/current-system/sw"
+          ];
           environment = {
             HOME = home;
             PICOCLAW_HOME = home;
             PICOCLAW_BUILTIN_SKILLS = "/etc/picoclaw/skills";
             # Bez TZ picoclaw podaje modelowi datę bez nazwy strefy.
             TZ = config.time.timeZone;
+            NOTIFY_PHONE_CLAUDE_HOOKS = "off";
           };
           serviceConfig = sandbox // {
             ExecStart = lib.getExe start;
@@ -190,7 +208,7 @@
 
       customBot = {
         tailscaleServe.${ntfyPort}.users = [ user ];
-        # Agent łączy się z internetem sam (narzędzia web, modele :cloud).
+        # Agent łączy się z internetem sam (Claude Code, narzędzia web).
         lockdownServices = [ user ];
       };
     };
