@@ -116,7 +116,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "helium";
-  version = "0.21.3.1";
+  version = "0.22.1.1";
 
   src =
     let
@@ -126,8 +126,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       url = "https://github.com/imputnet/helium-linux/releases/download/${finalAttrs.version}/helium-${finalAttrs.version}-${arch}_linux.tar.xz";
       hash =
         {
-          x86_64 = "sha256-iPPFOiNxguhyrDBhzIwSnnWuy86Erq2DQiXYEDCWwlQ=";
-          arm64 = "sha256-shm+E3Rbq0/H9wBqlSTPZ/mfw2zS5vlFIRejn+6G1Ak=";
+          x86_64 = "sha256-5BWJi1G/HEHWvX1EAnd2yZvzbZ4O50FsHYvw3lO26gw=";
+          arm64 = "sha256-HD34QXiRzb4x1797w9cWJUkMTRWlKuS1VqMQrqTwbp8=";
         }
         .${arch};
     };
