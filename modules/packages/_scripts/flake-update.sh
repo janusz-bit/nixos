@@ -41,8 +41,8 @@ amend_package waywallen modules/packages/_waywallen
 nix-update --commit --system x86_64-linux -F waywallen-kde-plugin
 
 echo "Updating strata..."
-# engineTag/engineVersion i rev llama.cpp podbija się RĘCZNIE
-# w modules/packages/_strata/default.nix (SHA256SUMS.txt i setup.py wydania);
+# engineTag/engineVersion podbija się RĘCZNIE
+# w modules/packages/_strata/default.nix (SHA256SUMS.txt wydania);
 # nix-update podbija tylko version i src.
 nix-update --commit -F strata
 echo "Updating unsloth-desktop..."
