@@ -72,6 +72,13 @@ let
           [ $# -gt 0 ] || usage
           [[ $priority =~ ^[1-5]$ ]] || usage
 
+          # Usługa może dostać token jako poświadczenie systemd (LoadCredential
+          # ntfy-token, np. rpi-picoclaw) zamiast pliku tego konta.
+          token=${lib.escapeShellArg config.age.secrets.ntfy-token.path}
+          if [ -r "''${CREDENTIALS_DIRECTORY:-}/ntfy-token" ]; then
+            token=$CREDENTIALS_DIRECTORY/ntfy-token
+          fi
+
           jq -n \
             --arg topic ${lib.escapeShellArg topic} \
             --arg title "$title" \
@@ -79,7 +86,7 @@ let
             --argjson priority "$priority" \
             '{$topic, $message, $priority} + (if $title == "" then {} else {$title} end)' |
             curl -fsS --max-time 10 -o /dev/null \
-              -H @${lib.escapeShellArg config.age.secrets.ntfy-token.path} \
+              -H @"$token" \
               --data-binary @- ${lib.escapeShellArg baseUrl}
         '';
       };

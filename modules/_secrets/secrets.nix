@@ -32,6 +32,9 @@ in
   "ntfy-server.age" = toAllHosts;
   # Ten sam token jako nagłówek dla `curl -H @plik`: Authorization: Bearer <tk_…>
   "ntfy-token.age" = toAllHosts;
+  # Token rejestracji serwera Matrix na RPi (modules/hosts/raspberry-pi-4/matrix.nix),
+  # sam token w jednej linii.
+  "continuwuity-registration-token.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.

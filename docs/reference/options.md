@@ -512,13 +512,14 @@ Skille (katalog z SKILL.md) znane konfiguracji; do agentów trafiają włączone
 
 Agenci, którzy dostają skill; węższa lista dla skilla, który działa tylko w jednym (kernel Pythona Prime Agenta, hooki Claude Code).
 
-- Type: list of (one of "prime-agent", "pi", "claude-code", "codex", "opencode")
+- Type: list of (one of "prime-agent", "pi", "claude-code", "codex", "opencode", "picoclaw")
 - Default: `[
   "prime-agent"
   "pi"
   "claude-code"
   "codex"
   "opencode"
+  "picoclaw"
 ]`
 - Declared in: [ai/options.nix](../../modules/ai/options.nix)
 

@@ -20,6 +20,9 @@
 #   więc nie potrzebuje opencode.json i działa też na RPi. Tablica
 #   skills.paths w zarządzanym opencode.json zastępowałaby (nie
 #   sklejała) skills.paths użytkownika.
+# - picoclaw: /etc/picoclaw/skills (PICOCLAW_BUILTIN_SKILLS, rpi-picoclaw) jako
+#   jeden katalog z kopiami skilli, bo picoclaw pomija wpisy-symlinki
+#   (os.ReadDir + IsDir).
 # Antigravity (agy) nie ma katalogu skilli systemowych (tylko
 # ~/.gemini/config/skills), więc skille do niego nie trafiają.
 #
@@ -63,7 +66,7 @@
         in
         lib.mapAttrs (name: _: {
           source = "${pack.source}/${name}";
-          agents = lib.attrNames skillDirs;
+          agents = lib.attrNames skillDirs ++ [ "picoclaw" ];
           packages = [ ];
           python = false;
         }) (lib.filterAttrs isSkill (builtins.readDir pack.source));
@@ -79,6 +82,18 @@
           lib.filterAttrs (_: skill: lib.elem agent skill.agents) skills
         )
       ) skillDirs;
+
+      picoclawSkills = lib.filterAttrs (_: skill: lib.elem "picoclaw" skill.agents) skills;
+      picoclawSkillDir = pkgs.runCommand "picoclaw-skills" { } (
+        ''
+          mkdir $out
+        ''
+        + lib.concatLines (
+          lib.mapAttrsToList (
+            name: skill: "cp -rL ${lib.escapeShellArg skill.source} $out/${lib.escapeShellArg name}"
+          ) picoclawSkills
+        )
+      );
 
       # Kernel Prime Agenta działa na PRIME_AGENT_KERNEL_PYTHON (read-only env
       # z flake llm-agents), więc bootstrap NIE zrobi `uv pip install
@@ -235,6 +250,8 @@
           "opencode/opencode.json" = lib.mkIf (opencodeConfig != { }) {
             text = builtins.toJSON opencodeConfig;
           };
+
+          "picoclaw/skills" = lib.mkIf (picoclawSkills != { }) { source = picoclawSkillDir; };
         };
 
         systemPackages =

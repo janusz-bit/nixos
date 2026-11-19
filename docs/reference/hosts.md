@@ -7,7 +7,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 35 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 37 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -154,6 +154,8 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_t3code[rpi-t3code]
   host_raspberry_pi_4 --> rpi_t3code_laptop[rpi-t3code-laptop]
   host_raspberry_pi_4 --> rpi_ntfy[rpi-ntfy]
+  host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
+  host_raspberry_pi_4 --> rpi_picoclaw[rpi-picoclaw]
   host_raspberry_pi_4 --> rpi_ai[rpi-ai]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
@@ -197,10 +199,12 @@ flowchart LR
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
 - `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
+- `rpi-matrix` — [hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)
 - `rpi-network` — [hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)
 - `rpi-nextcloud` — [hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)
 - `rpi-ntfy` — [hosts/ntfy.nix](../../modules/hosts/ntfy.nix)
 - `rpi-ollama` — [hosts/raspberry-pi-4/ollama.nix](../../modules/hosts/raspberry-pi-4/ollama.nix)
+- `rpi-picoclaw` — [hosts/raspberry-pi-4/picoclaw.nix](../../modules/hosts/raspberry-pi-4/picoclaw.nix)
 - `rpi-resources` — [hosts/raspberry-pi-4/resources.nix](../../modules/hosts/raspberry-pi-4/resources.nix)
 - `rpi-ssh` — [hosts/raspberry-pi-4/ssh.nix](../../modules/hosts/raspberry-pi-4/ssh.nix)
 - `rpi-t3code` — [hosts/raspberry-pi-4/t3code.nix](../../modules/hosts/raspberry-pi-4/t3code.nix)

@@ -39,6 +39,8 @@
         self.modules.nixos.rpi-t3code
         self.modules.nixos.rpi-t3code-laptop
         self.modules.nixos.rpi-ntfy
+        self.modules.nixos.rpi-matrix
+        self.modules.nixos.rpi-picoclaw
         self.modules.nixos.rpi-ai
       ];
 

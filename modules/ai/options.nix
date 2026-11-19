@@ -1,5 +1,6 @@
 # Opcje ai.*: neutralny opis skilli i modeli, które mają dostać agenci kodujący
-# hosta (Prime Agent, Pi, Claude Code, Codex, opencode2). Host tylko włącza to, co
+# hosta (Prime Agent, Pi, Claude Code, Codex, opencode2; skille także asystent
+# picoclaw). Host tylko włącza to, co
 # chce (`ai.skills.obscura.enable = true;`, `ai.models.<model>.enable = true;`,
 # pliki ai.nix hostów), a definicje skilli i modeli (ai-skills, ai-models) oraz
 # ich przełożenie na konfigurację każdego agenta (ai-harness) są w modules/ai/.
@@ -21,6 +22,7 @@ _: {
         "claude-code"
         "codex"
         "opencode"
+        "picoclaw"
       ];
       modelAgents = [
         "prime-agent"

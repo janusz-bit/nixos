@@ -23,5 +23,5 @@ notification that only repeats "done" at the end of a reply. Use the command
 for events inside a long task, or for a result that should arrive even when
 the reply itself is not finished yet.
 
-The token is read from a file owned by this account and passed to curl from
-that file; never print or copy it.
+The token is read from a file only this account or service can read and
+passed to curl from that file; never print or copy it.
