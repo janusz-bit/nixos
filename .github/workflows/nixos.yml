@@ -24,7 +24,15 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           name: janusz-bit
       - name: nixos
-        run: nix build ".#nixosConfigurations.nixos.config.system.build.toplevel" --show-trace --accept-flake-config
+        run: |-
+          sha=${{ github.event.pull_request.head.sha || github.sha }}
+          if git ls-remote --exit-code https://github.com/janusz-bit/nixpkgs-v3 "refs/tags/cached/nixos-$sha" >/dev/null; then
+            nix build ".#nixosConfigurations.nixos.config.system.build.toplevel" --show-trace --accept-flake-config
+          else
+            missing=$(nix build ".#nixosConfigurations.nixos.config.system.build.toplevel" --dry-run --accept-flake-config 2>&1 | grep -c '\.drv$' || true)
+            echo "::warning::janusz-bit/nixpkgs-v3 has no cached/nixos-$sha yet: $missing derivations are in no cache. Build them there: gh workflow run build.yml --repo janusz-bit/nixpkgs-v3 -f nixos_ref=$sha"
+            echo "$missing derivations of nixos are not cached yet (janusz-bit/nixpkgs-v3, cached/nixos-$sha missing); build skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
 name: nixos
 "on":
   pull_request:

@@ -587,6 +587,26 @@
         "type": "github"
       }
     },
+    "nixpkgs-v3": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795216725,
+        "narHash": "sha256-u8aLHVRwT7Kf/waEEZ6pkHLc5jsD8tSwq8yolT1hGDE=",
+        "owner": "janusz-bit",
+        "repo": "nixpkgs-v3",
+        "rev": "d9e2651b427540377100d41411846b9c367712a3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "janusz-bit",
+        "repo": "nixpkgs-v3",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1794840529,
@@ -682,6 +702,7 @@
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
+        "nixpkgs-v3": "nixpkgs-v3",
         "tstack": "tstack"
       }
     },

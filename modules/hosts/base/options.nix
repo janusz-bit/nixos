@@ -41,6 +41,11 @@ in
           type = lib.types.str;
           description = "Nazwa nixosConfigurations używana przez aliasy update/push; ustawia ją rejestr hostów (modules/hosts/registry.nix).";
         };
+        cachedBy = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Repozytorium (owner/repo), którego tag cached/nixos-<rev> musi istnieć przed update; ustawia go rejestr hostów (hosts.<host>.cachedBy).";
+        };
         enableFastfetch = lib.mkOption {
           type = lib.types.bool;
           default = true;

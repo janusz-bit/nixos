@@ -78,7 +78,24 @@ in
           # Tanie sprawdzenia także na każdy push do master (commity trafiają
           # tam wprost).
           onMaster ? false,
+          # hosts.<host>.cachedBy: zamknięcie buduje CI innego repo (świat
+          # x86-64-v3 to tysiące derywacji, żaden 6-godzinny job go nie
+          # zbuduje). Build tylko, gdy tamto repo ma tag cached/nixos-<sha>,
+          # inaczej dry run z liczbą brakujących derywacji i ostrzeżeniem.
+          cachedBy ? null,
         }:
+        let
+          gated = lib.concatStringsSep "\n" [
+            "sha=\${{ github.event.pull_request.head.sha || github.sha }}"
+            "if git ls-remote --exit-code https://github.com/${cachedBy} \"refs/tags/cached/nixos-$sha\" >/dev/null; then"
+            "  ${command}"
+            "else"
+            "  missing=$(nix build \".#${buildTarget}\" --dry-run --accept-flake-config 2>&1 | grep -c '\\.drv$' || true)"
+            "  echo \"::warning::${cachedBy} has no cached/nixos-$sha yet: $missing derivations are in no cache. Build them there: gh workflow run build.yml --repo ${cachedBy} -f nixos_ref=$sha\""
+            "  echo \"$missing derivations of ${name} are not cached yet (${cachedBy}, cached/nixos-$sha missing); build skipped.\" >> \"$GITHUB_STEP_SUMMARY\""
+            "fi"
+          ];
+        in
         {
           inherit name runName;
           # Least privilege: buildy tylko czytają repo.
@@ -97,7 +114,7 @@ in
             steps = baseSteps ++ [
               {
                 inherit name;
-                run = command;
+                run = if cachedBy == null then command else gated;
               }
             ];
           };
@@ -134,6 +151,7 @@ in
             lib.mapAttrs (_: host: {
               arch = host.system;
               tags = host.buildOnTags;
+              inherit (host) cachedBy;
             }) hosts
             // {
               raspberry-pi-4-sd-image = {
