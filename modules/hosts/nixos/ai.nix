@@ -24,7 +24,6 @@ _: {
           brulion.enable = true;
           claude-usage.enable = true;
           nixos-system.enable = true;
-          notify-phone.enable = true;
           obscura.enable = true;
         };
         skillPacks = {

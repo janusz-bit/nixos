@@ -38,7 +38,6 @@
         self.modules.nixos.rpi-tailscale
         self.modules.nixos.rpi-t3code
         self.modules.nixos.rpi-t3code-laptop
-        self.modules.nixos.rpi-ntfy
         self.modules.nixos.rpi-ai
       ];
 

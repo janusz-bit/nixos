@@ -73,9 +73,6 @@
           source = "${brulionPackage}/share/brulion/agent-skills/brulion";
           packages = [ brulionPackage ];
         };
-        # notify-phone instaluje moduł ntfy hosta (adres serwera i token
-        # zależą od hosta), więc skill bez pakietów.
-        notify-phone.source = "${self}/modules/skills/notify-phone";
         obscura = {
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];

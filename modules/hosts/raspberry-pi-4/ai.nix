@@ -4,7 +4,6 @@ _: {
   flake.modules.nixos.rpi-ai = _: {
     ai.skills = {
       nixos-system.enable = true;
-      notify-phone.enable = true;
       obscura.enable = true;
     };
   };

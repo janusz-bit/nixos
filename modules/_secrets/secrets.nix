@@ -26,12 +26,6 @@ in
   "open-webui-keys.age" = toAllHosts;
   "llmgateway-api-key.age" = toAllHosts;
   "openrouter-api-key.age" = toAllHosts;
-  # ntfy na RPi (modules/hosts/ntfy.nix), EnvironmentFile serwera:
-  # NTFY_AUTH_USERS=phone:<bcrypt>:user,claude:<bcrypt>:user
-  # NTFY_AUTH_TOKENS=claude:<tk_…>:agents
-  "ntfy-server.age" = toAllHosts;
-  # Ten sam token jako nagłówek dla `curl -H @plik`: Authorization: Bearer <tk_…>
-  "ntfy-token.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
