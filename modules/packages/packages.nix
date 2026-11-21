@@ -14,6 +14,7 @@ let
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
+    openbot = pkgs.callPackage ./_openbot { };
     opencharts = pkgs.callPackage ./_opencharts { };
     strata = pkgs.callPackage ./_strata { };
     unsloth-desktop = pkgs.callPackage ./_unsloth-desktop { };
