@@ -87,6 +87,18 @@ in
             keyMap = strOption "Układ klawiatury w konsoli (console.keyMap).";
             xkbLayout = strOption "Układ klawiatury w sesji graficznej (services.xserver.xkb.layout).";
             wifiRegdom = strOption "Domena regulacyjna Wi-Fi (cfg80211.ieee80211_regdom).";
+            latitude = lib.mkOption {
+              type = lib.types.float;
+              description = ''
+                Przybliżona szerokość geograficzna (location.latitude, stałe
+                źródło GeoClue): środek kraju, nie adres, bo repozytorium jest
+                publiczne.
+              '';
+            };
+            longitude = lib.mkOption {
+              type = lib.types.float;
+              description = "Przybliżona długość geograficzna (location.longitude), jak latitude.";
+            };
           };
 
           lan.subnet = strOption ''
@@ -134,6 +146,13 @@ in
             publicKey = strOption ''
               Klucz publiczny podpisów cache'a. Prywatny jest tylko w sekrecie
               GitHub Actions NIX_CACHE_SIGNING_KEY, nigdy na RPi.
+            '';
+            v3PublicKey = strOption ''
+              Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
+              w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
+              w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
+              laptop: każdy zaufany klucz może podsunąć hostowi dowolną
+              ścieżkę, a RPi ścieżek v3 nie używa.
             '';
             url = lib.mkOption {
               type = lib.types.str;

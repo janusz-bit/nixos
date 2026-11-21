@@ -103,6 +103,22 @@ Układ klawiatury w konsoli (console.keyMap).
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.locale.latitude`
+
+Przybliżona szerokość geograficzna (location.latitude, stałe
+źródło GeoClue): środek kraju, nie adres, bo repozytorium jest
+publiczne.
+
+- Type: floating point number
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.locale.longitude`
+
+Przybliżona długość geograficzna (location.longitude), jak latitude.
+
+- Type: floating point number
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.locale.timeZone`
 
 Strefa czasowa (time.timeZone).
@@ -153,6 +169,17 @@ Adres cache'a w tailnecie: substituter laptopa i CI, cel nix-cache-push.
 
 - Type: string
 - Default: `"https://${nixCache.host}.${tailnet.domain}:${toString nixCache.port}"`
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.nixCache.v3PublicKey`
+
+Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
+w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
+w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
+laptop: każdy zaufany klucz może podsunąć hostowi dowolną
+ścieżkę, a RPi ścieżek v3 nie używa.
+
+- Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
 ### `customTop.nixConfig`

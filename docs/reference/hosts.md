@@ -7,7 +7,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
 | [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 35 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -154,6 +154,7 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_t3code[rpi-t3code]
   host_raspberry_pi_4 --> rpi_t3code_laptop[rpi-t3code-laptop]
   host_raspberry_pi_4 --> rpi_nix_cache[rpi-nix-cache]
+  host_raspberry_pi_4 --> rpi_brulion_agent[rpi-brulion-agent]
   host_raspberry_pi_4 --> rpi_ai[rpi-ai]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
@@ -196,6 +197,7 @@ flowchart LR
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
 - `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
+- `rpi-brulion-agent` — [hosts/raspberry-pi-4/brulion-agent.nix](../../modules/hosts/raspberry-pi-4/brulion-agent.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
 - `rpi-network` — [hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)
 - `rpi-nextcloud` — [hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)
