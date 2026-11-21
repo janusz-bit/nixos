@@ -19,7 +19,7 @@
       ...
     }:
     {
-      # Chaotic-Nyx (proton-cachyos-bin_x86_64_v3) bez cache nyx: jego pakiety budują
+      # Chaotic-Nyx (proton-cachyos_x86_64_v3) bez cache nyx: jego pakiety budują
       # się lokalnie albo przychodzą z własnego cachix.
       imports = [ inputs.chaotic.nixosModules.default ];
       chaotic.nyx.cache.enable = false;
@@ -38,7 +38,7 @@
         );
         protontricks.enable = true;
         remotePlay.openFirewall = true;
-        extraCompatPackages = [ pkgs.proton-cachyos-bin_x86_64_v3 ];
+        extraCompatPackages = [ pkgs.proton-cachyos_x86_64_v3 ];
       };
 
       # NTSYNC: Wine/Proton 11 używa /dev/ntsync, gdy istnieje, a kernel CachyOS ma
