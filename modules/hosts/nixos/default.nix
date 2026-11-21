@@ -13,7 +13,7 @@
     system = "x86_64-linux";
     # Ciężki build (~400 pakietów, 3-5 h) — CI tylko przy PR i ręcznie.
     buildOnTags = false;
-    # Userspace x86-64-v3 (nixpkgs-v3) jest tylko w cachix, gdy CI
+    # Userspace x86-64-v3 (nixpkgs-v3) jest w cache'u RPi dopiero, gdy CI
     # nixpkgs-v3 zbuduje cały świat tej rewizji.
     cachedBy = "${config.customTop.owner}/nixpkgs-v3";
     modules = [

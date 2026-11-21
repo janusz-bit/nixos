@@ -47,11 +47,17 @@ in
         aarch64-linux = "ubuntu-24.04-arm";
       };
 
+      # cachedBy: świat x86-64-v3 laptopa leży w cache'u RPi podpisany kluczem
+      # nixpkgs-v3, więc tylko jego build ufa temu kluczowi (jak sam laptop).
       baseSteps =
-        nixCache:
+        nixCache: cachedBy:
         let
           substituters = [ customTop.cachix.url ] ++ lib.optional nixCache customTop.nixCache.url;
-          publicKeys = [ customTop.cachix.pubKey ] ++ lib.optional nixCache customTop.nixCache.publicKey;
+          publicKeys = [
+            customTop.cachix.pubKey
+          ]
+          ++ lib.optional nixCache customTop.nixCache.publicKey
+          ++ lib.optional (cachedBy != null) customTop.nixCache.v3PublicKey;
         in
         [
           {
@@ -162,7 +168,7 @@ in
           jobs.build = {
             runsOn = archToRunner.${arch};
             steps =
-              baseSteps nixCache
+              baseSteps nixCache cachedBy
               ++ [
                 {
                   inherit name;
@@ -241,7 +247,7 @@ in
               concurrency.group = "cachyos-kernel-update";
               jobs.update-and-build = {
                 runsOn = archToRunner.x86_64-linux;
-                steps = baseSteps true ++ [
+                steps = baseSteps true null ++ [
                   {
                     name = "Update nix-cachyos-kernel flake input";
                     run = "nix flake update nix-cachyos-kernel";

@@ -16,7 +16,7 @@ jobs:
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             extra-substituters = https://janusz-bit.cachix.org https://raspberry-pi-4.tail1ea20e.ts.net:8444
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= janusz-bit-ci-1:sZOoPt8moauyLh35tiK6hcpnLfPySRm1C2IN/DffoVE=
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= janusz-bit-ci-1:sZOoPt8moauyLh35tiK6hcpnLfPySRm1C2IN/DffoVE= janusz-bit-v3-1:nESt1tMO6HoJe3AcnJ5Gj+VTNyz2suKd7hJOp8vQBbk=
             build-fallback = true
             connect-timeout = 5
       - continue-on-error: true
