@@ -13,6 +13,9 @@
 #   klient sprawdza podpis i NarHash. Attic odpadł, bo podpisuje na serwerze.
 #   Klucz w GitHubie nie otwiera nowej drogi: kto przejmie repo, ten i tak
 #   wdraża przez `update`.
+# - github:janusz-bit/nixpkgs-v3 wysyła tu świat x86-64-v3 laptopa podpisany
+#   własnym kluczem (customTop.nixCache.v3PublicKey), z tym samym hasłem PUT.
+#   Ufa mu tylko laptop, bo RPi ścieżek v3 nie używa.
 # - Zapis tylko PUT-em z hasłem (nix-cache-htpasswd.age, konto `ci`), odczyt
 #   bez hasła dla tailnetu. Inne metody WebDAV (DELETE, MOVE) są wyłączone, więc
 #   z hasłem da się tylko dopisać albo nadpisać plik, którego bez podpisu
@@ -84,7 +87,10 @@ in
   flake.modules.nixos.nixos-nix-cache = {
     nix.settings = {
       extra-substituters = [ nixCache.url ];
-      extra-trusted-public-keys = [ nixCache.publicKey ];
+      extra-trusted-public-keys = [
+        nixCache.publicKey
+        nixCache.v3PublicKey
+      ];
       # Gdy RPi nie odpowiada, curl bez limitu czeka na połączenie 300 s,
       # a Nix ponawia próby (download-attempts), więc rebuild stałby minutami.
       connect-timeout = 5;

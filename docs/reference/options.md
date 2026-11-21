@@ -159,6 +159,17 @@ Adres cache'a w tailnecie: substituter laptopa i CI, cel nix-cache-push.
 - Default: `"https://${nixCache.host}.${tailnet.domain}:${toString nixCache.port}"`
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.nixCache.v3PublicKey`
+
+Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
+w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
+w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
+laptop: każdy zaufany klucz może podsunąć hostowi dowolną
+ścieżkę, a RPi ścieżek v3 nie używa.
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.nixConfig`
 
 nixConfig z flake.nix, jedyna lista cache (literał: nix czyta go

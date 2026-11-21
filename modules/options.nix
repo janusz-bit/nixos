@@ -147,6 +147,13 @@ in
               Klucz publiczny podpisów cache'a. Prywatny jest tylko w sekrecie
               GitHub Actions NIX_CACHE_SIGNING_KEY, nigdy na RPi.
             '';
+            v3PublicKey = strOption ''
+              Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
+              w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
+              w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
+              laptop: każdy zaufany klucz może podsunąć hostowi dowolną
+              ścieżkę, a RPi ścieżek v3 nie używa.
+            '';
             url = lib.mkOption {
               type = lib.types.str;
               default = "https://${config.nixCache.host}.${config.tailnet.domain}:${toString config.nixCache.port}";
