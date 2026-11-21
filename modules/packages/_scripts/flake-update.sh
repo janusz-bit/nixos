@@ -48,8 +48,6 @@ nix-update --commit -F strata
 echo "Updating unsloth-desktop..."
 # Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.
 nix-update --commit --system x86_64-linux -F unsloth-desktop --version=unstable
-echo "Updating openbot..."
-nix-update --commit --system x86_64-linux -F openbot
 echo "Updating opencharts..."
 # Upstream nie taguje wydań: wersja 0.3.0-unstable-<data> z gałęzi.
 nix-update --commit -F opencharts --version=branch

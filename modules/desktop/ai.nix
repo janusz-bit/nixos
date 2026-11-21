@@ -58,7 +58,6 @@
             pi-coding-agent
             (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
             self.packages.${system}.unsloth-desktop
-            self.packages.${system}.openbot
             inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
           ]
           # Strata ma tylko silnik CUDA (pakiet z wydania, _strata).
