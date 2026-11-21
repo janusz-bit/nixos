@@ -3,9 +3,9 @@
 #
 # nixpkgs daje derywacjom z gcc.arch platformy (np. pkgsx86_64_v3 z Chaotic-Nyx)
 # requiredSystemFeatures = gccarch-<arch>, a bez tej cechy nix odmawia ich
-# budowania. NixOS dodaje ją sam tylko przy nixpkgs.hostPlatform.gcc.arch,
-# a tego celowo nie ma: userspace pod v3 nie jest w cache.nixos.org
-# i budowałby się lokalnie.
+# budowania. NixOS dodaje ją sam przy nixpkgs.hostPlatform.gcc.arch, które na
+# laptopie ustawia nixpkgs-v3 (hosts/nixos); ten moduł zostaje dla hostów v3
+# bez niego (kernel CachyOS v3, Proton-CachyOS v3 budowane lokalnie).
 #
 # Sprawdzenie: `nix config show system-features` zawiera gccarch-x86-64-v3.
 _: {
