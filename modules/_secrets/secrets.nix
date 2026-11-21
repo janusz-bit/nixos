@@ -30,6 +30,8 @@ in
   "wifi.age" = toAllHosts;
   # nginx cache'a Nix na RPi (modules/hosts/nix-cache.nix): ci:<openssl passwd -6>
   "nix-cache-htpasswd.age" = toAllHosts;
+  # Hasło aplikacji Nextclouda dla agentów Brulionu na RPi (raspberry-pi-4/brulion-agent.nix).
+  "brulion-acp-nextcloud.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
   # Format env z nazwami sekretów CI github:janusz-bit/brulion:
   # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,
