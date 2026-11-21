@@ -84,13 +84,13 @@ buildFHSEnv (
   in
   {
     pname = "unsloth-desktop";
-    version = "0.1.920-beta";
+    version = "0.1.922-beta";
 
     # version i src sa atrybutami pakietu, a nie wewnetrznej derywacji:
     # tylko wtedy nix-update znajduje ich pozycje i podmienia wersje oraz hash.
     src = fetchurl {
       url = "https://github.com/unslothai/unsloth/releases/download/v${finalAttrs.version}/Unsloth-Desktop-Ubuntu.deb";
-      hash = "sha256-16uOleWbPd4UdaF6AezekWMMtTlOJpvBXkU+Q39V/Jc=";
+      hash = "sha256-juTXGs549O9StWWW6s+fY8ME4d0Tt5tn2P/QYfI2z54=";
     };
 
     includeClosures = true;
