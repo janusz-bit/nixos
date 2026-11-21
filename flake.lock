@@ -589,16 +589,28 @@
     },
     "nixpkgs-v3": {
       "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "git-hooks-nix": [
+          "git-hooks-nix"
+        ],
+        "github-actions-nix": [
+          "github-actions-nix"
+        ],
+        "import-tree": [
+          "import-tree"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1795216725,
-        "narHash": "sha256-u8aLHVRwT7Kf/waEEZ6pkHLc5jsD8tSwq8yolT1hGDE=",
+        "lastModified": 1795218970,
+        "narHash": "sha256-u98xZS6lnKIlgFIo3VzMhXemnpCgARH74+ttKUy9f0k=",
         "owner": "janusz-bit",
         "repo": "nixpkgs-v3",
-        "rev": "d9e2651b427540377100d41411846b9c367712a3",
+        "rev": "361a0ca09af125e38905c97a3d956dabe4f11319",
         "type": "github"
       },
       "original": {
