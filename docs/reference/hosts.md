@@ -6,8 +6,8 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 54 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 34 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -32,6 +32,7 @@ flowchart LR
   host_nixos --> nixos_ai[nixos-ai]
   host_nixos --> nixos_tailscale[nixos-tailscale]
   host_nixos --> nixos_t3code_laptop[nixos-t3code-laptop]
+  host_nixos --> nixos_matrix_notify[nixos-matrix-notify]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
   ai --> ai_models[ai-models]
@@ -122,6 +123,7 @@ flowchart LR
 - `nixos-ai` — [hosts/nixos/ai.nix](../../modules/hosts/nixos/ai.nix)
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
+- `nixos-matrix-notify` — [hosts/matrix-notify.nix](../../modules/hosts/matrix-notify.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
 - `nixos-ssh` — [hosts/nixos/ssh.nix](../../modules/hosts/nixos/ssh.nix)
 - `nixos-t3code-laptop` — [hosts/t3code-laptop.nix](../../modules/hosts/t3code-laptop.nix)
@@ -151,6 +153,8 @@ flowchart LR
   host_raspberry_pi_4 --> rpi_tailscale[rpi-tailscale]
   host_raspberry_pi_4 --> rpi_t3code[rpi-t3code]
   host_raspberry_pi_4 --> rpi_t3code_laptop[rpi-t3code-laptop]
+  host_raspberry_pi_4 --> rpi_matrix[rpi-matrix]
+  host_raspberry_pi_4 --> rpi_matrix_notify[rpi-matrix-notify]
   host_raspberry_pi_4 --> rpi_ai[rpi-ai]
   ai --> ai_options[ai-options]
   ai --> ai_skills[ai-skills]
@@ -194,6 +198,8 @@ flowchart LR
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)
 - `rpi-ai` — [hosts/raspberry-pi-4/ai.nix](../../modules/hosts/raspberry-pi-4/ai.nix)
 - `rpi-gitea` — [hosts/raspberry-pi-4/gitea.nix](../../modules/hosts/raspberry-pi-4/gitea.nix)
+- `rpi-matrix` — [hosts/raspberry-pi-4/matrix.nix](../../modules/hosts/raspberry-pi-4/matrix.nix)
+- `rpi-matrix-notify` — [hosts/matrix-notify.nix](../../modules/hosts/matrix-notify.nix)
 - `rpi-network` — [hosts/raspberry-pi-4/network.nix](../../modules/hosts/raspberry-pi-4/network.nix)
 - `rpi-nextcloud` — [hosts/raspberry-pi-4/nextcloud.nix](../../modules/hosts/raspberry-pi-4/nextcloud.nix)
 - `rpi-ollama` — [hosts/raspberry-pi-4/ollama.nix](../../modules/hosts/raspberry-pi-4/ollama.nix)

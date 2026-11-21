@@ -26,6 +26,12 @@ in
   "open-webui-keys.age" = toAllHosts;
   "llmgateway-api-key.age" = toAllHosts;
   "openrouter-api-key.age" = toAllHosts;
+  # Token rejestracji serwera Matrix na RPi (modules/hosts/raspberry-pi-4/matrix.nix),
+  # sam token w jednej linii.
+  "continuwuity-registration-token.age" = toAllHosts;
+  # Token bota powiadomień Matrix jako nagłówek dla `curl -H @plik`:
+  # Authorization: Bearer <token> (modules/hosts/matrix-notify.nix).
+  "matrix-notify.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.

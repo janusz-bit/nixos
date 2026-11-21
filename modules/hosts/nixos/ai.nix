@@ -23,6 +23,7 @@ _: {
         skills = {
           brulion.enable = true;
           claude-usage.enable = true;
+          matrix-notify.enable = true;
           nixos-system.enable = true;
           obscura.enable = true;
         };

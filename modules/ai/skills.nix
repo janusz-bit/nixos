@@ -73,6 +73,9 @@
           source = "${brulionPackage}/share/brulion/agent-skills/brulion";
           packages = [ brulionPackage ];
         };
+        # matrix-notify instaluje moduł matrix-notify hosta (adres serwera
+        # i właściciel tokenu zależą od hosta), więc skill bez pakietów.
+        matrix-notify.source = "${self}/modules/skills/matrix-notify";
         obscura = {
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
