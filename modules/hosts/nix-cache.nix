@@ -28,7 +28,9 @@
 #   ReadWritePaths daje EXDEV, a wtedy nginx kopiuje NAR blokująco w procesie
 #   roboczym i stoi też Nextcloud.
 # - nix-cache-push wysyła domknięcie wyniku bez ścieżek podpisanych przez
-#   cache.nixos.org (pełne domknięcie laptopa to dziesiątki GB). nix-cache-info
+#   cache.nixos.org (pełne domknięcie laptopa to dziesiątki GB) i bez tych,
+#   które cache już ma, po jednej naraz (nagłówek _nix-cache/push.sh: czemu
+#   nie nix copy wprost do cache'a). nix-cache-info
 #   nie ma Priority, więc cache ma domyślne 50 i ścieżki obecne w
 #   cache.nixos.org (40) klienci biorą stamtąd.
 # - nix-cache-gc (codziennie, jako nginx) usuwa narinfo starsze niż
@@ -68,6 +70,8 @@ in
           pkgs.nix
           pkgs.jq
           pkgs.coreutils
+          pkgs.curl
+          pkgs.gnused
         ];
         runtimeEnv = {
           NIX_CACHE_DEFAULT_URL = nixCache.url;
@@ -157,9 +161,12 @@ in
             inherit user group;
             mode = "0750";
           };
+          # Przerwany PUT nginx sprząta sam, ale po awarii RPi niedokończone
+          # bufory zostają; usuwa je systemd-tmpfiles-clean.
           ${uploadDir}.d = {
             inherit user group;
             mode = "0700";
+            age = "1d";
           };
         };
 

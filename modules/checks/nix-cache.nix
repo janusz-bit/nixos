@@ -1,9 +1,11 @@
 # Test VM cache'a Nix w tailnecie (rpi-nix-cache, hosts/nix-cache.nix): nginx
 # oddaje nix-cache-info i pliki bez hasła, przyjmuje PUT tylko z hasłem
 # z agenix (DELETE nie), nix-cache-push wysyła ścieżkę podpisaną kluczem CI,
-# klient przyjmuje ją z tym kluczem i odrzuca z innym, a nix-cache-gc usuwa
-# stary narinfo, jego NAR dopiero w następnym przebiegu i nie rusza świeżego
-# wpisu.
+# klient przyjmuje ją z tym kluczem i odrzuca z innym, ścieżki podpisane przez
+# cache.nixos.org (także w domknięciu) i te, które cache już ma, nie są
+# wysyłane, klient bierze z cache'a samą ścieżkę bez jej referencji, a
+# nix-cache-gc usuwa stary narinfo, jego NAR dopiero w następnym przebiegu
+# i nie rusza świeżego wpisu.
 #
 # Uruchomienie: nix build -L .#checks.<system>.nix-cache (wymaga kvm).
 {
@@ -37,6 +39,10 @@
       # (nix store add-file) Nix przyjmuje także bez podpisu.
       oldPath = pkgs.writeText "nix-cache-test-old" "old";
       freshPath = pkgs.writeText "nix-cache-test-fresh" "fresh";
+      # topPath odwołuje się do upstreamPath, który test podpisuje kluczem
+      # o nazwie cache.nixos.org-1.
+      upstreamPath = pkgs.writeText "nix-cache-test-upstream" "upstream";
+      topPath = pkgs.writeText "nix-cache-test-top" "${upstreamPath}";
     in
     {
       checks.nix-cache = pkgs.testers.runNixOSTest {
@@ -58,6 +64,7 @@
           system.extraDependencies = [
             oldPath
             freshPath
+            topPath
           ];
         };
 
@@ -78,12 +85,16 @@
                 return server.succeed(f"curl -s -o /dev/null -w '%{{http_code}}' {args}")
 
 
+            def narinfo(path):
+                return files + "/" + path.removeprefix("/nix/store/")[:32] + ".narinfo"
+
+
             def push(path):
                 server.succeed(
                     f"NIX_CACHE_URL={cache} NIX_CACHE_SIGNING_KEY=\"$(cat /root/signing-key)\" "
                     f"NIX_CACHE_PUSH_PASSWORD=${password} nix-cache-push {path}"
                 )
-                return files + "/" + path.removeprefix("/nix/store/")[:32] + ".narinfo"
+                return narinfo(path)
 
 
             def nar_of(narinfo):
@@ -112,6 +123,26 @@
                 old_narinfo = push(old)
                 server.succeed(f"nix copy --from {cache} --to /root/good --trusted-public-keys '{key}' {old}")
                 server.fail(f"nix copy --from {cache} --to /root/bad --trusted-public-keys '{other}' {old}")
+
+            with subtest("push skips paths signed by cache.nixos.org, also in the closure"):
+                server.succeed(
+                    "nix key generate-secret --key-name cache.nixos.org-1 > /root/upstream-key && "
+                    "nix store sign --key-file /root/upstream-key ${upstreamPath}"
+                )
+                server.succeed(f"test -e {push('${topPath}')}")
+                server.fail("test -e " + narinfo("${upstreamPath}"))
+                # Klient z referencją z innego źródła (u hostów cache.nixos.org)
+                # bierze z cache'a samą podpisaną ścieżkę.
+                server.succeed(
+                    "nix copy --no-check-sigs --to /root/partial ${upstreamPath} && "
+                    f"nix copy --no-recursive --from {cache} --to /root/partial "
+                    f"--trusted-public-keys '{key}' ${topPath}"
+                )
+                out = server.succeed(
+                    f"NIX_CACHE_URL={cache} NIX_CACHE_SIGNING_KEY=\"$(cat /root/signing-key)\" "
+                    f"NIX_CACHE_PUSH_PASSWORD=${password} nix-cache-push ${topPath}"
+                )
+                assert "nothing to push" in out, out
 
             with subtest("gc: expired narinfo first, its NAR one run later, fresh entry stays"):
                 fresh_narinfo = push("${freshPath}")
