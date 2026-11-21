@@ -114,13 +114,13 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "strata";
-  version = "0.2.17";
+  version = "0.2.18";
 
   src = fetchFromGitHub {
     owner = "Niko1221";
     repo = "Strata";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-P6V8EDElMtohpT60Ya94Hb2ebUz1ZjzJbb8O/L12ybE=";
+    hash = "sha256-CR1oBVBBk3cOTqYiwIRhMNZeU+asIVvRHoWnbw8ZiRM=";
   };
 
   # Silnik ma własną numerację, więc engineTag i engineVersion podbija się
