@@ -15,9 +15,17 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://janusz-bit.cachix.org
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters = https://janusz-bit.cachix.org https://raspberry-pi-4.tail1ea20e.ts.net:8444
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= janusz-bit-ci-1:sZOoPt8moauyLh35tiK6hcpnLfPySRm1C2IN/DffoVE=
             build-fallback = true
+            connect-timeout = 5
+      - continue-on-error: true
+        name: Connect to the tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          audience: ${{ secrets.TS_AUDIENCE }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          tags: tag:ci
       - name: Setup Cachix
         uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
         with:
@@ -33,6 +41,12 @@ jobs:
             echo "::warning::janusz-bit/nixpkgs-v3 has no cached/nixos-$sha yet: $missing derivations are in no cache. Build them there: gh workflow run build.yml --repo janusz-bit/nixpkgs-v3 -f nixos_ref=$sha"
             echo "$missing derivations of nixos are not cached yet (janusz-bit/nixpkgs-v3, cached/nixos-$sha missing); build skipped." >> "$GITHUB_STEP_SUMMARY"
           fi
+      - continue-on-error: true
+        env:
+          NIX_CACHE_PUSH_PASSWORD: ${{ secrets.NIX_CACHE_PUSH_PASSWORD }}
+          NIX_CACHE_SIGNING_KEY: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
+        name: Push to the tailnet nix cache
+        run: nix run .#nix-cache-push -- ./result*
 name: nixos
 "on":
   pull_request:
@@ -41,4 +55,5 @@ name: nixos
   workflow_dispatch: {}
 permissions:
   contents: read
+  id-token: write
 run-name: Build nixos by @${{ github.actor }}

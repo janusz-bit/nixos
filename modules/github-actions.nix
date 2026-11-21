@@ -8,7 +8,8 @@
 #
 # Akcje są przypięte do SHA commitów, nie tagów: tag można przesunąć na inny
 # kod, a akcje widzą CACHIX_AUTH_TOKEN, w cachyos-kernel-update także
-# `contents: write` (push flake.lock).
+# `contents: write` (push flake.lock), a w workflowach z cache'em w tailnecie
+# (hosts/nix-cache.nix) `id-token: write` (logowanie OIDC do Tailscale).
 #
 # Sprawdzenie: `nix run .#sync-github-actions && git status --short .github/workflows`
 # (pusto = workflowy w repo zgodne z generatorem).
@@ -31,38 +32,80 @@ in
         checkout = "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"; # v5
         installNix = "cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24"; # v31
         cachix = "cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be"; # v14
+        tailscale = "tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c"; # v4.4.0
       };
+
+      # Hosty, które pobierają z cache'a w tailnecie (hosts/nix-cache.nix): ich
+      # buildy dołączają do tailnetu, biorą z niego i wysyłają tam wynik.
+      nixCacheHosts = [
+        "nixos"
+        "raspberry-pi-4"
+      ];
 
       archToRunner = {
         x86_64-linux = "ubuntu-latest";
         aarch64-linux = "ubuntu-24.04-arm";
       };
 
-      baseSteps = [
-        {
-          name = "Checkout repository";
-          uses = actions.checkout;
-        }
-        {
-          name = "Install Nix";
-          uses = actions.installNix;
-          with_.extra_nix_config = ''
-            experimental-features = nix-command flakes
-            access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = ${customTop.cachix.url}
-            extra-trusted-public-keys = ${customTop.cachix.pubKey}
-            build-fallback = true
-          '';
-        }
-        {
-          name = "Setup Cachix";
-          uses = actions.cachix;
+      baseSteps =
+        nixCache:
+        let
+          substituters = [ customTop.cachix.url ] ++ lib.optional nixCache customTop.nixCache.url;
+          publicKeys = [ customTop.cachix.pubKey ] ++ lib.optional nixCache customTop.nixCache.publicKey;
+        in
+        [
+          {
+            name = "Checkout repository";
+            uses = actions.checkout;
+          }
+          {
+            name = "Install Nix";
+            uses = actions.installNix;
+            with_.extra_nix_config = ''
+              experimental-features = nix-command flakes
+              access-tokens = github.com=''${{ secrets.GITHUB_TOKEN }}
+              extra-substituters = ${lib.concatStringsSep " " substituters}
+              extra-trusted-public-keys = ${lib.concatStringsSep " " publicKeys}
+              build-fallback = true
+            ''
+            # Jak na laptopie (nixos-nix-cache): RPi poza siecią nie wstrzymuje
+            # buildu na limicie curl.
+            + lib.optionalString nixCache "connect-timeout = 5\n";
+          }
+        ]
+        # continue-on-error: bez tailnetu build idzie dalej, tylko bez cache'a RPi.
+        ++ lib.optional nixCache {
+          name = "Connect to the tailnet";
+          uses = actions.tailscale;
+          continueOnError = true;
           with_ = {
-            inherit (customTop.cachix) name;
-            authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
+            oauth-client-id = "\${{ secrets.TS_OAUTH_CLIENT_ID }}";
+            audience = "\${{ secrets.TS_AUDIENCE }}";
+            tags = "tag:ci";
           };
         }
-      ];
+        ++ [
+          {
+            name = "Setup Cachix";
+            uses = actions.cachix;
+            with_ = {
+              inherit (customTop.cachix) name;
+              authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
+            };
+          }
+        ];
+
+      # Po buildzie, wynik w ./result*. Sekrety tylko w env tego kroku;
+      # niedostępny cache daje ostrzeżenie zamiast nieudanego buildu.
+      nixCachePush = {
+        name = "Push to the tailnet nix cache";
+        continueOnError = true;
+        env = {
+          NIX_CACHE_SIGNING_KEY = "\${{ secrets.NIX_CACHE_SIGNING_KEY }}";
+          NIX_CACHE_PUSH_PASSWORD = "\${{ secrets.NIX_CACHE_PUSH_PASSWORD }}";
+        };
+        run = "nix run .#nix-cache-push -- ./result*";
+      };
 
       mkWorkflow =
         name:
@@ -78,10 +121,13 @@ in
           # Tanie sprawdzenia także na każdy push do master (commity trafiają
           # tam wprost).
           onMaster ? false,
+          # Dołącza do tailnetu, pobiera z cache'a RPi i wysyła do niego wynik.
+          nixCache ? false,
           # hosts.<host>.cachedBy: zamknięcie buduje CI innego repo (świat
           # x86-64-v3 to tysiące derywacji, żaden 6-godzinny job go nie
-          # zbuduje). Build tylko, gdy tamto repo ma tag cached/nixos-<sha>,
-          # inaczej dry run z liczbą brakujących derywacji i ostrzeżeniem.
+          # zbuduje). Build tylko, gdy tamto repo ma tag cached/nixos-<sha>
+          # (komplet w cache'u RPi), inaczej dry run z liczbą brakujących
+          # derywacji i ostrzeżeniem.
           cachedBy ? null,
         }:
         let
@@ -98,8 +144,12 @@ in
         in
         {
           inherit name runName;
-          # Least privilege: buildy tylko czytają repo.
-          permissions.contents = "read";
+          # Least privilege: buildy tylko czytają repo; id-token to logowanie
+          # OIDC do Tailscale.
+          permissions = {
+            contents = "read";
+          }
+          // lib.optionalAttrs nixCache { id-token = "write"; };
           concurrency.group = "build-${name}-\${{ github.ref }}";
           on = {
             push = lib.mkIf (tags || onMaster) {
@@ -111,12 +161,15 @@ in
           };
           jobs.build = {
             runsOn = archToRunner.${arch};
-            steps = baseSteps ++ [
-              {
-                inherit name;
-                run = if cachedBy == null then command else gated;
-              }
-            ];
+            steps =
+              baseSteps nixCache
+              ++ [
+                {
+                  inherit name;
+                  run = if cachedBy == null then command else gated;
+                }
+              ]
+              ++ lib.optional nixCache nixCachePush;
           };
         };
     in
@@ -148,9 +201,10 @@ in
         enable = true;
         workflows =
           lib.mapAttrs mkWorkflow (
-            lib.mapAttrs (_: host: {
+            lib.mapAttrs (name: host: {
               arch = host.system;
               tags = host.buildOnTags;
+              nixCache = lib.elem name nixCacheHosts;
               inherit (host) cachedBy;
             }) hosts
             // {
@@ -179,12 +233,15 @@ in
               name = "cachyos-kernel-update";
               runName = "Update & Build CachyOS Kernel by @\${{ github.actor }}";
               on.workflowDispatch = { };
-              permissions.contents = "write";
+              permissions = {
+                contents = "write";
+                id-token = "write";
+              };
               # Ręcznie odpalany: dwa równoległe buildy kernela nie mają sensu.
               concurrency.group = "cachyos-kernel-update";
               jobs.update-and-build = {
                 runsOn = archToRunner.x86_64-linux;
-                steps = baseSteps ++ [
+                steps = baseSteps true ++ [
                   {
                     name = "Update nix-cachyos-kernel flake input";
                     run = "nix flake update nix-cachyos-kernel";
@@ -193,6 +250,7 @@ in
                     name = "Build Kernel";
                     run = "nix build \".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*\" --show-trace --accept-flake-config";
                   }
+                  nixCachePush
                   {
                     name = "Commit updated flake.lock";
                     run = ''

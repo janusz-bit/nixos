@@ -4,10 +4,12 @@
 #
 # Host z customBot.cachedBy (laptop: świat x86-64-v3 z nixpkgs-v3) robi
 # update* z GitHuba dopiero, gdy repozytorium cachedBy ma tag
-# cached/nixos-<rev> dla bieżącego master: bez niego nixos-rebuild
-# kompilowałby tysiące pakietów lokalnie. Bramka i rebuild czytają master
-# osobno, więc commit wypchnięty pomiędzy nimi ją ominie (build pokaże wtedy
-# sam, co kompiluje). update-local* (własny klon) bramki nie ma.
+# cached/nixos-<rev> dla bieżącego master (cały świat w cache'u RPi,
+# hosts/nix-cache.nix) i gdy ten cache odpowiada: bez jednego albo drugiego
+# nixos-rebuild kompilowałby tysiące pakietów lokalnie. Bramka i rebuild
+# czytają master osobno, więc commit wypchnięty pomiędzy nimi ją ominie
+# (build pokaże wtedy sam, co kompiluje). update-local* (własny klon) bramki
+# nie ma.
 #
 # Sprawdzenie: `nix eval --raw .#nixosConfigurations.<host>.config.environment.shellAliases.update-reboot`.
 { lib, ... }:
@@ -16,6 +18,7 @@
     { config, pkgs, ... }:
     let
       inherit (config.customTop.repository) flake path url;
+      inherit (config.customTop) nixCache;
       inherit (config.customBot) flakeTarget cachedBy;
       rebuild =
         mode: flakeRef:
@@ -28,19 +31,24 @@
         runtimeInputs = [
           pkgs.git
           pkgs.coreutils
+          pkgs.curl
         ];
         text = ''
           url=${lib.escapeShellArg url}
           repo=https://github.com/${lib.escapeShellArg cachedBy}
           rev=$(git ls-remote "$url" refs/heads/master | cut -f1)
           [ -n "$rev" ] || { echo "cannot resolve master of $url" >&2; exit 1; }
-          if git ls-remote --exit-code "$repo" "refs/tags/cached/nixos-$rev" >/dev/null; then
-            echo "master $rev is fully cached ($repo)"
-          else
+          cache=${lib.escapeShellArg nixCache.url}
+          if ! git ls-remote --exit-code "$repo" "refs/tags/cached/nixos-$rev" >/dev/null; then
             echo "master $rev is not fully cached yet ($repo/actions is building it);" >&2
             echo "update would compile it locally. Wait for tag cached/nixos-$rev." >&2
             exit 1
           fi
+          if ! curl -sf --connect-timeout 5 --max-time 15 -o /dev/null "$cache/nix-cache-info"; then
+            echo "the tailnet cache $cache does not answer; update would compile the x86-64-v3 world locally." >&2
+            exit 1
+          fi
+          echo "master $rev is fully cached in $cache ($repo)"
         '';
       };
       gate = lib.optionalString (cachedBy != null) "${lib.getExe cachedCheck} && ";

@@ -46,7 +46,8 @@
             default = null;
             description = ''
               Repozytorium GitHub (owner/repo), którego CI buduje zamknięcie
-              hosta do cachix i po komplecie taguje cached/nixos-<rev>. Na ten
+              hosta do cache'a w tailnecie (hosts/nix-cache.nix) i po komplecie
+              taguje cached/nixos-<rev>. Na ten
               tag czekają workflow CI hosta (github-actions.nix) i aliasy
               update (hosts/base/rebuild.nix); null = zamknięcie z cache.nixos.org.
             '';
