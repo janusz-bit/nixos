@@ -15,9 +15,17 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            extra-substituters = https://janusz-bit.cachix.org
-            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo=
+            extra-substituters = https://janusz-bit.cachix.org https://raspberry-pi-4.tail1ea20e.ts.net:8444
+            extra-trusted-public-keys = janusz-bit.cachix.org-1:4stTiufAF02BAXw8HNvYslAmUlPbZPIRhIGht0gSMoo= janusz-bit-ci-1:sZOoPt8moauyLh35tiK6hcpnLfPySRm1C2IN/DffoVE=
             build-fallback = true
+            connect-timeout = 5
+      - continue-on-error: true
+        name: Connect to the tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          audience: ${{ secrets.TS_AUDIENCE }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          tags: tag:ci
       - name: Setup Cachix
         uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be
         with:
@@ -27,6 +35,12 @@ jobs:
         run: nix flake update nix-cachyos-kernel
       - name: Build Kernel
         run: nix build ".#nixosConfigurations.nixos.config.boot.kernelPackages.kernel^*" --show-trace --accept-flake-config
+      - continue-on-error: true
+        env:
+          NIX_CACHE_PUSH_PASSWORD: ${{ secrets.NIX_CACHE_PUSH_PASSWORD }}
+          NIX_CACHE_SIGNING_KEY: ${{ secrets.NIX_CACHE_SIGNING_KEY }}
+        name: Push to the tailnet nix cache
+        run: nix run .#nix-cache-push -- ./result*
       - name: Commit updated flake.lock
         run: |
           git config user.name "github-actions[bot]"
@@ -39,4 +53,5 @@ name: cachyos-kernel-update
   workflow_dispatch: {}
 permissions:
   contents: write
+  id-token: write
 run-name: Update & Build CachyOS Kernel by @${{ github.actor }}

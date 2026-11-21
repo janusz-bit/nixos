@@ -35,6 +35,7 @@
         self.modules.nixos.nixos-ai
         self.modules.nixos.nixos-tailscale
         self.modules.nixos.nixos-t3code-laptop
+        self.modules.nixos.nixos-nix-cache
       ];
 
       system.stateVersion = "25.11";

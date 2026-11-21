@@ -28,6 +28,8 @@ in
   "openrouter-api-key.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
+  # nginx cache'a Nix na RPi (modules/hosts/nix-cache.nix): ci:<openssl passwd -6>
+  "nix-cache-htpasswd.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.
   # Format env z nazwami sekretów CI github:janusz-bit/brulion:
   # QT_ANDROID_KEYSTORE_BASE64 (plik .jks w base64), QT_ANDROID_KEYSTORE_STORE_PASS,
