@@ -91,6 +91,22 @@ Układ klawiatury w konsoli (console.keyMap).
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.locale.latitude`
+
+Przybliżona szerokość geograficzna (location.latitude, stałe
+źródło GeoClue): środek kraju, nie adres, bo repozytorium jest
+publiczne.
+
+- Type: floating point number
+- Declared in: [options.nix](../../modules/options.nix)
+
+### `customTop.locale.longitude`
+
+Przybliżona długość geograficzna (location.longitude), jak latitude.
+
+- Type: floating point number
+- Declared in: [options.nix](../../modules/options.nix)
+
 ### `customTop.locale.timeZone`
 
 Strefa czasowa (time.timeZone).

@@ -40,6 +40,9 @@
       keyMap = "pl2";
       xkbLayout = "pl";
       wifiRegdom = "PL";
+      # Geometryczny środek Polski.
+      latitude = 52.07;
+      longitude = 19.48;
     };
     lan.subnet = "192.168.100.0/24";
     inherit (import ../flake.nix) nixConfig;

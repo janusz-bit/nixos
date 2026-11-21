@@ -87,6 +87,18 @@ in
             keyMap = strOption "Układ klawiatury w konsoli (console.keyMap).";
             xkbLayout = strOption "Układ klawiatury w sesji graficznej (services.xserver.xkb.layout).";
             wifiRegdom = strOption "Domena regulacyjna Wi-Fi (cfg80211.ieee80211_regdom).";
+            latitude = lib.mkOption {
+              type = lib.types.float;
+              description = ''
+                Przybliżona szerokość geograficzna (location.latitude, stałe
+                źródło GeoClue): środek kraju, nie adres, bo repozytorium jest
+                publiczne.
+              '';
+            };
+            longitude = lib.mkOption {
+              type = lib.types.float;
+              description = "Przybliżona długość geograficzna (location.longitude), jak latitude.";
+            };
           };
 
           lan.subnet = strOption ''
