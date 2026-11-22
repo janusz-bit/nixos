@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 55 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 56 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -25,6 +25,7 @@ flowchart LR
   host_nixos --> base_agenix[base-agenix]
   host_nixos --> base_ssh_lan[base-ssh-lan]
   host_nixos --> nixos_ssh[nixos-ssh]
+  host_nixos --> nixos_brulion_agent[nixos-brulion-agent]
   host_nixos --> desktop[desktop]
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
@@ -122,6 +123,7 @@ flowchart LR
 - `nixos` — [hosts/nixos/default.nix](../../modules/hosts/nixos/default.nix)
 - `nixos-ai` — [hosts/nixos/ai.nix](../../modules/hosts/nixos/ai.nix)
 - `nixos-boot` — [hosts/nixos/boot.nix](../../modules/hosts/nixos/boot.nix)
+- `nixos-brulion-agent` — [hosts/nixos/brulion-agent.nix](../../modules/hosts/nixos/brulion-agent.nix)
 - `nixos-disko` — [hosts/nixos/disko.nix](../../modules/hosts/nixos/disko.nix)
 - `nixos-nix-cache` — [hosts/nix-cache.nix](../../modules/hosts/nix-cache.nix)
 - `nixos-snapper` — [hosts/nixos/snapper.nix](../../modules/hosts/nixos/snapper.nix)
