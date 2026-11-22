@@ -62,8 +62,8 @@
 let
   # Tag wydania, które zawiera poniższy silnik: asset istnieje tylko tam, więc
   # nie wynika z `version` (nowszy Control działa ze starszym silnikiem).
-  engineTag = "v0.2.16";
-  engineVersion = "0.1.62";
+  engineTag = "v0.2.19";
+  engineVersion = "0.1.65";
 
   python = python3.withPackages (
     ps: with ps; [
@@ -114,13 +114,13 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "strata";
-  version = "0.2.18";
+  version = "0.2.19";
 
   src = fetchFromGitHub {
     owner = "Niko1221";
     repo = "Strata";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-CR1oBVBBk3cOTqYiwIRhMNZeU+asIVvRHoWnbw8ZiRM=";
+    hash = "sha256-hoqWE28i0b1R1+//WJMqk1wYmvfh2uNHd4yiL9U66RA=";
   };
 
   # Silnik ma własną numerację, więc engineTag i engineVersion podbija się
@@ -128,7 +128,7 @@ stdenv.mkDerivation (finalAttrs: {
   # `nix-update -F strata --custom-dep engine`.
   engine = fetchurl {
     url = "https://github.com/Niko1221/Strata/releases/download/${engineTag}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
-    hash = "sha256-ZyPhtrYEK/4dNocj6/hzr7D6ZfTxkI2UjdhlCY9s+54=";
+    hash = "sha256-d6b9kz1B8ZaMBp/gSZX3KRKHNdD8fFPkRt1KH5x/v0k=";
   };
 
   nativeBuildInputs = [
