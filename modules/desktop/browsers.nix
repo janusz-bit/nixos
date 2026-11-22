@@ -1,4 +1,4 @@
-# Przeglądarki: Helium, ungoogled-chromium, Firefox, Tor Browser.
+# Przeglądarki: Helium, ungoogled-chromium, Firefox, Tor Browser, Mullvad Browser.
 #
 # Helium (pakiet lokalny modules/packages/_helium) nie ma brandingu Chrome, więc
 # czyta polityki tylko z wkompilowanego /etc/chromium/policies, gdzie pisze
@@ -21,6 +21,7 @@ _: {
         helium
         ungoogled-chromium
         tor-browser
+        mullvad-browser
       ];
 
       programs.firefox.enable = true;
