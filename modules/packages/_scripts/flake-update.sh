@@ -42,8 +42,8 @@ nix-update --commit --system x86_64-linux -F waywallen-kde-plugin
 
 echo "Updating strata..."
 # engineTag/engineVersion podbija się RĘCZNIE
-# w modules/packages/_strata/default.nix (SHA256SUMS.txt wydania);
-# nix-update podbija tylko version i src.
+# w modules/packages/_strata/default.nix (SHA256SUMS.txt wydania; potem
+# --custom-dep engine --custom-dep inkling); nix-update podbija tylko version i src.
 nix-update --commit -F strata
 echo "Updating unsloth-desktop..."
 # Wszystkie wydania maja sufiks -beta, wiec nix-update wymaga --version=unstable.

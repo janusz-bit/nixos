@@ -10,12 +10,15 @@
 # silnik porównuje min_runtime) ten sam projekt CMake (engine/CMakeLists.txt)
 # co w archiwum upstreamu.
 # Silnik to gotowy pakiet CUDA 13 z tego samego wydania (sm_75/86/89/120,
-# z dołączonymi cudart i cuBLAS): upstream buduje go CUDA 13.0, bo 13.2
+# z dołączonymi cudart i cuBLAS); obok niego leży osobny silnik
+# strata-inkling (components/shapes/inkling2), bo Inkling-2-Mini (domyślny
+# model gołego `strata launch`) nie biegnie na silniku Qwen, a Control
+# pobrałby go do katalogu komponentów w store: upstream buduje go CUDA 13.0, bo 13.2
 # źle kompiluje sm_120, a build ze źródeł to lokalna kompilacja CUDA.
 # autoPatchelf zmienia binarki, a Control sprawdza przy każdym starcie
 # sha256 i rozmiar każdego pliku z engine-component.json oraz podpis
 # ed25519 manifestu, więc manifest dostaje nowe sumy i signature = null
-# (silnik figuruje jako unsigned). Autentyczność zapewnia hash fetchurl,
+# (oba silniki figurują jako unsigned). Autentyczność zapewnia hash fetchurl,
 # zgodny z SHA256SUMS.txt wydania. libcuda.so.1 (sterownik) ładuje się przez
 # LD_LIBRARY_PATH z wrappera, bo dlopen robią też sondy GPU w Pythonie.
 #
@@ -36,15 +39,17 @@
 # version i src. Silnik ma własną numerację, a jego asset leży tylko
 # w wydaniu, które go wydało, więc engineTag i engineVersion podbija się
 # RĘCZNIE z SHA256SUMS.txt wydania (potem `nix-update -F strata
-# --custom-dep engine` przelicza hash). Nowszy Control ze starszym
+# --custom-dep engine --custom-dep inkling` przelicza oba hashe; strata-inkling
+# wychodzi w tym samym wydaniu i z tą samą wersją co silnik). Nowszy Control ze starszym
 # silnikiem działa: to silnik deklaruje min_runtime. Dlatego version, src
 # i engine są atrybutami tej derywacji, a nie kryją się
 # w wrapperze — tylko wtedy nix-update widzi położenie version/src
 # i podmienia hashe.
 #
 # Sprawdzenie: `nix build .#strata` (installCheck uruchamia `strata
-# --version`), potem na laptopie `strata components engine` (usable: true)
-# i `strata launch --family coder --model IQ1_M --plan`.
+# --version`), potem na laptopie `strata components engine` (usable: true,
+# także w wierszu inkling2), `strata launch --family coder --model IQ1_M
+# --plan` i gołe `strata launch` (Inkling-2-Mini).
 {
   lib,
   stdenv,
@@ -124,11 +129,15 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   # Silnik ma własną numerację, więc engineTag i engineVersion podbija się
-  # ręcznie (SHA256SUMS.txt wydania); hash przelicza
-  # `nix-update -F strata --custom-dep engine`.
+  # ręcznie (SHA256SUMS.txt wydania); hashe przelicza
+  # `nix-update -F strata --custom-dep engine --custom-dep inkling`.
   engine = fetchurl {
     url = "https://github.com/Niko1221/Strata/releases/download/${engineTag}/strata-engine-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
     hash = "sha256-d6b9kz1B8ZaMBp/gSZX3KRKHNdD8fFPkRt1KH5x/v0k=";
+  };
+  inkling = fetchurl {
+    url = "https://github.com/Niko1221/Strata/releases/download/${engineTag}/strata-inkling-${engineVersion}-linux-x86_64-cuda-cuda13.tar.gz";
+    hash = "sha256-tRMckCkVhRCY3OODyIscSnQYqipQR4koguhvajadv4Y=";
   };
 
   nativeBuildInputs = [
@@ -169,21 +178,25 @@ stdenv.mkDerivation (finalAttrs: {
       | head -n 1 > $app/VERSION
     test -s $app/VERSION
 
-    engine=$app/components/engine/${engineVersion}-linux-x86_64-cuda-cuda13
-    mkdir -p $engine
-    tar -xzf ${finalAttrs.engine} -C $engine
-    autoPatchelf $engine
-    (
-      cd $engine
-      jq -r '.files[].path' engine-component.json | while IFS= read -r file; do
-        jq -n --arg path "$file" \
-          --arg sha256 "$(sha256sum "$file" | cut -d ' ' -f 1)" \
-          --argjson bytes "$(stat -c %s "$file")" \
-          '{ $path, $sha256, $bytes }'
-      done | jq --slurpfile files /dev/stdin '.files = $files | .signature = null' \
-        engine-component.json > $TMPDIR/engine-component.json
-    )
-    mv $TMPDIR/engine-component.json $engine/engine-component.json
+    installEngine() {
+      local engine=$1/${engineVersion}-linux-x86_64-cuda-cuda13
+      mkdir -p $engine
+      tar -xzf $2 -C $engine
+      autoPatchelf $engine
+      (
+        cd $engine
+        jq -r '.files[].path' engine-component.json | while IFS= read -r file; do
+          jq -n --arg path "$file" \
+            --arg sha256 "$(sha256sum "$file" | cut -d ' ' -f 1)" \
+            --argjson bytes "$(stat -c %s "$file")" \
+            '{ $path, $sha256, $bytes }'
+        done | jq --slurpfile files /dev/stdin '.files = $files | .signature = null' \
+          engine-component.json > $TMPDIR/engine-component.json
+      )
+      mv $TMPDIR/engine-component.json $engine/engine-component.json
+    }
+    installEngine $app/components/engine ${finalAttrs.engine}
+    installEngine $app/components/shapes/inkling2/engine ${finalAttrs.inkling}
 
     install -Dm755 ${lib.getExe wrapper} $out/bin/strata
     substituteInPlace $out/bin/strata --replace-fail '@app@' $app
