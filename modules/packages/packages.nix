@@ -16,6 +16,7 @@ let
     helium = pkgs.callPackage ./_helium { };
     opencharts = pkgs.callPackage ./_opencharts { };
     strata = pkgs.callPackage ./_strata { };
+    thedarkmod = pkgs.callPackage ./_thedarkmod { };
     unsloth-desktop = pkgs.callPackage ./_unsloth-desktop { };
     waywallen = pkgs.callPackage ./_waywallen { };
     waywallen-kde-plugin = pkgs.callPackage ./_waywallen-kde-plugin { };

@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 56 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 57 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -70,6 +70,7 @@ flowchart LR
   gaming --> gaming_gamemode[gaming-gamemode]
   gaming --> gaming_launchers[gaming-launchers]
   gaming --> gaming_dbd[gaming-dbd]
+  gaming --> gaming_thedarkmod[gaming-thedarkmod]
   hardware_LOQ_15IRX10 --> hardware_lenovo[hardware-lenovo]
   hardware_LOQ_15IRX10 --> hardware_x86_64_v3[hardware-x86-64-v3]
 ```
@@ -117,6 +118,7 @@ flowchart LR
 - `gaming-gamemode` — [gaming/gamemode.nix](../../modules/gaming/gamemode.nix)
 - `gaming-launchers` — [gaming/launchers.nix](../../modules/gaming/launchers.nix)
 - `gaming-steam` — [gaming/steam.nix](../../modules/gaming/steam.nix)
+- `gaming-thedarkmod` — [gaming/thedarkmod.nix](../../modules/gaming/thedarkmod.nix)
 - `hardware-LOQ-15IRX10` — [hardware/LOQ-15IRX10/default.nix](../../modules/hardware/LOQ-15IRX10/default.nix)
 - `hardware-lenovo` — [hardware/lenovo.nix](../../modules/hardware/lenovo.nix)
 - `hardware-x86-64-v3` — [hardware/x86-64-v3.nix](../../modules/hardware/x86-64-v3.nix)
