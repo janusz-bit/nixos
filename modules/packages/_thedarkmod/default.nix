@@ -1,7 +1,10 @@
 {
   lib,
   buildFHSEnv,
+  fetchurl,
   fetchzip,
+  imagemagick,
+  runCommand,
   writeShellApplication,
 }:
 
@@ -50,6 +53,29 @@ buildFHSEnv (
       '';
     };
 
+    # Instalator nie ma ikony, a gra leży poza store, więc logo bierzemy z ikony
+    # Windows ze źródeł silnika (oficjalny mirror SVN). Wpisy 10-14 (od zera)
+    # to komplet 32-bitowych RGBA; wcześniejsze są 4/8-bitowe albo ditherowane,
+    # a jeden 4-bitowy jest uszkodzony, przez co icotool kończy się błędem
+    # na całym pliku — ImageMagick czyta tylko wskazany wpis.
+    icons =
+      runCommand "thedarkmod-icons"
+        {
+          nativeBuildInputs = [ imagemagick ];
+          src = fetchurl {
+            url = "https://raw.githubusercontent.com/stgatilov/darkmod_src/1ebe26440ffbeccb64e9c047c13a4f39e4eae21a/sys/win32/rc/res/darkmod.ico";
+            hash = "sha256-D2+o+Uq1/VWEcS1dzDAQzxdlIPYnwbXkjZxqdjZUdi0=";
+          };
+        }
+        ''
+          for entry in 10:256 11:48 12:32 13:24 14:16; do
+            size=''${entry#*:}
+            dir=$out/share/icons/hicolor/''${size}x''${size}/apps
+            mkdir -p "$dir"
+            magick "$src[''${entry%%:*}]" "png32:$dir/thedarkmod.png"
+          done
+        '';
+
     tdm-installer = buildFHSEnv {
       pname = "tdm-installer";
       inherit (finalAttrs) version;
@@ -72,9 +98,11 @@ buildFHSEnv (
 
     extraInstallCommands = ''
       ln -s ${lib.getExe tdm-installer} $out/bin/tdm-installer
+      mkdir -p $out/share
+      ln -s ${icons}/share/icons $out/share/icons
     '';
 
-    passthru = { inherit launcher tdm-installer; };
+    passthru = { inherit icons launcher tdm-installer; };
 
     meta = {
       description = "Stealth game in the style of Thief, run through its official installer";

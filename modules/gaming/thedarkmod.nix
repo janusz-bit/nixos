@@ -17,6 +17,7 @@ _: {
           desktopName = "The Dark Mod";
           comment = "Stealth game in the style of Thief";
           exec = "${lib.getExe' pkgs.gamemode "gamemoderun"} ${lib.getExe pkgs.thedarkmod}";
+          icon = "thedarkmod";
           categories = [ "Game" ];
         })
       ];
