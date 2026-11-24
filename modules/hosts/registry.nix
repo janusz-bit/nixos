@@ -41,6 +41,17 @@
             type = lib.types.listOf lib.types.raw;
             description = "Moduły NixOS hosta w kolejności importu.";
           };
+          cachedBy = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = ''
+              Repozytorium GitHub (owner/repo), którego CI buduje zamknięcie
+              hosta do cache'a w tailnecie (hosts/nix-cache.nix) i po komplecie
+              taguje cached/nixos-<rev>. Na ten
+              tag czekają workflow CI hosta (github-actions.nix) i aliasy
+              update (hosts/base/rebuild.nix); null = zamknięcie z cache.nixos.org.
+            '';
+          };
           buildOnTags = lib.mkOption {
             type = lib.types.bool;
             default = true;
@@ -58,7 +69,10 @@
         {
           nixpkgs.hostPlatform = host.system;
           networking.hostName = name;
-          customBot.flakeTarget = name;
+          customBot = {
+            flakeTarget = name;
+            inherit (host) cachedBy;
+          };
         }
       ];
     }

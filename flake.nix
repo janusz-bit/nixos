@@ -13,6 +13,20 @@
     # patche kernela są pod własny nixpkgs tego wejścia.
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    # Userspace laptopa pod x86-64-v3 z flagami repozytoriów v3 CachyOS
+    # (hosts/nixos). Moduł i overlay biorą nixpkgs systemu, a flake jest na
+    # flake-parts i import-tree jak ten, stąd follows na wszystkie wejścia.
+    # Niczego z tego świata nie ma w cache.nixos.org: buduje go CI tamtego
+    # repo do janusz-bit.cachix.org i taguje cached/nixos-<rev>, na który
+    # czeka update (hosts/base/rebuild.nix).
+    nixpkgs-v3.url = "github:janusz-bit/nixpkgs-v3";
+    nixpkgs-v3.inputs = {
+      nixpkgs.follows = "nixpkgs";
+      flake-parts.follows = "flake-parts";
+      import-tree.follows = "import-tree";
+      git-hooks-nix.follows = "git-hooks-nix";
+      github-actions-nix.follows = "github-actions-nix";
+    };
     # Vendorowy kernel RPi4 (hardware/raspberry-pi-4) z gotowego cache
     # nixos-raspberrypi zamiast kompilacji kernela z nixos-hardware. NIE
     # ustawiać follows: cache ma kernel zbudowany własnym nixpkgs tego wejścia.

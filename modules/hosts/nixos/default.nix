@@ -2,16 +2,25 @@
 # offload) — stacja robocza z Plasmą 6 i grami. Tu tylko wpis rejestru,
 # tożsamość (stateVersion, konto) i lista modułów hosta; dysk i rozruch:
 # disko.nix, snapper.nix, boot.nix obok.
-{ self, ... }:
+{
+  config,
+  inputs,
+  self,
+  ...
+}:
 {
   hosts.nixos = {
     system = "x86_64-linux";
     # Ciężki build (~400 pakietów, 3-5 h) — CI tylko przy PR i ręcznie.
     buildOnTags = false;
+    # Userspace x86-64-v3 (nixpkgs-v3) jest w cache'u RPi dopiero, gdy CI
+    # nixpkgs-v3 zbuduje cały świat tej rewizji.
+    cachedBy = "${config.customTop.owner}/nixpkgs-v3";
     modules = [
       self.modules.nixos.base
       self.modules.nixos.nixos
       self.modules.nixos.hardware-LOQ-15IRX10
+      inputs.nixpkgs-v3.nixosModules.default
     ];
   };
 

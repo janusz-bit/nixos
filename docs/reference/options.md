@@ -12,6 +12,18 @@ Czy CI buduje toplevel hosta także przy tagach v* (false dla wielogodzinnych bu
 - Default: `true`
 - Declared in: [hosts/registry.nix](../../modules/hosts/registry.nix)
 
+### `hosts.<name>.cachedBy`
+
+Repozytorium GitHub (owner/repo), którego CI buduje zamknięcie
+hosta do cache'a w tailnecie (hosts/nix-cache.nix) i po komplecie
+taguje cached/nixos-\<rev>. Na ten
+tag czekają workflow CI hosta (github-actions.nix) i aliasy
+update (hosts/base/rebuild.nix); null = zamknięcie z cache.nixos.org.
+
+- Type: null or string
+- Default: `null`
+- Declared in: [hosts/registry.nix](../../modules/hosts/registry.nix)
+
 ### `hosts.<name>.modules`
 
 Moduły NixOS hosta w kolejności importu.
@@ -278,6 +290,14 @@ Główne konto laptopa (jego customBot.defaultUser).
 - Declared in: [options.nix](../../modules/options.nix)
 
 ## Host options (`customBot`, NixOS)
+
+### `customBot.cachedBy`
+
+Repozytorium (owner/repo), którego tag cached/nixos-\<rev> musi istnieć przed update; ustawia go rejestr hostów (hosts.\<host>.cachedBy).
+
+- Type: null or string
+- Default: `null`
+- Declared in: [hosts/base/options.nix](../../modules/hosts/base/options.nix)
 
 ### `customBot.defaultUser`
 

@@ -47,11 +47,17 @@ in
         aarch64-linux = "ubuntu-24.04-arm";
       };
 
+      # cachedBy: świat x86-64-v3 laptopa leży w cache'u RPi podpisany kluczem
+      # nixpkgs-v3, więc tylko jego build ufa temu kluczowi (jak sam laptop).
       baseSteps =
-        nixCache:
+        nixCache: cachedBy:
         let
           substituters = [ customTop.cachix.url ] ++ lib.optional nixCache customTop.nixCache.url;
-          publicKeys = [ customTop.cachix.pubKey ] ++ lib.optional nixCache customTop.nixCache.publicKey;
+          publicKeys = [
+            customTop.cachix.pubKey
+          ]
+          ++ lib.optional nixCache customTop.nixCache.publicKey
+          ++ lib.optional (cachedBy != null) customTop.nixCache.v3PublicKey;
         in
         [
           {
@@ -123,7 +129,25 @@ in
           onMaster ? false,
           # Dołącza do tailnetu, pobiera z cache'a RPi i wysyła do niego wynik.
           nixCache ? false,
+          # hosts.<host>.cachedBy: zamknięcie buduje CI innego repo (świat
+          # x86-64-v3 to tysiące derywacji, żaden 6-godzinny job go nie
+          # zbuduje). Build tylko, gdy tamto repo ma tag cached/nixos-<sha>
+          # (komplet w cache'u RPi), inaczej dry run z liczbą brakujących
+          # derywacji i ostrzeżeniem.
+          cachedBy ? null,
         }:
+        let
+          gated = lib.concatStringsSep "\n" [
+            "sha=\${{ github.event.pull_request.head.sha || github.sha }}"
+            "if git ls-remote --exit-code https://github.com/${cachedBy} \"refs/tags/cached/nixos-$sha\" >/dev/null; then"
+            "  ${command}"
+            "else"
+            "  missing=$(nix build \".#${buildTarget}\" --dry-run --accept-flake-config 2>&1 | grep -c '\\.drv$' || true)"
+            "  echo \"::warning::${cachedBy} has no cached/nixos-$sha yet: $missing derivations are in no cache. Build them there: gh workflow run build.yml --repo ${cachedBy} -f nixos_ref=$sha\""
+            "  echo \"$missing derivations of ${name} are not cached yet (${cachedBy}, cached/nixos-$sha missing); build skipped.\" >> \"$GITHUB_STEP_SUMMARY\""
+            "fi"
+          ];
+        in
         {
           inherit name runName;
           # Least privilege: buildy tylko czytają repo; id-token to logowanie
@@ -144,11 +168,11 @@ in
           jobs.build = {
             runsOn = archToRunner.${arch};
             steps =
-              baseSteps nixCache
+              baseSteps nixCache cachedBy
               ++ [
                 {
                   inherit name;
-                  run = command;
+                  run = if cachedBy == null then command else gated;
                 }
               ]
               ++ lib.optional nixCache nixCachePush;
@@ -187,6 +211,7 @@ in
               arch = host.system;
               tags = host.buildOnTags;
               nixCache = lib.elem name nixCacheHosts;
+              inherit (host) cachedBy;
             }) hosts
             // {
               raspberry-pi-4-sd-image = {
@@ -222,7 +247,7 @@ in
               concurrency.group = "cachyos-kernel-update";
               jobs.update-and-build = {
                 runsOn = archToRunner.x86_64-linux;
-                steps = baseSteps true ++ [
+                steps = baseSteps true null ++ [
                   {
                     name = "Update nix-cachyos-kernel flake input";
                     run = "nix flake update nix-cachyos-kernel";
