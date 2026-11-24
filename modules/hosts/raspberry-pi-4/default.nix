@@ -26,6 +26,7 @@
         self.modules.nixos.base-fail2ban
         self.modules.nixos.base-ssh-lan
         self.modules.nixos.base-lockdown
+        self.modules.nixos.base-t3code-policy
         self.modules.nixos.hardware-raspberry-pi-4
         self.modules.nixos.hardware-raspberry-pi-4-fan
         self.modules.nixos.rpi-resources
