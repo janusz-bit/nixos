@@ -6,8 +6,8 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 57 |
-| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 36 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 58 |
+| [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 37 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
 ## nixos
@@ -30,6 +30,7 @@ flowchart LR
   host_nixos --> gaming[gaming]
   host_nixos --> base_fail2ban[base-fail2ban]
   host_nixos --> base_lockdown[base-lockdown]
+  host_nixos --> base_t3code_policy[base-t3code-policy]
   host_nixos --> nixos_ai[nixos-ai]
   host_nixos --> nixos_tailscale[nixos-tailscale]
   host_nixos --> nixos_t3code_laptop[nixos-t3code-laptop]
@@ -95,6 +96,7 @@ flowchart LR
 - `base-shell` — [hosts/base/shell.nix](../../modules/hosts/base/shell.nix)
 - `base-ssh` — [hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)
 - `base-ssh-lan` — [hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)
+- `base-t3code-policy` — [hosts/base/t3code-policy.nix](../../modules/hosts/base/t3code-policy.nix)
 - `desktop` — [desktop/default.nix](../../modules/desktop/default.nix)
 - `desktop-ai` — [desktop/ai.nix](../../modules/desktop/ai.nix)
 - `desktop-apps` — [desktop/apps.nix](../../modules/desktop/apps.nix)
@@ -145,6 +147,7 @@ flowchart LR
   host_raspberry_pi_4 --> base_fail2ban[base-fail2ban]
   host_raspberry_pi_4 --> base_ssh_lan[base-ssh-lan]
   host_raspberry_pi_4 --> base_lockdown[base-lockdown]
+  host_raspberry_pi_4 --> base_t3code_policy[base-t3code-policy]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4[hardware-raspberry-pi-4]
   host_raspberry_pi_4 --> hardware_raspberry_pi_4_fan[hardware-raspberry-pi-4-fan]
   host_raspberry_pi_4 --> rpi_resources[rpi-resources]
@@ -197,6 +200,7 @@ flowchart LR
 - `base-shell` — [hosts/base/shell.nix](../../modules/hosts/base/shell.nix)
 - `base-ssh` — [hosts/base/ssh.nix](../../modules/hosts/base/ssh.nix)
 - `base-ssh-lan` — [hosts/base/ssh-lan.nix](../../modules/hosts/base/ssh-lan.nix)
+- `base-t3code-policy` — [hosts/base/t3code-policy.nix](../../modules/hosts/base/t3code-policy.nix)
 - `hardware-raspberry-pi-4` — [hardware/raspberry-pi-4/default.nix](../../modules/hardware/raspberry-pi-4/default.nix)
 - `hardware-raspberry-pi-4-fan` — [hardware/raspberry-pi-4/fan.nix](../../modules/hardware/raspberry-pi-4/fan.nix)
 - `raspberry-pi-4` — [hosts/raspberry-pi-4/default.nix](../../modules/hosts/raspberry-pi-4/default.nix)

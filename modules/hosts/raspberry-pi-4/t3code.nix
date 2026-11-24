@@ -15,7 +15,7 @@
 # - Uwierzytelnia sam T3 (parowanie, sesje). `t3 serve` wypisuje przy starcie
 #   token parowania właściciela (5 min); LogFilterPatterns nie wpuszcza go do
 #   journala, który czytają też inne konta (grupy wheel i systemd-journal).
-#   Telemetria wyłączona.
+#   Telemetrię wyłącza polityka T3 (base-t3code-policy).
 #
 # Jednorazowo: zalogować RPi do Tailscale i włączyć Serve (nagłówek
 # hosts/tailscale.nix), logowanie agenta:
@@ -111,7 +111,6 @@
             pkgs.git
             config.nix.package
           ];
-          environment.T3CODE_TELEMETRY_ENABLED = "false";
           serviceConfig = {
             User = user;
             Group = user;
