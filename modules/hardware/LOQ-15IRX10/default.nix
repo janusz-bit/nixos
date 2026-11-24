@@ -41,7 +41,20 @@
       '';
 
       hardware = {
-        facter.reportPath = ./facter.json;
+        facter = {
+          reportPath = ./facter.json;
+          # Facter wstawia do initrd sterowniki wszystkich kart z raportu
+          # (i915, nvidia). Załadowany tam nvidia z
+          # PreserveVideoMemoryAllocations odmawia zamrożenia przed
+          # odtworzeniem obrazu hibernacji (`nv_pmops_freeze [nvidia] returns
+          # -5`, `PM: hibernation: resume failed (-5)`), więc wznowienie nigdy
+          # się nie udaje. W initrd nie jest potrzebny: panel jest na iGPU, a
+          # nvidia-drm i tak ładuje się dopiero w stage 2.
+          # Sprawdzenie: `systemctl hibernate` wraca do sesji, a
+          # `journalctl -k -b | grep 'PM: hibernation'` nie pokazuje
+          # `resume failed`.
+          detected.boot.graphics.kernelModules = [ "i915" ];
+        };
         graphics = {
           enable = true;
           enable32Bit = true;
