@@ -56,7 +56,10 @@
             antigravity-cli
             inputs.llm-agents.packages.${system}.opencode2
             pi-coding-agent
-            (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
+            # Fork PrismML (niskobitowe formaty Bonsai) zamiast nixpkgs
+            # llama-cpp: te same binarki, a czyta też modele forka. Nie mieszać
+            # z nixpkgs llama-cpp w jednym PATH (osobne, niekompatybilne ggml-*).
+            (llama-cpp-prism.override { cudaSupport = config.hardware.nvidia.enabled; })
             self.packages.${system}.unsloth-desktop
             inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
           ]

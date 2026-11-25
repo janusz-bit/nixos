@@ -78,6 +78,39 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `grep '^Revision' /proc/cpuinfo` coś zwraca — wtedy zmienną usunąć
   i sprawdzić `systemctl status pwm-fan`.
 
+### 9. llama.cpp (fork PrismML) — testy niezgodne z flagami budowania
+
+- **Od:** 2026-10-20 (pakiet usunięty 2026-11-10, przywrócony 2026-11-25).
+- **Plik:** `modules/packages/_llama-cpp-prism/default.nix` (`postPatch` — dwa
+  `substituteInPlace --replace-fail`, `disabledTests` i `ctestFlags` z regexem
+  `-E`).
+- **Objaw (b10787):** przy `GGML_BACKEND_DL=ON` i `BUILD_SHARED_LIBS` (flagi
+  z nixpkgs) `test-dfly-fusion` nie linkuje
+  (`undefined reference to ggml_graph_compute`), `test-kv-mean-center` pada
+  z `no backends are loaded`, `test-llama-archs` na asercie
+  `ggml_is_padded_1d` w grafie qwen35, a `test-generate-models` na
+  `key not found in model: dspark.dspark.block_size`; `test-llama-context`
+  przerywa na `ggml_backend_sched_alloc_splits: unexpected graph reallocation`;
+  `test-save-load-state` i testy rollback wymagają fixture'ów pobierających
+  modele z sieci.
+- **Przyczyna:** `test-dfly-fusion` i `test-kv-mean-center` to testy forka:
+  pierwszy używa wewnętrznego `ggml_graph_compute` (mainline bramkuje tak
+  `test-barrier` przez `if (NOT GGML_BACKEND_DL)`), drugi nie woła
+  `llama_backend_init()` — ta sama klasa błędu, którą upstream naprawił
+  w `test-llama-archs` (ggml-org/llama.cpp#30034). Asercja qwen35 i brak
+  metadanych dspark to błędy forka w kodzie grafu/testów.
+- **Obejście:** `test-dfly-fusion` pod `if (NOT GGML_BACKEND_DL)` (jak
+  mainline), `llama_backend_init()` w `test-kv-mean-center`, reszta w
+  `disabledTests`. Wydanie `prism-b12178` (commit `03ec600`) ma nadal
+  nieosłonięty `test-dfly-fusion` i `test-kv-mean-center` bez
+  `llama_backend_init()` (sprawdzone w źródłach); listę `disabledTests`
+  przeniesiono z b10787 i dodano `test-llama-context(-model)`. Plik wykluczeń
+  `ctestCheckHook` nie zadziałał w tym wydaniu, więc lista idzie też jako
+  regex `ctest -E`.
+- **Kiedy usunąć:** gdy fork naprawi te testy — `--replace-fail` padnie wtedy
+  na zmienionym kontekście; sprawdzenie: `nix build .#llama-cpp-prism`
+  z `doCheck` i bez `postPatch`/wyłączeń musi przejść.
+
 ### 14. Kernel RPi4 z nixos-raspberrypi — `kernelFile` i `deviceTree.enable` podane ręcznie
 
 - **Od:** 2026-11-04.

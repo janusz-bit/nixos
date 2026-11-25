@@ -14,6 +14,7 @@ let
   localPackages = pkgs: {
     bootdev-cli = pkgs.callPackage ./_bootdev-cli { };
     helium = pkgs.callPackage ./_helium { };
+    llama-cpp-prism = pkgs.callPackage ./_llama-cpp-prism { };
     opencharts = pkgs.callPackage ./_opencharts { };
     strata = pkgs.callPackage ./_strata { };
     thedarkmod = pkgs.callPackage ./_thedarkmod { };
