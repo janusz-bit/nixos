@@ -151,6 +151,19 @@ przejrzyj tę listę przy większych bumpach i przed `nix-collect-garbage`.
   `nix run .#nixosConfigurations.nixos.pkgs.nix-update -- -F <pakiet>`
   musi podbić wersję i hash.
 
+### 17. Ostrzeżenie Chaotic-Nyx o aliasie proton-cachyos
+
+- **Od:** 2026-11-25.
+- **Plik:** `modules/gaming/steam.nix` (`extraCompatPackages`).
+- **Objaw:** `evaluation warning: Chaotic-Nyx's proton-cachyos was renamed to
+  proton-cachyos-bin_edge` przy każdej ewaluacji.
+- **Przyczyna:** `overlays/default.nix` Chaotic-Nyx definiuje
+  `proton-cachyos-bin_x86_64_v3` przez `final.proton-cachyos.override`,
+  czyli przez własny przestarzały alias.
+- **Obejście:** ten sam override na `proton-cachyos-bin_edge` w module.
+- **Kiedy usunąć:** gdy overlay Chaotic-Nyx przestanie używać aliasu;
+  wróć do `pkgs.proton-cachyos-bin_x86_64_v3` (ewaluacja bez ostrzeżenia).
+
 ## Zamknięte
 
 - **Rust bez bibliotek systemowych — overlay `cargo-system-libs` (wpis 15)**
