@@ -1,10 +1,11 @@
 # Fork llama.cpp z PrismML (gałąź prism, wydania jako tagi prism-bNNNNN-rev):
 # formaty niskobitowe i runtime modeli Bonsai (PQ2_0, Q2_0_g64, dspark).
 # Pakiet lokalny, bo w nixpkgs go nie ma, a README forka zabrania mieszania
-# jego bibliotek ggml-* ze stockowym llama.cpp. Host nixos stawia go w miejsce
-# nixpkgs llama-cpp (modules/desktop/ai.nix); sam atrybut llama-cpp zostaje
-# nietknięty, bo whisper-cpp (przez kdenlive i ffmpeg-full) buduje się na
-# nagłówkach stockowego llama.cpp.
+# jego bibliotek ggml-* ze stockowym llama.cpp. Host nixos ma go pod nazwą
+# `llama-prism` (wrapper w modules/desktop/ai.nix), a w PATH zostaje stockowy
+# llama.cpp;
+# whisper-cpp (przez kdenlive i ffmpeg-full) też buduje się na nagłówkach
+# stockowego llama.cpp.
 #
 # Samodzielna derywacja, nie overrideAttrs llama-cpp z nixpkgs: fork stoi na
 # własnej wersji mainline, a bump bazy z 0.6.0 na 0.8.0 zmienił jej
@@ -14,8 +15,8 @@
 #
 # Sprawdzenie: `nix build .#llama-cpp-prism` (CPU) i `./result/bin/llama
 # --version`; wariant CUDA (cudaSupport z hardware.nvidia.enabled) pokazuje
-# CUDA0 w `llama serve --list-devices`, bez nvidia-offload (CUDA widzi dGPU
-# bez zmiennych PRIME offload).
+# CUDA0 w `llama-prism serve --list-devices`, bez nvidia-offload (CUDA widzi
+# dGPU bez zmiennych PRIME offload).
 {
   lib,
   autoAddDriverRunpath,

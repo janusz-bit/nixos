@@ -7,7 +7,8 @@
 # użytkownika, bo Pi zapisuje w nim wybrany model, /settings i ostatnią wersję
 # changelogu.
 #
-# Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII); `pi --list-models`
+# Sprawdzenie: `ollama ps` (kolumna PROCESSOR: GPU przy NVIDII); `llama-prism
+# --version` (fork pod aliasem, stockowy `llama` zostaje w PATH); `pi --list-models`
 # (modele z ai.models), w sesji Pi `/skill:` podpowiada skille z ai.skills.
 { inputs, self, ... }:
 {
@@ -22,6 +23,11 @@
       inherit (pkgs.stdenv.hostPlatform) system;
       user = config.customBot.defaultUser;
       piDir = "${config.users.users.${user}.home}/.pi";
+      # Fork PrismML ma te same nazwy binarek co stockowy llama.cpp, więc
+      # nie ląduje w PATH — wrapper `llama-prism` daje mu własną nazwę.
+      llamaCppPrism = pkgs.llama-cpp-prism.override {
+        cudaSupport = config.hardware.nvidia.enabled;
+      };
     in
     {
       services.ollama = {
@@ -56,10 +62,14 @@
             antigravity-cli
             inputs.llm-agents.packages.${system}.opencode2
             pi-coding-agent
-            # Fork PrismML (niskobitowe formaty Bonsai) zamiast nixpkgs
-            # llama-cpp: te same binarki, a czyta też modele forka. Nie mieszać
-            # z nixpkgs llama-cpp w jednym PATH (osobne, niekompatybilne ggml-*).
-            (llama-cpp-prism.override { cudaSupport = config.hardware.nvidia.enabled; })
+            (llama-cpp.override { cudaSupport = config.hardware.nvidia.enabled; })
+            # `llama-prism <polecenie>` to wielofunkcyjny `llama` forka (serve,
+            # cli, bench, quantize, perplexity); `llama` w PATH to stockowy.
+            (pkgs.writeShellApplication {
+              name = "llama-prism";
+              runtimeInputs = [ llamaCppPrism ];
+              text = ''exec llama "$@"'';
+            })
             self.packages.${system}.unsloth-desktop
             inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
           ]
