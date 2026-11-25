@@ -76,8 +76,13 @@
           # Strata ma tylko silnik CUDA (pakiet z wydania, _strata).
           ++ lib.optional config.hardware.nvidia.enabled strata;
 
-        # Pi bez telemetrii instalacji i nagłówków atrybucji providera.
-        sessionVariables.PI_TELEMETRY = "0";
+        sessionVariables = {
+          # Pi bez telemetrii instalacji i nagłówków atrybucji providera.
+          PI_TELEMETRY = "0";
+          # Bez zapytania pi.dev o najnowszą wersję: Pi z nixpkgs podbija się
+          # razem z nixpkgs, `pi update` go nie zaktualizuje.
+          PI_SKIP_VERSION_CHECK = "1";
+        };
       };
 
       # Katalog skilli przez L bez +: nie usuwa katalogu, który użytkownik

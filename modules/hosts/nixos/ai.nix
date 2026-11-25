@@ -2,8 +2,8 @@
 # programem, nixos-system z faktami o hoście, brulion z brulion-cli,
 # claude-usage z limitami subskrypcji Claude), paczki tstack
 # i frontend-design oraz lokalne modele na GPU — Qwen3.8 Flash-Next (Coder
-# IQ1_M i Gyro-M) z serwera Strata (Gyro-M jako domyślny model opencode2)
-# i Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
+# IQ1_M i Gyro-M) i Inkling-2-Mini z serwera Strata (Gyro-M jako domyślny
+# model opencode2) i Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
 # Tylko wybór; definicje są w modules/ai/. Port Strata jest otwarty
 # w tailnecie (np. dla Brulionu na telefonie: http://nixos.<tailnet>:8080/v1).
 #
@@ -32,6 +32,7 @@ _: {
           tstack.enable = true;
         };
         models = {
+          inkling-2-mini-sq-20.enable = true;
           ternary-bonsai-2-5-27b.enable = true;
           qwen3-8-flash-next-coder-iq1_m.enable = true;
           qwen3-8-flash-next-gyro-gyro-m.enable = true;

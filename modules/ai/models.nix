@@ -2,8 +2,8 @@
 # repozytorium zna, bez włączania ich: host wybiera je w swoim ai.nix, a ai-harness
 # zapisuje wybrane w konfiguracji Prime Agenta, Pi i opencode2. Zdalne: lokalna
 # Ollama (także modele chmurowe przez nią), Ollama Cloud i OpenRouter. Lokalne
-# na GPU: Qwen3.8-Flash-Next (Coder IQ1_M i Gyro-M) z serwera Strata (tylko
-# NVIDIA) oraz Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
+# na GPU: Qwen3.8-Flash-Next (Coder IQ1_M i Gyro-M) i Inkling-2-Mini z serwera
+# Strata (tylko NVIDIA) oraz Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
 #
 # Klucze API wstrzykują wrappery fish z agenix (base/agenix.nix); tu są tylko
 # nazwy zmiennych env.
@@ -141,6 +141,17 @@ _: {
         qwen3-8-flash-next-coder-iq1_m = strataModel "qwen3.8-flash-next-coder-iq1_m" "Qwen3.8-Flash-Next Coder IQ1_M (local)";
         # Gyro-M TQ2_0: jeden plik GGUF z tablicą n-gramów (pack gyro-gyro-m).
         qwen3-8-flash-next-gyro-gyro-m = strataModel "qwen3.8-flash-next-gyro-gyro-m" "Qwen3.8-Flash-Next Gyro-M TQ2_0 (local)";
+        # Gołe `strata launch --context 128k --no-api-key` (silnik inkling2,
+        # _strata). Bez myślenia i bez obrazów, więc flagi compat, które
+        # podaje Strata (supportsDeveloperRole, supportsReasoningEffort), Pi
+        # i tak stosuje tylko do modeli z reasoning.
+        inkling-2-mini-sq-20 = {
+          provider = "strata";
+          id = "inkling-2-mini-sq-20";
+          name = "Inkling-2-Mini (Strata, local)";
+          context = 131072;
+          output = 16384;
+        };
 
         # Uruchomić w katalogu z plikami .gguf:
         # llama-prism serve -m Ternary-Bonsai-2.5-27B-PTQ1_0.gguf
