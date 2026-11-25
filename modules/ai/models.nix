@@ -3,14 +3,14 @@
 # zapisuje wybrane w konfiguracji Prime Agenta, Pi i opencode2. Zdalne: lokalna
 # Ollama (także modele chmurowe przez nią), Ollama Cloud i OpenRouter. Lokalne
 # na GPU: Qwen3.8-Flash-Next (Coder IQ1_M i Gyro-M) z serwera Strata (tylko
-# NVIDIA).
+# NVIDIA) oraz Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
 #
 # Klucze API wstrzykują wrappery fish z agenix (base/agenix.nix); tu są tylko
 # nazwy zmiennych env.
 #
 # Sprawdzenie: `nix eval --raw .#nixosConfigurations.nixos.config.environment.etc.\"opencode/opencode.json\".text`
 # i `nix eval --raw .#nixosConfigurations.nixos.config.environment.etc.\"prime-agent/models.json\".text`;
-# po aktywacji `opencode2 models | grep strata/` (modele są na
+# po aktywacji `opencode2 models | grep -E 'strata/|llamacpp/'` (modele są na
 # liście także bez działającego serwera).
 _: {
   flake.modules.nixos.ai-models =
@@ -94,6 +94,16 @@ _: {
           baseUrl = "http://127.0.0.1:8080/v1";
           reasoningField = "reasoning_content";
         };
+        # Serwer forka PrismML (`llama-prism serve`, parametry w wpisie modelu)
+        # na 8080 — tym samym porcie co Strata, więc działa tylko jeden
+        # z tych serwerów naraz. Serwer bez --api-key, więc klucz jest formalny;
+        # tok myślenia oddaje w reasoning_content.
+        llamacpp = {
+          name = "llama.cpp (local)";
+          apiKey = "llamacpp";
+          baseUrl = "http://127.0.0.1:8080/v1";
+          reasoningField = "reasoning_content";
+        };
       };
 
       ai.models = {
@@ -131,6 +141,33 @@ _: {
         qwen3-8-flash-next-coder-iq1_m = strataModel "qwen3.8-flash-next-coder-iq1_m" "Qwen3.8-Flash-Next Coder IQ1_M (local)";
         # Gyro-M TQ2_0: jeden plik GGUF z tablicą n-gramów (pack gyro-gyro-m).
         qwen3-8-flash-next-gyro-gyro-m = strataModel "qwen3.8-flash-next-gyro-gyro-m" "Qwen3.8-Flash-Next Gyro-M TQ2_0 (local)";
+
+        # Uruchomić w katalogu z plikami .gguf:
+        # llama-prism serve -m Ternary-Bonsai-2.5-27B-PTQ1_0.gguf
+        #   --mmproj Ternary-Bonsai-2.5-27B-mmproj-BF16.gguf --no-mmproj-offload
+        #   --port 8080 -c 81920 -n 16384 -np 1 -ngl 99 -ctk q4_0 -ctv q4_0
+        #   -ub 256 --reasoning-effort medium
+        #   --reasoning-effort-allow xhigh,medium,low --cors-origins localhost
+        # Szablon czatu przyjmuje tylko podane poziomy effort, inny daje HTTP 500.
+        ternary-bonsai-2-5-27b = {
+          provider = "llamacpp";
+          id = "Ternary-Bonsai-2.5-27B-PTQ1_0.gguf";
+          name = "Ternary Bonsai 2.5 27B PTQ1_0 (local)";
+          input = [
+            "text"
+            "image"
+          ];
+          context = 81920;
+          output = 16384;
+          reasoning = {
+            efforts = [
+              "xhigh"
+              "medium"
+              "low"
+            ];
+            offEffort = "none";
+          };
+        };
       };
 
       assertions = lib.mapAttrsToList (name: model: {
