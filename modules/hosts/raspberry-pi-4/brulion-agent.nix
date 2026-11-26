@@ -8,24 +8,30 @@
 #
 # Agent to program z powłoką: działa jako osobne konto brulion-acp (bez sudo,
 # grup i sekretów poza hasłem aplikacji Nextclouda, bez dostępu do /var/lib
-# innych usług), a sparowany telefon nim steruje — kod parowania traktuj jak
-# hasło. Lokalnie do portu łączy się tylko root (proxy tailscaled,
-# customBot.tailscaleServe.users), a serwer i tak wymaga tokenu urządzenia.
-# Agent pochodzi z nixpkgs (claude-agent-acp), nie z `npx`.
+# innych usług), a sparowany telefon nim steruje. Parowanie bez kodu
+# (`--tailscale-serve`, docs/CLI.md „In a tailnet”): serwer pyta tailscaled
+# (whois), czyje urządzenie Serve przekazało, i paruje tylko urządzenia
+# użytkownika, na którego zalogowany jest RPi; reszta tailnetu potrzebuje kodu
+# z `brulion-acp pair`. Nagłówek Tailscale-User-Login bierze tylko wtedy, gdy
+# whois nikogo nie zna, a lokalnie do portu łączy się tylko root (proxy
+# tailscaled, customBot.tailscaleServe.users), więc żadne konto RPi go nie
+# podrobi. Agent pochodzi z nixpkgs (claude-agent-acp), nie z `npx`.
 #
 # Nextcloud: przez nginx na localhost (połączenia na własne adresy tailnetu są
-# odrzucane, hosts/tailscale.nix), stąd zaufana domena `localhost`.
+# odrzucane, hosts/tailscale.nix), stąd zaufana domena `localhost`. Hasło
+# aplikacji tworzy raz jednostka brulion-acp-nextcloud-password
+# (`occ user:auth-tokens:add`, w Nextcloudzie urządzenie „brulion-acp”),
+# bo Nextcloud jest na tym samym hoście: plik root 0400 w katalogu root 0700,
+# usługa dostaje go przez LoadCredential. Po usunięciu urządzenia
+# w Nextcloudzie: `sudo rm /var/lib/brulion-acp-nextcloud/app-password`,
+# `sudo systemctl restart brulion-acp` (tworzy nowe).
 #
 # Jednorazowo:
-#   1. W Nextcloudzie hasło aplikacji (Ustawienia → Bezpieczeństwo → Urządzenia
-#      i sesje → „brulion-acp”), na laptopie:
-#        cd modules/_secrets && agenix -e brulion-acp-nextcloud.age   # samo hasło
-#      (git add, commit) — bez niego usługa się nie włącza (ostrzeżenie).
-#   2. `sudo brulion-acp login claude`: w Claude Code /login (subskrypcja).
-#   3. `sudo brulion-acp pair`: kod QR dla aparatu telefonu i kod (10 minut);
-#      Brulion otwiera parowanie wypełnione, „Sparuj”. Ręcznie: Ustawienia →
+#   1. `sudo brulion-acp login claude`: w Claude Code /login (subskrypcja).
+#   2. W Brulionie na telefonie (Tailscale włączony): Ustawienia →
 #      Rozszerzenia → Agenci AI → Dodaj → Agent na innym komputerze, adres
-#      https://<RPi>.<tailnet>:8790 i kod.
+#      https://<RPi>.<tailnet>:8790, kod pusty, „Sparuj”. Urządzenie spoza
+#      konta RPi: kod lub QR z `sudo brulion-acp pair` (10 minut).
 #   Później: `sudo brulion-acp clients`, `sudo brulion-acp revoke --all`.
 #
 # Notatnik: /var/lib/brulion-acp/notebook, jedno z urządzeń notatnika
@@ -37,8 +43,9 @@
 # z telefonu — obok Nextclouda i T3 Code przy 4 GB RAM; przy presji pamięci
 # `sudo systemctl stop brulion-acp`. lockdown zatrzymuje usługę.
 #
-# Sprawdzenie: `systemctl status brulion-acp`, `journalctl -u brulion-acp -b`,
-# `tailscale serve status`, z urządzenia w tailnecie
+# Sprawdzenie: `systemctl status brulion-acp brulion-acp-nextcloud-password`,
+# `journalctl -u brulion-acp -b` (linie „devices of … pair without a code”
+# i synchronizacji), `tailscale serve status`, z urządzenia w tailnecie
 # `curl -s https://<RPi>.<tailnet>:8790/` (tekst „Brulion: AI agents …”).
 { inputs, ... }:
 {
@@ -50,28 +57,53 @@
       ...
     }:
     let
-      inherit (config.customTop) secretsDir;
       host = "${config.networking.hostName}.${config.customTop.tailnet.domain}";
       port = 8790;
-      secretFile = secretsDir + "/brulion-acp-nextcloud.age";
-      hasSecret = builtins.pathExists secretFile;
+      nextcloudUser = config.customBot.defaultUser;
+      passwordStateDirectory = "brulion-acp-nextcloud";
+      passwordDir = "/var/lib/${passwordStateDirectory}";
+      passwordFile = "${passwordDir}/app-password";
+
+      # occ jako nextcloud (runuser ustawia USER, więc nextcloud-occ nie woła
+      # sudo), wynik tylko w katalogu roota (mktemp: 0600); przy błędzie occ
+      # wypisuje sam komunikat, bez hasła.
+      createAppPassword = pkgs.writeShellApplication {
+        name = "brulion-acp-nextcloud-password";
+        runtimeInputs = [
+          config.services.nextcloud.occ
+          pkgs.coreutils
+          pkgs.gnused
+          pkgs.util-linux
+        ];
+        text = ''
+          target=${lib.escapeShellArg passwordFile}
+          if [[ -s $target ]]; then
+            exit 0
+          fi
+          output="$(mktemp ${lib.escapeShellArg passwordDir}/.occ.XXXXXX)"
+          trap 'rm -f "$output"' EXIT
+          if ! runuser -u nextcloud -- nextcloud-occ --no-interaction --no-ansi \
+            user:auth-tokens:add --name brulion-acp ${lib.escapeShellArg nextcloudUser} >"$output"; then
+            cat "$output" >&2
+            exit 1
+          fi
+          created="$(mktemp ${lib.escapeShellArg passwordDir}/.app-password.XXXXXX)"
+          sed -n '/^app password:$/{n;p;q}' "$output" >"$created"
+          if [[ ! -s $created ]]; then
+            rm -f "$created"
+            echo "occ user:auth-tokens:add nie wypisał hasła" >&2
+            exit 1
+          fi
+          chmod 0400 "$created"
+          mv "$created" "$target"
+        '';
+      };
     in
     {
       imports = [ inputs.brulion.nixosModules.default ];
 
-      warnings =
-        lib.optional (!hasSecret)
-          "rpi-brulion-agent: brak modules/_secrets/brulion-acp-nextcloud.age w gicie — agenci Brulionu są wyłączeni (kroki w nagłówku brulion-agent.nix).";
-
-      age.secrets.brulion-acp-nextcloud = lib.mkIf hasSecret {
-        file = secretFile;
-        # Czyta go systemd (LoadCredential) jako root.
-        owner = "root";
-        mode = "0400";
-      };
-
       services = {
-        brulion-acp = lib.mkIf hasSecret {
+        brulion-acp = {
           enable = true;
           inherit port;
           agents.claude = {
@@ -90,19 +122,41 @@
             claude-code
           ];
           publicUrl = "https://${host}:${toString port}";
+          # Moduł nie ma opcji dla tego trybu (aplikacja na laptopie
+          # uruchamia go tak samo przy własnym Serve).
+          extraArgs = [ "--tailscale-serve" ];
           nextcloud = {
             url = "http://localhost";
-            user = config.customBot.defaultUser;
+            user = nextcloudUser;
             folder = "Brulion";
-            passwordFile = config.age.secrets.brulion-acp-nextcloud.path;
+            inherit passwordFile;
             deviceName = config.networking.hostName;
           };
         };
 
-        nextcloud.settings.trusted_domains = lib.mkIf hasSecret [ "localhost" ];
+        nextcloud.settings.trusted_domains = [ "localhost" ];
       };
 
-      customBot = lib.mkIf hasSecret {
+      systemd.services.brulion-acp-nextcloud-password = {
+        description = "Hasło aplikacji Nextclouda dla brulion-acp";
+        requiredBy = [ "brulion-acp.service" ];
+        before = [ "brulion-acp.service" ];
+        after = [ "nextcloud-setup.service" ];
+        # Root (plik czyta LoadCredential), ale /usr, /boot i /etc tylko do
+        # odczytu; occ pisze do /var/lib/nextcloud, więc bez ProtectSystem=strict.
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = lib.getExe createAppPassword;
+          StateDirectory = passwordStateDirectory;
+          StateDirectoryMode = "0700";
+          ProtectSystem = "full";
+          ProtectHome = true;
+          PrivateTmp = true;
+          NoNewPrivileges = true;
+        };
+      };
+
+      customBot = {
         tailscaleServe.${toString port} = {
           inherit port;
           users = [ ];
