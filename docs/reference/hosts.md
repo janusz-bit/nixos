@@ -6,7 +6,7 @@ Declared in the host registry (`modules/hosts/registry.nix`); each host is `nixo
 
 | Host | Platform | CI build on `v*` tags | Modules |
 |---|---|---|---|
-| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 58 |
+| [`nixos`](#nixos) | `x86_64-linux` | no (PR, manual) | 57 |
 | [`raspberry-pi-4`](#raspberry-pi-4) | `aarch64-linux` | yes | 37 |
 | [`wsl`](#wsl) | `x86_64-linux` | yes | 16 |
 
@@ -61,7 +61,6 @@ flowchart LR
   desktop --> desktop_apps[desktop-apps]
   desktop --> desktop_obs[desktop-obs]
   desktop --> desktop_browsers[desktop-browsers]
-  desktop --> desktop_autostart[desktop-autostart]
   desktop --> desktop_brulion[desktop-brulion]
   desktop --> desktop_dev[desktop-dev]
   desktop --> desktop_devenv[desktop-devenv]
@@ -101,7 +100,6 @@ flowchart LR
 - `desktop-ai` — [desktop/ai.nix](../../modules/desktop/ai.nix)
 - `desktop-apps` — [desktop/apps.nix](../../modules/desktop/apps.nix)
 - `desktop-audio` — [desktop/audio.nix](../../modules/desktop/audio.nix)
-- `desktop-autostart` — [desktop/autostart.nix](../../modules/desktop/autostart.nix)
 - `desktop-browsers` — [desktop/browsers.nix](../../modules/desktop/browsers.nix)
 - `desktop-brulion` — [desktop/brulion.nix](../../modules/desktop/brulion.nix)
 - `desktop-connectivity` — [desktop/connectivity.nix](../../modules/desktop/connectivity.nix)
