@@ -156,10 +156,18 @@ _: {
         # Uruchomić w katalogu z plikami .gguf:
         # llama-prism serve -m Ternary-Bonsai-2.5-27B-PTQ1_0.gguf
         #   --mmproj Ternary-Bonsai-2.5-27B-mmproj-BF16.gguf --no-mmproj-offload
-        #   --port 8080 -c 81920 -n 16384 -np 1 -ngl 99 -ctk q4_0 -ctv q4_0
-        #   -ub 256 --reasoning-effort medium
+        #   --port 8080 -c 100000 -n 16384 -np 1 -ngl 99 -fa on -ctk q4_0 -ctv q4_0
+        #   -ub 128 --reasoning-effort medium
         #   --reasoning-effort-allow xhigh,medium,low --cors-origins localhost
         # Szablon czatu przyjmuje tylko podane poziomy effort, inny daje HTTP 500.
+        # KV: szybki kernel flash attention CUDA mają tylko pary q8_0/q8_0
+        # i q4_0/q4_0; mieszane (q8_0/q4_0), q5_*, q4_1 i pq2_0m generują
+        # o ~25-30% wolniej, iq4_nl liczy się na CPU. q4_0 względem f16: PPL
+        # +0,1%, pq2_0m +6,8%. -ub 128 zamiast 256 zwalnia prefill o ~4%
+        # i zostawia miejsce na 100K w 8 GB VRAM; 128K mieści się tylko z częścią
+        # warstw na CPU (-ngl 57, ~15 tok/s). 2026-11-26: prompt 96K tokenów
+        # przeszedł, ~440 MiB VRAM wolnego, prefill 387 tok/s, generowanie
+        # 30 tok/s (41 tok/s przy pustym kontekście).
         ternary-bonsai-2-5-27b = {
           provider = "llamacpp";
           id = "Ternary-Bonsai-2.5-27B-PTQ1_0.gguf";
@@ -168,7 +176,7 @@ _: {
             "text"
             "image"
           ];
-          context = 81920;
+          context = 100000;
           output = 16384;
           reasoning = {
             efforts = [
