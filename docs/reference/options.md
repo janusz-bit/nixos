@@ -277,6 +277,13 @@ Główne konto laptopa (jego customBot.defaultUser).
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
+### `customTop.users.nextcloud`
+
+Login właściciela w Nextcloudzie RPi (konto notatnika Brulionu, hosts/raspberry-pi-4/brulion-agent.nix).
+
+- Type: string
+- Declared in: [options.nix](../../modules/options.nix)
+
 ## Host options (`customBot`, NixOS)
 
 ### `customBot.defaultUser`

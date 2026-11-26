@@ -33,6 +33,7 @@
     users = {
       laptop = "dinosaur";
       default = "nixos";
+      nextcloud = "Janusz Chmaruk";
     };
     locale = {
       timeZone = "Europe/Warsaw";

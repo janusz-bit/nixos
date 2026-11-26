@@ -80,6 +80,7 @@ in
           users = {
             laptop = strOption "Główne konto laptopa (jego customBot.defaultUser).";
             default = strOption "Główne konto pozostałych hostów (domyślne customBot.defaultUser).";
+            nextcloud = strOption "Login właściciela w Nextcloudzie RPi (konto notatnika Brulionu, hosts/raspberry-pi-4/brulion-agent.nix).";
           };
 
           locale = {
