@@ -1,6 +1,6 @@
 # Skille i modele agentów AI na laptopie: skille własne (w tym obscura z jej
 # programem, nixos-system z faktami o hoście, brulion z brulion-cli,
-# claude-usage z limitami subskrypcji Claude), paczki tstack
+# claude-usage z limitami subskrypcji Claude), ub-mode, paczki tstack
 # i frontend-design oraz lokalne modele na GPU — Qwen3.8 Flash-Next (Coder
 # IQ1_M i Gyro-M) i Inkling-2-Mini z serwera Strata (Gyro-M jako domyślny
 # model opencode2) i Ternary Bonsai 2.5 27B PTQ1_0 z forka llama.cpp (llama-prism).
@@ -26,6 +26,7 @@ _: {
           claude-usage.enable = true;
           nixos-system.enable = true;
           obscura.enable = true;
+          ub-mode.enable = true;
         };
         skillPacks = {
           frontend-design.enable = true;

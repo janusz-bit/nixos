@@ -682,7 +682,8 @@
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
-        "tstack": "tstack"
+        "tstack": "tstack",
+        "ub-mode": "ub-mode"
       }
     },
     "systems": {
@@ -734,6 +735,22 @@
       "original": {
         "owner": "t3dotgg",
         "repo": "tstack",
+        "type": "github"
+      }
+    },
+    "ub-mode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793632109,
+        "narHash": "sha256-Az6UoipXKejGXnRHyhYk0NqVbYMqcjI5DEvSbyT0PFo=",
+        "owner": "unclebob",
+        "repo": "ub-mode",
+        "rev": "3da62bf3fcfd2034de41f30d920d2739e566171f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "unclebob",
+        "repo": "ub-mode",
         "type": "github"
       }
     }
