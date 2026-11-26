@@ -44,6 +44,11 @@
     # samego powodu co tstack.
     claude-plugins-official.url = "github:anthropics/claude-plugins-official";
     claude-plugins-official.flake = false;
+    # Skill ub-mode Uncle Boba (zasady pisania i zmieniania kodu). Repozytorium
+    # to jeden skill z SKILL.md w katalogu głównym, więc wpis w ai.skills, nie
+    # paczka; wejście zamiast fetchera, żeby flake-update go aktualizował.
+    ub-mode.url = "github:unclebob/ub-mode";
+    ub-mode.flake = false;
   };
 
   # Jedyna lista cache: hosty (customTop.nixConfig), CI i pierwszy rebuild

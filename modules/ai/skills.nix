@@ -3,8 +3,9 @@
 # prowadzenie PR przez review i CI do merge'a przez gh, i frontend-design
 # z oficjalnego marketplace'u pluginów Claude Code). Same skille leżą
 # w modules/skills/<nazwa>/ (SKILL.md + references/; skill pythonowy też src/
-# i pyproject.toml); tu tylko wpisy, bez włączania: host wybiera je w swoim
-# ai.nix, a ai-harness linkuje wybrane do agentów.
+# i pyproject.toml), a skill z własnego repozytorium (ub-mode) w wejściu
+# flake'a; tu tylko wpisy, bez włączania: host wybiera je w swoim ai.nix,
+# a ai-harness linkuje wybrane do agentów.
 #
 # pr-wait z babysit-pr woła python3 (desktop-ai), skille tstack także gh
 # (base-git); council i sol-loop potrzebują subagentów na modelach innych
@@ -73,6 +74,10 @@
           source = "${brulionPackage}/share/brulion/agent-skills/brulion";
           packages = [ brulionPackage ];
         };
+        # Narzędzia, które skill każe uruchamiać (crapper, dryer, mutator
+        # z github.com/unclebob), nie są spakowane; bez nich agent pomija te
+        # kroki.
+        ub-mode.source = "${inputs.ub-mode}";
         obscura = {
           source = "${self}/modules/skills/obscura";
           packages = [ pkgs.obscura ];
