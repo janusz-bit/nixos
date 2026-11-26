@@ -5,8 +5,7 @@
 # w modules/args.nix.
 #
 # Typy i opisy trafiają do docs/reference/options.md; pola wyliczane
-# (repository.flake/url, cachix.url/pubKey, nixCache.url) mają tu wartości
-# domyślne.
+# (repository.flake/url, cachix.url/pubKey) mają tu wartości domyślne.
 # readOnly: moduł inny niż args.nix, który spróbuje ustawić wartość, kończy
 # ewaluację błędem. Moduły NixOS widzą tę samą wartość przez opcję customTop
 # z base-options (modules/hosts/base/options.nix); w module NixOS zapisanym
@@ -133,34 +132,6 @@ in
                   config.nixConfig.extra-trusted-public-keys;
               defaultText = lib.literalExpression ''lib.findFirst (lib.hasPrefix "''${cachix.name}.cachix.org-1:") (throw "…") nixConfig.extra-trusted-public-keys'';
               description = "Klucz publiczny własnego cache.";
-            };
-          };
-
-          nixCache = {
-            host = strOption ''
-              Host cache'a Nix w tailnecie (hosts/nix-cache.nix): nazwa
-              z rejestru hostów, zarazem jego nazwa MagicDNS.
-            '';
-            port = lib.mkOption {
-              type = lib.types.port;
-              description = "Port HTTPS Tailscale Serve cache'a na hoście nixCache.host.";
-            };
-            publicKey = strOption ''
-              Klucz publiczny podpisów cache'a. Prywatny jest tylko w sekrecie
-              GitHub Actions NIX_CACHE_SIGNING_KEY, nigdy na RPi.
-            '';
-            v3PublicKey = strOption ''
-              Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
-              w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
-              w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
-              laptop: każdy zaufany klucz może podsunąć hostowi dowolną
-              ścieżkę, a RPi ścieżek v3 nie używa.
-            '';
-            url = lib.mkOption {
-              type = lib.types.str;
-              default = "https://${config.nixCache.host}.${config.tailnet.domain}:${toString config.nixCache.port}";
-              defaultText = lib.literalExpression ''"https://''${nixCache.host}.''${tailnet.domain}:''${toString nixCache.port}"'';
-              description = "Adres cache'a w tailnecie: substituter laptopa i CI, cel nix-cache-push.";
             };
           };
 

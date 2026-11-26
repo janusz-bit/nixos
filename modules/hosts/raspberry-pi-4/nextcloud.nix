@@ -91,7 +91,7 @@ _: {
 
       customBot = {
         tailscaleServe.${toString servePort}.port = 80;
-        # lockdown zatrzymuje nginx z Nextcloudem (i cache Nix, rpi-nix-cache).
+        # lockdown zatrzymuje nginx z Nextcloudem.
         lockdownServices = [ "nginx" ];
       };
     };

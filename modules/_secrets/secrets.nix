@@ -28,8 +28,6 @@ in
   "openrouter-api-key.age" = toAllHosts;
   # Wi-Fi RPi (modules/hosts/raspberry-pi-4/network.nix): WIFI_SSID=…, WIFI_PSK=…
   "wifi.age" = toAllHosts;
-  # nginx cache'a Nix na RPi (modules/hosts/nix-cache.nix): ci:<openssl passwd -6>
-  "nix-cache-htpasswd.age" = toAllHosts;
   # Hasło aplikacji Nextclouda dla agentów Brulionu na RPi (raspberry-pi-4/brulion-agent.nix).
   "brulion-acp-nextcloud.age" = toAllHosts;
   # Kopia zapasowa klucza podpisywania APK Brulionu, na żaden host nie trafia.

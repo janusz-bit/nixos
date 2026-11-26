@@ -48,12 +48,6 @@
     lan.subnet = "192.168.100.0/24";
     inherit (import ../flake.nix) nixConfig;
     cachix.name = "janusz-bit";
-    nixCache = {
-      host = "raspberry-pi-4";
-      port = 8444;
-      publicKey = "janusz-bit-ci-1:sZOoPt8moauyLh35tiK6hcpnLfPySRm1C2IN/DffoVE=";
-      v3PublicKey = "janusz-bit-v3-1:nESt1tMO6HoJe3AcnJ5Gj+VTNyz2suKd7hJOp8vQBbk=";
-    };
     secretsDir = ./_secrets;
     keys = import ./_secrets/keys.nix;
   };

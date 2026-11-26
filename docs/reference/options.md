@@ -128,48 +128,6 @@ Układ klawiatury w sesji graficznej (services.xserver.xkb.layout).
 - Type: string
 - Declared in: [options.nix](../../modules/options.nix)
 
-### `customTop.nixCache.host`
-
-Host cache'a Nix w tailnecie (hosts/nix-cache.nix): nazwa
-z rejestru hostów, zarazem jego nazwa MagicDNS.
-
-- Type: string
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.nixCache.port`
-
-Port HTTPS Tailscale Serve cache'a na hoście nixCache.host.
-
-- Type: 16 bit unsigned integer; between 0 and 65535 (both inclusive)
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.nixCache.publicKey`
-
-Klucz publiczny podpisów cache'a. Prywatny jest tylko w sekrecie
-GitHub Actions NIX_CACHE_SIGNING_KEY, nigdy na RPi.
-
-- Type: string
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.nixCache.url`
-
-Adres cache'a w tailnecie: substituter laptopa i CI, cel nix-cache-push.
-
-- Type: string
-- Default: `"https://${nixCache.host}.${tailnet.domain}:${toString nixCache.port}"`
-- Declared in: [options.nix](../../modules/options.nix)
-
-### `customTop.nixCache.v3PublicKey`
-
-Klucz publiczny, którym github:janusz-bit/nixpkgs-v3 podpisuje
-w tym samym cache'u świat x86-64-v3 laptopa. Prywatny jest tylko
-w sekrecie NIX_CACHE_SIGNING_KEY tamtego repo. Ufa mu tylko
-laptop: każdy zaufany klucz może podsunąć hostowi dowolną
-ścieżkę, a RPi ścieżek v3 nie używa.
-
-- Type: string
-- Declared in: [options.nix](../../modules/options.nix)
-
 ### `customTop.nixConfig`
 
 nixConfig z flake.nix, jedyna lista cache (literał: nix czyta go
