@@ -85,7 +85,7 @@ automatically.
    `hardware.facter.reportPath = ./facter.json;`, the GPU driver settings
    (see `modules/hardware/LOQ-15IRX10/`) and matching `nixos-hardware`
    profiles. `desktop-kernel` and Proton-CachyOS need an x86-64-v3 CPU
-   (AVX2); import `hardware-x86-64-v3` on such machines.
+   (AVX2).
 2. **Host.** Create `modules/hosts/<name>/default.nix`:
 
    ```nix

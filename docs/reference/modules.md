@@ -57,7 +57,6 @@ Every `.nix` file under `modules/` (except paths with a `_`-prefixed segment) is
 ## modules/hardware/
 
 - **[hardware/lenovo.nix](../../modules/hardware/lenovo.nix)** (`hardware-lenovo`) · hosts: `nixos` — Dodatki dla laptopów Lenovo (IdeaPad/LOQ): sterownik ideapad_laptop, thermald, power-profiles-daemon (profile zasilania w Plasmie przez platform_profile), progi baterii upower i tryb ochrony baterii przy starcie.
-- **[hardware/x86-64-v3.nix](../../modules/hardware/x86-64-v3.nix)** (`hardware-x86-64-v3`) · hosts: `nixos` — Cechy systemowe gccarch-x86-64{,-v2,-v3} demona nix dla procesorów z AVX2: pozwalają budować lokalnie derywacje skompilowane pod x86-64-v3.
 
 ## modules/hardware/LOQ-15IRX10/
 

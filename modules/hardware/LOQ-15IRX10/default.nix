@@ -16,7 +16,6 @@
     {
       imports = [
         self.modules.nixos.hardware-lenovo
-        self.modules.nixos.hardware-x86-64-v3
         # Importuje też common-gpu-intel (sterowniki VA-API/OpenCL iGPU).
         inputs.nixos-hardware.nixosModules.common-cpu-intel
         inputs.nixos-hardware.nixosModules.common-gpu-nvidia
